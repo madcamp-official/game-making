@@ -154,6 +154,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SnorlaxEvent
   exitDoor: {fileID: 7400304123308564998}
   goldReward: 10
+  rewardRelic: {fileID: 11400000, guid: 8015ae477201f4fdfba7ebc100ef4bec, type: 2}
 --- !u!1 &918333770299083856
 GameObject:
   m_ObjectHideFlags: 0

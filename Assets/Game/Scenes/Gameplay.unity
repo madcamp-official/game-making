@@ -250,6 +250,7 @@ MonoBehaviour:
   roomText: {fileID: 849924749}
   hintText: {fileID: 1191427563}
   messageText: {fileID: 1300111087}
+  relicBar: {fileID: 1656463257}
 --- !u!114 &453288735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -330,6 +331,7 @@ RectTransform:
   - {fileID: 849924752}
   - {fileID: 1191427566}
   - {fileID: 1300111090}
+  - {fileID: 1656463257}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -510,18 +512,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4de272c455925461181c814dd55174cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomFlowController
-  roomPrefabs:
-  - {fileID: 2579835144419204525, guid: 3fa93d7980be542e490c702224869f71, type: 3}
-  - {fileID: 4634163765385586772, guid: ca9e4e61037164d2887f6f46d3bf3ff2, type: 3}
-  - {fileID: 5295198522012122135, guid: 0333b3901c3ac499fb894689593344e0, type: 3}
-  - {fileID: 7991657534310858653, guid: 57cfcd3f892aa4eeebc5d7ee84a624f4, type: 3}
-  - {fileID: 4354520585081088859, guid: 81ec35d79a1294707ae0baf918417355, type: 3}
-  roomNames:
-  - "\uC804\uD22C"
-  - "\uC774\uBCA4\uD2B8"
-  - "\uC804\uD22C"
-  - "\uC0C1\uC810"
-  - "\uBCF4\uC2A4"
+  floors:
+  - {fileID: 11400000, guid: c98e8f3ea5dd84d319ef4eb0f63b9b57, type: 2}
+  - {fileID: 11400000, guid: a8ce78b99ffe346ecacd96705dd567c5, type: 2}
+  - {fileID: 11400000, guid: d9bfc60dfd55d4c1e86a09dce56adeaa, type: 2}
   playerSpawn: {x: -7, y: 0}
 --- !u!4 &826172832
 Transform:
@@ -773,7 +767,7 @@ MonoBehaviour:
     m_FontStyle: 0
     m_BestFit: 0
     m_MinSize: 10
-    m_MaxSize: 40
+    m_MaxSize: 48
     m_Alignment: 4
     m_AlignByGeometry: 0
     m_RichText: 1
@@ -823,6 +817,41 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 150}
   m_SizeDelta: {x: 1600, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1656463256
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1656463257}
+  m_Layer: 0
+  m_Name: RelicBar
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1656463257
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1656463256}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 453288738}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 1, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: -30, y: -20}
+  m_SizeDelta: {x: 400, y: 60}
+  m_Pivot: {x: 1, y: 1}
 --- !u!1 &1804104382
 GameObject:
   m_ObjectHideFlags: 0
@@ -833,6 +862,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1804104384}
   - component: {fileID: 1804104383}
+  - component: {fileID: 1804104385}
   m_Layer: 0
   m_Name: RunManager
   m_TagString: Untagged
@@ -867,6 +897,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1804104385
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1804104382}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c1fcfde449ea2407d8a5795f67a6727c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RelicManager
 --- !u!1 &2117187774
 GameObject:
   m_ObjectHideFlags: 0

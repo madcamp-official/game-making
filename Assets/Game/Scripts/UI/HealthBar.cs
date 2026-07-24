@@ -17,6 +17,7 @@ public class HealthBar : MonoBehaviour
     private Transform barRoot;
     private Transform fill;
     private SpriteRenderer fillRenderer;
+    private TextMesh valueText;
 
     private void Awake()
     {
@@ -47,6 +48,20 @@ public class HealthBar : MonoBehaviour
         fillRenderer.transform.localPosition = new Vector3(width * 0.5f, 0f, 0f);
         fillRenderer.transform.localScale = new Vector3(width, height * 0.7f, 1f);
 
+        // 바 오른쪽에 "현재/최대" 수치 표시
+        GameObject textGo = new GameObject("Value");
+        textGo.transform.SetParent(barRoot);
+        textGo.transform.localPosition = new Vector3(width * 0.5f + 0.08f, 0f, 0f);
+        valueText = textGo.AddComponent<TextMesh>();
+        valueText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        valueText.fontSize = 64;
+        valueText.characterSize = 0.045f;
+        valueText.anchor = TextAnchor.MiddleLeft;
+        valueText.color = Color.white;
+        var textRenderer = textGo.GetComponent<MeshRenderer>();
+        textRenderer.material = valueText.font.material;
+        textRenderer.sortingOrder = 42;
+
         health.OnHealthChanged += UpdateBar;
     }
 
@@ -73,6 +88,7 @@ public class HealthBar : MonoBehaviour
         float ratio = max > 0 ? (float)current / max : 0f;
         fill.localScale = new Vector3(ratio, 1f, 1f);
         fillRenderer.color = Color.Lerp(Color.red, Color.green, ratio);
+        if (valueText != null) valueText.text = current + "/" + max;
     }
 
     private void OnDestroy()

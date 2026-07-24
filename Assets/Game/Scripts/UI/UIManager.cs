@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Text roomText;
     [SerializeField] private Text hintText;
     [SerializeField] private Text messageText;
+    [SerializeField] private RectTransform relicBar;
 
     private Coroutine messageRoutine;
 
@@ -29,8 +30,38 @@ public class UIManager : MonoBehaviour
             RunManager.Instance.OnGoldChanged += SetGold;
             SetGold(RunManager.Instance.Gold);
         }
+        if (RelicManager.Instance != null)
+        {
+            RelicManager.Instance.OnRelicsChanged += RefreshRelics;
+            RefreshRelics();
+        }
         SetHint("");
         if (messageText != null) messageText.text = "";
+    }
+
+    private void RefreshRelics()
+    {
+        if (relicBar == null || RelicManager.Instance == null) return;
+
+        for (int i = relicBar.childCount - 1; i >= 0; i--)
+            Destroy(relicBar.GetChild(i).gameObject);
+
+        int index = 0;
+        foreach (RelicData relic in RelicManager.Instance.Relics)
+        {
+            GameObject iconGo = new GameObject("Relic_" + relic.relicName);
+            iconGo.transform.SetParent(relicBar, false);
+            Image image = iconGo.AddComponent<Image>();
+            image.sprite = relic.icon;
+            image.preserveAspect = true;
+            RectTransform rt = image.rectTransform;
+            rt.anchorMin = new Vector2(1, 1);
+            rt.anchorMax = new Vector2(1, 1);
+            rt.pivot = new Vector2(1, 1);
+            rt.sizeDelta = new Vector2(56, 56);
+            rt.anchoredPosition = new Vector2(-index * 64, 0);
+            index++;
+        }
     }
 
     public void SetGold(int gold)

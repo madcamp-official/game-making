@@ -31,7 +31,7 @@ public class Health : MonoBehaviour
     public void SetMaxHealth(int value, bool refill = true)
     {
         maxHealth = Mathf.Max(1, value);
-        if (refill) CurrentHealth = maxHealth;
+        CurrentHealth = refill ? maxHealth : Mathf.Min(CurrentHealth, maxHealth);
         OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
     }
 
@@ -51,6 +51,14 @@ public class Health : MonoBehaviour
         {
             StartCoroutine(InvincibleFlash());
         }
+    }
+
+    /// <summary>사망 상태에서 지정 체력으로 되살린다.</summary>
+    public void Revive(int amount)
+    {
+        CurrentHealth = Mathf.Clamp(amount, 1, maxHealth);
+        if (spriteRenderer != null) spriteRenderer.enabled = true;
+        OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
     }
 
     public void Heal(int amount)

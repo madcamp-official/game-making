@@ -87,11 +87,12 @@ PMD 스타일 픽셀 스프라이트는 우선 아래 설정으로 통일하고,
 |---|---|---|---|---|---|
 | 이상해씨 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0001) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 플레이어 | `Assets/ThirdParty/PMDCollab/0001_Bulbasaur/credits.txt` | 완료 (Idle·Walk·Attack·Hurt, 2026-07-24) |
 | 이상해풀 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0002) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 1층 보스 처치 후 | `Assets/ThirdParty/PMDCollab/0002_Ivysaur/credits.txt` | 완료 (Idle·Walk·Attack·Hurt, 2026-07-24) |
-| 이상해꽃 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 2층 보스 처치 후 | 추가 예정 | 예정 |
+| 이상해꽃 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0003) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 2층 보스 처치 후 | `Assets/ThirdParty/PMDCollab/0003_Venusaur/credits.txt` | 완료 (Idle·Walk·Attack·Hurt, 2026-07-24) |
 | 버터플 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0012) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 1층 보스 | `Assets/ThirdParty/PMDCollab/0012_Butterfree/credits.txt` | 완료 (Idle·Walk, 2026-07-24) |
-| 코뿌리 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 2층 보스 | 추가 예정 | 예정 |
-| 갸라도스 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 3층 보스 | 추가 예정 | 예정 |
+| 코뿌리 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0112) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 2층 보스 | `Assets/ThirdParty/PMDCollab/0112_Rhydon/credits.txt` | 완료 (Idle·Walk, 2026-07-24) |
+| 갸라도스 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0130) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 3층 보스 | `Assets/ThirdParty/PMDCollab/0130_Gyarados/credits.txt` | 완료 (Idle·Walk, 2026-07-24) |
 | 잠만보 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0143) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 1층 이벤트 | `Assets/ThirdParty/PMDCollab/0143_Snorlax/credits.txt` | 완료 (Sleep, 2026-07-24) |
+| 아이템 아이콘 시트 (`item.png`) | 시트 내 표기: "Ripped by redblueyellow. No credit needed." (공식 게임 유래 아이콘) | redblueyellow (립), 원저작 게임프리크/닌텐도 | 유물 아이콘 (자뭉열매 10행 2열, 행복의알 14행 6열 → `relic_icons.png`로 가공) | 시트 하단 표기 | 완료 (2026-07-24) |
 
 ## 7. 커밋 전 확인
 

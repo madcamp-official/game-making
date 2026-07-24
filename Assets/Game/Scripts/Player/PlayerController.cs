@@ -11,6 +11,13 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
 
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
+
+    /// <summary>공격 등 외부 요인으로 바라보는 방향을 바꾼다.</summary>
+    public void SetFacing(Vector2 direction)
+    {
+        if (direction.sqrMagnitude > 0.001f)
+            FacingDirection = direction.normalized;
+    }
     public Vector2 MoveInput { get; private set; }
     public bool IsMoving => MoveInput.sqrMagnitude > 0.01f;
     public bool ControlEnabled { get; set; } = true;

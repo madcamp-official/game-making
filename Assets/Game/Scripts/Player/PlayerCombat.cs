@@ -3,8 +3,8 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 플레이어 기본 공격. Space 키로 바라보는 방향에 원형 판정을 만들어
-/// 적(EnemyController)의 Health에 피해를 준다.
+/// 플레이어 기본 공격. 마우스 좌클릭으로 캐릭터 기준 마우스 방향(360도 자유각)에
+/// 원형 판정을 만들어 적(EnemyController)의 Health에 피해를 준다.
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
@@ -38,20 +38,32 @@ public class PlayerCombat : MonoBehaviour
     {
         if (!controller.ControlEnabled || (health != null && health.IsDead)) return;
 
-        Keyboard kb = Keyboard.current;
-        if (kb != null && kb.spaceKey.wasPressedThisFrame && Time.time >= lastAttackTime + attackCooldown)
+        Mouse mouse = Mouse.current;
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame && Time.time >= lastAttackTime + attackCooldown)
         {
             lastAttackTime = Time.time;
-            Attack();
+            Attack(GetMouseDirection());
         }
     }
 
-    private void Attack()
+    // 캐릭터 기준 마우스 커서 방향 (360도 자유각)
+    private Vector2 GetMouseDirection()
     {
+        Camera cam = Camera.main;
+        if (cam == null || Mouse.current == null) return controller.FacingDirection;
+        Vector3 mouseWorld = cam.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        Vector2 direction = (Vector2)mouseWorld - (Vector2)transform.position;
+        return direction.sqrMagnitude > 0.001f ? direction.normalized : controller.FacingDirection;
+    }
+
+    private void Attack(Vector2 direction)
+    {
+        // 캐릭터가 공격 방향을 바라보게 하고 (애니메이션은 가장 가까운 8방향 사용)
+        controller.SetFacing(direction);
         if (playerAnimator != null)
             playerAnimator.PlayAttack(attackAnimDuration);
 
-        Vector2 origin = (Vector2)transform.position + controller.FacingDirection * attackRange;
+        Vector2 origin = (Vector2)transform.position + direction * attackRange;
 
         if (attackEffectPrefab != null)
         {

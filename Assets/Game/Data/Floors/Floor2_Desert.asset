@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f519667a68f546e1a629e22f7986739, type: 3}
+  m_Name: Floor2_Desert
+  m_EditorClassIdentifier: Assembly-CSharp::FloorData
+  floorName: "\uC0AC\uB9C9"
+  roomPrefabs:
+  - {fileID: 1548193558299707262, guid: c985d46f28ba54a028d2826b0e8be24c, type: 3}
+  - {fileID: 4595491140055620955, guid: 5e992b66566d84725b0538e06bf1c9d2, type: 3}
+  - {fileID: 4951824835591514345, guid: 260c867a2d5a544bbafe2cc9f244a7d1, type: 3}
+  - {fileID: 1029158765316723021, guid: 99755483e4e124e189df1ae94be4e058, type: 3}
+  - {fileID: 5091023819373647342, guid: 95a902ecf3a8943beb5d5d22651075b8, type: 3}
+  roomNames:
+  - "\uC804\uD22C"
+  - "\uC774\uBCA4\uD2B8"
+  - "\uC804\uD22C"
+  - "\uC0C1\uC810"
+  - "\uBCF4\uC2A4"

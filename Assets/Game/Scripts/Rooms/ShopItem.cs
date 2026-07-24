@@ -8,11 +8,21 @@ public class ShopItem : MonoBehaviour, IInteractable
     [SerializeField] private string itemName = "포션";
     [SerializeField] private int price = 10;
     [SerializeField] private int healAmount = 5;
+    [SerializeField] private RelicData relicData; // 지정하면 회복 대신 유물을 판매
 
     private bool sold;
 
     public bool CanInteract => !sold;
-    public string Prompt => "E : " + itemName + " 구매 (" + price + "G, 체력 +" + healAmount + ")";
+
+    public string Prompt
+    {
+        get
+        {
+            if (relicData != null)
+                return "E : " + relicData.relicName + " 구매 (" + price + "G) — " + relicData.description;
+            return "E : " + itemName + " 구매 (" + price + "G, 체력 +" + healAmount + ")";
+        }
+    }
 
     public void Interact(GameObject interactor)
     {
@@ -26,13 +36,23 @@ public class ShopItem : MonoBehaviour, IInteractable
         }
 
         sold = true;
-        Health health = interactor.GetComponent<Health>();
-        if (health != null) health.Heal(healAmount);
-        if (UIManager.Instance != null)
-            UIManager.Instance.ShowMessage(itemName + "을(를) 마셔 체력을 " + healAmount + " 회복했다!", 2f);
 
-        // 판매된 상품은 흐리게 표시
+        if (relicData != null)
+        {
+            if (RelicManager.Instance != null) RelicManager.Instance.AddRelic(relicData);
+        }
+        else
+        {
+            Health health = interactor.GetComponent<Health>();
+            if (health != null) health.Heal(healAmount);
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowMessage(itemName + "을(를) 마셔 체력을 " + healAmount + " 회복했다!", 2f);
+        }
+
+        // 판매된 상품은 화면에서 제거
         SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
-        if (sr != null) sr.color = new Color(1f, 1f, 1f, 0.25f);
+        if (sr != null) sr.enabled = false;
+        foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
+            col.enabled = false;
     }
 }

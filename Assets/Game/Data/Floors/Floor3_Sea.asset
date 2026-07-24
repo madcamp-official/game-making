@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f519667a68f546e1a629e22f7986739, type: 3}
+  m_Name: Floor3_Sea
+  m_EditorClassIdentifier: Assembly-CSharp::FloorData
+  floorName: "\uBC14\uB2E4"
+  roomPrefabs:
+  - {fileID: 7880433528824150094, guid: acd7d4669000148c48c3509f4577f638, type: 3}
+  - {fileID: 505624384788793548, guid: 98201f773ee324776a83ea7006650d27, type: 3}
+  - {fileID: 6474264866089661173, guid: f2fd5799c8f3c46b7873d6b11dd9e792, type: 3}
+  - {fileID: 1325666270686542489, guid: e8eab4ea20c924316ab9839708023252, type: 3}
+  - {fileID: 811270971744975827, guid: add8ba46c2b9c472db859885dd5a11f2, type: 3}
+  roomNames:
+  - "\uC804\uD22C"
+  - "\uC774\uBCA4\uD2B8"
+  - "\uC804\uD22C"
+  - "\uC0C1\uC810"
+  - "\uBCF4\uC2A4"

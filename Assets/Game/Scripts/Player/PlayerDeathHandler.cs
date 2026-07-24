@@ -1,0 +1,61 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+
+/// <summary>
+/// 플레이어 사망 처리: 자뭉열매가 있으면 방 진입 전 상태(입구, 체력 회복)로 부활,
+/// 없으면 게임 오버를 띄우고 R 키로 재시작한다.
+/// </summary>
+[RequireComponent(typeof(Health))]
+[RequireComponent(typeof(PlayerController))]
+public class PlayerDeathHandler : MonoBehaviour
+{
+    [SerializeField] private Vector2 roomEntrance = new Vector2(-7f, 0f);
+
+    private Health health;
+    private PlayerController controller;
+    private bool isGameOver;
+
+    private void Awake()
+    {
+        health = GetComponent<Health>();
+        controller = GetComponent<PlayerController>();
+        health.OnDied += HandleDeath;
+    }
+
+    private void HandleDeath()
+    {
+        if (RelicManager.Instance != null && RelicManager.Instance.TryConsume(RelicEffect.SitrusBerry))
+        {
+            StartCoroutine(ReviveRoutine());
+        }
+        else
+        {
+            isGameOver = true;
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowMessage("게임 오버...   R : 다시 시작", 9999f);
+        }
+    }
+
+    private IEnumerator ReviveRoutine()
+    {
+        yield return new WaitForSeconds(0.8f);
+
+        // 방 진입 전 상태로 복원: 입구 위치 + 체력 전부 회복
+        transform.position = roomEntrance;
+        health.Revive(health.MaxHealth);
+        controller.ControlEnabled = true;
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowMessage("자뭉열매의 힘으로 부활했다!", 2.5f);
+    }
+
+    private void Update()
+    {
+        if (!isGameOver) return;
+        Keyboard kb = Keyboard.current;
+        if (kb != null && kb.rKey.wasPressedThisFrame)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
+}

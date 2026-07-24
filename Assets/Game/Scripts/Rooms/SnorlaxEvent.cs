@@ -8,6 +8,7 @@ public class SnorlaxEvent : MonoBehaviour, IInteractable
 {
     [SerializeField] private ExitDoor exitDoor;
     [SerializeField] private int goldReward = 10;
+    [SerializeField] private RelicData rewardRelic;
 
     private bool done;
 
@@ -45,6 +46,11 @@ public class SnorlaxEvent : MonoBehaviour, IInteractable
         }
 
         if (exitDoor != null) exitDoor.SetOpen(true);
+
+        // 잠만보가 자리를 비키며 유물을 남긴다.
+        if (rewardRelic != null && RelicManager.Instance != null)
+            RelicManager.Instance.AddRelic(rewardRelic);
+
         gameObject.SetActive(false);
     }
 }

@@ -1,20 +1,23 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 한 층의 방 순서를 관리한다. 방 프리팹을 교체하며 플레이어를 입구로 옮긴다.
-/// 마지막 방(보스방) 출구를 통과하면 층 클리어 처리를 한다.
+/// 층과 방 순서를 관리한다. FloorData 목록을 따라 방 프리팹을 교체하고,
+/// 각 층의 마지막 방(보스방)을 나가면 다음 층으로, 마지막 층이면 게임 클리어.
 /// </summary>
 public class RoomFlowController : MonoBehaviour
 {
     public static RoomFlowController Instance { get; private set; }
 
-    [SerializeField] private GameObject[] roomPrefabs;
-    [SerializeField] private string[] roomNames;
+    [SerializeField] private FloorData[] floors;
     [SerializeField] private Vector2 playerSpawn = new Vector2(-7f, 0f);
 
+    public int CurrentFloorIndex { get; private set; }
     public int CurrentRoomIndex { get; private set; } = -1;
 
     private GameObject currentRoom;
+    private bool gameCleared;
 
     private void Awake()
     {
@@ -24,14 +27,33 @@ public class RoomFlowController : MonoBehaviour
 
     private void Start()
     {
+        CurrentFloorIndex = 0;
         LoadRoom(0);
     }
 
     public void NextRoom()
     {
-        if (CurrentRoomIndex + 1 >= roomPrefabs.Length)
+        FloorData floor = floors[CurrentFloorIndex];
+        if (CurrentRoomIndex + 1 >= floor.roomPrefabs.Length)
         {
-            FloorClear();
+            // 층의 마지막 방을 통과
+            if (CurrentFloorIndex + 1 >= floors.Length)
+            {
+                GameClear();
+                return;
+            }
+            CurrentFloorIndex++;
+            if (UIManager.Instance != null)
+                UIManager.Instance.ShowMessage((CurrentFloorIndex + 1) + "층 — " + floors[CurrentFloorIndex].floorName + "에 도착했다! 체력이 모두 회복되었다.", 2.5f);
+            LoadRoom(0);
+
+            // 층을 넘어가면 체력을 완전히 회복한다.
+            PlayerController player = FindAnyObjectByType<PlayerController>();
+            if (player != null)
+            {
+                Health health = player.GetComponent<Health>();
+                if (health != null) health.Heal(health.MaxHealth);
+            }
             return;
         }
         LoadRoom(CurrentRoomIndex + 1);
@@ -40,22 +62,33 @@ public class RoomFlowController : MonoBehaviour
     private void LoadRoom(int index)
     {
         if (currentRoom != null) Destroy(currentRoom);
+        FloorData floor = floors[CurrentFloorIndex];
         CurrentRoomIndex = index;
-        currentRoom = Instantiate(roomPrefabs[index]);
+        currentRoom = Instantiate(floor.roomPrefabs[index]);
 
         PlayerController player = FindAnyObjectByType<PlayerController>();
         if (player != null) player.transform.position = playerSpawn;
 
-        string label = roomNames != null && index < roomNames.Length ? roomNames[index] : roomPrefabs[index].name;
+        string label = floor.roomNames != null && index < floor.roomNames.Length ? floor.roomNames[index] : floor.roomPrefabs[index].name;
         if (UIManager.Instance != null)
-            UIManager.Instance.SetRoomName(string.Format("1층  {0}/{1}  {2}", index + 1, roomPrefabs.Length, label));
+            UIManager.Instance.SetRoomName(string.Format("{0}층 {1}  {2}/{3}  {4}",
+                CurrentFloorIndex + 1, floor.floorName, index + 1, floor.roomPrefabs.Length, label));
     }
 
-    private void FloorClear()
+    private void GameClear()
     {
+        gameCleared = true;
         PlayerController player = FindAnyObjectByType<PlayerController>();
         if (player != null) player.ControlEnabled = false;
         if (UIManager.Instance != null)
-            UIManager.Instance.ShowMessage("1층 클리어!  (2층은 추후 구현)", 9999f);
+            UIManager.Instance.ShowMessage("게임 클리어! 축하합니다!   R : 다시 시작", 9999f);
+    }
+
+    private void Update()
+    {
+        if (!gameCleared) return;
+        Keyboard kb = Keyboard.current;
+        if (kb != null && kb.rKey.wasPressedThisFrame)
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }
