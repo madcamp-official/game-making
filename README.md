@@ -13,11 +13,14 @@
 - Unity 버전: `6000.5.3f1`
 - 렌더링: Universal 2D
 
-세부 게임 구성과 구현 우선순위는 [게임 기획 개요](docs/game-design.md)에서 확인할 수 있습니다.
+## 문서
+
+- [게임 기획 개요](docs/game-design.md): 게임 콘셉트, 층 구성, 진화와 유물
+- [개발 로드맵](docs/development-roadmap.md): 1주 개발 순서, 구조, 완료 기준과 협업 방식
+- [에셋 반입 및 크레딧 규칙](docs/asset-guidelines.md): PMD Sprite Repository 사용 방법과 출처 관리
 
 ## 프로젝트 열기
 
 1. 저장소를 내려받습니다.
 2. Unity Hub에서 이 저장소 폴더를 프로젝트로 추가합니다.
 3. Unity `6000.5.3f1`로 프로젝트를 엽니다.
-
