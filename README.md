@@ -16,8 +16,10 @@
 ## 문서
 
 - [게임 기획 개요](docs/game-design.md): 게임 콘셉트, 층 구성, 진화와 유물
+- [게임플레이 상세 명세](docs/gameplay-spec.md): 조작, 공격, 체력, 전투방, 보상, 진화와 상점 규칙
 - [개발 로드맵](docs/development-roadmap.md): 1주 개발 순서, 구조, 완료 기준과 협업 방식
 - [에셋 반입 및 크레딧 규칙](docs/asset-guidelines.md): PMD Sprite Repository 사용 방법과 출처 관리
+- [프로젝트 기준](docs/project-standards.md): Unity 설정, 입력과 구현 기준
 
 ## 프로젝트 열기
 
