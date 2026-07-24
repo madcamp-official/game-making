@@ -85,13 +85,13 @@ PMD 스타일 픽셀 스프라이트는 우선 아래 설정으로 통일하고,
 
 | 에셋 | 출처 | 제작자 | 사용 위치 | 크레딧 파일 | 상태 |
 |---|---|---|---|---|---|
-| 이상해씨 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 플레이어 | 추가 예정 | 예정 |
-| 이상해풀 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 1층 보스 처치 후 | 추가 예정 | 예정 |
+| 이상해씨 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0001) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 플레이어 | `Assets/ThirdParty/PMDCollab/0001_Bulbasaur/credits.txt` | 완료 (Idle·Walk·Attack·Hurt, 2026-07-24) |
+| 이상해풀 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0002) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 1층 보스 처치 후 | `Assets/ThirdParty/PMDCollab/0002_Ivysaur/credits.txt` | 완료 (Idle·Walk·Attack·Hurt, 2026-07-24) |
 | 이상해꽃 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 2층 보스 처치 후 | 추가 예정 | 예정 |
-| 버터플 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 1층 보스 | 추가 예정 | 예정 |
+| 버터플 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0012) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 1층 보스 | `Assets/ThirdParty/PMDCollab/0012_Butterfree/credits.txt` | 완료 (Idle·Walk, 2026-07-24) |
 | 코뿌리 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 2층 보스 | 추가 예정 | 예정 |
 | 갸라도스 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 3층 보스 | 추가 예정 | 예정 |
-| 잠만보 스프라이트 | PMD Sprite Repository | 추가 시 기록 | 1층 이벤트 | 추가 예정 | 예정 |
+| 잠만보 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0143) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 1층 이벤트 | `Assets/ThirdParty/PMDCollab/0143_Snorlax/credits.txt` | 완료 (Sleep, 2026-07-24) |
 
 ## 7. 커밋 전 확인
 
