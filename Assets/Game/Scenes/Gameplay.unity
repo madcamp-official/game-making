@@ -537,8 +537,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 0}
   smoothTime: 0.15
-  hurtShakeDuration: 0.15
-  hurtShakeMagnitude: 0.12
+  hurtShakeDuration: 0.12
+  hurtShakeMagnitude: 0.04
 --- !u!20 &698633941
 Camera:
   m_ObjectHideFlags: 0
