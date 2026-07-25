@@ -53,13 +53,15 @@ public class HealthBar : MonoBehaviour
         textGo.transform.SetParent(barRoot);
         textGo.transform.localPosition = new Vector3(width * 0.5f + 0.08f, 0f, 0f);
         valueText = textGo.AddComponent<TextMesh>();
-        valueText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        valueText.fontSize = 64;
-        valueText.characterSize = 0.045f;
+        valueText.font = PixelUi.Font;
+        valueText.fontSize = PixelUi.BaseFontSize * 5;   // 비트맵 폰트는 기준 크기의 배수만 쓴다
+        valueText.characterSize = 0.058f;
         valueText.anchor = TextAnchor.MiddleLeft;
         valueText.color = Color.white;
         var textRenderer = textGo.GetComponent<MeshRenderer>();
-        textRenderer.material = valueText.font.material;
+        // UI/Default는 캔버스 밖에서 쓰기 부적절해 월드용 머티리얼을 따로 쓴다.
+        textRenderer.material = PixelUi.WorldFontMaterial != null
+            ? PixelUi.WorldFontMaterial : valueText.font.material;
         textRenderer.sortingOrder = 42;
 
         health.OnHealthChanged += UpdateBar;

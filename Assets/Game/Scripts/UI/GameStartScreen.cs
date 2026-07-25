@@ -13,7 +13,7 @@ public class GameStartScreen : MonoBehaviour
     [SerializeField, TextArea] private string controlsText =
         "이동 WASD   ·   조준 마우스\n기본 공격 좌클릭   ·   잎날가르기 우클릭\n상호작용 E   ·   재시작 R";
     [SerializeField, TextArea] private string creditsText =
-        "Sprites: PMD Sprite Repository (PMDCollab/SpriteCollab) — © CHUNSOFT / Pokémon\n비상업 팬 프로젝트";
+        "Sprites: PMD Sprite Repository (PMDCollab/SpriteCollab) — (C) CHUNSOFT / Pokemon\n비상업 팬 프로젝트";
 
     private GameObject panel;
 
@@ -41,7 +41,7 @@ public class GameStartScreen : MonoBehaviour
 
     private void BuildPanel()
     {
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        Font font = PixelUi.Font;
 
         panel = new GameObject("StartScreen");
         panel.transform.SetParent(transform, false);
@@ -53,11 +53,11 @@ public class GameStartScreen : MonoBehaviour
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
 
-        MakeText("Title", gameTitle, font, 88, new Vector2(0, 170), new Color(0.55f, 0.95f, 0.55f));
-        MakeText("Subtitle", subtitle, font, 30, new Vector2(0, 95), new Color(0.8f, 0.85f, 0.8f));
-        MakeText("Controls", controlsText, font, 30, new Vector2(0, -60), Color.white);
+        MakeText("Title", gameTitle, font, 84, new Vector2(0, 170), new Color(0.55f, 0.95f, 0.55f));
+        MakeText("Subtitle", subtitle, font, 24, new Vector2(0, 95), new Color(0.8f, 0.85f, 0.8f));
+        MakeText("Controls", controlsText, font, 24, new Vector2(0, -60), Color.white);
         MakeText("Prompt", "클릭 또는 아무 키나 눌러 시작", font, 36, new Vector2(0, -220), new Color(1f, 0.85f, 0.3f));
-        MakeText("Credits", creditsText, font, 20, new Vector2(0, -420), new Color(0.6f, 0.6f, 0.65f));
+        MakeText("Credits", creditsText, font, 24, new Vector2(0, -420), new Color(0.6f, 0.6f, 0.65f));
     }
 
     private void MakeText(string name, string content, Font font, int size, Vector2 anchoredPos, Color color)
@@ -66,7 +66,7 @@ public class GameStartScreen : MonoBehaviour
         go.transform.SetParent(panel.transform, false);
         Text text = go.AddComponent<Text>();
         text.font = font;
-        text.fontSize = size;
+        text.fontSize = PixelUi.SnapFontSize(size);   // 비트맵 폰트라 12의 배수여야 한다
         text.alignment = TextAnchor.MiddleCenter;
         text.color = color;
         text.text = content;

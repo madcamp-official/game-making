@@ -236,9 +236,10 @@ public class EvolutionCutscene : MonoBehaviour
         canvas.planeDistance = 1f;
         canvas.sortingOrder = 32000;
 
+        // 비트맵 폰트가 뭉개지지 않도록 캔버스 배율을 정수로 고정한다.
         CanvasScaler scaler = panelRoot.AddComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920, 1080);
+        scaler.uiScaleMode = CanvasScaler.ScaleMode.ConstantPixelSize;
+        scaler.scaleFactor = PixelUi.PixelScale;
 
         panelGroup = panelRoot.AddComponent<CanvasGroup>();
         panelGroup.alpha = 0f;
@@ -261,17 +262,17 @@ public class EvolutionCutscene : MonoBehaviour
         msgBox.rectTransform.sizeDelta = new Vector2(0f, 150f);
         msgBox.rectTransform.anchoredPosition = Vector2.zero;
 
-        Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        Font font = PixelUi.Font;
         messageText = MakeStretched<Text>(msgBox.transform, "MessageText");
         messageText.font = font;
-        messageText.fontSize = 40;
+        messageText.fontSize = PixelUi.BaseFontSize * 3;
         messageText.alignment = TextAnchor.MiddleCenter;
         messageText.color = Color.white;
         messageText.horizontalOverflow = HorizontalWrapMode.Overflow;
 
         Text hint = MakeStretched<Text>(msgBox.transform, "SkipHint");
         hint.font = font;
-        hint.fontSize = 22;
+        hint.fontSize = PixelUi.BaseFontSize * 2;
         hint.alignment = TextAnchor.LowerRight;
         hint.color = new Color(1f, 1f, 1f, 0.45f);
         hint.text = skipHint;

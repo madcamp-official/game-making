@@ -41,17 +41,56 @@
 - 타이밍·배율·메시지는 모두 `EvolutionCutscene` Inspector에서 조정. 단계별 초상은 `PlayerEvolution` stages의 `portrait`(각 캐릭터 Idle 남쪽 1프레임).
 - 컷씬 리소스가 비어 있으면 기존 제자리 점멸 연출로 대체된다.
 
-## UI 폰트 (2026-07-25)
+## UI 폰트 — PMDFont (2026-07-25)
 
-PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합쳐 Unity 레거시 비트맵 폰트로 만들었다.
+PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합쳐 Unity 레거시 비트맵 폰트로 만들고, 게임 UI 전체에 적용했다.
 
-- 에셋: `Assets/Game/Art/UI/Fonts/PMDFont.fontsettings` + `PMDFont.mat` + `PMDFont_Atlas.png` (768×560)
-- 원본 시트와 생성 스크립트는 `Assets/ThirdParty/Fonts_original/`에 보관 (`build_atlas.py`로 아틀라스를 다시 만들 수 있다)
-- 수록 글자 2538자: 한글 완성형 2349자 + 자모 33자 + 라틴/숫자/문장부호 148자 + 직접 그린 7자 (`( ) / · — = %`) + 공백
-- 원본 시트 격자: 라틴 15px 간격 13×12, 한글 10×13px 간격 64×38(EUC-KR 완성형 순서). **한글 시트에는 `읍`이 빠져 있어** 그 지점부터 인덱스가 한 칸 밀린다 — 아틀라스 생성 시 보정했고 `읍`은 표시되지 않는다.
-- 라틴 원본에는 우하단 1px 검은 그림자가 있고 한글 원본에는 없어서, 한글 글리프에 같은 그림자를 생성해 붙였다.
-- 사용법: `Text`의 Font에 `PMDFont`를 지정하고 **Color를 흰색**으로 둔다(머티리얼이 `UI/Default`라 텍스처 색이 그대로 나오고, Color는 곱해진다). 기준 크기는 12이므로 **Font Size는 12·24·36처럼 12의 배수**로 써야 픽셀이 깨지지 않는다. 줄 간격 14.
-- 아직 게임 UI에는 적용하지 않았다. 적용하려면 기존 `Text`들의 Font Size를 12의 배수로 맞추는 작업이 필요하다.
+### ⚠️ 가장 중요한 규칙 — 폰트 크기는 반드시 12의 배수
+
+`PMDFont`는 **비트맵 폰트**다. 벡터 폰트와 달리 임의 크기로 늘릴 수 없고, 기준 크기 12px의 **정수배**로만 확대해야 한다.
+
+| Font Size | 확대 배율 | 결과 |
+|---|---|---|
+| 12 | 1배 | 원본 픽셀 그대로 |
+| 24 | 2배 | 깨끗함 |
+| 36 | 3배 | 깨끗함 |
+| 48 | 4배 | 깨끗함 |
+| 30 | 2.5배 | **획 굵기가 들쭉날쭉해짐 (뭉개짐)** |
+| 40 | 3.33배 | **뭉개짐** |
+
+12의 배수가 아니면 어떤 획은 2픽셀, 어떤 획은 3픽셀로 렌더되어 글자가 지저분해진다. 새 `Text`를 만들 때는 12·24·36·48 중에서 고르고, 코드에서 만들 때는 `PixelUi.BaseFontSize * n` 또는 `PixelUi.SnapFontSize(size)`를 쓴다.
+
+같은 이유로 **캔버스 배율도 정수여야 한다.** 기본 `CanvasScaler`의 Scale With Screen Size는 화면 크기에 비례해 1.33배 같은 소수 배율을 만들기 때문에, HUDCanvas에는 `PixelPerfectCanvasScaler`를 붙여 Constant Pixel Size + 정수 배율(화면 높이 1080마다 1단계, 최대 4배)로 고정했다. 진화 컷씬 캔버스도 같은 방식이다.
+
+### 적용 현황
+
+| 대상 | 크기 | 비고 |
+|---|---|---|
+| `HUDCanvas/MessageText` | 48 | 4배 |
+| `HUDCanvas/RoomText` | 36 | 3배 (34에서 변경) |
+| `HUDCanvas/HintText` | 36 | 3배 (32에서 변경) |
+| `HUDCanvas/GoldText` | 36 | 3배 (40에서 변경) |
+| `HUDCanvas/ControlsText` | 24 | 2배 (22에서 변경) |
+| `GameStartScreen` (코드 생성) | 84 / 36 / 24 | 제목 / 시작 안내 / 부제·조작·크레딧 |
+| `EvolutionCutscene` (코드 생성) | 36 / 24 | 메시지 / 스킵 안내 |
+| `HealthBar` 수치 (TextMesh) | 60 | 월드 공간, `characterSize`로 실제 크기 조절 |
+
+`Text.color`는 곱해지는 값이다. 흰색으로 두면 원본 색(흰 글자 + 검은 그림자)이 그대로 나오고, 다른 색을 넣으면 글자만 그 색으로 물들고 그림자는 검은색으로 남는다(골드 텍스트가 이 방식).
+
+### 폰트 에셋 구성
+
+- `Assets/Game/Resources/Fonts/PMDFont.fontsettings` — 폰트 본체 (코드에서 `PixelUi.Font`로 접근하려고 `Resources` 폴더에 둔다)
+- `PMDFont.mat` (`UI/Default`) — 캔버스 UI용. `PMDFont_World.mat` (`Sprites/Default`) — 월드 공간 `TextMesh`용
+- `PMDFont_Atlas.png` — 768×560, Point 필터·무압축·밉맵 없음
+- 원본 시트와 생성 스크립트: `Assets/ThirdParty/SpritersResource/PMD_Explorers_Fonts/Source/` (`build_atlas.py`로 아틀라스를 다시 만들 수 있다)
+
+### 수록 글자 2538자와 주의점
+
+- 한글 완성형 2349자 + 자모 33자 + 라틴·숫자·문장부호 148자 + 직접 그린 7자 (`( ) / · — = %`) + 공백
+- 원본 격자: 라틴 15px 간격 13×12, 한글 10×13px 간격 64×38(EUC-KR 완성형 순서)
+- **한글 시트에는 `읍`이 통째로 빠져 있다.** 그 지점(1533번째)부터 인덱스가 한 칸씩 밀리므로 아틀라스 생성 시 보정했다. `읍` 한 글자만 표시되지 않는다
+- 라틴 원본에는 우하단 1px 검은 그림자가 있고 한글 원본에는 없어서, 한글 글리프에 같은 그림자를 생성해 붙였다
+- **`©`는 폰트에 없다.** 시작 화면 크레딧의 `©`를 `(C)`로 바꿨다. 새 텍스트를 쓸 때 원본에 없는 기호를 넣으면 그 자리가 비어 보이니 주의
 
 ## 조작
 
