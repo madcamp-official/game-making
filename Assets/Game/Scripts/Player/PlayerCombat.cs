@@ -22,6 +22,8 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField, Min(0)] private int razorDamage = 8;
     [SerializeField, Min(0f)] private float razorCooldown = 0.5f;
     [SerializeField, Min(0f)] private float razorSpawnOffset = 0.55f;
+    [Tooltip("탄퍼짐. 조준 방향을 기준으로 좌우로 흩어지는 전체 각도(도). 0이면 정확히 조준 방향으로 나간다.")]
+    [SerializeField, Range(0f, 90f)] private float razorSpreadAngle = 8f;
     [SerializeField] private Projectile razorLeafPrefab;
 
     [Header("공통")]
@@ -126,12 +128,26 @@ public class PlayerCombat : MonoBehaviour
 
     private void RazorLeafAttack(Vector2 direction)
     {
-        BeginAttack(direction);
+        BeginAttack(direction); // 캐릭터는 조준 방향 그대로 바라본다
+
         if (razorLeafPrefab == null) return;
 
-        Vector2 spawnPos = (Vector2)transform.position + direction * razorSpawnOffset;
+        Vector2 shotDirection = ApplySpread(direction, razorSpreadAngle);
+        Vector2 spawnPos = (Vector2)transform.position + shotDirection * razorSpawnOffset;
         Projectile leaf = Instantiate(razorLeafPrefab, spawnPos, Quaternion.identity);
-        leaf.Launch(direction, razorDamage);
+        leaf.Launch(shotDirection, razorDamage);
+    }
+
+    /// <summary>탄퍼짐: 조준 방향을 전체 각도 범위 안에서 무작위로 틀어 준다.</summary>
+    private static Vector2 ApplySpread(Vector2 direction, float spreadAngle)
+    {
+        if (spreadAngle <= 0f) return direction;
+        float half = spreadAngle * 0.5f;
+        float offset = Random.Range(-half, half) * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(offset);
+        float sin = Mathf.Sin(offset);
+        return new Vector2(direction.x * cos - direction.y * sin,
+                           direction.x * sin + direction.y * cos);
     }
 
     private static readonly WaitForSeconds flashDuration = new WaitForSeconds(0.1f);
