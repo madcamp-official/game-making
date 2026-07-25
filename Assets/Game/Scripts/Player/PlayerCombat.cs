@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -32,6 +33,8 @@ public class PlayerCombat : MonoBehaviour
 
     private static readonly Collider2D[] hitBuffer = new Collider2D[16];
     private static readonly ContactFilter2D noFilter = ContactFilter2D.noFilter;
+    // 한 적이 콜라이더를 여러 개 가져도 한 번만 타격하기 위한 목록 (매 공격마다 비운다)
+    private static readonly List<Health> struckTargets = new List<Health>(8);
     private static Sprite whiteSprite;
 
     private PlayerController controller;
@@ -112,6 +115,7 @@ public class PlayerCombat : MonoBehaviour
             StartCoroutine(DebugAttackFlash(origin));
         }
 
+        struckTargets.Clear();
         int count = Physics2D.OverlapCircle(origin, meleeRadius, noFilter, hitBuffer);
         for (int i = 0; i < count; i++)
         {
@@ -120,6 +124,8 @@ public class PlayerCombat : MonoBehaviour
             if (enemy == null) continue;
             Health enemyHealth = enemy.GetComponent<Health>();
             if (enemyHealth == null || enemyHealth.IsDead) continue;
+            if (struckTargets.Contains(enemyHealth)) continue;
+            struckTargets.Add(enemyHealth);
 
             enemyHealth.TakeDamage(meleeDamage);
             enemy.ApplyKnockback(direction, meleeKnockbackForce);

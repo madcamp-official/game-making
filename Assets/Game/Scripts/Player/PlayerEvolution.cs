@@ -11,6 +11,8 @@ public class PlayerEvolution : MonoBehaviour
     {
         public string stageName;
         public RuntimeAnimatorController animatorController;
+        [Tooltip("진화 컷씬에 표시할 정면 스프라이트 (남쪽 대기 1프레임)")]
+        public Sprite portrait;
         [Min(1)] public int maxHealth = 100;
         [Min(0)] public int attackDamage = 12;   // 기본 공격 1 (근거리)
         [Min(0)] public int razorDamage = 8;     // 기본 공격 2 (잎날가르기)
@@ -31,6 +33,11 @@ public class PlayerEvolution : MonoBehaviour
         // 예전에는 이때 두 번째 연출이 겹치면서 Kinematic 상태를 원래 상태로 잘못 기억해
         // 연출이 끝난 뒤에도 Kinematic으로 남았고(=벽을 통과), 단계도 한 번에 두 칸 올라갔다.
         if (IsEvolving) return;
+
+        // 이미 쓰러진 뒤라면 진화하지 않는다. (플레이어가 죽는 것과 동시에 보스가 죽으면
+        // 진화의 완전 회복이 자뭉열매 없이 부활시키는 버그가 있었다.)
+        Health health = GetComponent<Health>();
+        if (health != null && health.IsDead) return;
 
         if (stages == null || CurrentStageIndex + 1 >= stages.Length) return;
 
@@ -62,33 +69,38 @@ public class PlayerEvolution : MonoBehaviour
                 body.bodyType = RigidbodyType2D.Kinematic;
             }
 
-            if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage("어라...?! 몸이 빛나기 시작했다!", 1.6f);
-
-            // 흰색 점멸 연출
-            WaitForSeconds step = new WaitForSeconds(flashStepDuration);
-            for (int i = 0; i < 6; i++)
-            {
-                if (sr != null) sr.color = i % 2 == 0 ? Color.white * 3f : Color.white;
-                yield return step;
-            }
-            if (sr != null) sr.color = Color.white;
-
+            Stage previous = stages[CurrentStageIndex - 1];
             Stage next = stages[CurrentStageIndex];
 
-            Animator animator = GetComponent<Animator>();
-            if (animator != null && next.animatorController != null)
-                animator.runtimeAnimatorController = next.animatorController;
+            bool canPlayCutscene = EvolutionCutscene.Instance != null &&
+                                   previous.portrait != null && next.portrait != null;
+            if (canPlayCutscene)
+            {
+                // 풀스크린 컷씬. 백색 섬광 순간(onReveal)에 실제 능력치가 바뀐다.
+                yield return EvolutionCutscene.Instance.Play(
+                    previous.portrait, next.portrait,
+                    previous.stageName, next.stageName,
+                    () => ApplyStage(next));
+            }
+            else
+            {
+                // 컷씬 리소스가 없을 때의 예비 연출: 제자리 흰색 점멸
+                if (UIManager.Instance != null)
+                    UIManager.Instance.ShowMessage("어라...?! 몸이 빛나기 시작했다!", 1.6f);
 
-            // 명세(gameplay-spec 6절): 진화 시 최대 체력 증가 + 체력 완전 회복
-            Health health = GetComponent<Health>();
-            if (health != null) health.SetMaxHealth(next.maxHealth, true);
+                WaitForSeconds step = new WaitForSeconds(flashStepDuration);
+                for (int i = 0; i < 6; i++)
+                {
+                    if (sr != null) sr.color = i % 2 == 0 ? Color.white * 3f : Color.white;
+                    yield return step;
+                }
+                if (sr != null) sr.color = Color.white;
 
-            PlayerCombat combat = GetComponent<PlayerCombat>();
-            if (combat != null) combat.SetDamages(next.attackDamage, next.razorDamage);
+                ApplyStage(next);
 
-            if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage(next.stageName + "(으)로 진화했다!", 2.5f);
+                if (UIManager.Instance != null)
+                    UIManager.Instance.ShowMessage(next.stageName + "(으)로 진화했다!", 2.5f);
+            }
         }
         finally
         {
@@ -103,5 +115,21 @@ public class PlayerEvolution : MonoBehaviour
             if (controller != null) controller.ControlEnabled = true;
             IsEvolving = false;
         }
+    }
+
+    // 진화 확정: 애니메이터·능력치 교체.
+    // 명세(gameplay-spec 6절): 진화 시 최대 체력 증가 + 체력 완전 회복.
+    private void ApplyStage(Stage next)
+    {
+        Animator animator = GetComponent<Animator>();
+        if (animator != null && next.animatorController != null)
+            animator.runtimeAnimatorController = next.animatorController;
+
+        // 연출 도중(예비 연출은 게임이 정지되지 않는다) 쓰러졌다면 회복 없이 최대치만 올린다.
+        Health health = GetComponent<Health>();
+        if (health != null) health.SetMaxHealth(next.maxHealth, refill: !health.IsDead);
+
+        PlayerCombat combat = GetComponent<PlayerCombat>();
+        if (combat != null) combat.SetDamages(next.attackDamage, next.razorDamage);
     }
 }
