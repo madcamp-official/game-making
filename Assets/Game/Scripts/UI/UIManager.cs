@@ -64,9 +64,14 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    private int lastGold = int.MinValue;
+    private string lastHint;
+
     public void SetGold(int gold)
     {
-        if (goldText != null) goldText.text = "G " + gold;
+        if (goldText == null || gold == lastGold) return;
+        lastGold = gold;
+        goldText.text = "G " + gold;
     }
 
     public void SetRoomName(string label)
@@ -74,9 +79,12 @@ public class UIManager : MonoBehaviour
         if (roomText != null) roomText.text = label;
     }
 
+    // 같은 힌트가 유지되는 동안 Text 재대입(캔버스 리빌드)을 피한다.
     public void SetHint(string hint)
     {
-        if (hintText != null) hintText.text = hint;
+        if (hintText == null || hint == lastHint) return;
+        lastHint = hint;
+        hintText.text = hint;
     }
 
     public void ShowMessage(string message, float duration)

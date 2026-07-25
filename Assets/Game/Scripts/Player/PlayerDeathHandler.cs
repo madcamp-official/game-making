@@ -34,7 +34,12 @@ public class PlayerDeathHandler : MonoBehaviour
         {
             isGameOver = true;
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage("게임 오버...   R : 다시 시작", 9999f);
+            {
+                int floor = RoomFlowController.Instance != null ? RoomFlowController.Instance.CurrentFloorIndex + 1 : 1;
+                int gold = RunManager.Instance != null ? RunManager.Instance.Gold : 0;
+                UIManager.Instance.ShowMessage(
+                    "쓰러졌다...  " + floor + "층에서 여정 종료  ·  획득 골드 " + gold + "G\nR : 다시 시작", 9999f);
+            }
         }
     }
 

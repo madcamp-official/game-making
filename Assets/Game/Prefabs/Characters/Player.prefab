@@ -188,8 +188,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 10
-  invincibleDuration: 0.3
+  maxHealth: 100
+  invincibleDuration: 0.5
 --- !u!114 &2327175509895783932
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -215,12 +215,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b249a72eab64b4430b60a8146a2e2a03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
-  attackDamage: 3
-  attackRange: 0.9
-  attackRadius: 0.6
-  attackCooldown: 0.35
-  attackAnimDuration: 0.467
+  meleeDamage: 12
+  meleeRange: 0.9
+  meleeRadius: 0.6
+  meleeCooldown: 0.5
+  meleeKnockbackForce: 6
   attackEffectPrefab: {fileID: 0}
+  razorDamage: 8
+  razorCooldown: 0.5
+  razorSpawnOffset: 0.55
+  razorLeafPrefab: {fileID: 966188026010977204, guid: a32b1e5e256374347894cb56f2f22464, type: 3}
+  attackMoveSpeedMultiplier: 0.5
+  attackAnimDuration: 0.467
 --- !u!95 &3910182958006894460
 Animator:
   serializedVersion: 7
@@ -298,16 +304,19 @@ MonoBehaviour:
   stages:
   - stageName: "\uC774\uC0C1\uD574\uC528"
     animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
-    maxHealth: 10
-    attackDamage: 3
+    maxHealth: 100
+    attackDamage: 12
+    razorDamage: 8
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
-    maxHealth: 16
-    attackDamage: 5
+    maxHealth: 130
+    attackDamage: 18
+    razorDamage: 12
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
-    maxHealth: 24
-    attackDamage: 7
+    maxHealth: 170
+    attackDamage: 25
+    razorDamage: 17
 --- !u!114 &510344029345414639
 MonoBehaviour:
   m_ObjectHideFlags: 0

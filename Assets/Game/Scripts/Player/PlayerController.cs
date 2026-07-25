@@ -8,9 +8,12 @@ using UnityEngine.InputSystem;
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField, Min(0f)] private float moveSpeed = 5f;
 
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
+
+    /// <summary>공격 중 감속 등 외부 요인이 곱해지는 이동 속도 배율.</summary>
+    public float SpeedMultiplier { get; set; } = 1f;
 
     /// <summary>공격 등 외부 요인으로 바라보는 방향을 바꾼다.</summary>
     public void SetFacing(Vector2 direction)
@@ -57,7 +60,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        body.linearVelocity = MoveInput * moveSpeed;
+        body.linearVelocity = MoveInput * (moveSpeed * SpeedMultiplier);
     }
 
     private void HandleDeath()

@@ -8,8 +8,8 @@ using UnityEngine;
 /// </summary>
 public class Health : MonoBehaviour
 {
-    [SerializeField] private int maxHealth = 10;
-    [SerializeField] private float invincibleDuration = 0.3f;
+    [SerializeField, Min(1)] private int maxHealth = 10;
+    [SerializeField, Min(0f)] private float invincibleDuration = 0.3f;
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth { get; private set; }
@@ -20,7 +20,11 @@ public class Health : MonoBehaviour
     public event Action OnDamaged;
     public event Action OnDied;
 
+    // 코루틴 대기 객체 재사용 (루프마다 할당 방지)
+    private static readonly WaitForSeconds flashInterval = new WaitForSeconds(0.06f);
+
     private SpriteRenderer spriteRenderer;
+    private Coroutine flashRoutine;
 
     private void Awake()
     {
@@ -45,11 +49,16 @@ public class Health : MonoBehaviour
 
         if (CurrentHealth <= 0)
         {
+            // 진행 중이던 점멸을 멈추고 렌더러가 꺼진 채 남지 않게 복원한다.
+            if (flashRoutine != null) StopCoroutine(flashRoutine);
+            if (spriteRenderer != null) spriteRenderer.enabled = true;
+            IsInvincible = false;
             OnDied?.Invoke();
         }
         else
         {
-            StartCoroutine(InvincibleFlash());
+            if (flashRoutine != null) StopCoroutine(flashRoutine);
+            flashRoutine = StartCoroutine(InvincibleFlash());
         }
     }
 
@@ -76,10 +85,11 @@ public class Health : MonoBehaviour
         {
             if (spriteRenderer != null)
                 spriteRenderer.enabled = !spriteRenderer.enabled;
-            yield return new WaitForSeconds(0.06f);
+            yield return flashInterval;
             elapsed += 0.06f;
         }
         if (spriteRenderer != null) spriteRenderer.enabled = true;
         IsInvincible = false;
+        flashRoutine = null;
     }
 }

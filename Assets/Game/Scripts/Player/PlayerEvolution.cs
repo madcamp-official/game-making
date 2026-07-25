@@ -11,8 +11,9 @@ public class PlayerEvolution : MonoBehaviour
     {
         public string stageName;
         public RuntimeAnimatorController animatorController;
-        public int maxHealth = 10;
-        public int attackDamage = 3;
+        [Min(1)] public int maxHealth = 100;
+        [Min(0)] public int attackDamage = 12;   // 기본 공격 1 (근거리)
+        [Min(0)] public int razorDamage = 8;     // 기본 공격 2 (잎날가르기)
     }
 
     [SerializeField] private Stage[] stages;
@@ -66,12 +67,12 @@ public class PlayerEvolution : MonoBehaviour
         if (animator != null && next.animatorController != null)
             animator.runtimeAnimatorController = next.animatorController;
 
-        // 최대 체력만 늘리고 현재 체력은 유지한다 (회복은 층 이동 시).
+        // 명세(gameplay-spec 6절): 진화 시 최대 체력 증가 + 체력 완전 회복
         Health health = GetComponent<Health>();
-        if (health != null) health.SetMaxHealth(next.maxHealth, false);
+        if (health != null) health.SetMaxHealth(next.maxHealth, true);
 
         PlayerCombat combat = GetComponent<PlayerCombat>();
-        if (combat != null) combat.SetAttackDamage(next.attackDamage);
+        if (combat != null) combat.SetDamages(next.attackDamage, next.razorDamage);
 
         if (UIManager.Instance != null)
             UIManager.Instance.ShowMessage(next.stageName + "(으)로 진화했다!", 2.5f);

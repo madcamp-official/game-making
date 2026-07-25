@@ -8,17 +8,28 @@ using UnityEngine;
 [RequireComponent(typeof(Health))]
 public class EnemyController : MonoBehaviour
 {
-    [SerializeField] private float moveSpeed = 2.5f;
-    [SerializeField] private float detectRange = 6f;
-    [SerializeField] private float attackRange = 1.0f;
-    [SerializeField] private int attackDamage = 1;
-    [SerializeField] private float attackCooldown = 1.0f;
-    [SerializeField] private int goldReward = 2;
+    [SerializeField, Min(0f)] private float moveSpeed = 2.5f;
+    [SerializeField, Min(0f)] private float detectRange = 6f;
+    [SerializeField, Min(0f)] private float attackRange = 1.0f;
+    [SerializeField, Min(0)] private int attackDamage = 1;
+    [SerializeField, Min(0f)] private float attackCooldown = 1.0f;
+    [SerializeField, Min(0)] private int goldReward = 2;
+    [SerializeField, Min(0f)] private float knockbackStunDuration = 0.15f;
 
     private Rigidbody2D body;
     private Health health;
     private Transform player;
+    private Health playerHealth; // 매 FixedUpdate GetComponent 호출 방지용 캐시
     private float lastAttackTime = -999f;
+    private float stunnedUntil = -999f;
+
+    /// <summary>플레이어 공격 등으로 밀려나며 잠시 행동 불능이 된다.</summary>
+    public void ApplyKnockback(Vector2 direction, float force)
+    {
+        if (health.IsDead) return;
+        stunnedUntil = Time.time + knockbackStunDuration;
+        body.linearVelocity = direction.normalized * force;
+    }
 
     private void Awake()
     {
@@ -30,18 +41,24 @@ public class EnemyController : MonoBehaviour
     private void Start()
     {
         PlayerController pc = FindAnyObjectByType<PlayerController>();
-        if (pc != null) player = pc.transform;
+        if (pc != null)
+        {
+            player = pc.transform;
+            playerHealth = pc.GetComponent<Health>();
+        }
     }
 
     private void FixedUpdate()
     {
+        // 넉백 중에는 밀려나는 속도를 유지한다.
+        if (Time.time < stunnedUntil) return;
+
         if (health.IsDead || player == null)
         {
             body.linearVelocity = Vector2.zero;
             return;
         }
 
-        Health playerHealth = player.GetComponent<Health>();
         if (playerHealth != null && playerHealth.IsDead)
         {
             body.linearVelocity = Vector2.zero;
@@ -56,7 +73,7 @@ public class EnemyController : MonoBehaviour
             if (Time.time >= lastAttackTime + attackCooldown)
             {
                 lastAttackTime = Time.time;
-                playerHealth?.TakeDamage(attackDamage);
+                if (playerHealth != null) playerHealth.TakeDamage(attackDamage);
             }
         }
         else if (distance <= detectRange)

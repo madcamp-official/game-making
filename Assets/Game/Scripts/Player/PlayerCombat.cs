@@ -3,24 +3,43 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 /// <summary>
-/// 플레이어 기본 공격. 마우스 좌클릭으로 캐릭터 기준 마우스 방향(360도 자유각)에
-/// 원형 판정을 만들어 적(EnemyController)의 Health에 피해를 준다.
+/// 플레이어 공격. 마우스 조준(360도 자유각) 기준으로
+/// 좌클릭 = 기본 공격 1(근거리), 우클릭 = 기본 공격 2(잎날가르기 투사체).
+/// 공격 중에는 이동 속도가 감소한다. 수치는 모두 Inspector에서 조정한다.
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
 {
-    [SerializeField] private int attackDamage = 3;
-    [SerializeField] private float attackRange = 0.9f;
-    [SerializeField] private float attackRadius = 0.6f;
-    [SerializeField] private float attackCooldown = 0.5f;
-    // Attack 클립 길이 (AnimData.xml 지속시간 합 28틱 / 60)
-    [SerializeField] private float attackAnimDuration = 0.467f;
+    [Header("기본 공격 1 — 근거리")]
+    [SerializeField, Min(0)] private int meleeDamage = 12;
+    [SerializeField, Min(0f)] private float meleeRange = 0.9f;
+    [SerializeField, Min(0f)] private float meleeRadius = 0.6f;
+    [SerializeField, Min(0f)] private float meleeCooldown = 0.5f;
+    [SerializeField, Min(0f)] private float meleeKnockbackForce = 6f;
     [SerializeField] private GameObject attackEffectPrefab;
+
+    [Header("기본 공격 2 — 잎날가르기")]
+    [SerializeField, Min(0)] private int razorDamage = 8;
+    [SerializeField, Min(0f)] private float razorCooldown = 0.5f;
+    [SerializeField, Min(0f)] private float razorSpawnOffset = 0.55f;
+    [SerializeField] private Projectile razorLeafPrefab;
+
+    [Header("공통")]
+    [SerializeField, Range(0f, 1f)] private float attackMoveSpeedMultiplier = 0.5f;
+    [SerializeField, Min(0f)] private float attackAnimDuration = 0.467f;
+
+    private static readonly Collider2D[] hitBuffer = new Collider2D[16];
+    private static readonly ContactFilter2D noFilter = ContactFilter2D.noFilter;
+    private static Sprite whiteSprite;
 
     private PlayerController controller;
     private PlayerAnimator playerAnimator;
     private Health health;
-    private float lastAttackTime = -999f;
+    private Camera mainCamera;
+    private SpriteRenderer flashMarker; // 재사용하는 공격 판정 표시
+    private float lastMeleeTime = -999f;
+    private float lastRazorTime = -999f;
+    private float slowUntil = -999f;
 
     private void Awake()
     {
@@ -29,41 +48,57 @@ public class PlayerCombat : MonoBehaviour
         health = GetComponent<Health>();
     }
 
-    public void SetAttackDamage(int value)
+    /// <summary>진화 등으로 공격력을 바꾼다.</summary>
+    public void SetDamages(int melee, int razor)
     {
-        attackDamage = value;
+        meleeDamage = melee;
+        razorDamage = razor;
     }
 
     private void Update()
     {
+        // 공격 중 이동 감속 적용/해제
+        controller.SpeedMultiplier = Time.time < slowUntil ? attackMoveSpeedMultiplier : 1f;
+
         if (!controller.ControlEnabled || (health != null && health.IsDead)) return;
 
         Mouse mouse = Mouse.current;
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame && Time.time >= lastAttackTime + attackCooldown)
+        if (mouse == null) return;
+
+        if (mouse.leftButton.wasPressedThisFrame && Time.time >= lastMeleeTime + meleeCooldown)
         {
-            lastAttackTime = Time.time;
-            Attack(GetMouseDirection());
+            lastMeleeTime = Time.time;
+            MeleeAttack(GetMouseDirection());
+        }
+        else if (mouse.rightButton.wasPressedThisFrame && Time.time >= lastRazorTime + razorCooldown)
+        {
+            lastRazorTime = Time.time;
+            RazorLeafAttack(GetMouseDirection());
         }
     }
 
     // 캐릭터 기준 마우스 커서 방향 (360도 자유각)
     private Vector2 GetMouseDirection()
     {
-        Camera cam = Camera.main;
-        if (cam == null || Mouse.current == null) return controller.FacingDirection;
-        Vector3 mouseWorld = cam.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        if (mainCamera == null) mainCamera = Camera.main;
+        if (mainCamera == null || Mouse.current == null) return controller.FacingDirection;
+        Vector3 mouseWorld = mainCamera.ScreenToWorldPoint(Mouse.current.position.ReadValue());
         Vector2 direction = (Vector2)mouseWorld - (Vector2)transform.position;
         return direction.sqrMagnitude > 0.001f ? direction.normalized : controller.FacingDirection;
     }
 
-    private void Attack(Vector2 direction)
+    private void BeginAttack(Vector2 direction)
     {
-        // 캐릭터가 공격 방향을 바라보게 하고 (애니메이션은 가장 가까운 8방향 사용)
         controller.SetFacing(direction);
+        slowUntil = Time.time + attackAnimDuration;
         if (playerAnimator != null)
             playerAnimator.PlayAttack(attackAnimDuration);
+    }
 
-        Vector2 origin = (Vector2)transform.position + direction * attackRange;
+    private void MeleeAttack(Vector2 direction)
+    {
+        BeginAttack(direction);
+        Vector2 origin = (Vector2)transform.position + direction * meleeRange;
 
         if (attackEffectPrefab != null)
         {
@@ -75,37 +110,56 @@ public class PlayerCombat : MonoBehaviour
             StartCoroutine(DebugAttackFlash(origin));
         }
 
-        Collider2D[] hits = Physics2D.OverlapCircleAll(origin, attackRadius);
-        foreach (Collider2D hit in hits)
+        int count = Physics2D.OverlapCircle(origin, meleeRadius, noFilter, hitBuffer);
+        for (int i = 0; i < count; i++)
         {
-            if (hit.GetComponentInParent<EnemyController>() == null) continue;
-            Health enemyHealth = hit.GetComponentInParent<Health>();
-            if (enemyHealth != null && !enemyHealth.IsDead)
-                enemyHealth.TakeDamage(attackDamage);
+            Collider2D hit = hitBuffer[i];
+            EnemyController enemy = hit.GetComponentInParent<EnemyController>();
+            if (enemy == null) continue;
+            Health enemyHealth = enemy.GetComponent<Health>();
+            if (enemyHealth == null || enemyHealth.IsDead) continue;
+
+            enemyHealth.TakeDamage(meleeDamage);
+            enemy.ApplyKnockback(direction, meleeKnockbackForce);
         }
     }
 
-    private static Sprite whiteSprite;
+    private void RazorLeafAttack(Vector2 direction)
+    {
+        BeginAttack(direction);
+        if (razorLeafPrefab == null) return;
 
-    // 이펙트 프리팹이 없을 때 공격 판정 위치를 잠깐 표시하는 임시 연출
+        Vector2 spawnPos = (Vector2)transform.position + direction * razorSpawnOffset;
+        Projectile leaf = Instantiate(razorLeafPrefab, spawnPos, Quaternion.identity);
+        leaf.Launch(direction, razorDamage);
+    }
+
+    private static readonly WaitForSeconds flashDuration = new WaitForSeconds(0.1f);
+
+    // 이펙트 프리팹이 없을 때 공격 판정 위치를 잠깐 표시하는 임시 연출.
+    // 마커 오브젝트는 한 번만 만들어 재사용한다.
     private IEnumerator DebugAttackFlash(Vector2 origin)
     {
-        if (whiteSprite == null)
+        if (flashMarker == null)
         {
-            Texture2D tex = new Texture2D(1, 1);
-            tex.SetPixel(0, 0, Color.white);
-            tex.Apply();
-            whiteSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
+            if (whiteSprite == null)
+            {
+                Texture2D tex = new Texture2D(1, 1);
+                tex.SetPixel(0, 0, Color.white);
+                tex.Apply();
+                whiteSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
+            }
+            GameObject marker = new GameObject("AttackFlash");
+            flashMarker = marker.AddComponent<SpriteRenderer>();
+            flashMarker.sprite = whiteSprite;
+            flashMarker.color = new Color(1f, 0.9f, 0.2f, 0.6f);
+            flashMarker.sortingOrder = 50;
         }
 
-        GameObject marker = new GameObject("AttackFlash");
-        marker.transform.position = origin;
-        SpriteRenderer sr = marker.AddComponent<SpriteRenderer>();
-        sr.sprite = whiteSprite;
-        sr.color = new Color(1f, 0.9f, 0.2f, 0.6f);
-        sr.sortingOrder = 50;
-        marker.transform.localScale = Vector3.one * attackRadius * 2f;
-        yield return new WaitForSeconds(0.1f);
-        Destroy(marker);
+        flashMarker.transform.position = origin;
+        flashMarker.transform.localScale = Vector3.one * meleeRadius * 2f;
+        flashMarker.enabled = true;
+        yield return flashDuration;
+        if (flashMarker != null) flashMarker.enabled = false;
     }
 }

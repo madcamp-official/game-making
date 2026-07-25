@@ -81,7 +81,11 @@ public class RoomFlowController : MonoBehaviour
         PlayerController player = FindAnyObjectByType<PlayerController>();
         if (player != null) player.ControlEnabled = false;
         if (UIManager.Instance != null)
-            UIManager.Instance.ShowMessage("게임 클리어! 축하합니다!   R : 다시 시작", 9999f);
+        {
+            int gold = RunManager.Instance != null ? RunManager.Instance.Gold : 0;
+            UIManager.Instance.ShowMessage(
+                "게임 클리어! 모든 층을 정복했다!  ·  최종 골드 " + gold + "G\nR : 다시 시작", 9999f);
+        }
     }
 
     private void Update()

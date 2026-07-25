@@ -227,6 +227,7 @@ GameObject:
   - component: {fileID: 453288736}
   - component: {fileID: 453288735}
   - component: {fileID: 453288734}
+  - component: {fileID: 453288739}
   m_Layer: 0
   m_Name: HUDCanvas
   m_TagString: Untagged
@@ -332,6 +333,7 @@ RectTransform:
   - {fileID: 1191427566}
   - {fileID: 1300111090}
   - {fileID: 1656463257}
+  - {fileID: 633222641}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -339,6 +341,121 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &453288739
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453288733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f26285869157c4912af2885642589a3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameStartScreen
+  gameTitle: "\uC774\uC0C1\uD574\uC528\uC758 \uB358\uC804 \uD0D0\uD5D8"
+  subtitle: "\uD3EC\uCF13\uBAAC \uB85C\uADF8\uB77C\uC774\uD2B8 \uD504\uB85C\uD1A0\uD0C0\uC785"
+  controlsText: "\uC774\uB3D9 WASD   \xB7   \uC870\uC900 \uB9C8\uC6B0\uC2A4\n\uAE30\uBCF8
+    \uACF5\uACA9 \uC88C\uD074\uB9AD   \xB7   \uC78E\uB0A0\uAC00\uB974\uAE30 \uC6B0\uD074\uB9AD\n\uC0C1\uD638\uC791\uC6A9
+    E   \xB7   \uC7AC\uC2DC\uC791 R"
+  creditsText: "Sprites: PMD Sprite Repository (PMDCollab/SpriteCollab) \u2014 \xA9
+    CHUNSOFT / Pok\xE9mon\n\uBE44\uC0C1\uC5C5 \uD32C \uD504\uB85C\uC81D\uD2B8"
+--- !u!1 &633222640
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 633222641}
+  - component: {fileID: 633222644}
+  - component: {fileID: 633222643}
+  - component: {fileID: 633222642}
+  m_Layer: 0
+  m_Name: ControlsText
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &633222641
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633222640}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 453288738}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 25, y: 15}
+  m_SizeDelta: {x: 900, y: 40}
+  m_Pivot: {x: 0, y: 0}
+--- !u!114 &633222642
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633222640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cfabb0440166ab443bba8876756fdfa9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Shadow
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
+--- !u!114 &633222643
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633222640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.55}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 22
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 6
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: "WASD \uC774\uB3D9 \xB7 \uC88C\uD074\uB9AD \uACF5\uACA9 \xB7 \uC6B0\uD074\uB9AD
+    \uC78E\uB0A0\uAC00\uB974\uAE30 \xB7 E \uC0C1\uD638\uC791\uC6A9"
+--- !u!222 &633222644
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633222640}
+  m_CullTransparentMesh: 1
 --- !u!1 &689315467
 GameObject:
   m_ObjectHideFlags: 0
@@ -370,6 +487,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatRoomController
   exitDoor: {fileID: 0}
   isBossRoom: 0
+  clearGoldReward: 5
+  clearHealAmount: 20
+  bossRewardRelic: {fileID: 0}
 --- !u!4 &689315469
 Transform:
   m_ObjectHideFlags: 0
@@ -417,6 +537,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CameraFollow
   target: {fileID: 0}
   smoothTime: 0.15
+  hurtShakeDuration: 0.15
+  hurtShakeMagnitude: 0.12
 --- !u!20 &698633941
 Camera:
   m_ObjectHideFlags: 0

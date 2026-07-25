@@ -62,11 +62,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3030848718822414418, guid: c5873431807344684ba40b8cb35fdb7a, type: 3}
       propertyPath: attackDamage
-      value: 2
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 4008822001101423458, guid: c5873431807344684ba40b8cb35fdb7a, type: 3}
       propertyPath: maxHealth
-      value: 9
+      value: 45
       objectReference: {fileID: 0}
     - target: {fileID: 4613649252874062295, guid: c5873431807344684ba40b8cb35fdb7a, type: 3}
       propertyPath: m_Color.g

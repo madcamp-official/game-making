@@ -323,7 +323,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 30
+  maxHealth: 220
   invincibleDuration: 0.3
 --- !u!114 &5764212027173477630
 MonoBehaviour:
@@ -338,11 +338,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
   moveSpeed: 2.4
-  detectRange: 20
+  detectRange: 9
   attackRange: 1.3
-  attackDamage: 3
+  attackDamage: 18
   attackCooldown: 1
   goldReward: 35
+  knockbackStunDuration: 0.15
 --- !u!95 &1489783095321110572
 Animator:
   serializedVersion: 7
@@ -1018,6 +1019,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatRoomController
   exitDoor: {fileID: 4174508580180658047}
   isBossRoom: 1
+  clearGoldReward: 5
+  clearHealAmount: 20
+  bossRewardRelic: {fileID: 11400000, guid: 5a9dd3a529fc94b05a56b5ea1b99e1d1, type: 2}
 --- !u!1 &9139983139213436662
 GameObject:
   m_ObjectHideFlags: 0

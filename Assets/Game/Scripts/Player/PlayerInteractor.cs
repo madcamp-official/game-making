@@ -16,7 +16,11 @@ public interface IInteractable
 /// </summary>
 public class PlayerInteractor : MonoBehaviour
 {
-    [SerializeField] private float radius = 1.4f;
+    [SerializeField, Min(0f)] private float radius = 1.4f;
+
+    // 매 프레임 배열 할당을 피하기 위한 공용 버퍼
+    private static readonly Collider2D[] overlapBuffer = new Collider2D[12];
+    private static readonly ContactFilter2D noFilter = ContactFilter2D.noFilter;
 
     private Health health;
 
@@ -34,13 +38,15 @@ public class PlayerInteractor : MonoBehaviour
         }
 
         IInteractable best = null;
-        float bestDistance = float.MaxValue;
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(transform.position, radius))
+        float bestSqrDistance = float.MaxValue;
+        Vector2 position = transform.position;
+        int count = Physics2D.OverlapCircle(position, radius, noFilter, overlapBuffer);
+        for (int i = 0; i < count; i++)
         {
-            IInteractable interactable = hit.GetComponentInParent<IInteractable>();
+            IInteractable interactable = overlapBuffer[i].GetComponentInParent<IInteractable>();
             if (interactable == null || !interactable.CanInteract) continue;
-            float distance = Vector2.Distance(transform.position, hit.transform.position);
-            if (distance < bestDistance) { bestDistance = distance; best = interactable; }
+            float sqrDistance = (position - (Vector2)overlapBuffer[i].transform.position).sqrMagnitude;
+            if (sqrDistance < bestSqrDistance) { bestSqrDistance = sqrDistance; best = interactable; }
         }
 
         if (UIManager.Instance != null)
