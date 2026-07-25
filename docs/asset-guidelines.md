@@ -93,6 +93,7 @@ PMD 스타일 픽셀 스프라이트는 우선 아래 설정으로 통일하고,
 | 갸라도스 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0130) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 3층 보스 | `Assets/ThirdParty/PMDCollab/0130_Gyarados/credits.txt` | 완료 (Idle·Walk, 2026-07-24) |
 | 잠만보 스프라이트 | PMD Sprite Repository (PMDCollab/SpriteCollab, sprite/0143) | CHUNSOFT (공식 PMD 유래, credits.txt 기준) | 1층 이벤트 | `Assets/ThirdParty/PMDCollab/0143_Snorlax/credits.txt` | 완료 (Sleep, 2026-07-24) |
 | 아이템 아이콘 시트 (`item.png`) | 시트 내 표기: "Ripped by redblueyellow. No credit needed." (공식 게임 유래 아이콘) | redblueyellow (립), 원저작 게임프리크/닌텐도 | 유물 아이콘 (자뭉열매 10행 2열, 행복의알 14행 6열 → `relic_icons.png`로 가공) | 시트 하단 표기 | 완료 (2026-07-24) |
+| 던전 타일셋 (`Forest/Desert/Sea.png`) | 시트 내 표기: "Ripped and formatted by SilverDeoxys563. No credit is necessary, but it's always appreciated!" (PMD 공식 게임 유래: Forest Path·Northern Desert·Miracle Sea) | SilverDeoxys563 (립), 원저작 Spike Chunsoft | 1·2·3층 방 타일맵 (24px 그리드 슬라이스, 물 타일 마젠타 자리표시자 후처리 — 원본은 `Assets/ThirdParty/Tilesets_original/`) | 시트 좌상단 표기 | 완료 (2026-07-25) |
 
 ## 7. 커밋 전 확인
 
