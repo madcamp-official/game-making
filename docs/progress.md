@@ -41,6 +41,18 @@
 - 타이밍·배율·메시지는 모두 `EvolutionCutscene` Inspector에서 조정. 단계별 초상은 `PlayerEvolution` stages의 `portrait`(각 캐릭터 Idle 남쪽 1프레임).
 - 컷씬 리소스가 비어 있으면 기존 제자리 점멸 연출로 대체된다.
 
+## UI 폰트 (2026-07-25)
+
+PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합쳐 Unity 레거시 비트맵 폰트로 만들었다.
+
+- 에셋: `Assets/Game/Art/UI/Fonts/PMDFont.fontsettings` + `PMDFont.mat` + `PMDFont_Atlas.png` (768×560)
+- 원본 시트와 생성 스크립트는 `Assets/ThirdParty/Fonts_original/`에 보관 (`build_atlas.py`로 아틀라스를 다시 만들 수 있다)
+- 수록 글자 2538자: 한글 완성형 2349자 + 자모 33자 + 라틴/숫자/문장부호 148자 + 직접 그린 7자 (`( ) / · — = %`) + 공백
+- 원본 시트 격자: 라틴 15px 간격 13×12, 한글 10×13px 간격 64×38(EUC-KR 완성형 순서). **한글 시트에는 `읍`이 빠져 있어** 그 지점부터 인덱스가 한 칸 밀린다 — 아틀라스 생성 시 보정했고 `읍`은 표시되지 않는다.
+- 라틴 원본에는 우하단 1px 검은 그림자가 있고 한글 원본에는 없어서, 한글 글리프에 같은 그림자를 생성해 붙였다.
+- 사용법: `Text`의 Font에 `PMDFont`를 지정하고 **Color를 흰색**으로 둔다(머티리얼이 `UI/Default`라 텍스처 색이 그대로 나오고, Color는 곱해진다). 기준 크기는 12이므로 **Font Size는 12·24·36처럼 12의 배수**로 써야 픽셀이 깨지지 않는다. 줄 간격 14.
+- 아직 게임 UI에는 적용하지 않았다. 적용하려면 기존 `Text`들의 Font Size를 12의 배수로 맞추는 작업이 필요하다.
+
 ## 조작
 
 - 이동: `WASD` / 방향키 (8방향)
