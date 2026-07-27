@@ -95,6 +95,29 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 - 라틴 원본에는 우하단 1px 검은 그림자가 있고 한글 원본에는 없어서, 한글 글리프에 같은 그림자를 생성해 붙였다
 - **`©`는 폰트에 없다.** 시작 화면 크레딧의 `©`를 `(C)`로 바꿨다. 새 텍스트를 쓸 때 원본에 없는 기호를 넣으면 그 자리가 비어 보이니 주의
 
+## 1층 보스 — 버터플 (2026-07-27)
+
+명세: `docs/boss-butterfree-spec.md`. 구현은 `Assets/Game/Scripts/Combat/Bosses/`.
+
+| 파일 | 역할 |
+|---|---|
+| `ButterfreeBossController.cs` | 상태 기계, 이동, 패턴 선택, 페이즈 전환. 모든 밸런스 수치는 Inspector 노출 |
+| `EnemyProjectile.cs` | 적 투사체. 플레이어만 맞히고 벽에서 소멸 |
+| `DamageZone.cs` | 독가루 장판. 원형 지속 피해 |
+| `AttackTelegraph.cs` | 공격 예고 표시 (선·원·링) |
+| `PrimitiveSprites.cs` | 연출용 단색 도형. 한 번 만들어 재사용 |
+
+패턴은 1페이즈에서 바람탄·독가루, 체력 50%에서 한 번 전환한 뒤 은빛바람이 풀린다. 전환 직후에는 은빛바람을 한 번 강제로 쓴다.
+
+주의할 점:
+
+- **`EnemyController`의 기본 AI와 보스 컨트롤러가 동시에 Rigidbody를 만지면 안 된다.** `SetBasicAIEnabled(false)`로 끄고 보스가 직접 이동한다. 일반 적 23개는 기본값 그대로 켜져 있다
+- **넉백은 `knockbackMultiplier`로 끈다 (보스는 0).** 배율만 0으로 두고 경직(`knockbackStunDuration`)을 남기면 맞을 때마다 패턴이 끊기므로, 배율이 0이면 경직도 걸지 않는다
+- **탄과 장판은 보스 밑에 두면 안 된다.** 버터플 스케일이 1.3배라 자식으로 붙이면 판정까지 1.3배가 된다. `Butterfree_Attacks`라는 씬 루트 오브젝트를 만들어 거기에 모으고, 사망·방 이동 시 통째로 지운다
+- **예고선 두께 = 실제 탄 지름.** 처음엔 0.12로 얇게 그렸는데 실제 탄(지름 0.36)보다 얇아서 안전해 보이는 곳이 안전하지 않았다
+- 조준 방향은 `Windup` 시작 시점에 저장하고 발사까지 바꾸지 않는다. 예고와 실제 발사가 어긋나면 안 된다
+- 장판 판정은 물리 트리거가 아니라 중심 거리로 한다. 그려진 원이 곧 피해 범위다
+
 ## 유물 설명 UI (2026-07-27)
 
 유물 설명을 두 곳에서 보여준다. 둘 다 `UIManager`가 HUDCanvas 아래에 런타임으로 만든다.
@@ -122,6 +145,7 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 - 방 흐름: `RoomFlowController` (씬) — `FloorData` SO(`Assets/Game/Data/Floors/`) 3개로 층 구성, 방 프리팹 `Assets/Game/Prefabs/Rooms/` (층당 5개)
 - 런 상태: `RunManager`(골드) + `RelicManager`(유물) — 같은 씬 오브젝트
 - 유물 데이터: `Assets/Game/Data/Relics/*.asset` (`RelicData` SO)
+- 1층 보스: `ButterfreeBossController` (`Room5_Boss.prefab`의 `Boss_Butterfree`) — 명세 `docs/boss-butterfree-spec.md`
 - 진화: `PlayerEvolution` (플레이어, 단계 배열) — 보스 처치 또는 행복의알로 발동
 - HUD: `UIManager` (HUDCanvas) — 골드/방/힌트/메시지/유물 바, 유물 툴팁(`RelicTooltip`)·획득 팝업(`RelicPopup`)
 - 캐릭터 스프라이트 파이프라인: PMDCollab 시트 → 8방향 슬라이스 → 클립/컨트롤러 자동 생성

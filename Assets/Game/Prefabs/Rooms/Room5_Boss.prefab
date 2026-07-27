@@ -5609,6 +5609,7 @@ GameObject:
   - component: {fileID: 8959849977286451428}
   - component: {fileID: 7412502636437254996}
   - component: {fileID: 3398064387217946831}
+  - component: {fileID: 3398064387217946832}
   m_Layer: 0
   m_Name: Boss_Butterfree
   m_TagString: Untagged
@@ -5776,7 +5777,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 150
+  maxHealth: 240
   invincibleDuration: 0.3
 --- !u!114 &8118534622895777848
 MonoBehaviour:
@@ -5793,10 +5794,13 @@ MonoBehaviour:
   moveSpeed: 3.2
   detectRange: 9
   attackRange: 1.2
+  attackContactReach: 0.25
   attackDamage: 15
   attackCooldown: 0.8
   goldReward: 25
   knockbackStunDuration: 0.15
+  knockbackMultiplier: 0
+  basicAIEnabled: 0
 --- !u!95 &8959849977286451428
 Animator:
   serializedVersion: 7
@@ -5846,6 +5850,67 @@ MonoBehaviour:
   offsetY: 1.15
   width: 1.4
   height: 0.12
+--- !u!114 &3398064387217946832
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7480132887291969846}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac0dd14af3f2466bbd19c68b9881bed0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ButterfreeBossController
+  moveSpeed: 2.8
+  introDelay: 1
+  arenaCenter: {fileID: 5874861080203317405}
+  arenaHalfSize: {x: 8.2, y: 5.2}
+  preferredMinDistance: 3.5
+  preferredMaxDistance: 5
+  repositionMaxDuration: 1.5
+  orbitDuration: 0.45
+  patternGapPhase1: 1
+  patternGapPhase2: 0.8
+  windWindup: 0.7
+  windRecovery: 0.8
+  windSpread: 20
+  windSpreadPhase2: 16
+  windCount: 3
+  windCountPhase2: 5
+  windSpeed: 6
+  windDamage: 10
+  windLifetime: 3
+  windRadius: 0.18
+  poisonWindup: 0.9
+  poisonRecovery: 1
+  poisonCount: 3
+  poisonCountPhase2: 4
+  poisonRadius: 0.9
+  poisonDuration: 3
+  poisonDamage: 8
+  poisonTickInterval: 1
+  poisonSpreadDistance: 1.7
+  silverWindup: 1
+  silverRecovery: 1.2
+  silverCountPerVolley: 8
+  silverVolleyGap: 0.45
+  silverSpeed: 5
+  silverDamage: 12
+  silverLifetime: 4
+  silverRadius: 0.18
+  windWeight: 40
+  poisonWeight: 35
+  silverWeight: 25
+  maxActiveZones: 2
+  contactDamage: 10
+  contactInterval: 1
+  warningColor: {r: 1, g: 0.9, b: 0.25, a: 0.45}
+  windColor: {r: 0.75, g: 0.95, b: 1, a: 1}
+  poisonWarningColor: {r: 0.75, g: 0.35, b: 0.85, a: 0.35}
+  poisonZoneColor: {r: 0.45, g: 0.12, b: 0.6, a: 0.65}
+  silverColor: {r: 0.6, g: 1, b: 0.95, a: 1}
+  windupTint: {r: 1, g: 0.7, b: 0.7, a: 1}
 --- !u!1 &7658749920411860896
 GameObject:
   m_ObjectHideFlags: 0

@@ -19,9 +19,19 @@ public class EnemyController : MonoBehaviour
     [SerializeField, Min(0f)] private float attackCooldown = 1.0f;
     [SerializeField, Min(0)] private int goldReward = 2;
     [SerializeField, Min(0f)] private float knockbackStunDuration = 0.15f;
+    [Tooltip("넉백 배율. 0이면 넉백 면역. 보스는 패턴 위치가 무너지지 않도록 0을 쓴다.")]
+    [SerializeField, Min(0f)] private float knockbackMultiplier = 1f;
+    [Tooltip("기본 추적 AI. 전용 보스 컨트롤러가 이동을 맡을 때만 끈다.")]
+    [SerializeField] private bool basicAIEnabled = true;
 
     /// <summary>한 번 어그로가 끌리면 절대 풀리지 않는다.</summary>
     public bool IsAggro { get; private set; }
+
+    /// <summary>
+    /// 기본 추적 AI를 켜고 끈다. 전용 컨트롤러와 이 스크립트가 동시에 Rigidbody를 조작하면
+    /// 서로 속도를 덮어써서 움직임이 망가지므로, 보스는 이걸 꺼 두고 직접 이동한다.
+    /// </summary>
+    public void SetBasicAIEnabled(bool enabled) => basicAIEnabled = enabled;
 
     private Rigidbody2D body;
     private Health health;
@@ -36,8 +46,11 @@ public class EnemyController : MonoBehaviour
     public void ApplyKnockback(Vector2 direction, float force)
     {
         if (health.IsDead) return;
+        float scaled = force * knockbackMultiplier;
+        // 넉백 면역이면 경직도 걸지 않는다. 경직만 남으면 보스 패턴이 끊긴다.
+        if (scaled <= 0f) return;
         stunnedUntil = Time.time + knockbackStunDuration;
-        body.linearVelocity = direction.normalized * force;
+        body.linearVelocity = direction.normalized * scaled;
     }
 
     private void Awake()
@@ -74,6 +87,9 @@ public class EnemyController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        // 전용 컨트롤러가 이동을 맡는 동안에는 Rigidbody를 건드리지 않는다.
+        if (!basicAIEnabled) return;
+
         // 넉백 중에는 밀려나는 속도를 유지한다.
         if (Time.time < stunnedUntil) return;
 
