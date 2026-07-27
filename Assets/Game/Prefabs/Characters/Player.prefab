@@ -38,8 +38,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -4, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.2, y: 1.2, z: 1.2}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -137,7 +137,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: -0.25}
+  m_Offset: {x: -0.02, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -224,6 +224,7 @@ MonoBehaviour:
   razorDamage: 8
   razorCooldown: 0.5
   razorSpawnOffset: 0.55
+  razorSpreadAngle: 8
   razorLeafPrefab: {fileID: 966188026010977204, guid: a32b1e5e256374347894cb56f2f22464, type: 3}
   attackMoveSpeedMultiplier: 0.5
   attackAnimDuration: 0.467
@@ -304,19 +305,24 @@ MonoBehaviour:
   stages:
   - stageName: "\uC774\uC0C1\uD574\uC528"
     animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
+    portrait: {fileID: 0}
     maxHealth: 100
     attackDamage: 12
     razorDamage: 8
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
+    portrait: {fileID: 0}
     maxHealth: 130
     attackDamage: 18
     razorDamage: 12
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
+    portrait: {fileID: 0}
     maxHealth: 170
     attackDamage: 25
     razorDamage: 17
+  flashStepDuration: 0.15
+  healMissingFraction: 0.6
 --- !u!114 &510344029345414639
 MonoBehaviour:
   m_ObjectHideFlags: 0
