@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 픽셀 UI 공통 규칙. PMD 비트맵 폰트(`Resources/Fonts/PMDFont`)를 코드에서 만드는 UI에도 쓰기 위한 접근자와,
@@ -48,4 +49,64 @@ public static class PixelUi
     /// <summary>가장 가까운 <see cref="BaseFontSize"/> 배수로 맞춘다 (최소 1배).</summary>
     public static int SnapFontSize(int size) =>
         Mathf.Max(BaseFontSize, Mathf.RoundToInt(size / (float)BaseFontSize) * BaseFontSize);
+
+    /// <summary>
+    /// PMD 폰트를 쓰는 Text를 만든다. 크기는 항상 12의 배수로 맞춰진다.
+    /// 가로는 부모 폭에 맞춰 늘어나고 넘치면 줄바꿈한다.
+    /// </summary>
+    public static Text MakeText(Transform parent, string name, int size, Color color, TextAnchor anchor)
+    {
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        Text text = go.AddComponent<Text>();
+        text.font = Font;
+        text.fontSize = SnapFontSize(size);
+        text.color = color;
+        text.alignment = anchor;
+        text.raycastTarget = false;
+        text.horizontalOverflow = HorizontalWrapMode.Wrap;
+        text.verticalOverflow = VerticalWrapMode.Overflow;
+        return text;
+    }
+
+    /// <summary>
+    /// 테두리가 있는 어두운 패널을 만든다. 반환값은 바깥 테두리의 RectTransform이고,
+    /// 안쪽 채움은 자식으로 붙어 있으므로 내용은 반환값 아래에 그대로 넣으면 된다.
+    /// </summary>
+    public static RectTransform MakePanel(Transform parent, string name, int borderWidth = 3)
+    {
+        GameObject go = new GameObject(name);
+        go.transform.SetParent(parent, false);
+        Image border = go.AddComponent<Image>();
+        border.color = new Color(0.78f, 0.72f, 0.5f, 1f);
+        border.raycastTarget = false;
+
+        GameObject fillGo = new GameObject("Fill");
+        fillGo.transform.SetParent(go.transform, false);
+        Image fill = fillGo.AddComponent<Image>();
+        fill.color = new Color(0.05f, 0.06f, 0.1f, 0.96f);
+        fill.raycastTarget = false;
+        RectTransform fillRt = fill.rectTransform;
+        fillRt.anchorMin = Vector2.zero;
+        fillRt.anchorMax = Vector2.one;
+        fillRt.offsetMin = new Vector2(borderWidth, borderWidth);
+        fillRt.offsetMax = new Vector2(-borderWidth, -borderWidth);
+
+        return border.rectTransform;
+    }
+
+    /// <summary>부모 폭에 좌우 여백을 두고 붙는, 위에서 아래로 쌓는 배치를 설정한다.</summary>
+    public static float StackFromTop(Text text, float top, float padding)
+    {
+        RectTransform rt = text.rectTransform;
+        rt.anchorMin = new Vector2(0f, 1f);
+        rt.anchorMax = new Vector2(1f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.sizeDelta = new Vector2(-padding * 2f, 0f);
+        rt.anchoredPosition = new Vector2(0f, top);
+        // preferredHeight는 위 폭이 정해진 뒤에야 올바른 줄 수를 반영한다.
+        float height = text.preferredHeight;
+        rt.sizeDelta = new Vector2(-padding * 2f, height);
+        return top - height;
+    }
 }

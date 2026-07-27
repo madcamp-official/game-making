@@ -16,6 +16,8 @@ public class UIManager : MonoBehaviour
     [SerializeField] private RectTransform relicBar;
 
     private Coroutine messageRoutine;
+    private RelicTooltip relicTooltip;
+    private RelicPopup relicPopup;
 
     private void Awake()
     {
@@ -30,6 +32,7 @@ public class UIManager : MonoBehaviour
             RunManager.Instance.OnGoldChanged += SetGold;
             SetGold(RunManager.Instance.Gold);
         }
+        BuildRelicUi();
         if (RelicManager.Instance != null)
         {
             RelicManager.Instance.OnRelicsChanged += RefreshRelics;
@@ -46,6 +49,8 @@ public class UIManager : MonoBehaviour
         for (int i = relicBar.childCount - 1; i >= 0; i--)
             Destroy(relicBar.GetChild(i).gameObject);
 
+        if (relicTooltip != null) relicTooltip.ClearTargets();
+
         int index = 0;
         foreach (RelicData relic in RelicManager.Instance.Relics)
         {
@@ -61,7 +66,41 @@ public class UIManager : MonoBehaviour
             rt.sizeDelta = new Vector2(56, 56);
             rt.anchoredPosition = new Vector2(-index * 64, 0);
             index++;
+
+            if (relicTooltip != null) relicTooltip.AddTarget(rt, relic);
         }
+    }
+
+    /// <summary>유물 획득 팝업과 호버 툴팁을 캔버스 아래에 만들어 둔다.</summary>
+    private void BuildRelicUi()
+    {
+        Transform canvasRoot = relicBar != null ? relicBar.parent : transform;
+
+        relicPopup = MakeFullScreenChild(canvasRoot, "RelicPopup").AddComponent<RelicPopup>();
+
+        // 툴팁은 다른 HUD 요소 위에 그려져야 한다.
+        GameObject tooltipGo = MakeFullScreenChild(canvasRoot, "RelicTooltip");
+        tooltipGo.transform.SetAsLastSibling();
+        relicTooltip = tooltipGo.AddComponent<RelicTooltip>();
+    }
+
+    /// <summary>화면 전체를 덮는 빈 컨테이너. 안쪽 패널이 화면 기준으로 배치될 수 있게 한다.</summary>
+    private static GameObject MakeFullScreenChild(Transform parent, string name)
+    {
+        GameObject go = new GameObject(name, typeof(RectTransform));
+        RectTransform rt = (RectTransform)go.transform;
+        rt.SetParent(parent, false);
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = Vector2.zero;
+        rt.offsetMax = Vector2.zero;
+        return go;
+    }
+
+    /// <summary>유물 획득 시 전용 패널로 이름과 설명을 크게 보여준다.</summary>
+    public void ShowRelicAcquired(RelicData relic, float duration)
+    {
+        if (relicPopup != null) relicPopup.Show(relic, duration);
     }
 
     private int lastGold = int.MinValue;

@@ -73,6 +73,8 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 | `HUDCanvas/ControlsText` | 24 | 2배 (22에서 변경) |
 | `GameStartScreen` (코드 생성) | 84 / 36 / 24 | 제목 / 시작 안내 / 부제·조작·크레딧. 크레딧은 화면 아래에 앵커해 창이 작아도 잘리지 않는다 |
 | `EvolutionCutscene` (코드 생성) | 36 / 24 | 메시지 / 스킵 안내 |
+| `RelicPopup` (코드 생성) | 72 / 60 / 36 | 유물 이름 / 설명 / "유물 획득!". 창이 낮으면 48 / 36 / 24로 한 단계 내려간다 |
+| `RelicTooltip` (코드 생성) | 48 / 36 | 유물 이름 / 설명 |
 | `HealthBar` 수치 (TextMesh) | — | 월드 공간이라 12의 배수 규칙이 적용되지 않는다. `TextMesh`는 비트맵 폰트에서 `fontSize`를 무시하므로 `characterSize`(0.16)로만 크기를 정한다 |
 
 `Text.color`는 곱해지는 값이다. 흰색으로 두면 원본 색(흰 글자 + 검은 그림자)이 그대로 나오고, 다른 색을 넣으면 글자만 그 색으로 물들고 그림자는 검은색으로 남는다(골드 텍스트가 이 방식).
@@ -93,6 +95,20 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 - 라틴 원본에는 우하단 1px 검은 그림자가 있고 한글 원본에는 없어서, 한글 글리프에 같은 그림자를 생성해 붙였다
 - **`©`는 폰트에 없다.** 시작 화면 크레딧의 `©`를 `(C)`로 바꿨다. 새 텍스트를 쓸 때 원본에 없는 기호를 넣으면 그 자리가 비어 보이니 주의
 
+## 유물 설명 UI (2026-07-27)
+
+유물 설명을 두 곳에서 보여준다. 둘 다 `UIManager`가 HUDCanvas 아래에 런타임으로 만든다.
+
+- **호버 툴팁** (`RelicTooltip`) — 우측 상단 유물 아이콘에 마우스를 올리면 이름과 설명이 아이콘 바로 아래에 뜬다 (슬레이 더 스파이어 방식)
+- **획득 팝업** (`RelicPopup`) — 유물을 얻으면 아이콘·이름·설명을 화면 위쪽에 크게 띄운다. 예전에는 공용 `MessageText` 한 줄에 "유물 획득 — 이름: 설명"을 넣었는데, 한 줄에 다 담느라 글자가 작고 긴 설명은 화면 밖으로 밀려났다
+
+주의할 점:
+
+- **씬에 `EventSystem`이 없다.** 그래서 툴팁은 uGUI 포인터 이벤트 대신 `RectTransformUtility.RectangleContainsScreenPoint`로 아이콘 사각형을 직접 검사한다. 좌클릭이 공격이라 `EventSystem`을 넣으면 게임 입력과 겹치는 문제도 피한다. 호버 판정은 `RelicTooltip.UpdateHover(screenPos)`로 분리해 두었다
+- **패널 컨테이너는 캔버스를 가득 채워야 한다.** 빈 `RectTransform`은 기본이 100×100이라, 그 아래 패널의 앵커 (0.5, 1)이 "화면 위"가 아니라 "100×100 상자의 위"를 가리켜 엉뚱한 곳에 놓인다 (`UIManager.MakeFullScreenChild`)
+- **캔버스가 Constant Pixel Size라 UI는 화면 크기와 무관하게 절대 픽셀이다.** 에디터 Game 뷰가 작으면 팝업이 화면보다 커진다. 그래서 폭은 창 크기에 맞춰 줄이고, 높이가 넘치면 글자 크기 한 단계를 통째로 내린다 (`RelicPopup.Tiers`, 두 단계 모두 12의 배수)
+- 팝업은 `WaitForSecondsRealtime`으로 닫는다. 행복의알은 획득 직후 진화 컷씬이 `Time.timeScale = 0`을 걸어서, 스케일 시간으로 기다리면 컷씬 내내 팝업이 남는다
+
 ## 조작
 
 - 이동: `WASD` / 방향키 (8방향)
@@ -107,5 +123,5 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 - 런 상태: `RunManager`(골드) + `RelicManager`(유물) — 같은 씬 오브젝트
 - 유물 데이터: `Assets/Game/Data/Relics/*.asset` (`RelicData` SO)
 - 진화: `PlayerEvolution` (플레이어, 단계 배열) — 보스 처치 또는 행복의알로 발동
-- HUD: `UIManager` (HUDCanvas) — 골드/방/힌트/메시지/유물 바
+- HUD: `UIManager` (HUDCanvas) — 골드/방/힌트/메시지/유물 바, 유물 툴팁(`RelicTooltip`)·획득 팝업(`RelicPopup`)
 - 캐릭터 스프라이트 파이프라인: PMDCollab 시트 → 8방향 슬라이스 → 클립/컨트롤러 자동 생성

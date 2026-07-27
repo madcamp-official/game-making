@@ -34,7 +34,7 @@ public class RelicManager : MonoBehaviour
         OnRelicsChanged?.Invoke();
 
         if (UIManager.Instance != null)
-            UIManager.Instance.ShowMessage("유물 획득 — " + relic.relicName + ": " + relic.description, 3f);
+            UIManager.Instance.ShowRelicAcquired(relic, 3f);
 
         ApplyOnAcquire(relic);
     }
