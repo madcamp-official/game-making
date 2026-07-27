@@ -14,10 +14,11 @@ public class PlayerHealthHud : MonoBehaviour
 {
     // 조작 안내(y 15, 높이 40) 바로 위에 앉힌다.
     private const float MarginX = 30f;
-    private const float MarginY = 72f;
-    private const float BarWidth = 460f;
-    private const float BarHeight = 52f;
-    private const int Border = 3;
+    private const float MarginY = 64f;
+    private const float BarWidth = 300f;
+    private const float BarHeight = 36f;
+    private const int Border = 2;
+    private const int FontSize = 24;   // PMD 폰트라 12의 배수여야 한다
 
     private static readonly Color LowColor = new Color(0.85f, 0.15f, 0.15f, 1f);
     private static readonly Color HighColor = new Color(0.3f, 0.85f, 0.3f, 1f);
@@ -54,7 +55,7 @@ public class PlayerHealthHud : MonoBehaviour
         fillRt.offsetMin = new Vector2(Border + 2, Border + 2);
         fillRt.offsetMax = new Vector2(-(Border + 2), -(Border + 2));
 
-        hud.valueText = PixelUi.MakeText(panel, "Value", 36, Color.white, TextAnchor.MiddleCenter);
+        hud.valueText = PixelUi.MakeText(panel, "Value", FontSize, Color.white, TextAnchor.MiddleCenter);
         hud.valueText.horizontalOverflow = HorizontalWrapMode.Overflow;
         RectTransform textRt = hud.valueText.rectTransform;
         textRt.anchorMin = Vector2.zero;

@@ -114,7 +114,7 @@ public class ButterfreeBossController : MonoBehaviour
     [Header("기본")]
     [Tooltip("이동 속도. 플레이어는 5다.")]
     [SerializeField, Min(0f)] private float moveSpeed = 4.6f;
-    [SerializeField, Min(0f)] private float introDelay = 1f;
+    [SerializeField, Min(0f)] private float introDelay = 0.15f;
     [Tooltip("전투 영역의 중심. 비워 두면 부모(방)의 위치를 쓴다.")]
     [SerializeField] private Transform arenaCenter;
     [Tooltip("전투 영역의 반너비·반높이. 장판과 이동 목표를 이 안으로 제한한다.")]
@@ -380,18 +380,25 @@ public class ButterfreeBossController : MonoBehaviour
         body.linearVelocity = Vector2.zero;
         yield return new WaitForSeconds(introDelay);
 
+        // 방에 들어서자마자 달려들어야 한다. 첫 패턴은 대기 없이 바로 시작하고,
+        // 패턴 사이 간격은 두 번째부터 적용한다.
+        bool firstPattern = true;
+
         while (!health.IsDead)
         {
             if (phaseTransitionPending && !phaseTransitionDone)
             {
                 phaseTransitionDone = true;
                 yield return PhaseTransitionRoutine();
+                firstPattern = false;
                 continue;
             }
 
             state = BossState.PatternCooldown;
             body.linearVelocity = Vector2.zero;
-            yield return new WaitForSeconds(inPhase2 ? patternGapPhase2 : patternGapPhase1);
+            if (!firstPattern)
+                yield return new WaitForSeconds(inPhase2 ? patternGapPhase2 : patternGapPhase1);
+            firstPattern = false;
             if (health.IsDead) yield break;
 
             Pattern next = DrawPattern();

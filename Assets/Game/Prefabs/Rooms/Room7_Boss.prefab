@@ -4683,7 +4683,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButterfreeBossController
   moveSpeed: 4.6
-  introDelay: 1
+  introDelay: 0.15
   arenaCenter: {fileID: 5874861080203317405}
   arenaHalfSize: {x: 6.2, y: 4.2}
   preferredMinDistance: 3.5
