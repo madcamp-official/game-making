@@ -71,9 +71,9 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 | `HUDCanvas/HintText` | 36 | 3배 (32에서 변경) |
 | `HUDCanvas/GoldText` | 36 | 3배 (40에서 변경) |
 | `HUDCanvas/ControlsText` | 24 | 2배 (22에서 변경) |
-| `GameStartScreen` (코드 생성) | 84 / 36 / 24 | 제목 / 시작 안내 / 부제·조작·크레딧 |
+| `GameStartScreen` (코드 생성) | 84 / 36 / 24 | 제목 / 시작 안내 / 부제·조작·크레딧. 크레딧은 화면 아래에 앵커해 창이 작아도 잘리지 않는다 |
 | `EvolutionCutscene` (코드 생성) | 36 / 24 | 메시지 / 스킵 안내 |
-| `HealthBar` 수치 (TextMesh) | 60 | 월드 공간, `characterSize`로 실제 크기 조절 |
+| `HealthBar` 수치 (TextMesh) | — | 월드 공간이라 12의 배수 규칙이 적용되지 않는다. `TextMesh`는 비트맵 폰트에서 `fontSize`를 무시하므로 `characterSize`(0.16)로만 크기를 정한다 |
 
 `Text.color`는 곱해지는 값이다. 흰색으로 두면 원본 색(흰 글자 + 검은 그림자)이 그대로 나오고, 다른 색을 넣으면 글자만 그 색으로 물들고 그림자는 검은색으로 남는다(골드 텍스트가 이 방식).
 

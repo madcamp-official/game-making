@@ -57,10 +57,15 @@ public class GameStartScreen : MonoBehaviour
         MakeText("Subtitle", subtitle, font, 24, new Vector2(0, 95), new Color(0.8f, 0.85f, 0.8f));
         MakeText("Controls", controlsText, font, 24, new Vector2(0, -60), Color.white);
         MakeText("Prompt", "클릭 또는 아무 키나 눌러 시작", font, 36, new Vector2(0, -220), new Color(1f, 0.85f, 0.3f));
-        MakeText("Credits", creditsText, font, 24, new Vector2(0, -420), new Color(0.6f, 0.6f, 0.65f));
+        // 크레딧은 화면 아래에 붙인다. 캔버스가 정수 배율(Constant Pixel Size)이라
+        // 창이 작으면 중앙 기준 고정 오프셋으로는 화면 밖으로 밀려난다.
+        Text credits = MakeText("Credits", creditsText, font, 24, Vector2.zero, new Color(0.6f, 0.6f, 0.65f));
+        RectTransform creditsRt = credits.rectTransform;
+        creditsRt.anchorMin = creditsRt.anchorMax = new Vector2(0.5f, 0f);
+        creditsRt.anchoredPosition = new Vector2(0, 60);
     }
 
-    private void MakeText(string name, string content, Font font, int size, Vector2 anchoredPos, Color color)
+    private Text MakeText(string name, string content, Font font, int size, Vector2 anchoredPos, Color color)
     {
         GameObject go = new GameObject(name);
         go.transform.SetParent(panel.transform, false);
@@ -77,5 +82,6 @@ public class GameStartScreen : MonoBehaviour
         rt.anchorMax = new Vector2(0.5f, 0.5f);
         rt.anchoredPosition = anchoredPos;
         rt.sizeDelta = new Vector2(1600, 100);
+        return text;
     }
 }

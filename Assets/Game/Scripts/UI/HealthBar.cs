@@ -54,8 +54,10 @@ public class HealthBar : MonoBehaviour
         textGo.transform.localPosition = new Vector3(width * 0.5f + 0.08f, 0f, 0f);
         valueText = textGo.AddComponent<TextMesh>();
         valueText.font = PixelUi.Font;
-        valueText.fontSize = PixelUi.BaseFontSize * 5;   // 비트맵 폰트는 기준 크기의 배수만 쓴다
-        valueText.characterSize = 0.058f;
+        // 비트맵 폰트에서 TextMesh는 fontSize를 무시하고 글리프 크기를 그대로 쓴다.
+        // 실제 크기는 characterSize로만 정해진다 (글자 높이 = 글리프 픽셀 x characterSize / 10).
+        valueText.fontSize = 0;
+        valueText.characterSize = 0.16f;
         valueText.anchor = TextAnchor.MiddleLeft;
         valueText.color = Color.white;
         var textRenderer = textGo.GetComponent<MeshRenderer>();
