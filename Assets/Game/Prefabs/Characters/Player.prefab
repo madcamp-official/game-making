@@ -20,6 +20,7 @@ GameObject:
   - component: {fileID: 7742731487587555107}
   - component: {fileID: 3114308109792484670}
   - component: {fileID: 510344029345414639}
+  - component: {fileID: 2179762030920104916}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -320,3 +321,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerDeathHandler
   roomEntrance: {x: -7, y: 0}
+--- !u!114 &2179762030920104916
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5351824350706094291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 27e983fa6aa57437387e6f26199c54dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HealthBar
+  offsetY: 0.85
+  width: 0.9
+  height: 0.12
+  showValue: 0

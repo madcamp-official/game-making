@@ -3,6 +3,9 @@ using UnityEngine;
 /// <summary>
 /// Health 컴포넌트가 있는 오브젝트 머리 위에 표시되는 월드 스페이스 체력바.
 /// 배경(검정)과 채움(초록→빨강) 스프라이트를 런타임에 생성한다.
+///
+/// 수치는 기본적으로 그리지 않는다. 적이 여럿 붙으면 머리 위 숫자가 서로 겹쳐
+/// 화면이 어지럽고, 플레이어 체력은 좌하단 <see cref="PlayerHealthHud"/>에 크게 나온다.
 /// </summary>
 [RequireComponent(typeof(Health))]
 public class HealthBar : MonoBehaviour
@@ -10,6 +13,8 @@ public class HealthBar : MonoBehaviour
     [SerializeField] private float offsetY = 0.85f;
     [SerializeField] private float width = 0.9f;
     [SerializeField] private float height = 0.12f;
+    [Tooltip("바 옆에 \"현재/최대\"를 함께 그린다. 디버그용이며 평소에는 꺼 둔다.")]
+    [SerializeField] private bool showValue;
 
     private static Sprite whiteSprite;
 
@@ -48,23 +53,26 @@ public class HealthBar : MonoBehaviour
         fillRenderer.transform.localPosition = new Vector3(width * 0.5f, 0f, 0f);
         fillRenderer.transform.localScale = new Vector3(width, height * 0.7f, 1f);
 
-        // 바 오른쪽에 "현재/최대" 수치 표시
-        GameObject textGo = new GameObject("Value");
-        textGo.transform.SetParent(barRoot);
-        textGo.transform.localPosition = new Vector3(width * 0.5f + 0.08f, 0f, 0f);
-        valueText = textGo.AddComponent<TextMesh>();
-        valueText.font = PixelUi.Font;
-        // 비트맵 폰트에서 TextMesh는 fontSize를 무시하고 글리프 크기를 그대로 쓴다.
-        // 실제 크기는 characterSize로만 정해진다 (글자 높이 = 글리프 픽셀 x characterSize / 10).
-        valueText.fontSize = 0;
-        valueText.characterSize = 0.16f;
-        valueText.anchor = TextAnchor.MiddleLeft;
-        valueText.color = Color.white;
-        var textRenderer = textGo.GetComponent<MeshRenderer>();
-        // UI/Default는 캔버스 밖에서 쓰기 부적절해 월드용 머티리얼을 따로 쓴다.
-        textRenderer.material = PixelUi.WorldFontMaterial != null
-            ? PixelUi.WorldFontMaterial : valueText.font.material;
-        textRenderer.sortingOrder = 42;
+        // 바 오른쪽에 "현재/최대" 수치 표시 (기본은 그리지 않는다)
+        if (showValue)
+        {
+            GameObject textGo = new GameObject("Value");
+            textGo.transform.SetParent(barRoot);
+            textGo.transform.localPosition = new Vector3(width * 0.5f + 0.08f, 0f, 0f);
+            valueText = textGo.AddComponent<TextMesh>();
+            valueText.font = PixelUi.Font;
+            // 비트맵 폰트에서 TextMesh는 fontSize를 무시하고 글리프 크기를 그대로 쓴다.
+            // 실제 크기는 characterSize로만 정해진다 (글자 높이 = 글리프 픽셀 x characterSize / 10).
+            valueText.fontSize = 0;
+            valueText.characterSize = 0.16f;
+            valueText.anchor = TextAnchor.MiddleLeft;
+            valueText.color = Color.white;
+            var textRenderer = textGo.GetComponent<MeshRenderer>();
+            // UI/Default는 캔버스 밖에서 쓰기 부적절해 월드용 머티리얼을 따로 쓴다.
+            textRenderer.material = PixelUi.WorldFontMaterial != null
+                ? PixelUi.WorldFontMaterial : valueText.font.material;
+            textRenderer.sortingOrder = 42;
+        }
 
         health.OnHealthChanged += UpdateBar;
     }
