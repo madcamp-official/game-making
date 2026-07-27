@@ -722,7 +722,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c98e8f3ea5dd84d319ef4eb0f63b9b57, type: 2}
   - {fileID: 11400000, guid: a8ce78b99ffe346ecacd96705dd567c5, type: 2}
   - {fileID: 11400000, guid: d9bfc60dfd55d4c1e86a09dce56adeaa, type: 2}
-  playerSpawn: {x: -7, y: 0}
+  playerSpawn: {x: -5.5, y: 0}
   floorHealMissingFraction: 0.6
 --- !u!4 &826172832
 Transform:
@@ -1327,6 +1327,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 510344029345414639, guid: 007e0f1cd14b34af8b1a6e476f424592, type: 3}
+      propertyPath: roomEntrance.x
+      value: -5.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2179902001351465798, guid: 007e0f1cd14b34af8b1a6e476f424592, type: 3}
       propertyPath: m_LocalPosition.x
       value: -4
