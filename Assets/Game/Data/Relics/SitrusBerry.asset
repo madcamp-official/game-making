@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b91b3799f87bf4d2eb41794c54a827dd, type: 3}
-  m_Name: EnergyRoot
+  m_Name: SitrusBerry
   m_EditorClassIdentifier: Assembly-CSharp::RelicData
-  relicName: "\uAE30\uB825\uC758 \uB369\uC5B4\uB9AC"
-  description: "\uC4F0\uB7EC\uC84C\uC744 \uB54C \uD55C \uBC88 \uBD80\uD65C\uD55C\uB2E4 (1\uD68C \uC18C\uBE44)"
-  icon: {fileID: -340640526325527147, guid: f50feb73d32304386bca20bcc21f4abf, type: 3}
-  effect: 1
+  relicName: "\uC790\uBB49\uC5F4\uB9E4"
+  description: "\uD68D\uB4DD \uC989\uC2DC \uCD5C\uB300 \uCCB4\uB825\uC758 33%\uB97C \uD68C\uBCF5\uD55C\uB2E4"
+  icon: {fileID: -858097255324596723, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
+  effect: 11

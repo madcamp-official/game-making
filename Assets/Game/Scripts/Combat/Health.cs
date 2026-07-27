@@ -92,6 +92,18 @@ public class Health : MonoBehaviour
         OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
     }
 
+    /// <summary>
+    /// 비어 있는 체력 중 <paramref name="fraction"/>만큼만 채운다. 1이면 완전 회복.
+    /// 최대 체력이 아니라 "모자란 만큼"을 기준으로 하므로, 많이 다칠수록 많이 회복한다.
+    /// </summary>
+    public void HealMissingFraction(float fraction)
+    {
+        if (IsDead || fraction <= 0f) return;
+        int missing = MaxHealth - CurrentHealth;
+        if (missing <= 0) return;
+        Heal(GameMath.RoundHalfUp(missing * Mathf.Clamp01(fraction)));
+    }
+
     /// <summary>회복. 큰뿌리 같은 회복량 배율은 여기서 한 번에 적용된다.</summary>
     public void Heal(int amount)
     {

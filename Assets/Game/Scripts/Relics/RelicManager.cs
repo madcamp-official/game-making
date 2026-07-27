@@ -29,7 +29,7 @@ public class RelicManager : MonoBehaviour
     [SerializeField, Min(0f)] private float wideLensScaleBonus = 0.15f;
     [SerializeField, Min(0f)] private float lifeOrbDamageBonus = 0.3f;
     [SerializeField, Range(0f, 0.9f)] private float lifeOrbMaxHealthPenalty = 0.3f;
-    [SerializeField, Range(0f, 1f)] private float energyRootHealRatio = 0.33f;
+    [SerializeField, Range(0f, 1f)] private float sitrusBerryHealRatio = 0.33f;
     [SerializeField, Min(0)] private int leftoversHealPerRoom = 8;
     [SerializeField, Min(1)] private int shellBellDamagePerHeal = 40;
     [SerializeField, Min(0)] private int shellBellHealAmount = 3;
@@ -157,6 +157,21 @@ public class RelicManager : MonoBehaviour
         ApplyOnAcquire(relic);
     }
 
+    /// <summary>
+    /// 소비형 유물을 하나 써 없앤다 (기력의 덩어리). 가지고 있었다면 true.
+    /// 다 쓴 유물은 더미로 돌아가지 않는다.
+    /// </summary>
+    public bool TryConsume(RelicEffect effect)
+    {
+        RelicData found = relics.Find(r => r.effect == effect);
+        if (found == null) return false;
+
+        relics.Remove(found);
+        RecalculateModifiers();
+        OnRelicsChanged?.Invoke();
+        return true;
+    }
+
     private void RecalculateModifiers()
     {
         GoldMultiplier = 1f;
@@ -212,14 +227,17 @@ public class RelicManager : MonoBehaviour
                 if (evolution != null) evolution.Evolve();
                 break;
 
-            // 기력의 덩어리: 획득 즉시 최대 체력의 일정 비율을 회복한다.
+            // 자뭉열매: 획득 즉시 최대 체력의 일정 비율을 회복한다.
             // 생명의구슬로 줄어든 최대 체력이 이미 반영된 값을 기준으로 삼는다.
-            case RelicEffect.EnergyRoot:
+            case RelicEffect.SitrusBerry:
                 PlayerController player = FindAnyObjectByType<PlayerController>();
                 Health health = player != null ? player.GetComponent<Health>() : null;
                 if (health != null)
-                    health.Heal(GameMath.RoundHalfUp(health.MaxHealth * energyRootHealRatio));
+                    health.Heal(GameMath.RoundHalfUp(health.MaxHealth * sitrusBerryHealRatio));
                 break;
+
+            // 기력의 덩어리는 획득 시점에 아무 일도 하지 않는다.
+            // 쓰러졌을 때 PlayerDeathHandler가 소비한다.
         }
     }
 }

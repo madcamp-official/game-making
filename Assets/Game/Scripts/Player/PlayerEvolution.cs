@@ -21,6 +21,9 @@ public class PlayerEvolution : MonoBehaviour
     [SerializeField] private Stage[] stages;
     [SerializeField, Min(0f)] private float flashStepDuration = 0.15f;
 
+    [Tooltip("진화(=보스 클리어) 시 비어 있는 체력 중 몇 할을 채울지. 1이면 완전 회복.")]
+    [SerializeField, Range(0f, 1f)] private float healMissingFraction = 0.6f;
+
     public int CurrentStageIndex { get; private set; }
 
     /// <summary>진화 연출이 진행 중인지. 연출 중 재진입을 막는다.</summary>
@@ -129,16 +132,22 @@ public class PlayerEvolution : MonoBehaviour
     }
 
     // 진화 확정: 애니메이터·능력치 교체.
-    // 명세(gameplay-spec 6절): 진화 시 최대 체력 증가 + 체력 완전 회복.
+    // 명세(gameplay-spec 6절)는 완전 회복이었으나, 보스 클리어가 너무 후해져서
+    // 비어 있는 체력의 일부만 채우도록 바꿨다 (healMissingFraction).
     private void ApplyStage(Stage next)
     {
         Animator animator = GetComponent<Animator>();
         if (animator != null && next.animatorController != null)
             animator.runtimeAnimatorController = next.animatorController;
 
+        // 최대치를 먼저 올린 뒤 회복해야, 늘어난 몫까지 회복 대상에 들어간다.
         // 연출 도중(예비 연출은 게임이 정지되지 않는다) 쓰러졌다면 회복 없이 최대치만 올린다.
         Health health = GetComponent<Health>();
-        if (health != null) health.SetMaxHealth(next.maxHealth, refill: !health.IsDead);
+        if (health != null)
+        {
+            health.SetMaxHealth(next.maxHealth, refill: false);
+            if (!health.IsDead) health.HealMissingFraction(healMissingFraction);
+        }
 
         PlayerCombat combat = GetComponent<PlayerCombat>();
         if (combat != null) combat.SetDamages(next.attackDamage, next.razorDamage);

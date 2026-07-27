@@ -13,6 +13,9 @@ public class RoomFlowController : MonoBehaviour
     [SerializeField] private FloorData[] floors;
     [SerializeField] private Vector2 playerSpawn = new Vector2(-7f, 0f);
 
+    [Tooltip("다음 층으로 넘어갈 때 비어 있는 체력 중 몇 할을 채울지. 1이면 완전 회복.")]
+    [SerializeField, Range(0f, 1f)] private float floorHealMissingFraction = 0.6f;
+
     public int CurrentFloorIndex { get; private set; }
     public int CurrentRoomIndex { get; private set; } = -1;
 
@@ -44,15 +47,15 @@ public class RoomFlowController : MonoBehaviour
             }
             CurrentFloorIndex++;
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage((CurrentFloorIndex + 1) + "층 — " + floors[CurrentFloorIndex].floorName + "에 도착했다! 체력이 모두 회복되었다.", 2.5f);
+                UIManager.Instance.ShowMessage((CurrentFloorIndex + 1) + "층 — " + floors[CurrentFloorIndex].floorName + "에 도착했다! 체력을 조금 회복했다.", 2.5f);
             LoadRoom(0);
 
-            // 층을 넘어가면 체력을 완전히 회복한다.
+            // 층을 넘어가면 모자란 체력의 일부를 회복한다 (완전 회복이 아니다).
             PlayerController player = FindAnyObjectByType<PlayerController>();
             if (player != null)
             {
                 Health health = player.GetComponent<Health>();
-                if (health != null) health.Heal(health.MaxHealth);
+                if (health != null) health.HealMissingFraction(floorHealMissingFraction);
             }
             return;
         }

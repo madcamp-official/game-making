@@ -1,25 +1,38 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 플레이어 사망 처리: 게임 오버를 띄우고 R 키로 재시작한다.
-///
-/// 예전에는 자뭉열매가 1회 부활을 주었지만, 그 유물이 기력의 덩어리(즉시 회복)로 바뀌면서
-/// 부활 수단은 사라졌다. 부활을 다시 넣으려면 유물 효과를 추가하고 여기서 분기하면 된다.
+/// 플레이어 사망 처리: 기력의 덩어리가 있으면 방 진입 전 상태(입구, 체력 회복)로 부활,
+/// 없으면 게임 오버를 띄우고 R 키로 재시작한다.
 /// </summary>
 [RequireComponent(typeof(Health))]
+[RequireComponent(typeof(PlayerController))]
 public class PlayerDeathHandler : MonoBehaviour
 {
+    [SerializeField] private Vector2 roomEntrance = new Vector2(-7f, 0f);
+
+    private Health health;
+    private PlayerController controller;
     private bool isGameOver;
 
     private void Awake()
     {
-        GetComponent<Health>().OnDied += HandleDeath;
+        health = GetComponent<Health>();
+        controller = GetComponent<PlayerController>();
+        health.OnDied += HandleDeath;
     }
 
     private void HandleDeath()
     {
+        // 기력의 덩어리는 1회 소비형이다. 쓰고 나면 목록에서 사라진다.
+        if (RelicManager.Instance != null && RelicManager.Instance.TryConsume(RelicEffect.EnergyRoot))
+        {
+            StartCoroutine(ReviveRoutine());
+            return;
+        }
+
         isGameOver = true;
         if (UIManager.Instance == null) return;
 
@@ -27,6 +40,19 @@ public class PlayerDeathHandler : MonoBehaviour
         int gold = RunManager.Instance != null ? RunManager.Instance.Gold : 0;
         UIManager.Instance.ShowMessage(
             "쓰러졌다...  " + floor + "층에서 여정 종료  ·  획득 골드 " + gold + "G\nR : 다시 시작", 9999f);
+    }
+
+    private IEnumerator ReviveRoutine()
+    {
+        yield return new WaitForSeconds(0.8f);
+
+        // 방 진입 전 상태로 복원: 입구 위치 + 체력 전부 회복
+        transform.position = roomEntrance;
+        health.Revive(health.MaxHealth);
+        controller.ControlEnabled = true;
+
+        if (UIManager.Instance != null)
+            UIManager.Instance.ShowMessage("기력의 덩어리를 씹어 삼키고 다시 일어섰다!", 2.5f);
     }
 
     private void Update()

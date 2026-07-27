@@ -7,7 +7,7 @@ using UnityEngine;
 public enum RelicEffect
 {
     HappyEgg = 0,     // 행복의알: 보스방 진입 전에 미리 진화
-    EnergyRoot = 1,   // 기력의 덩어리: 획득 즉시 최대 체력의 33% 회복
+    EnergyRoot = 1,   // 기력의 덩어리: 기절 시 방 진입 전 상태로 부활 (1회 소비)
     AmuletCoin = 2,   // 부적금화: 골드 획득량 +25%
     ChoiceBand = 3,   // 구애머리띠: 근접 +50%, 원거리 -50%
     ChoiceSpecs = 4,  // 구애안경: 원거리 +50%, 근접 -50%
@@ -17,6 +17,7 @@ public enum RelicEffect
     WideLens = 8,     // 광각렌즈: 투사체 크기 +15%
     ShellBell = 9,    // 조개껍질방울: 누적 40 피해마다 체력 3 회복
     LifeOrb = 10,     // 생명의구슬: 최대 체력 -30%, 공격력 +30%
+    SitrusBerry = 11, // 자뭉열매: 획득 즉시 최대 체력의 33% 회복
 }
 
 /// <summary>
