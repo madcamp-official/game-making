@@ -3,17 +3,41 @@ guid: fef94fc7aa63e4a4ba18939190621f04
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -7588217791283646765
-    second: relic_icons_0
-  - first:
-      213: -8685963078151927365
-    second: relic_icons_1
-  - first:
       213: -858097255324596723
     second: SitrusBerry
   - first:
       213: -9144173604413439809
     second: HappyEgg
+  - first:
+      213: -277926102777470087
+    second: EnergyRoot
+  - first:
+      213: -925438405068424657
+    second: AmuletCoin
+  - first:
+      213: -89283019197598215
+    second: ChoiceBand
+  - first:
+      213: -776548856458496259
+    second: ChoiceSpecs
+  - first:
+      213: -915694855800825915
+    second: ChoiceScarf
+  - first:
+      213: -1097654122726955955
+    second: BigRoot
+  - first:
+      213: -13671140403848561
+    second: Leftovers
+  - first:
+      213: -850829490758938199
+    second: WideLens
+  - first:
+      213: -309770242307367625
+    second: ShellBell
+  - first:
+      213: -608441634412139001
+    second: LifeOrb
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -119,15 +143,15 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: d06c3a9b71d6714f0800000000000000
+      spriteID: fe35b45070308e050800000000000000
       internalID: -858097255324596723
       vertices: []
-      indices: 
+      indices:
       edges: []
       weights: []
     - serializedVersion: 2
@@ -141,15 +165,235 @@ TextureImporter:
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
+      customData:
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: fb00f600e8e591180800000000000000
+      spriteID: f8503388717898820800000000000000
       internalID: -9144173604413439809
       vertices: []
-      indices: 
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: EnergyRoot
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 65f66c58ee4838e10800000000000000
+      internalID: -277926102777470087
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: AmuletCoin
+      rect:
+        serializedVersion: 2
+        x: 120
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0bdba15f5bda4ca50800000000000000
+      internalID: -925438405068424657
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChoiceBand
+      rect:
+        serializedVersion: 2
+        x: 160
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e7a777e7184fa60e0800000000000000
+      internalID: -89283019197598215
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChoiceSpecs
+      rect:
+        serializedVersion: 2
+        x: 200
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 024d6c6769b957790800000000000000
+      internalID: -776548856458496259
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ChoiceScarf
+      rect:
+        serializedVersion: 2
+        x: 240
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8a9fab1872fcfe020800000000000000
+      internalID: -915694855800825915
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: BigRoot
+      rect:
+        serializedVersion: 2
+        x: 280
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15ca8449351d618a0800000000000000
+      internalID: -1097654122726955955
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Leftovers
+      rect:
+        serializedVersion: 2
+        x: 320
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 46ae60c2efb24e280800000000000000
+      internalID: -13671140403848561
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: WideLens
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ddaed6a9834e1f60800000000000000
+      internalID: -850829490758938199
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ShellBell
+      rect:
+        serializedVersion: 2
+        x: 400
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29f5742feb4d64990800000000000000
+      internalID: -309770242307367625
+      vertices: []
+      indices:
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: LifeOrb
+      rect:
+        serializedVersion: 2
+        x: 440
+        y: 0
+        width: 40
+        height: 40
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData:
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f502832b65880670800000000000000
+      internalID: -608441634412139001
+      vertices: []
+      indices:
       edges: []
       weights: []
     outline: []
@@ -166,10 +410,18 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      HappyEgg: -9144173604413439809
       SitrusBerry: -858097255324596723
-      relic_icons_0: -7588217791283646765
-      relic_icons_1: -8685963078151927365
+      HappyEgg: -9144173604413439809
+      EnergyRoot: -277926102777470087
+      AmuletCoin: -925438405068424657
+      ChoiceBand: -89283019197598215
+      ChoiceSpecs: -776548856458496259
+      ChoiceScarf: -915694855800825915
+      BigRoot: -1097654122726955955
+      Leftovers: -13671140403848561
+      WideLens: -850829490758938199
+      ShellBell: -309770242307367625
+      LifeOrb: -608441634412139001
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
