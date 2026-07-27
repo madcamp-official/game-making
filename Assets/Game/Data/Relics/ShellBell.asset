@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b91b3799f87bf4d2eb41794c54a827dd, type: 3}
-  m_Name: HappyEgg
+  m_Name: ShellBell
   m_EditorClassIdentifier: Assembly-CSharp::RelicData
-  relicName: "\uD589\uBCF5\uC758\uC54C"
-  description: "\uBCF4\uC2A4\uB97C \uB9CC\uB098\uAE30 \uC804\uC5D0 \uBBF8\uB9AC \uD55C \uB2E8\uACC4 \uC9C4\uD654\uD55C\uB2E4"
-  icon: {fileID: -9144173604413439809, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
-  effect: 0
+  relicName: "\uC870\uAC1C\uAECD\uC9C8\uBC29\uC6B8"
+  description: "\uB204\uC801 40\uC758 \uD53C\uD574\uB97C \uC904 \uB54C\uB9C8\uB2E4 \uCCB4\uB825\uC744 3 \uD68C\uBCF5\uD55C\uB2E4"
+  icon: {fileID: -440552132224613555, guid: f50feb73d32304386bca20bcc21f4abf, type: 3}
+  effect: 9

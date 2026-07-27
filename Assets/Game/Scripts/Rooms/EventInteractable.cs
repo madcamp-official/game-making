@@ -10,6 +10,9 @@ public class EventInteractable : MonoBehaviour, IInteractable
     [SerializeField, TextArea] private string resultMessage;
     [SerializeField] private int goldReward;
     [SerializeField] private int healAmount;
+    [Tooltip("유물 보상을 줄지 여부. 어떤 유물이 나올지는 유물 등장 순서가 정한다.")]
+    [SerializeField] private bool givesRelic;
+    [Tooltip("특정 유물을 고정하고 싶을 때만 채운다. 비워 두면 등장 순서에서 다음 유물이 나온다.")]
     [SerializeField] private RelicData rewardRelic;
     [SerializeField] private ExitDoor exitDoor;
     [SerializeField] private bool disappearAfterUse;
@@ -36,8 +39,8 @@ public class EventInteractable : MonoBehaviour, IInteractable
             if (health != null) health.Heal(healAmount);
         }
 
-        if (rewardRelic != null && RelicManager.Instance != null)
-            RelicManager.Instance.AddRelic(rewardRelic);
+        if (givesRelic || rewardRelic != null)
+            RelicManager.GrantReward(rewardRelic);
 
         if (exitDoor != null) exitDoor.SetOpen(true);
 

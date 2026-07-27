@@ -8,13 +8,34 @@ using UnityEngine;
 /// </summary>
 public class Health : MonoBehaviour
 {
+    [Tooltip("배율을 적용하기 전의 기본 최대 체력. 실제 최대치는 MaxHealth를 쓴다.")]
     [SerializeField, Min(1)] private int maxHealth = 10;
     [SerializeField, Min(0f)] private float invincibleDuration = 0.3f;
 
-    public int MaxHealth => maxHealth;
+    private float maxHealthMultiplier = 1f;
+
+    /// <summary>실제 최대 체력. 기본값에 유물 배율(생명의구슬 등)을 곱한 값이다.</summary>
+    public int MaxHealth => Mathf.Max(1, GameMath.RoundHalfUp(maxHealth * maxHealthMultiplier));
     public int CurrentHealth { get; private set; }
     public bool IsDead => CurrentHealth <= 0;
     public bool IsInvincible { get; private set; }
+
+    /// <summary>회복량 배율 (큰뿌리). 플레이어 쪽에서만 설정한다.</summary>
+    public float HealMultiplier { get; set; } = 1f;
+
+    /// <summary>최대 체력 배율 (생명의구슬). 줄어들면 현재 체력도 같이 깎인다.</summary>
+    public float MaxHealthMultiplier
+    {
+        get => maxHealthMultiplier;
+        set
+        {
+            float clamped = Mathf.Max(0.01f, value);
+            if (Mathf.Approximately(clamped, maxHealthMultiplier)) return;
+            maxHealthMultiplier = clamped;
+            CurrentHealth = Mathf.Min(CurrentHealth, MaxHealth);
+            OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
+        }
+    }
 
     public event Action<int, int> OnHealthChanged; // (current, max)
     public event Action OnDamaged;
@@ -28,15 +49,16 @@ public class Health : MonoBehaviour
 
     private void Awake()
     {
-        CurrentHealth = maxHealth;
+        CurrentHealth = MaxHealth;
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
     }
 
+    /// <summary>기본 최대 체력을 바꾼다 (진화 등). 유물 배율은 그대로 유지된다.</summary>
     public void SetMaxHealth(int value, bool refill = true)
     {
         maxHealth = Mathf.Max(1, value);
-        CurrentHealth = refill ? maxHealth : Mathf.Min(CurrentHealth, maxHealth);
-        OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
+        CurrentHealth = refill ? MaxHealth : Mathf.Min(CurrentHealth, MaxHealth);
+        OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
     }
 
     public void TakeDamage(int amount)
@@ -44,7 +66,7 @@ public class Health : MonoBehaviour
         if (IsDead || IsInvincible || amount <= 0) return;
 
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
-        OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
+        OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
         OnDamaged?.Invoke();
 
         if (CurrentHealth <= 0)
@@ -65,16 +87,18 @@ public class Health : MonoBehaviour
     /// <summary>사망 상태에서 지정 체력으로 되살린다.</summary>
     public void Revive(int amount)
     {
-        CurrentHealth = Mathf.Clamp(amount, 1, maxHealth);
+        CurrentHealth = Mathf.Clamp(amount, 1, MaxHealth);
         if (spriteRenderer != null) spriteRenderer.enabled = true;
-        OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
+        OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
     }
 
+    /// <summary>회복. 큰뿌리 같은 회복량 배율은 여기서 한 번에 적용된다.</summary>
     public void Heal(int amount)
     {
         if (IsDead || amount <= 0) return;
-        CurrentHealth = Mathf.Min(maxHealth, CurrentHealth + amount);
-        OnHealthChanged?.Invoke(CurrentHealth, maxHealth);
+        int healed = Mathf.Max(1, GameMath.RoundHalfUp(amount * HealMultiplier));
+        CurrentHealth = Mathf.Min(MaxHealth, CurrentHealth + healed);
+        OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
     }
 
     private IEnumerator InvincibleFlash()

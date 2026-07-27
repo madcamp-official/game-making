@@ -155,7 +155,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SnorlaxEvent
   exitDoor: {fileID: 7400304123308564998}
   goldReward: 10
-  rewardRelic: {fileID: 11400000, guid: 8015ae477201f4fdfba7ebc100ef4bec, type: 2}
+  givesRelic: 1
+  rewardRelic: {fileID: 0}
 --- !u!95 &8617542859854920208
 Animator:
   serializedVersion: 7

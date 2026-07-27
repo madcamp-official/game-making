@@ -361,6 +361,19 @@ MonoBehaviour:
     E   \xB7   \uC7AC\uC2DC\uC791 R"
   creditsText: "Sprites: PMD Sprite Repository (PMDCollab/SpriteCollab) \u2014 (C)
     CHUNSOFT / Pok\xE9mon\n\uBE44\uC0C1\uC5C5 \uD32C \uD504\uB85C\uC81D\uD2B8"
+--- !u!114 &453288740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453288733}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4cf948aef3ab4cee9b5aab1fe802b12f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxScale: 4
 --- !u!1 &633222640
 GameObject:
   m_ObjectHideFlags: 0
@@ -577,7 +590,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 5.625
+  orthographic size: 10.979167
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -1010,6 +1023,23 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 150}
   m_SizeDelta: {x: 1600, y: 80}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1512383062 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5351824350706094291, guid: 007e0f1cd14b34af8b1a6e476f424592, type: 3}
+  m_PrefabInstance: {fileID: 5612608592070019887}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1512383076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1512383062}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73c7ca3be3ce2469290c2b71cd98c005, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerRelicEffects
 --- !u!1 &1656463256
 GameObject:
   m_ObjectHideFlags: 0
@@ -1102,6 +1132,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1fcfde449ea2407d8a5795f67a6727c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RelicManager
+  relicPool:
+  - {fileID: 11400000, guid: 5a9dd3a529fc94b05a56b5ea1b99e1d1, type: 2}
+  - {fileID: 11400000, guid: 35ad3b7363cc6fc601cef72939d032b5, type: 2}
+  - {fileID: 11400000, guid: 4a4b1890d8a7b9d187487e8b8dc677dc, type: 2}
+  - {fileID: 11400000, guid: d10d8a6d4c98e5a6f5830a1f040c3597, type: 2}
+  - {fileID: 11400000, guid: 447dd8990b96dd68f92e96d85c4377d3, type: 2}
+  - {fileID: 11400000, guid: 48d1850bb1cd0503046fe81230fe6281, type: 2}
+  - {fileID: 11400000, guid: 6e04cd43ddcb8da990bdf2302e87fd18, type: 2}
+  - {fileID: 11400000, guid: 4088378ee270e9637bc4c61e51759242, type: 2}
+  - {fileID: 11400000, guid: 8015ae477201f4fdfba7ebc100ef4bec, type: 2}
+  - {fileID: 11400000, guid: c25899696b3be8d16d5bacbe585a154f, type: 2}
+  - {fileID: 11400000, guid: f24b2b41e20a60fde0fd017fc76141be, type: 2}
+  shuffleOrder: 1
+  amuletCoinGoldBonus: 0.25
+  choiceBonus: 0.5
+  choiceScarfSpeedBonus: 0.5
+  choiceScarfDamagePenalty: 0.2
+  bigRootHealBonus: 0.5
+  wideLensScaleBonus: 0.15
+  lifeOrbDamageBonus: 0.3
+  lifeOrbMaxHealthPenalty: 0.3
+  energyRootHealRatio: 0.33
+  leftoversHealPerRoom: 8
+  shellBellDamagePerHeal: 40
+  shellBellHealAmount: 3
 --- !u!1 &1906208093
 GameObject:
   m_ObjectHideFlags: 0
@@ -1329,7 +1384,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5351824350706094291, guid: 007e0f1cd14b34af8b1a6e476f424592, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1512383076}
   m_SourcePrefab: {fileID: 100100000, guid: 007e0f1cd14b34af8b1a6e476f424592, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -1343,16 +1401,3 @@ SceneRoots:
   - {fileID: 826172832}
   - {fileID: 453288738}
   - {fileID: 1906208095}
---- !u!114 &453288740
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 453288733}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4cf948aef3ab4cee9b5aab1fe802b12f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxScale: 4

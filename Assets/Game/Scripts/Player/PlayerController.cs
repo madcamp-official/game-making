@@ -15,6 +15,9 @@ public class PlayerController : MonoBehaviour
     /// <summary>공격 중 감속 등 외부 요인이 곱해지는 이동 속도 배율.</summary>
     public float SpeedMultiplier { get; set; } = 1f;
 
+    /// <summary>유물로 인한 이동 속도 배율 (구애스카프). 공격 감속과 따로 곱해진다.</summary>
+    public float RelicSpeedMultiplier { get; set; } = 1f;
+
     /// <summary>공격 등 외부 요인으로 바라보는 방향을 바꾼다.</summary>
     public void SetFacing(Vector2 direction)
     {
@@ -60,7 +63,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        body.linearVelocity = MoveInput * (moveSpeed * SpeedMultiplier);
+        body.linearVelocity = MoveInput * (moveSpeed * SpeedMultiplier * RelicSpeedMultiplier);
     }
 
     private void HandleDeath()

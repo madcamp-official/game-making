@@ -19,9 +19,15 @@ public class RunManager : MonoBehaviour
         Instance = this;
     }
 
+    /// <summary>골드를 준다. 부적금화 같은 획득량 배율은 여기서 한 번에 적용된다.</summary>
     public void AddGold(int amount)
     {
         if (amount <= 0) return;
+
+        RelicManager relics = RelicManager.Instance;
+        if (relics != null && !Mathf.Approximately(relics.GoldMultiplier, 1f))
+            amount = Mathf.Max(1, GameMath.RoundHalfUp(amount * relics.GoldMultiplier));
+
         Gold += amount;
         OnGoldChanged?.Invoke(Gold);
     }

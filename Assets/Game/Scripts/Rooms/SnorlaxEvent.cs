@@ -8,6 +8,9 @@ public class SnorlaxEvent : MonoBehaviour, IInteractable
 {
     [SerializeField] private ExitDoor exitDoor;
     [SerializeField] private int goldReward = 10;
+    [Tooltip("유물 보상을 줄지 여부. 어떤 유물이 나올지는 유물 등장 순서가 정한다.")]
+    [SerializeField] private bool givesRelic = true;
+    [Tooltip("특정 유물을 고정하고 싶을 때만 채운다. 비워 두면 등장 순서에서 다음 유물이 나온다.")]
     [SerializeField] private RelicData rewardRelic;
 
     private bool done;
@@ -48,8 +51,8 @@ public class SnorlaxEvent : MonoBehaviour, IInteractable
         if (exitDoor != null) exitDoor.SetOpen(true);
 
         // 잠만보가 자리를 비키며 유물을 남긴다.
-        if (rewardRelic != null && RelicManager.Instance != null)
-            RelicManager.Instance.AddRelic(rewardRelic);
+        if (givesRelic || rewardRelic != null)
+            RelicManager.GrantReward(rewardRelic);
 
         gameObject.SetActive(false);
     }

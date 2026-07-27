@@ -384,7 +384,8 @@ MonoBehaviour:
     \uB098\uC654\uB2E4! (+15G)"
   goldReward: 15
   healAmount: 0
-  rewardRelic: {fileID: 11400000, guid: 5a9dd3a529fc94b05a56b5ea1b99e1d1, type: 2}
+  givesRelic: 1
+  rewardRelic: {fileID: 0}
   exitDoor: {fileID: 8322763104860190034}
   disappearAfterUse: 1
 --- !u!1 &3236779435123139719

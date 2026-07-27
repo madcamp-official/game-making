@@ -35,6 +35,7 @@ public class Projectile : MonoBehaviour
             {
                 consumed = true;
                 enemyHealth.TakeDamage(damage);
+                PlayerRelicEffects.ReportDamageDealt(damage);
                 Destroy(gameObject);
             }
             return;

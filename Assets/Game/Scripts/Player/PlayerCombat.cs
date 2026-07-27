@@ -53,11 +53,25 @@ public class PlayerCombat : MonoBehaviour
         health = GetComponent<Health>();
     }
 
-    /// <summary>진화 등으로 공격력을 바꾼다.</summary>
+    /// <summary>진화 등으로 기본 공격력을 바꾼다. 유물 배율은 공격할 때 따로 곱해진다.</summary>
     public void SetDamages(int melee, int razor)
     {
         meleeDamage = melee;
         razorDamage = razor;
+    }
+
+    // 유물 배율이 걸린 실제 피해량. 배율이 아무리 낮아도 최소 1은 들어간다.
+    private int EffectiveMeleeDamage => ScaleDamage(meleeDamage, RelicMultiplier(true));
+    private int EffectiveRazorDamage => ScaleDamage(razorDamage, RelicMultiplier(false));
+
+    private static int ScaleDamage(int baseDamage, float multiplier) =>
+        baseDamage <= 0 ? 0 : Mathf.Max(1, GameMath.RoundHalfUp(baseDamage * multiplier));
+
+    private static float RelicMultiplier(bool melee)
+    {
+        RelicManager relics = RelicManager.Instance;
+        if (relics == null) return 1f;
+        return melee ? relics.MeleeDamageMultiplier : relics.RangedDamageMultiplier;
     }
 
     private void Update()
@@ -115,6 +129,7 @@ public class PlayerCombat : MonoBehaviour
             StartCoroutine(DebugAttackFlash(origin));
         }
 
+        int damage = EffectiveMeleeDamage;
         struckTargets.Clear();
         int count = Physics2D.OverlapCircle(origin, meleeRadius, noFilter, hitBuffer);
         for (int i = 0; i < count; i++)
@@ -127,8 +142,9 @@ public class PlayerCombat : MonoBehaviour
             if (struckTargets.Contains(enemyHealth)) continue;
             struckTargets.Add(enemyHealth);
 
-            enemyHealth.TakeDamage(meleeDamage);
+            enemyHealth.TakeDamage(damage);
             enemy.ApplyKnockback(direction, meleeKnockbackForce);
+            PlayerRelicEffects.ReportDamageDealt(damage);
         }
     }
 
@@ -141,7 +157,13 @@ public class PlayerCombat : MonoBehaviour
         Vector2 shotDirection = ApplySpread(direction, razorSpreadAngle);
         Vector2 spawnPos = (Vector2)transform.position + shotDirection * razorSpawnOffset;
         Projectile leaf = Instantiate(razorLeafPrefab, spawnPos, Quaternion.identity);
-        leaf.Launch(shotDirection, razorDamage);
+
+        // 광각렌즈: 루트를 키우면 스프라이트와 콜라이더가 함께 커진다.
+        RelicManager relics = RelicManager.Instance;
+        if (relics != null && !Mathf.Approximately(relics.ProjectileScale, 1f))
+            leaf.transform.localScale *= relics.ProjectileScale;
+
+        leaf.Launch(shotDirection, EffectiveRazorDamage);
     }
 
     /// <summary>탄퍼짐: 조준 방향을 전체 각도 범위 안에서 무작위로 틀어 준다.</summary>

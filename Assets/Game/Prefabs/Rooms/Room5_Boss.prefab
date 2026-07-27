@@ -5436,7 +5436,7 @@ MonoBehaviour:
   isBossRoom: 1
   clearGoldReward: 5
   clearHealAmount: 20
-  bossRewardRelic: {fileID: 11400000, guid: 5a9dd3a529fc94b05a56b5ea1b99e1d1, type: 2}
+  bossRewardRelic: {fileID: 0}
 --- !u!1 &4651649921477816399
 GameObject:
   m_ObjectHideFlags: 0

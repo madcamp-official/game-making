@@ -15,6 +15,7 @@ public class CombatRoomController : MonoBehaviour
     [SerializeField, Min(0)] private int clearHealAmount = 20;
 
     [Header("보스방 보상 유물 (1·2층)")]
+    [Tooltip("비워 두면 유물 등장 순서에서 다음 유물을 준다. 특정 유물을 고정하고 싶을 때만 채운다.")]
     [SerializeField] private RelicData bossRewardRelic;
 
     private readonly List<Health> aliveEnemies = new List<Health>();
@@ -50,12 +51,14 @@ public class CombatRoomController : MonoBehaviour
     }
 
     // 일반 전투방: 재화 또는 회복 중 하나. 보스방: 보상 유물.
+    // 어느 쪽이든 먹다남은음식이 있으면 방을 정리한 값으로 체력을 조금 회복한다.
     private void GiveClearReward()
     {
+        GiveLeftoversHeal();
+
         if (isBossRoom)
         {
-            if (bossRewardRelic != null && RelicManager.Instance != null)
-                RelicManager.Instance.AddRelic(bossRewardRelic);
+            RelicManager.GrantReward(bossRewardRelic);
             return;
         }
 
@@ -67,11 +70,27 @@ public class CombatRoomController : MonoBehaviour
         }
         else if (clearHealAmount > 0)
         {
-            PlayerController player = FindAnyObjectByType<PlayerController>();
-            Health playerHealth = player != null ? player.GetComponent<Health>() : null;
+            Health playerHealth = FindPlayerHealth();
             if (playerHealth != null) playerHealth.Heal(clearHealAmount);
             if (UIManager.Instance != null)
                 UIManager.Instance.ShowMessage("방 클리어! 체력을 " + clearHealAmount + " 회복했다.", 2f);
         }
+    }
+
+    // 먹다남은음식: 전투방을 정리할 때마다 체력을 조금 회복한다.
+    private void GiveLeftoversHeal()
+    {
+        RelicManager relics = RelicManager.Instance;
+        if (relics == null || !relics.Has(RelicEffect.Leftovers)) return;
+        if (relics.LeftoversHealPerRoom <= 0) return;
+
+        Health playerHealth = FindPlayerHealth();
+        if (playerHealth != null) playerHealth.Heal(relics.LeftoversHealPerRoom);
+    }
+
+    private static Health FindPlayerHealth()
+    {
+        PlayerController player = FindAnyObjectByType<PlayerController>();
+        return player != null ? player.GetComponent<Health>() : null;
     }
 }

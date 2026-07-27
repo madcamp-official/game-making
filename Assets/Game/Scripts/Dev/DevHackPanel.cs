@@ -13,6 +13,7 @@ public class DevHackPanel : MonoBehaviour
 {
     private const float PanelWidth = 132f;
     private const float Margin = 8f;
+    private const float OpenHeight = 262f;
 
     private bool open = true;
 
@@ -26,7 +27,7 @@ public class DevHackPanel : MonoBehaviour
 
     private void OnGUI()
     {
-        float height = open ? 232f : 26f;
+        float height = open ? OpenHeight : 26f;
         Rect area = new Rect(Screen.width - PanelWidth - Margin,
                              Screen.height - height - Margin, PanelWidth, height);
 
@@ -49,6 +50,14 @@ public class DevHackPanel : MonoBehaviour
             if (GUILayout.Button("Bulbasaur")) SetStage(evolution, 0);
             if (GUILayout.Button("Ivysaur")) SetStage(evolution, 1);
             if (GUILayout.Button("Venusaur")) SetStage(evolution, 2);
+
+            GUILayout.Space(6f);
+
+            // 유물 등장 순서에서 다음 유물을 바로 받는다.
+            RelicManager relics = RelicManager.Instance;
+            int left = relics != null ? relics.RemainingCount : 0;
+            if (GUILayout.Button("Relic +1  (" + left + ")") && relics != null)
+                RelicManager.GrantReward(null);
         }
 
         GUILayout.EndArea();

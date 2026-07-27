@@ -279,10 +279,13 @@ MonoBehaviour:
   moveSpeed: 2.4
   detectRange: 9
   attackRange: 1.3
+  attackContactReach: 0.25
   attackDamage: 18
   attackCooldown: 1
   goldReward: 35
   knockbackStunDuration: 0.15
+  knockbackMultiplier: 1
+  basicAIEnabled: 1
 --- !u!95 &1489783095321110572
 Animator:
   serializedVersion: 7
@@ -778,7 +781,7 @@ MonoBehaviour:
   isBossRoom: 1
   clearGoldReward: 5
   clearHealAmount: 20
-  bossRewardRelic: {fileID: 11400000, guid: 5a9dd3a529fc94b05a56b5ea1b99e1d1, type: 2}
+  bossRewardRelic: {fileID: 0}
 --- !u!1 &6433335177086366122
 GameObject:
   m_ObjectHideFlags: 0

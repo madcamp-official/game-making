@@ -10,9 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b91b3799f87bf4d2eb41794c54a827dd, type: 3}
-  m_Name: SitrusBerry
+  m_Name: AmuletCoin
   m_EditorClassIdentifier: Assembly-CSharp::RelicData
-  relicName: "\uC790\uBB49\uC5F4\uB9E4"
-  description: "\uAE30\uC808\uD588\uC744 \uB54C \uD55C \uBC88 \uBD80\uD65C\uD55C\uB2E4"
-  icon: {fileID: -858097255324596723, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
-  effect: 1
+  relicName: "\uBD80\uC801\uAE08\uD654"
+  description: "\uD68D\uB4DD\uD558\uB294 \uACE8\uB4DC\uAC00 25% \uC99D\uAC00\uD55C\uB2E4"
+  icon: {fileID: -184238894771869427, guid: f50feb73d32304386bca20bcc21f4abf, type: 3}
+  effect: 2
