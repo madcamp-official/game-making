@@ -28,6 +28,21 @@ public class PlayerController : MonoBehaviour
     public bool IsMoving => MoveInput.sqrMagnitude > 0.01f;
     public bool ControlEnabled { get; set; } = true;
 
+    /// <summary>덩굴채찍 후딜 등으로 잠시 움직일 수 없는 상태.</summary>
+    public bool IsStunned => Time.time < stunnedUntil;
+
+    /// <summary>
+    /// <paramref name="duration"/>초 동안 이동을 막는다. 이미 걸린 경직이 더 길면 그대로 둔다.
+    /// <see cref="ControlEnabled"/>와 따로 두는 이유: 그쪽은 게임 오버·컷씬이 켜고 끄는 값이라,
+    /// 짧은 경직이 끝나며 되돌려 놓으면 꺼져 있어야 할 조작이 되살아난다.
+    /// </summary>
+    public void Stun(float duration)
+    {
+        if (duration <= 0f) return;
+        stunnedUntil = Mathf.Max(stunnedUntil, Time.time + duration);
+    }
+
+    private float stunnedUntil = -999f;
     private Rigidbody2D body;
     private Health health;
 
@@ -40,7 +55,9 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (!ControlEnabled || (health != null && health.IsDead))
+        // 경직 중에는 입력을 아예 읽지 않는다. 바라보는 방향은 그대로 둬서,
+        // 채찍을 휘두른 자세 그대로 굳었다가 풀리게 한다.
+        if (!ControlEnabled || IsStunned || (health != null && health.IsDead))
         {
             MoveInput = Vector2.zero;
             return;

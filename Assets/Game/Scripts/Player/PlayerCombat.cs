@@ -2,11 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 플레이어 공격. 마우스 조준(360도 자유각) 기준으로
-/// 좌클릭 = 기본 공격 1(근거리), 우클릭 = 기본 공격 2(잎날가르기 투사체).
-/// 공격 중에는 이동 속도가 감소한다. 수치는 모두 Inspector에서 조정한다.
+/// 좌클릭 = 기본 공격 1(근거리), 우클릭 = 기본 공격 2(덩굴채찍).
+/// 공격 중에는 이동 속도가 감소하고, 덩굴채찍은 휘두른 뒤 짧게 경직이 걸린다.
+/// 수치는 모두 Inspector에서 조정한다.
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
@@ -19,13 +21,19 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField, Min(0f)] private float meleeKnockbackForce = 6f;
     [SerializeField] private GameObject attackEffectPrefab;
 
-    [Header("기본 공격 2 — 잎날가르기")]
-    [SerializeField, Min(0)] private int razorDamage = 8;
-    [SerializeField, Min(0f)] private float razorCooldown = 0.5f;
-    [SerializeField, Min(0f)] private float razorSpawnOffset = 0.55f;
-    [Tooltip("탄퍼짐. 조준 방향을 기준으로 좌우로 흩어지는 전체 각도(도). 0이면 정확히 조준 방향으로 나간다.")]
-    [SerializeField, Range(0f, 90f)] private float razorSpreadAngle = 8f;
-    [SerializeField] private Projectile razorLeafPrefab;
+    [Header("기본 공격 2 — 덩굴채찍")]
+    [FormerlySerializedAs("razorDamage")]
+    [SerializeField, Min(0)] private int vineDamage = 8;
+    [FormerlySerializedAs("razorCooldown")]
+    [SerializeField, Min(0f)] private float vineCooldown = 0.5f;
+    [Tooltip("채찍이 닿는 거리. 타일 한 칸이 1이다.")]
+    [SerializeField, Min(0f)] private float vineRange = 2f;
+    [Tooltip("채찍 판정의 굵기.")]
+    [SerializeField, Min(0f)] private float vineWidth = 0.7f;
+    [SerializeField, Min(0f)] private float vineKnockbackForce = 4f;
+    [Tooltip("휘두른 뒤 움직이지 못하는 시간.")]
+    [SerializeField, Min(0f)] private float vineStunDuration = 0.22f;
+    [SerializeField] private Color vineColor = new Color(0.3f, 0.85f, 0.25f, 0.95f);
 
     [Header("공통")]
     [SerializeField, Range(0f, 1f)] private float attackMoveSpeedMultiplier = 0.5f;
@@ -42,8 +50,9 @@ public class PlayerCombat : MonoBehaviour
     private Health health;
     private Camera mainCamera;
     private SpriteRenderer flashMarker; // 재사용하는 공격 판정 표시
+    private SpriteRenderer vineMarker;  // 재사용하는 덩굴채찍 연출
     private float lastMeleeTime = -999f;
-    private float lastRazorTime = -999f;
+    private float lastVineTime = -999f;
     private float slowUntil = -999f;
 
     private void Awake()
@@ -54,15 +63,17 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>진화 등으로 기본 공격력을 바꾼다. 유물 배율은 공격할 때 따로 곱해진다.</summary>
-    public void SetDamages(int melee, int razor)
+    public void SetDamages(int melee, int vine)
     {
         meleeDamage = melee;
-        razorDamage = razor;
+        vineDamage = vine;
     }
 
     // 유물 배율이 걸린 실제 피해량. 배율이 아무리 낮아도 최소 1은 들어간다.
     private int EffectiveMeleeDamage => ScaleDamage(meleeDamage, RelicMultiplier(true));
-    private int EffectiveRazorDamage => ScaleDamage(razorDamage, RelicMultiplier(false));
+    // 덩굴채찍은 사거리가 2칸이라 몸으로 붙는 좌클릭과 역할이 다르다. 구애 시리즈에서는
+    // 잎날가르기가 있던 자리를 그대로 이어받아 "원거리" 쪽 배율을 쓴다.
+    private int EffectiveVineDamage => ScaleDamage(vineDamage, RelicMultiplier(false));
 
     private static int ScaleDamage(int baseDamage, float multiplier) =>
         baseDamage <= 0 ? 0 : Mathf.Max(1, GameMath.RoundHalfUp(baseDamage * multiplier));
@@ -80,6 +91,8 @@ public class PlayerCombat : MonoBehaviour
         controller.SpeedMultiplier = Time.time < slowUntil ? attackMoveSpeedMultiplier : 1f;
 
         if (!controller.ControlEnabled || (health != null && health.IsDead)) return;
+        // 경직 중에는 공격도 못 한다. 후딜이 없는 것과 같아지면 경직을 넣은 의미가 없다.
+        if (controller.IsStunned) return;
 
         Mouse mouse = Mouse.current;
         if (mouse == null) return;
@@ -89,10 +102,10 @@ public class PlayerCombat : MonoBehaviour
             lastMeleeTime = Time.time;
             MeleeAttack(GetMouseDirection());
         }
-        else if (mouse.rightButton.wasPressedThisFrame && Time.time >= lastRazorTime + razorCooldown)
+        else if (mouse.rightButton.wasPressedThisFrame && Time.time >= lastVineTime + vineCooldown)
         {
-            lastRazorTime = Time.time;
-            RazorLeafAttack(GetMouseDirection());
+            lastVineTime = Time.time;
+            VineWhipAttack(GetMouseDirection());
         }
     }
 
@@ -148,37 +161,88 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
-    private void RazorLeafAttack(Vector2 direction)
+    /// <summary>
+    /// 덩굴채찍. 조준 방향으로 2칸 길이의 초록 채찍을 뻗어, 그 선 위에 닿은 적을 전부 때린다.
+    /// 휘두른 뒤에는 짧게 경직이 걸려 바로 도망칠 수 없다 — 사거리를 준 대신 붙은 대가다.
+    /// </summary>
+    private void VineWhipAttack(Vector2 direction)
     {
         BeginAttack(direction); // 캐릭터는 조준 방향 그대로 바라본다
+        controller.Stun(vineStunDuration);
 
-        if (razorLeafPrefab == null) return;
+        // 판정은 플레이어 앞으로 뻗은 직사각형이다. 그린 채찍과 같은 범위여야 한다.
+        Vector2 origin = transform.position;
+        Vector2 center = origin + direction * (vineRange * 0.5f);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        Vector2 shotDirection = ApplySpread(direction, razorSpreadAngle);
-        Vector2 spawnPos = (Vector2)transform.position + shotDirection * razorSpawnOffset;
-        Projectile leaf = Instantiate(razorLeafPrefab, spawnPos, Quaternion.identity);
+        StartCoroutine(VineWhipFlash(origin, direction));
 
-        // 광각렌즈: 루트를 키우면 스프라이트와 콜라이더가 함께 커진다.
-        RelicManager relics = RelicManager.Instance;
-        if (relics != null && !Mathf.Approximately(relics.ProjectileScale, 1f))
-            leaf.transform.localScale *= relics.ProjectileScale;
+        int damage = EffectiveVineDamage;
+        struckTargets.Clear();
+        int count = Physics2D.OverlapBox(center, new Vector2(vineRange, vineWidth), angle,
+                                         noFilter, hitBuffer);
+        for (int i = 0; i < count; i++)
+        {
+            EnemyController enemy = hitBuffer[i].GetComponentInParent<EnemyController>();
+            if (enemy == null) continue;
+            Health enemyHealth = enemy.GetComponent<Health>();
+            if (enemyHealth == null || enemyHealth.IsDead) continue;
+            if (struckTargets.Contains(enemyHealth)) continue;
+            struckTargets.Add(enemyHealth);
 
-        leaf.Launch(shotDirection, EffectiveRazorDamage);
+            enemyHealth.TakeDamage(damage);
+            enemy.ApplyKnockback(direction, vineKnockbackForce);
+            PlayerRelicEffects.ReportDamageDealt(damage);
+        }
     }
 
-    /// <summary>탄퍼짐: 조준 방향을 전체 각도 범위 안에서 무작위로 틀어 준다.</summary>
-    private static Vector2 ApplySpread(Vector2 direction, float spreadAngle)
+    /// <summary>채찍이 뻗었다가 사라지는 연출. 마커 하나를 계속 재사용한다.</summary>
+    private IEnumerator VineWhipFlash(Vector2 origin, Vector2 direction)
     {
-        if (spreadAngle <= 0f) return direction;
-        float half = spreadAngle * 0.5f;
-        float offset = Random.Range(-half, half) * Mathf.Deg2Rad;
-        float cos = Mathf.Cos(offset);
-        float sin = Mathf.Sin(offset);
-        return new Vector2(direction.x * cos - direction.y * sin,
-                           direction.x * sin + direction.y * cos);
+        if (vineMarker == null)
+        {
+            EnsureWhiteSprite();
+            GameObject marker = new GameObject("VineWhip");
+            vineMarker = marker.AddComponent<SpriteRenderer>();
+            vineMarker.sprite = whiteSprite;
+            vineMarker.sortingOrder = 50;
+        }
+
+        // 스프라이트 중심이 아니라 뿌리(플레이어 쪽)를 기준으로 늘어나야 채찍처럼 보인다.
+        Transform t = vineMarker.transform;
+        t.rotation = Quaternion.FromToRotation(Vector3.right, direction);
+        vineMarker.color = vineColor;
+        vineMarker.enabled = true;
+
+        const float ExtendTime = 0.07f;
+        const float HoldTime = 0.05f;
+
+        float elapsed = 0f;
+        while (elapsed < ExtendTime)
+        {
+            elapsed += Time.deltaTime;
+            float length = vineRange * Mathf.Clamp01(elapsed / ExtendTime);
+            t.position = origin + direction * (length * 0.5f);
+            t.localScale = new Vector3(length, vineWidth, 1f);
+            yield return null;
+        }
+
+        t.position = origin + direction * (vineRange * 0.5f);
+        t.localScale = new Vector3(vineRange, vineWidth, 1f);
+        yield return new WaitForSeconds(HoldTime);
+        if (vineMarker != null) vineMarker.enabled = false;
     }
 
     private static readonly WaitForSeconds flashDuration = new WaitForSeconds(0.1f);
+
+    private static void EnsureWhiteSprite()
+    {
+        if (whiteSprite != null) return;
+        Texture2D tex = new Texture2D(1, 1);
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        whiteSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
+    }
 
     // 이펙트 프리팹이 없을 때 공격 판정 위치를 잠깐 표시하는 임시 연출.
     // 마커 오브젝트는 한 번만 만들어 재사용한다.
@@ -186,13 +250,7 @@ public class PlayerCombat : MonoBehaviour
     {
         if (flashMarker == null)
         {
-            if (whiteSprite == null)
-            {
-                Texture2D tex = new Texture2D(1, 1);
-                tex.SetPixel(0, 0, Color.white);
-                tex.Apply();
-                whiteSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
-            }
+            EnsureWhiteSprite();
             GameObject marker = new GameObject("AttackFlash");
             flashMarker = marker.AddComponent<SpriteRenderer>();
             flashMarker.sprite = whiteSprite;

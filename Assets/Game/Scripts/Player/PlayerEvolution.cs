@@ -15,7 +15,8 @@ public class PlayerEvolution : MonoBehaviour
         public Sprite portrait;
         [Min(1)] public int maxHealth = 100;
         [Min(0)] public int attackDamage = 12;   // 기본 공격 1 (근거리)
-        [Min(0)] public int razorDamage = 8;     // 기본 공격 2 (잎날가르기)
+        [UnityEngine.Serialization.FormerlySerializedAs("razorDamage")]
+        [Min(0)] public int vineDamage = 8;      // 기본 공격 2 (덩굴채찍)
     }
 
     [SerializeField] private Stage[] stages;
@@ -150,6 +151,6 @@ public class PlayerEvolution : MonoBehaviour
         }
 
         PlayerCombat combat = GetComponent<PlayerCombat>();
-        if (combat != null) combat.SetDamages(next.attackDamage, next.razorDamage);
+        if (combat != null) combat.SetDamages(next.attackDamage, next.vineDamage);
     }
 }
