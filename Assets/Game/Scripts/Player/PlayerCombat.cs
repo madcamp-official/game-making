@@ -25,14 +25,14 @@ public class PlayerCombat : MonoBehaviour
     [FormerlySerializedAs("razorDamage")]
     [SerializeField, Min(0)] private int vineDamage = 8;
     [FormerlySerializedAs("razorCooldown")]
-    [SerializeField, Min(0f)] private float vineCooldown = 0.5f;
+    [SerializeField, Min(0f)] private float vineCooldown = 5f;
     [Tooltip("채찍이 닿는 거리. 타일 한 칸이 1이다.")]
     [SerializeField, Min(0f)] private float vineRange = 2f;
     [Tooltip("채찍 판정의 굵기.")]
     [SerializeField, Min(0f)] private float vineWidth = 0.7f;
     [SerializeField, Min(0f)] private float vineKnockbackForce = 4f;
     [Tooltip("휘두른 뒤 움직이지 못하는 시간.")]
-    [SerializeField, Min(0f)] private float vineStunDuration = 0.22f;
+    [SerializeField, Min(0f)] private float vineStunDuration = 0.5f;
     [SerializeField] private Color vineColor = new Color(0.3f, 0.85f, 0.25f, 0.95f);
 
     [Header("공통")]
@@ -119,6 +119,7 @@ public class PlayerCombat : MonoBehaviour
         return direction.sqrMagnitude > 0.001f ? direction.normalized : controller.FacingDirection;
     }
 
+    /// <summary>근접 공격용. 조준 방향을 보고, 공격 모션을 재생하며 그동안 감속한다.</summary>
     private void BeginAttack(Vector2 direction)
     {
         controller.SetFacing(direction);
@@ -167,7 +168,10 @@ public class PlayerCombat : MonoBehaviour
     /// </summary>
     private void VineWhipAttack(Vector2 direction)
     {
-        BeginAttack(direction); // 캐릭터는 조준 방향 그대로 바라본다
+        // 근접 공격과 달리 공격 모션을 재생하지 않는다. 조준 방향만 바라보고,
+        // 감속도 걸지 않는다 — 감속은 공격 모션 길이에 묶인 값인데 모션이 없고,
+        // 어차피 경직 동안 못 움직인다.
+        controller.SetFacing(direction);
         controller.Stun(vineStunDuration);
 
         // 판정은 플레이어 앞으로 뻗은 직사각형이다. 그린 채찍과 같은 범위여야 한다.

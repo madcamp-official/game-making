@@ -221,11 +221,13 @@ MonoBehaviour:
   meleeCooldown: 0.5
   meleeKnockbackForce: 6
   attackEffectPrefab: {fileID: 0}
-  razorDamage: 8
-  razorCooldown: 0.5
-  razorSpawnOffset: 0.55
-  razorSpreadAngle: 8
-  razorLeafPrefab: {fileID: 966188026010977204, guid: a32b1e5e256374347894cb56f2f22464, type: 3}
+  vineDamage: 8
+  vineCooldown: 5
+  vineRange: 2
+  vineWidth: 0.7
+  vineKnockbackForce: 4
+  vineStunDuration: 0.5
+  vineColor: {r: 0.3, g: 0.85, b: 0.25, a: 0.95}
   attackMoveSpeedMultiplier: 0.5
   attackAnimDuration: 0.467
 --- !u!95 &3910182958006894460
@@ -293,19 +295,19 @@ MonoBehaviour:
     portrait: {fileID: 0}
     maxHealth: 100
     attackDamage: 12
-    razorDamage: 8
+    vineDamage: 8
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
     portrait: {fileID: 0}
     maxHealth: 130
     attackDamage: 18
-    razorDamage: 12
+    vineDamage: 12
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
     portrait: {fileID: 0}
     maxHealth: 170
     attackDamage: 25
-    razorDamage: 17
+    vineDamage: 17
   flashStepDuration: 0.15
   healMissingFraction: 0.6
 --- !u!114 &510344029345414639

@@ -830,17 +830,9 @@ public class ButterfreeBossController : MonoBehaviour
                 attackRoot, origin, silverTelegraphRadius, safeCenter, safeSweep, safeZoneColor);
             safe.Hold(windup);
 
-            // 첫 예고에서만 안전 구역이 어느 쪽으로 돌지 흐릿한 부채꼴로 보여 준다.
-            // 안전색이 옅어져서 그대로 곱하면 안 보인다. 알파만 되돌려 쓴다.
-            if (wave == 0 && settings.waves > 1)
-            {
-                Color hintColor = safeZoneColor;
-                hintColor.a = Mathf.Min(1f, safeZoneColor.a * 2.5f);
-                AttackTelegraph hint = AttackTelegraph.CreateSector(
-                    attackRoot, origin, silverTelegraphRadius * 0.75f, safeCenter, safeSweep,
-                    hintColor);
-                hint.SweepTo(safeCenter, safeCenter + rotation, windup);
-            }
+            // 첫 파동에 안전 구역이 어느 쪽으로 돌지 미리 보여 주는 회전 부채꼴이 있었는데,
+            // 위험 구역을 칠하기 시작한 뒤로는 그 위에서 따로 도는 부채꼴이 무엇을 뜻하는지
+            // 읽히지 않아 걷어냈다. 회전 방향은 두 번째 파동을 보고 알면 된다.
 
             yield return new WaitForSeconds(windup);
             SetWindupTint(false);
