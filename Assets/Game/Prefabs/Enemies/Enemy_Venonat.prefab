@@ -278,7 +278,7 @@ MonoBehaviour:
   cooldown: 3
   initialDelay: 1
   radius: 1.26
-  windup: 0.55
+  windup: 0.99
   duration: 5.5
   damage: 10
   tickInterval: 1
