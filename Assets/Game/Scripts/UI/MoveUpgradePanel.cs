@@ -42,6 +42,7 @@ public class MoveUpgradePanel : MonoBehaviour
 
     private PlayerMoves moves;
     private float savedTimeScale = 1f;
+    private int openedFrame = -1;
 
     private void Awake()
     {
@@ -51,8 +52,9 @@ public class MoveUpgradePanel : MonoBehaviour
 
     private void OnDestroy()
     {
-        // 팔레트가 뜬 채로 씬이 내려가면 시간이 멈춘 채 남는다.
-        if (IsOpen) Close(false);
+        // timeScale은 씬이 바뀌어도 유지되는 전역값이라, 팔레트가 뜬 채로 씬이 내려가면
+        // 다음 씬이 멈춘 채 시작한다. 반드시 시간을 되살리며 닫는다.
+        if (IsOpen) Close(true);
     }
 
     private void Build()
@@ -154,6 +156,7 @@ public class MoveUpgradePanel : MonoBehaviour
 
         SetVisible(true);
         IsOpen = true;
+        openedFrame = Time.frameCount;
         savedTimeScale = Time.timeScale;
         Time.timeScale = 0f;
         return true;
@@ -162,6 +165,9 @@ public class MoveUpgradePanel : MonoBehaviour
     private void Update()
     {
         if (!IsOpen) return;
+        // 마지막 적을 잡은 공격 클릭과 같은 프레임에 팔레트가 열린다. 그 클릭이 카드까지
+        // 눌러 버리지 않도록, 열린 프레임에는 입력을 받지 않는다.
+        if (Time.frameCount == openedFrame) return;
 
         Mouse mouse = Mouse.current;
         int hovered = -1;
