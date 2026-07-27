@@ -12,9 +12,9 @@ using UnityEngine.UI;
 /// </summary>
 public class PlayerHealthHud : MonoBehaviour
 {
-    // 조작 안내(y 15, 높이 40) 바로 위에 앉힌다.
+    // 아래에서부터 조작 안내(y 15) → 경험치 바(y 56) → 체력바 순으로 쌓는다.
     private const float MarginX = 30f;
-    private const float MarginY = 64f;
+    private const float MarginY = 72f;
     private const float BarWidth = 300f;
     private const float BarHeight = 36f;
     private const int Border = 2;

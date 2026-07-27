@@ -51,7 +51,15 @@ public class CombatRoomController : MonoBehaviour
     private void GiveClearReward()
     {
         GiveLeftoversHeal();
-        if (isBossRoom) RelicManager.GrantReward(bossRewardRelic);
+        if (isBossRoom)
+        {
+            RelicManager.GrantReward(bossRewardRelic);
+            return;
+        }
+
+        // 보스방은 진화로 기술을 하나 주므로 경험치까지 얹지 않는다.
+        // 일반 전투방 두 개마다 레벨이 올라 강화 팔레트가 뜬다.
+        if (PlayerLevel.Instance != null) PlayerLevel.Instance.AddRoomClear();
     }
 
     // 먹다남은음식: 전투방을 정리할 때마다 체력을 조금 회복한다.

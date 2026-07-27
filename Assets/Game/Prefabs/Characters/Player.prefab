@@ -21,6 +21,8 @@ GameObject:
   - component: {fileID: 3114308109792484670}
   - component: {fileID: 510344029345414639}
   - component: {fileID: 2179762030920104916}
+  - component: {fileID: 2687637874087857744}
+  - component: {fileID: 9034063676416855689}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -339,3 +341,28 @@ MonoBehaviour:
   width: 0.9
   height: 0.12
   showValue: 0
+--- !u!114 &2687637874087857744
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5351824350706094291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59746f170890548beb611a4833906c70, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMoves
+--- !u!114 &9034063676416855689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5351824350706094291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b06120885cbfd44279cb66bd82bbb0ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerLevel
+  gainPerRoom: 0.5

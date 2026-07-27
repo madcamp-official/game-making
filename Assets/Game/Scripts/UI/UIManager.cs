@@ -18,6 +18,7 @@ public class UIManager : MonoBehaviour
     private Coroutine messageRoutine;
     private RelicTooltip relicTooltip;
     private RelicPopup relicPopup;
+    private MoveUpgradePanel upgradePanel;
 
     private void Awake()
     {
@@ -77,13 +78,24 @@ public class UIManager : MonoBehaviour
         Transform canvasRoot = relicBar != null ? relicBar.parent : transform;
 
         PlayerHealthHud.Create(canvasRoot);
+        ExpBar.Create(canvasRoot);
+        MoveSlotsHud.Create(canvasRoot);
         relicPopup = MakeFullScreenChild(canvasRoot, "RelicPopup").AddComponent<RelicPopup>();
 
         // 툴팁은 다른 HUD 요소 위에 그려져야 한다.
         GameObject tooltipGo = MakeFullScreenChild(canvasRoot, "RelicTooltip");
         tooltipGo.transform.SetAsLastSibling();
         relicTooltip = tooltipGo.AddComponent<RelicTooltip>();
+
+        // 강화 팔레트는 모든 HUD 위에 뜬다.
+        GameObject upgradeGo = MakeFullScreenChild(canvasRoot, "MoveUpgradePanel");
+        upgradeGo.transform.SetAsLastSibling();
+        upgradePanel = upgradeGo.AddComponent<MoveUpgradePanel>();
     }
+
+    /// <summary>레벨이 올랐을 때 기술 강화 팔레트를 띄운다.</summary>
+    public bool ShowMoveUpgrades(PlayerMoves moves) =>
+        upgradePanel != null && upgradePanel.Open(moves);
 
     /// <summary>화면 전체를 덮는 빈 컨테이너. 안쪽 패널이 화면 기준으로 배치될 수 있게 한다.</summary>
     private static GameObject MakeFullScreenChild(Transform parent, string name)

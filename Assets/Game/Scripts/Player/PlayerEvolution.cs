@@ -152,5 +152,9 @@ public class PlayerEvolution : MonoBehaviour
 
         PlayerCombat combat = GetComponent<PlayerCombat>();
         if (combat != null) combat.SetDamages(next.attackDamage, next.vineDamage);
+
+        // 진화할 때마다 기술을 하나 더 배운다 (처음 둘 → 셋 → 넷).
+        PlayerMoves moves = GetComponent<PlayerMoves>();
+        if (moves != null) moves.LearnNext();
     }
 }
