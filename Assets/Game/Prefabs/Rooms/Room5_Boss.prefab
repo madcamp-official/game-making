@@ -5872,44 +5872,104 @@ MonoBehaviour:
   orbitDuration: 0.45
   patternGapPhase1: 1
   patternGapPhase2: 0.8
-  windWindup: 0.7
-  windRecovery: 0.8
-  windSpread: 20
-  windSpreadPhase2: 16
-  windCount: 3
-  windCountPhase2: 5
-  windSpeed: 6
+  windPhase1:
+    volleys:
+    - windup: 0.55
+      count: 3
+      stepAngle: 16
+      gapAfter: 0.35
+      aim: 0
+    - windup: 0.5
+      count: 5
+      stepAngle: 12
+      gapAfter: 0
+      aim: 0
+    speed: 6
+    recovery: 1
+    predictLeadTime: 0.3
+    predictMaxDistance: 1.5
+  windPhase2:
+    volleys:
+    - windup: 0.45
+      count: 5
+      stepAngle: 9
+      gapAfter: 0.25
+      aim: 0
+    - windup: 0.4
+      count: 5
+      stepAngle: 7
+      gapAfter: 0.25
+      aim: 1
+    - windup: 0.45
+      count: 6
+      stepAngle: 12
+      gapAfter: 0
+      aim: 2
+    speed: 6.5
+    recovery: 0.8
+    predictLeadTime: 0.3
+    predictMaxDistance: 1.5
   windDamage: 10
   windLifetime: 3
   windRadius: 0.18
-  poisonWindup: 0.9
-  poisonRecovery: 1
-  poisonCount: 3
-  poisonCountPhase2: 4
-  poisonRadius: 0.9
-  poisonDuration: 3
+  poisonPhase1:
+    count: 3
+    recordInterval: 0.4
+    activationDelay: 0.75
+    radius: 0.9
+    duration: 2.7
+    recovery: 1
+    predictIndex: -1
+    predictLead: 1.2
+  poisonPhase2:
+    count: 5
+    recordInterval: 0.28
+    activationDelay: 0.6
+    radius: 0.95
+    duration: 3
+    recovery: 0.8
+    predictIndex: 3
+    predictLead: 1.2
   poisonDamage: 8
   poisonTickInterval: 1
-  poisonSpreadDistance: 1.7
-  silverWindup: 1
-  silverRecovery: 1.2
-  silverCountPerVolley: 8
-  silverVolleyGap: 0.45
-  silverSpeed: 5
+  poisonMinSeparation: 0.85
+  poisonArenaMargin: 0.55
+  poisonMaxZones: 6
+  poisonMaxAreaRatio: 0.55
+  silverPhase1:
+    waves: 2
+    safeSlots: 4
+    firstWindup: 0.8
+    laterWindup: 0.65
+    waveGap: 0.7
+    rotationStep: 60
+    speed: 4.8
+    recovery: 1
+  silverPhase2:
+    waves: 3
+    safeSlots: 3
+    firstWindup: 0.65
+    laterWindup: 0.5
+    waveGap: 0.55
+    rotationStep: 60
+    speed: 5.3
+    recovery: 0.9
+  silverSlotCount: 12
   silverDamage: 12
   silverLifetime: 4
   silverRadius: 0.18
-  windWeight: 40
-  poisonWeight: 35
-  silverWeight: 25
-  maxActiveZones: 2
+  silverTelegraphRadius: 3.2
+  projectilePoolSize: 48
+  phase2GraceTime: 0.8
   contactDamage: 10
   contactInterval: 1
+  logPatterns: 0
   warningColor: {r: 1, g: 0.9, b: 0.25, a: 0.45}
   windColor: {r: 0.75, g: 0.95, b: 1, a: 1}
   poisonWarningColor: {r: 0.75, g: 0.35, b: 0.85, a: 0.35}
   poisonZoneColor: {r: 0.45, g: 0.12, b: 0.6, a: 0.65}
   silverColor: {r: 0.6, g: 1, b: 0.95, a: 1}
+  safeZoneColor: {r: 0.3, g: 0.7, b: 1, a: 0.4}
   windupTint: {r: 1, g: 0.7, b: 0.7, a: 1}
 --- !u!1 &7658749920411860896
 GameObject:

@@ -42,6 +42,29 @@ public class AttackTelegraph : MonoBehaviour
         return telegraph;
     }
 
+    /// <summary>
+    /// 안전 부채꼴. 은빛바람에서 탄이 비는 구간을 표시한다.
+    /// <paramref name="centerAngle"/>은 부채꼴의 중심 방향(도), <paramref name="sweepAngle"/>은 전체 각도다.
+    /// 여기는 위험 표시가 아니라 안전 표시이므로 다른 예고와 색을 구분해서 쓴다.
+    /// </summary>
+    public static AttackTelegraph CreateSector(Transform parent, Vector2 center, float radius,
+                                               float centerAngle, float sweepAngle, Color color)
+    {
+        AttackTelegraph telegraph = Create(parent, center, PrimitiveSprites.Sector(sweepAngle), color);
+        telegraph.transform.localScale = Vector3.one * (radius * 2f);
+        telegraph.transform.rotation = Quaternion.Euler(0f, 0f, centerAngle);
+        return telegraph;
+    }
+
+    /// <summary>
+    /// 중심 각도를 <paramref name="fromAngle"/>에서 <paramref name="toAngle"/>로 돌리며 사라진다.
+    /// 은빛바람 첫 예고에서 안전 구역이 어느 쪽으로 회전할지 미리 보여 주는 데 쓴다.
+    /// </summary>
+    public void SweepTo(float fromAngle, float toAngle, float duration)
+    {
+        StartCoroutine(SweepRoutine(fromAngle, toAngle, duration));
+    }
+
     private static AttackTelegraph Create(Transform parent, Vector2 position, Sprite sprite, Color color)
     {
         GameObject go = new GameObject("AttackTelegraph");
@@ -65,6 +88,15 @@ public class AttackTelegraph : MonoBehaviour
         StartCoroutine(PulseRoutine(duration));
     }
 
+    /// <summary>
+    /// 깜빡이지 않고 같은 밝기로 유지하다 사라진다.
+    /// 위험 예고는 깜빡여야 눈에 띄지만, 안전 구역 표시는 깜빡이면 어두워지는 순간에 안 보인다.
+    /// </summary>
+    public void Hold(float duration)
+    {
+        StartCoroutine(HoldRoutine(duration));
+    }
+
     /// <summary>반지름을 넓히며 사라지는 파동. 피해는 없다.</summary>
     public void Expand(float fromRadius, float toRadius, float duration)
     {
@@ -81,6 +113,28 @@ public class AttackTelegraph : MonoBehaviour
             float speed = Mathf.Lerp(4f, 12f, elapsed / Mathf.Max(0.01f, duration));
             float wave = 0.65f + 0.35f * Mathf.Sin(elapsed * speed);
             SetAlpha(baseAlpha * wave);
+            yield return null;
+        }
+        Destroy(gameObject);
+    }
+
+    private IEnumerator HoldRoutine(float duration)
+    {
+        SetAlpha(baseAlpha);
+        yield return new WaitForSeconds(duration);
+        Destroy(gameObject);
+    }
+
+    private IEnumerator SweepRoutine(float fromAngle, float toAngle, float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+            float t = Mathf.Clamp01(elapsed / Mathf.Max(0.01f, duration));
+            transform.rotation = Quaternion.Euler(0f, 0f, Mathf.Lerp(fromAngle, toAngle, t));
+            // 회전을 마칠수록 옅어져, 이건 예고가 아니라 방향 힌트라는 걸 구분한다.
+            SetAlpha(baseAlpha * (1f - t * 0.8f));
             yield return null;
         }
         Destroy(gameObject);
