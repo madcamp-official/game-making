@@ -71,11 +71,12 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    /// <summary>유물 획득 팝업과 호버 툴팁을 캔버스 아래에 만들어 둔다.</summary>
+    /// <summary>플레이어 체력바, 유물 획득 팝업, 호버 툴팁을 캔버스 아래에 만들어 둔다.</summary>
     private void BuildRelicUi()
     {
         Transform canvasRoot = relicBar != null ? relicBar.parent : transform;
 
+        PlayerHealthHud.Create(canvasRoot);
         relicPopup = MakeFullScreenChild(canvasRoot, "RelicPopup").AddComponent<RelicPopup>();
 
         // 툴팁은 다른 HUD 요소 위에 그려져야 한다.
