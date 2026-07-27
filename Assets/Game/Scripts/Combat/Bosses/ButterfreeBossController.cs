@@ -243,6 +243,7 @@ public class ButterfreeBossController : MonoBehaviour
     private bool inPhase2;
     private bool phaseTransitionPending;
     private bool phaseTransitionDone;
+    private bool phaseInvulnerabilityActive;
 
     private EnemyController enemyController;
     private Health health;
@@ -291,6 +292,7 @@ public class ButterfreeBossController : MonoBehaviour
 
     private void OnDisable()
     {
+        EndPhaseInvulnerability();
         // 파괴 중이면 EnemyController가 이미 사라졌을 수 있다.
         if (enemyController != null) enemyController.SetBasicAIEnabled(true);
     }
@@ -324,6 +326,7 @@ public class ButterfreeBossController : MonoBehaviour
 
     private void OnDestroy()
     {
+        EndPhaseInvulnerability();
         if (health != null)
         {
             health.OnDamaged -= HandleDamaged;
@@ -344,6 +347,7 @@ public class ButterfreeBossController : MonoBehaviour
 
     private void HandleDied()
     {
+        EndPhaseInvulnerability();
         state = BossState.Dead;
         StopAllCoroutines();
         body.linearVelocity = Vector2.zero;
@@ -853,6 +857,7 @@ public class ButterfreeBossController : MonoBehaviour
     private IEnumerator PhaseTransitionRoutine()
     {
         state = BossState.PhaseTransition;
+        BeginPhaseInvulnerability();
         // 전환 연출 중에는 새 공격 판정이 남아 있으면 안 된다.
         ClearAttackObjects();
 
@@ -889,6 +894,21 @@ public class ButterfreeBossController : MonoBehaviour
 
         // 전환을 인지할 시간을 준다.
         yield return new WaitForSeconds(phase2GraceTime);
+        EndPhaseInvulnerability();
+    }
+
+    private void BeginPhaseInvulnerability()
+    {
+        if (phaseInvulnerabilityActive || health == null || health.IsDead) return;
+        health.BeginInvulnerability();
+        phaseInvulnerabilityActive = true;
+    }
+
+    private void EndPhaseInvulnerability()
+    {
+        if (!phaseInvulnerabilityActive) return;
+        if (health != null) health.EndInvulnerability();
+        phaseInvulnerabilityActive = false;
     }
 
     // ---------------------------------------------------------------- 보조

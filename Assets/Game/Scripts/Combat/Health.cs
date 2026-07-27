@@ -13,12 +13,15 @@ public class Health : MonoBehaviour
     [SerializeField, Min(0f)] private float invincibleDuration = 0.3f;
 
     private float maxHealthMultiplier = 1f;
+    private bool hitInvincible;
+    private int invulnerabilityLocks;
 
     /// <summary>실제 최대 체력. 기본값에 유물 배율(생명의구슬 등)을 곱한 값이다.</summary>
     public int MaxHealth => Mathf.Max(1, GameMath.RoundHalfUp(maxHealth * maxHealthMultiplier));
     public int CurrentHealth { get; private set; }
     public bool IsDead => CurrentHealth <= 0;
-    public bool IsInvincible { get; private set; }
+    /// <summary>피격 직후 무적 또는 연출·상태가 건 무적 잠금 중 하나라도 활성화되어 있으면 true.</summary>
+    public bool IsInvincible => hitInvincible || invulnerabilityLocks > 0;
 
     /// <summary>회복량 배율 (큰뿌리). 플레이어 쪽에서만 설정한다.</summary>
     public float HealMultiplier { get; set; } = 1f;
@@ -74,7 +77,8 @@ public class Health : MonoBehaviour
             // 진행 중이던 점멸을 멈추고 렌더러가 꺼진 채 남지 않게 복원한다.
             if (flashRoutine != null) StopCoroutine(flashRoutine);
             if (spriteRenderer != null) spriteRenderer.enabled = true;
-            IsInvincible = false;
+            hitInvincible = false;
+            invulnerabilityLocks = 0;
             OnDied?.Invoke();
         }
         else
@@ -88,8 +92,28 @@ public class Health : MonoBehaviour
     public void Revive(int amount)
     {
         CurrentHealth = Mathf.Clamp(amount, 1, MaxHealth);
+        if (flashRoutine != null) StopCoroutine(flashRoutine);
+        flashRoutine = null;
+        hitInvincible = false;
+        invulnerabilityLocks = 0;
         if (spriteRenderer != null) spriteRenderer.enabled = true;
         OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
+    }
+
+    /// <summary>
+    /// 연출이나 상태가 지속되는 동안 피해를 막는다. 여러 시스템이 동시에 호출해도 마지막 잠금이
+    /// 해제될 때까지 무적이 유지되므로, 호출한 쪽은 반드시 <see cref="EndInvulnerability"/>와 짝을 맞춘다.
+    /// </summary>
+    public void BeginInvulnerability()
+    {
+        if (IsDead) return;
+        invulnerabilityLocks++;
+    }
+
+    /// <summary><see cref="BeginInvulnerability"/>로 건 무적 잠금을 하나 해제한다.</summary>
+    public void EndInvulnerability()
+    {
+        invulnerabilityLocks = Mathf.Max(0, invulnerabilityLocks - 1);
     }
 
     /// <summary>
@@ -115,7 +139,7 @@ public class Health : MonoBehaviour
 
     private IEnumerator InvincibleFlash()
     {
-        IsInvincible = true;
+        hitInvincible = true;
         float elapsed = 0f;
         while (elapsed < invincibleDuration)
         {
@@ -125,7 +149,7 @@ public class Health : MonoBehaviour
             elapsed += 0.06f;
         }
         if (spriteRenderer != null) spriteRenderer.enabled = true;
-        IsInvincible = false;
+        hitInvincible = false;
         flashRoutine = null;
     }
 }
