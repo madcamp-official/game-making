@@ -104,9 +104,32 @@ public static class PixelUi
         rt.pivot = new Vector2(0.5f, 1f);
         rt.sizeDelta = new Vector2(-padding * 2f, 0f);
         rt.anchoredPosition = new Vector2(0f, top);
-        // preferredHeight는 위 폭이 정해진 뒤에야 올바른 줄 수를 반영한다.
-        float height = text.preferredHeight;
+        // 줄 수는 위 폭이 정해진 뒤에야 올바르게 나온다.
+        float height = LineBoxHeight(text);
         rt.sizeDelta = new Vector2(-padding * 2f, height);
         return top - height;
+    }
+
+    /// <summary>
+    /// 글자가 실제로 차지하는 세로 폭. <see cref="Text.preferredHeight"/>를 쓰면 안 된다.
+    ///
+    /// preferredHeight는 줄당 폰트의 ascent만 센다. PMD 폰트는 ascent가 9, 글자칸이 12라
+    /// 크기 48짜리 한 줄을 36으로 보고하는데 실제로는 48을 그린다. 그 값으로 쌓으면
+    /// 줄마다 25%씩 모자라서 아래 요소와 글자가 겹친다.
+    /// 그래서 줄 수만 생성기에서 얻고 높이는 폰트의 줄 간격으로 직접 계산한다.
+    /// </summary>
+    public static float LineBoxHeight(Text text)
+    {
+        if (text == null || string.IsNullOrEmpty(text.text)) return 0f;
+
+        Font f = text.font;
+        // 동적 폰트는 요청한 크기 그대로 렌더링되므로 preferredHeight가 맞다.
+        if (f == null || f.dynamic || f.fontSize <= 0) return text.preferredHeight;
+
+        TextGenerator gen = text.cachedTextGeneratorForLayout;
+        gen.Populate(text.text, text.GetGenerationSettings(new Vector2(text.rectTransform.rect.width, 0f)));
+
+        float scale = text.fontSize / (float)f.fontSize;
+        return Mathf.Max(1, gen.lineCount) * f.lineHeight * scale;
     }
 }

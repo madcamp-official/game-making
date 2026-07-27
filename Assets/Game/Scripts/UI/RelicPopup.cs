@@ -28,7 +28,7 @@ public class RelicPopup : MonoBehaviour
     // 큰 쪽을 먼저 쓰고, 창이 낮아 패널이 잘릴 때만 작은 쪽으로 내린다.
     private static readonly Tier[] Tiers =
     {
-        new Tier(24, 48, 36, 48, 12),
+        new Tier(24, 48, 24, 48, 12),
         new Tier(12, 36, 24, 40, 10),
     };
 
@@ -110,15 +110,18 @@ public class RelicPopup : MonoBehaviour
         icon.rectTransform.sizeDelta = new Vector2(tier.icon, tier.icon);
         panel.sizeDelta = new Vector2(width, panel.sizeDelta.y);
 
+        // 줄과 줄 사이에는 반드시 눈에 보이는 간격을 둔다. 붙여 놓으면 글자가 서로 닿는다.
+        float gap = tier.padding * 0.5f;
+
         float y = -tier.padding;
         if (icon.enabled)
         {
             icon.rectTransform.anchoredPosition = new Vector2(0f, y);
-            y -= tier.icon + tier.padding * 0.5f;
+            y -= tier.icon + gap;
         }
-        y = PixelUi.StackFromTop(headerText, y, tier.padding);
-        y = PixelUi.StackFromTop(nameText, y, tier.padding);
-        y = PixelUi.StackFromTop(descText, y - tier.padding * 0.5f, tier.padding);
+        y = PixelUi.StackFromTop(headerText, y, tier.padding) - gap;
+        y = PixelUi.StackFromTop(nameText, y, tier.padding) - gap;
+        y = PixelUi.StackFromTop(descText, y, tier.padding);
 
         float height = -y + tier.padding;
         panel.sizeDelta = new Vector2(width, height);

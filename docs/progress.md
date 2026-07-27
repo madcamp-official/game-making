@@ -73,11 +73,21 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 | `HUDCanvas/ControlsText` | 24 | 2배 (22에서 변경) |
 | `GameStartScreen` (코드 생성) | 84 / 36 / 24 | 제목 / 시작 안내 / 부제·조작·크레딧. 크레딧은 화면 아래에 앵커해 창이 작아도 잘리지 않는다 |
 | `EvolutionCutscene` (코드 생성) | 36 / 24 | 메시지 / 스킵 안내 |
-| `RelicPopup` (코드 생성) | 48 / 36 / 24 | 유물 이름 / 설명 / "유물 획득!". 창이 낮으면 36 / 24 / 12로 한 단계 내려간다 |
+| `RelicPopup` (코드 생성) | 48 / 24 / 24 | 유물 이름 / 설명 / "유물 획득!". 창이 낮으면 36 / 24 / 12로 한 단계 내려간다 |
 | `RelicTooltip` (코드 생성) | 36 / 24 | 유물 이름 / 설명 |
 | `HealthBar` 수치 (TextMesh) | — | 월드 공간이라 12의 배수 규칙이 적용되지 않는다. `TextMesh`는 비트맵 폰트에서 `fontSize`를 무시하므로 `characterSize`(0.16)로만 크기를 정한다 |
 
 `Text.color`는 곱해지는 값이다. 흰색으로 두면 원본 색(흰 글자 + 검은 그림자)이 그대로 나오고, 다른 색을 넣으면 글자만 그 색으로 물들고 그림자는 검은색으로 남는다(골드 텍스트가 이 방식).
+
+### ⚠️ 두 번째 함정 — 세로 배치에 `Text.preferredHeight`를 쓰면 안 된다
+
+여러 줄을 위에서 아래로 쌓을 때 `preferredHeight`로 높이를 재면 **글자가 아래 요소와 겹친다.**
+
+`preferredHeight`는 줄당 폰트의 `ascent`만 센다. PMDFont는 `fontSize` 12 / `ascent` 9 / `lineHeight` 14라서, 크기 48짜리 한 줄을 **36으로 보고하지만 실제로는 48을 그린다** (정점 y범위로 확인). 줄마다 25%가 모자라니 다음 요소가 그만큼 위로 올라와 글자끼리 부딪힌다.
+
+그래서 `PixelUi.StackFromTop`은 `PixelUi.LineBoxHeight(text)`를 쓴다. 줄 수만 `TextGenerator`에서 얻고 높이는 `줄 수 × font.lineHeight × (fontSize / font.fontSize)`로 직접 계산한다. 크기 48 한 줄이면 56이 나와 글자 48 + 여백 8이 된다. 동적 폰트는 요청한 크기 그대로 렌더링되므로 그때만 `preferredHeight`를 그대로 쓴다.
+
+코드로 만든 UI에서 줄 간격이 좁아 보이면 거의 항상 이 문제다.
 
 ### 폰트 에셋 구성
 
