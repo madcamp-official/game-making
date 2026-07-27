@@ -5862,105 +5862,105 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0dd14af3f2466bbd19c68b9881bed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButterfreeBossController
-  moveSpeed: 4.2
+  moveSpeed: 4.6
   introDelay: 1
   arenaCenter: {fileID: 5874861080203317405}
   arenaHalfSize: {x: 8.2, y: 5.2}
   preferredMinDistance: 3.5
   preferredMaxDistance: 5
-  repositionMaxDuration: 1.5
-  orbitDuration: 0.45
-  patternGapPhase1: 1
-  patternGapPhase2: 0.8
+  repositionMaxDuration: 1.05
+  orbitDuration: 0.3
+  patternGapPhase1: 0.7
+  patternGapPhase2: 0.56
   windPhase1:
     volleys:
-    - windup: 0.55
+    - windup: 0.45
       count: 3
       stepAngle: 16
-      gapAfter: 0.35
-      aim: 0
-    - windup: 0.5
-      count: 5
-      stepAngle: 12
-      gapAfter: 0
-      aim: 0
-    speed: 6
-    recovery: 1
-    predictLeadTime: 0.3
-    predictMaxDistance: 1.5
-  windPhase2:
-    volleys:
-    - windup: 0.45
-      count: 5
-      stepAngle: 9
       gapAfter: 0.25
       aim: 0
     - windup: 0.4
       count: 5
+      stepAngle: 12
+      gapAfter: 0
+      aim: 0
+    speed: 7.5
+    recovery: 0.7
+    predictLeadTime: 0.3
+    predictMaxDistance: 1.5
+  windPhase2:
+    volleys:
+    - windup: 0.38
+      count: 5
+      stepAngle: 9
+      gapAfter: 0.18
+      aim: 0
+    - windup: 0.35
+      count: 5
       stepAngle: 7
-      gapAfter: 0.25
+      gapAfter: 0.18
       aim: 1
-    - windup: 0.45
+    - windup: 0.38
       count: 6
       stepAngle: 12
       gapAfter: 0
       aim: 2
-    speed: 6.5
-    recovery: 0.8
+    speed: 8
+    recovery: 0.6
     predictLeadTime: 0.3
     predictMaxDistance: 1.5
   windDamage: 10
   windLifetime: 3
   windRadius: 0.18
   poisonPhase1:
-    count: 3
-    recordInterval: 0.4
-    activationDelay: 0.75
+    count: 4
+    recordInterval: 0.28
+    activationDelay: 0.6
     radius: 0.9
-    duration: 2.7
-    recovery: 1
+    duration: 6
+    recovery: 0.7
     predictIndex: -1
     predictLead: 1.2
   poisonPhase2:
-    count: 5
-    recordInterval: 0.28
-    activationDelay: 0.6
+    count: 6
+    recordInterval: 0.2
+    activationDelay: 0.5
     radius: 0.95
-    duration: 3
-    recovery: 0.8
+    duration: 7.5
+    recovery: 0.6
     predictIndex: 3
     predictLead: 1.2
   poisonDamage: 8
   poisonTickInterval: 1
   poisonMinSeparation: 0.85
   poisonArenaMargin: 0.55
-  poisonMaxZones: 6
+  poisonMaxZones: 8
   poisonMaxAreaRatio: 0.55
   silverPhase1:
     waves: 2
-    safeSlots: 4
-    firstWindup: 0.8
-    laterWindup: 0.65
-    waveGap: 0.7
-    rotationStep: 60
-    speed: 4.8
-    recovery: 1
-  silverPhase2:
-    waves: 3
-    safeSlots: 3
+    safeSlots: 12
     firstWindup: 0.65
     laterWindup: 0.5
-    waveGap: 0.55
-    rotationStep: 60
-    speed: 5.3
-    recovery: 0.9
-  silverSlotCount: 12
+    waveGap: 0.5
+    rotationStep: 54
+    speed: 5.5
+    recovery: 0.7
+  silverPhase2:
+    waves: 3
+    safeSlots: 8
+    firstWindup: 0.55
+    laterWindup: 0.4
+    waveGap: 0.4
+    rotationStep: 54
+    speed: 6
+    recovery: 0.65
+  silverSlotCount: 40
   silverDamage: 12
   silverLifetime: 4
-  silverRadius: 0.18
+  silverRadius: 0.22
   silverTelegraphRadius: 3.2
-  projectilePoolSize: 48
-  phase2GraceTime: 0.8
+  projectilePoolSize: 128
+  phase2GraceTime: 0.6
   contactDamage: 10
   contactInterval: 1
   logPatterns: 0

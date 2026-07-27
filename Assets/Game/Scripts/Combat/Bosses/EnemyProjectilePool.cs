@@ -4,7 +4,7 @@ using UnityEngine;
 /// <summary>
 /// 적 투사체 풀. 전투 시작 전에 필요한 수만큼 미리 만들어 두고 빌려 쓴다.
 ///
-/// 강화 은빛바람은 한 패턴에 27발을 쓴다. 발사할 때마다 <see cref="GameObject"/>와
+/// 강화 은빛바람은 한 패턴에 최대 96발을 순차 발사한다. 발사할 때마다 <see cref="GameObject"/>와
 /// <see cref="Rigidbody2D"/>, <see cref="Collider2D"/>, 시각 자식을 새로 만들면
 /// 반복 전투에서 프레임이 끊기므로, 준비 단계에서 전부 만들어 두고 값만 갈아 끼운다.
 ///

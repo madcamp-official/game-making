@@ -7,7 +7,7 @@ using UnityEngine;
 ///
 /// 패턴은 두 페이즈 모두 바람탄·독가루·은빛바람 세 종류뿐이고, 2페이즈는 새 패턴이 아니라
 /// 같은 세 패턴의 강화형만 쓴다. 난도는 패턴을 섞어서가 아니라 한 패턴 안의 연속 동작으로 만든다.
-/// 서로 다른 패턴은 절대 겹치지 않는다.
+/// 직접 발사하는 패턴끼리는 겹치지 않지만, 독가루 장판은 이동 경로 압박을 위해 다음 패턴까지 남는다.
 ///
 /// <see cref="EnemyController"/>의 기본 추적 AI와 Rigidbody를 동시에 조작하면 안 되므로,
 /// 이 컴포넌트가 켜질 때 기본 AI를 끈다. 일반 적은 그대로 기본 AI로 움직인다.
@@ -89,7 +89,7 @@ public class ButterfreeBossController : MonoBehaviour
     {
         [Tooltip("파동 수")]
         public int waves = 2;
-        [Tooltip("비워 둘 인접 슬롯 수. 12슬롯 기준 4면 안전 구역이 120도다.")]
+        [Tooltip("비워 둘 인접 슬롯 수. 실제 안전 각도는 전체 슬롯 수에 따라 계산된다.")]
         public int safeSlots = 4;
         public float firstWindup = 0.8f;
         [Tooltip("두 번째 이후 파동의 예고 시간")]
@@ -103,17 +103,17 @@ public class ButterfreeBossController : MonoBehaviour
         public float recovery = 1f;
     }
 
-    // 명세 5절의 최소 반응 시간. Inspector에서 아무리 줄여도 이 아래로는 내려가지 않는다.
-    private const float MinAimWindup = 0.40f;
-    private const float MinZoneWindup = 0.55f;
-    private const float MinSilverFirstWindup = 0.65f;
-    private const float MinSilverLaterWindup = 0.50f;
-    private const float MinPhase2Recovery = 0.70f;
+    // 빠른 전투에서도 읽을 수 있어야 하는 절대 하한. Inspector 값이 더 작아도 이 아래로는 내려가지 않는다.
+    private const float MinAimWindup = 0.35f;
+    private const float MinZoneWindup = 0.45f;
+    private const float MinSilverFirstWindup = 0.55f;
+    private const float MinSilverLaterWindup = 0.40f;
+    private const float MinPhase2Recovery = 0.55f;
 
     // 최대 체력은 Health 컴포넌트의 값을 그대로 쓴다 (프리팹에서 240).
     [Header("기본")]
     [Tooltip("이동 속도. 플레이어는 5다.")]
-    [SerializeField, Min(0f)] private float moveSpeed = 4.2f;
+    [SerializeField, Min(0f)] private float moveSpeed = 4.6f;
     [SerializeField, Min(0f)] private float introDelay = 1f;
     [Tooltip("전투 영역의 중심. 비워 두면 부모(방)의 위치를 쓴다.")]
     [SerializeField] private Transform arenaCenter;
@@ -124,23 +124,23 @@ public class ButterfreeBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float preferredMinDistance = 3.5f;
     [SerializeField, Min(0f)] private float preferredMaxDistance = 5f;
     [Tooltip("한 번의 위치 조정에 쓸 수 있는 최대 시간. 벽에 막혀도 패턴이 무한히 밀리지 않게 한다.")]
-    [SerializeField, Min(0f)] private float repositionMaxDuration = 1.5f;
-    [SerializeField, Min(0f)] private float orbitDuration = 0.45f;
+    [SerializeField, Min(0f)] private float repositionMaxDuration = 1.05f;
+    [SerializeField, Min(0f)] private float orbitDuration = 0.3f;
 
     [Header("패턴 사이 대기")]
-    [SerializeField, Min(0f)] private float patternGapPhase1 = 1f;
-    [SerializeField, Min(0f)] private float patternGapPhase2 = 0.8f;
+    [SerializeField, Min(0f)] private float patternGapPhase1 = 0.7f;
+    [SerializeField, Min(0f)] private float patternGapPhase2 = 0.56f;
 
     [Header("바람탄 — 1페이즈")]
     [SerializeField] private WindSettings windPhase1 = new WindSettings
     {
         volleys = new[]
         {
-            new WindVolley { windup = 0.55f, count = 3, stepAngle = 16f, gapAfter = 0.35f, aim = WindAim.Current },
-            new WindVolley { windup = 0.50f, count = 5, stepAngle = 12f, gapAfter = 0f,    aim = WindAim.Current },
+            new WindVolley { windup = 0.45f, count = 3, stepAngle = 16f, gapAfter = 0.25f, aim = WindAim.Current },
+            new WindVolley { windup = 0.40f, count = 5, stepAngle = 12f, gapAfter = 0f,    aim = WindAim.Current },
         },
-        speed = 6f,
-        recovery = 1f,
+        speed = 7.5f,
+        recovery = 0.7f,
     };
 
     [Header("바람탄 — 2페이즈")]
@@ -148,12 +148,12 @@ public class ButterfreeBossController : MonoBehaviour
     {
         volleys = new[]
         {
-            new WindVolley { windup = 0.45f, count = 5, stepAngle = 9f,  gapAfter = 0.25f, aim = WindAim.Current },
-            new WindVolley { windup = 0.40f, count = 5, stepAngle = 7f,  gapAfter = 0.25f, aim = WindAim.Predict },
-            new WindVolley { windup = 0.45f, count = 6, stepAngle = 12f, gapAfter = 0f,    aim = WindAim.Gate },
+            new WindVolley { windup = 0.38f, count = 5, stepAngle = 9f,  gapAfter = 0.18f, aim = WindAim.Current },
+            new WindVolley { windup = 0.35f, count = 5, stepAngle = 7f,  gapAfter = 0.18f, aim = WindAim.Predict },
+            new WindVolley { windup = 0.38f, count = 6, stepAngle = 12f, gapAfter = 0f,    aim = WindAim.Gate },
         },
-        speed = 6.5f,
-        recovery = 0.8f,
+        speed = 8f,
+        recovery = 0.6f,
     };
 
     [Header("바람탄 — 공통")]
@@ -164,15 +164,15 @@ public class ButterfreeBossController : MonoBehaviour
     [Header("독가루 — 1페이즈")]
     [SerializeField] private PoisonSettings poisonPhase1 = new PoisonSettings
     {
-        count = 3, recordInterval = 0.4f, activationDelay = 0.75f,
-        radius = 0.9f, duration = 2.7f, recovery = 1f, predictIndex = -1,
+        count = 4, recordInterval = 0.28f, activationDelay = 0.6f,
+        radius = 0.9f, duration = 6f, recovery = 0.7f, predictIndex = -1,
     };
 
     [Header("독가루 — 2페이즈")]
     [SerializeField] private PoisonSettings poisonPhase2 = new PoisonSettings
     {
-        count = 5, recordInterval = 0.28f, activationDelay = 0.6f,
-        radius = 0.95f, duration = 3f, recovery = 0.8f, predictIndex = 3, predictLead = 1.2f,
+        count = 6, recordInterval = 0.2f, activationDelay = 0.5f,
+        radius = 0.95f, duration = 7.5f, recovery = 0.6f, predictIndex = 3, predictLead = 1.2f,
     };
 
     [Header("독가루 — 공통")]
@@ -183,40 +183,40 @@ public class ButterfreeBossController : MonoBehaviour
     [Tooltip("장판 중심을 방 경계에서 이만큼 안쪽으로 유지한다.")]
     [SerializeField, Min(0f)] private float poisonArenaMargin = 0.55f;
     [Tooltip("예고 중인 것까지 포함한 장판 수 상한.")]
-    [SerializeField, Min(1)] private int poisonMaxZones = 6;
+    [SerializeField, Min(1)] private int poisonMaxZones = 8;
     [Tooltip("장판이 전투 영역에서 차지할 수 있는 최대 면적 비율.")]
     [SerializeField, Range(0.1f, 1f)] private float poisonMaxAreaRatio = 0.55f;
 
     [Header("은빛바람 — 1페이즈")]
     [SerializeField] private SilverSettings silverPhase1 = new SilverSettings
     {
-        waves = 2, safeSlots = 4, firstWindup = 0.8f, laterWindup = 0.65f,
-        waveGap = 0.7f, rotationStep = 60f, speed = 4.8f, recovery = 1f,
+        waves = 2, safeSlots = 12, firstWindup = 0.65f, laterWindup = 0.5f,
+        waveGap = 0.5f, rotationStep = 54f, speed = 5.5f, recovery = 0.7f,
     };
 
     [Header("은빛바람 — 2페이즈")]
     [SerializeField] private SilverSettings silverPhase2 = new SilverSettings
     {
-        waves = 3, safeSlots = 3, firstWindup = 0.65f, laterWindup = 0.5f,
-        waveGap = 0.55f, rotationStep = 60f, speed = 5.3f, recovery = 0.9f,
+        waves = 3, safeSlots = 8, firstWindup = 0.55f, laterWindup = 0.4f,
+        waveGap = 0.4f, rotationStep = 54f, speed = 6f, recovery = 0.65f,
     };
 
     [Header("은빛바람 — 공통")]
-    [Tooltip("원을 나누는 슬롯 수. 12면 슬롯 간격이 30도다.")]
-    [SerializeField, Min(4)] private int silverSlotCount = 12;
+    [Tooltip("원을 나누는 슬롯 수. 40이면 슬롯 간격이 9도라 안전 구역 밖에서는 맵 가장자리까지 벌어지기 전 통과하기 어렵다.")]
+    [SerializeField, Min(4)] private int silverSlotCount = 40;
     [SerializeField, Min(0)] private int silverDamage = 12;
     [SerializeField, Min(0f)] private float silverLifetime = 4f;
-    [SerializeField, Min(0f)] private float silverRadius = 0.18f;
+    [SerializeField, Min(0f)] private float silverRadius = 0.22f;
     [Tooltip("안전 부채꼴 표시의 반지름.")]
     [SerializeField, Min(0f)] private float silverTelegraphRadius = 3.2f;
 
     [Header("투사체 풀")]
     [Tooltip("미리 만들어 둘 적 투사체 수. 동시에 이 수를 넘겨 발사하지 않는다.")]
-    [SerializeField, Min(1)] private int projectilePoolSize = 48;
+    [SerializeField, Min(1)] private int projectilePoolSize = 128;
 
     [Header("페이즈 전환")]
     [Tooltip("2페이즈에 들어간 뒤 공격하지 않고 두는 시간. 전환을 인지할 여유를 준다.")]
-    [SerializeField, Min(0f)] private float phase2GraceTime = 0.8f;
+    [SerializeField, Min(0f)] private float phase2GraceTime = 0.6f;
 
     [Header("접촉 피해")]
     [SerializeField, Min(0)] private int contactDamage = 10;
@@ -260,6 +260,8 @@ public class ButterfreeBossController : MonoBehaviour
     private readonly List<DamageZone> activeZones = new List<DamageZone>();
     /// <summary>예고 원만 떠 있고 아직 장판이 되지 않은 수. 상한 계산에 함께 센다.</summary>
     private int pendingZones;
+    /// <summary>페이즈 전환 등으로 공격을 정리한 뒤, 이전 독가루 예약이 장판을 다시 만들지 못하게 한다.</summary>
+    private int attackGeneration;
 
     // 셔플 백. 세 패턴을 한 번씩 다 쓰기 전에는 같은 패턴이 다시 나오지 않는다.
     private readonly List<Pattern> bag = new List<Pattern>(3);
@@ -440,6 +442,7 @@ public class ButterfreeBossController : MonoBehaviour
     /// <summary>페이즈 전환·사망에서 남은 탄과 장판, 예고를 한 번에 없앤다.</summary>
     private void ClearAttackObjects()
     {
+        attackGeneration++;
         if (pool != null) pool.ReturnAll();
 
         for (int i = activeZones.Count - 1; i >= 0; i--)
@@ -659,7 +662,6 @@ public class ButterfreeBossController : MonoBehaviour
         PruneZones();
         bool hasPrevious = false;
         Vector2 previous = Vector2.zero;
-        float lastZoneEnd = Time.time;
         int placedCount = 0;
 
         for (int i = 0; i < settings.count; i++)
@@ -683,8 +685,7 @@ public class ButterfreeBossController : MonoBehaviour
                     attackRoot, placed, settings.radius, poisonWarningColor);
                 warning.Pulse(windup);
                 pendingZones++;
-                StartCoroutine(ActivateZoneAfter(placed, windup, settings));
-                lastZoneEnd = Mathf.Max(lastZoneEnd, Time.time + windup + settings.duration);
+                StartCoroutine(ActivateZoneAfter(placed, windup, settings, attackGeneration));
                 placedCount++;
             }
 
@@ -695,22 +696,19 @@ public class ButterfreeBossController : MonoBehaviour
         Trace(string.Format("  독가루: {0}회 시도 중 {1}개 배치, 예고 {2:0.00}초",
             settings.count, placedCount, windup));
 
-        // 마지막 장판이 사라질 때까지 다음 패턴을 시작하지 않는다 (패턴 중첩 금지).
-        // 이 시간이 플레이어가 보스를 때릴 수 있는 구간이기도 하다.
+        // 장판은 다음 패턴까지 남는다. 독가루가 끝날 때까지 기다리면 전투 템포가 크게 느려진다.
+        // 직접 공격 코루틴은 겹치지 않지만, 남은 장판이 다음 회피 경로를 제한한다.
         state = BossState.Recovery;
-        float wait = lastZoneEnd - Time.time;
-        if (wait > 0f) yield return new WaitForSeconds(wait);
-        if (health.IsDead) yield break;
-
         yield return new WaitForSeconds(PatternRecovery(settings.recovery));
     }
 
     /// <summary>예고 원이 다 깜빡인 뒤 실제 장판으로 바꾼다.</summary>
-    private IEnumerator ActivateZoneAfter(Vector2 center, float delay, PoisonSettings settings)
+    private IEnumerator ActivateZoneAfter(Vector2 center, float delay, PoisonSettings settings, int generation)
     {
         yield return new WaitForSeconds(delay);
+        if (generation != attackGeneration || health.IsDead) yield break;
+
         pendingZones = Mathf.Max(0, pendingZones - 1);
-        if (health.IsDead) yield break;
 
         DamageZone zone = DamageZone.Spawn(attackRoot, center, settings.radius, settings.duration,
             poisonDamage, poisonTickInterval, poisonZoneColor);
