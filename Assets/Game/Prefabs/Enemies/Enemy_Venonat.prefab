@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 34
+  maxHealth: 52
   invincibleDuration: 0.3
 --- !u!114 &3485687602081994872
 MonoBehaviour:
@@ -222,17 +222,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 2.4
+  moveSpeed: 2.9
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
-  attackDamage: 8
+  attackDamage: 10
   attackCooldown: 1
-  goldReward: 4
+  goldReward: 6
   keepDistance: 4
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
   basicAIEnabled: 1
+  aggroOnSpawn: 1
 --- !u!114 &6951720428796443602
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -273,12 +274,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPoisonAbility
   range: 6.5
-  cooldown: 4.5
-  initialDelay: 1.6
+  minRange: 0
+  cooldown: 3
+  initialDelay: 1
   radius: 1.26
-  windup: 0.7
-  duration: 5
-  damage: 8
+  windup: 0.55
+  duration: 5.5
+  damage: 10
   tickInterval: 1
   predictLead: 0.6
   warningColor: {r: 0.75, g: 0.35, b: 0.85, a: 0.35}

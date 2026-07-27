@@ -17,6 +17,7 @@ public class EnemyAnimator : MonoBehaviour
 
     private Animator animator;
     private Rigidbody2D body;
+    private EnemyController controller;
     private Vector2 facing = Vector2.down;
     private string currentState = "";
     private string actionState;
@@ -25,6 +26,7 @@ public class EnemyAnimator : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         body = GetComponent<Rigidbody2D>();
+        controller = GetComponent<EnemyController>();
     }
 
     /// <summary>
@@ -43,14 +45,22 @@ public class EnemyAnimator : MonoBehaviour
     {
         Vector2 velocity = body.linearVelocity;
         bool moving = velocity.sqrMagnitude > 0.01f;
+        // 몸이 닿아 있으면 속도가 0이지만 계속 밀고 있는 상태다. 이때 멈춘 그림으로 바뀌면
+        // 붙어서 때리는 내내 굳어 보이므로, 추적 중이면 걷기를 유지한다.
+        bool engaged = controller != null && controller.IsEngaged;
+
         // 시전 중에는 방향을 고정한다. 돌진처럼 속도가 실리는 동작에서 몸이 홱 돌아버리면
         // 예고를 보고 잡은 위치가 무의미해진다.
-        if (moving && actionState == null) facing = velocity.normalized;
+        if (actionState == null)
+        {
+            if (moving) facing = velocity.normalized;
+            else if (engaged) facing = controller.FacingDirection;
+        }
 
         int octant = Mathf.RoundToInt(Mathf.Atan2(facing.y, facing.x) * Mathf.Rad2Deg / 45f);
         int row = RowForOctant[(octant + 8) % 8];
 
-        string prefix = actionState ?? (moving ? "Walk" : "Idle");
+        string prefix = actionState ?? (moving || engaged ? "Walk" : "Idle");
         string state = prefix + "_" + row;
         if (state != currentState)
         {

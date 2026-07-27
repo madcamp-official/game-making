@@ -26,9 +26,21 @@ public class EnemyController : MonoBehaviour
     [SerializeField, Min(0f)] private float knockbackMultiplier = 1f;
     [Tooltip("기본 추적 AI. 전용 보스 컨트롤러가 이동을 맡을 때만 끈다.")]
     [SerializeField] private bool basicAIEnabled = true;
+    [Tooltip("방에 들어온 순간부터 추적을 시작한다. 끄면 감지 범위에 들어와야 움직인다.")]
+    [SerializeField] private bool aggroOnSpawn = true;
 
     /// <summary>한 번 어그로가 끌리면 절대 풀리지 않는다.</summary>
     public bool IsAggro { get; private set; }
+
+    /// <summary>
+    /// 추적을 시작했고 아직 싸울 수 있는 상태. 벽이나 플레이어에 막혀 제자리여도 참이다.
+    /// 애니메이터가 이걸 보고 걷기를 유지한다 — 실제 속도로만 판단하면 몸이 닿는 순간
+    /// 속도가 0이 되면서 멈춰 선 그림으로 바뀐다.
+    /// </summary>
+    public bool IsEngaged { get; private set; }
+
+    /// <summary>지금 향하고 있는 방향. 막혀서 속도가 0이어도 마지막 방향을 유지한다.</summary>
+    public Vector2 FacingDirection { get; private set; } = Vector2.down;
 
     /// <summary>
     /// 기본 추적 AI를 켜고 끈다. 전용 컨트롤러와 이 스크립트가 동시에 Rigidbody를 조작하면
@@ -74,6 +86,9 @@ public class EnemyController : MonoBehaviour
             playerHealth = pc.GetComponent<Health>();
             playerCollider = pc.GetComponent<Collider2D>();
         }
+        // 방에 들어서는 순간 전부 달려든다. 감지 범위를 기다리면 방 반대편의 적은
+        // 플레이어가 걸어올 때까지 가만히 서 있어서 한 마리씩 상대하게 된다.
+        if (aggroOnSpawn) IsAggro = true;
     }
 
     private void OnDestroy()
@@ -98,18 +113,24 @@ public class EnemyController : MonoBehaviour
 
         if (health.IsDead || player == null)
         {
+            IsEngaged = false;
             body.linearVelocity = Vector2.zero;
             return;
         }
 
         if (playerHealth != null && playerHealth.IsDead)
         {
+            IsEngaged = false;
             body.linearVelocity = Vector2.zero;
             return;
         }
 
         float distance = Vector2.Distance(transform.position, player.position);
         if (distance <= detectRange) IsAggro = true;
+
+        IsEngaged = IsAggro;
+        Vector2 toPlayer = (Vector2)player.position - (Vector2)transform.position;
+        if (toPlayer.sqrMagnitude > 0.0001f) FacingDirection = toPlayer.normalized;
 
         if (IsInAttackRange(distance))
         {
