@@ -501,8 +501,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatRoomController
   exitDoor: {fileID: 0}
   isBossRoom: 0
-  clearGoldReward: 5
-  clearHealAmount: 20
   bossRewardRelic: {fileID: 0}
 --- !u!4 &689315469
 Transform:

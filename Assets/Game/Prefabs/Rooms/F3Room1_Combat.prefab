@@ -4751,8 +4751,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatRoomController
   exitDoor: {fileID: 7125249609897407262}
   isBossRoom: 0
-  clearGoldReward: 5
-  clearHealAmount: 20
   bossRewardRelic: {fileID: 0}
 --- !u!1001 &4439312430164710601
 PrefabInstance:

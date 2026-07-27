@@ -15,13 +15,17 @@ MonoBehaviour:
   floorName: "\uC232"
   roomPrefabs:
   - {fileID: 2579835144419204525, guid: 3fa93d7980be542e490c702224869f71, type: 3}
+  - {fileID: 5295198522012122135, guid: 476b72ca1cfe4c1d8884dc12d787839f, type: 3}
   - {fileID: 4634163765385586772, guid: ca9e4e61037164d2887f6f46d3bf3ff2, type: 3}
   - {fileID: 5295198522012122135, guid: 0333b3901c3ac499fb894689593344e0, type: 3}
+  - {fileID: 5295198522012122135, guid: c76223b123b14d898462f301ca007cce, type: 3}
   - {fileID: 7991657534310858653, guid: 57cfcd3f892aa4eeebc5d7ee84a624f4, type: 3}
   - {fileID: 4354520585081088859, guid: 81ec35d79a1294707ae0baf918417355, type: 3}
   roomNames:
   - "\uC804\uD22C"
+  - "\uC804\uD22C"
   - "\uC774\uBCA4\uD2B8"
+  - "\uC804\uD22C"
   - "\uC804\uD22C"
   - "\uC0C1\uC810"
   - "\uBCF4\uC2A4"

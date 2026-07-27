@@ -4124,7 +4124,7 @@ GameObject:
   - component: {fileID: 3376704584372149084}
   - component: {fileID: 5261148847127758377}
   m_Layer: 0
-  m_Name: F2Room3_Combat
+  m_Name: F2Room5_Combat
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4171,8 +4171,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CombatRoomController
   exitDoor: {fileID: 7510566556247789554}
   isBossRoom: 0
-  clearGoldReward: 5
-  clearHealAmount: 20
   bossRewardRelic: {fileID: 0}
 --- !u!1 &5139621663575868477
 GameObject:

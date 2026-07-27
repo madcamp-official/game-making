@@ -10,10 +10,6 @@ public class CombatRoomController : MonoBehaviour
     [SerializeField] private ExitDoor exitDoor;
     [SerializeField] private bool isBossRoom;
 
-    [Header("일반 전투방 클리어 보상 (재화 또는 회복 중 무작위)")]
-    [SerializeField, Min(0)] private int clearGoldReward = 5;
-    [SerializeField, Min(0)] private int clearHealAmount = 20;
-
     [Header("보스방 보상 유물 (1·2층)")]
     [Tooltip("비워 두면 유물 등장 순서에서 다음 유물을 준다. 특정 유물을 고정하고 싶을 때만 채운다.")]
     [SerializeField] private RelicData bossRewardRelic;
@@ -50,31 +46,12 @@ public class CombatRoomController : MonoBehaviour
         }
     }
 
-    // 일반 전투방: 재화 또는 회복 중 하나. 보스방: 보상 유물.
+    // 일반 전투방은 클리어해도 아무것도 주지 않는다. 보스방만 보상 유물을 준다.
     // 어느 쪽이든 먹다남은음식이 있으면 방을 정리한 값으로 체력을 조금 회복한다.
     private void GiveClearReward()
     {
         GiveLeftoversHeal();
-
-        if (isBossRoom)
-        {
-            RelicManager.GrantReward(bossRewardRelic);
-            return;
-        }
-
-        if (Random.value < 0.5f && clearGoldReward > 0)
-        {
-            if (RunManager.Instance != null) RunManager.Instance.AddGold(clearGoldReward);
-            if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage("방 클리어! 보상으로 " + clearGoldReward + "G를 얻었다.", 2f);
-        }
-        else if (clearHealAmount > 0)
-        {
-            Health playerHealth = FindPlayerHealth();
-            if (playerHealth != null) playerHealth.Heal(clearHealAmount);
-            if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage("방 클리어! 체력을 " + clearHealAmount + " 회복했다.", 2f);
-        }
+        if (isBossRoom) RelicManager.GrantReward(bossRewardRelic);
     }
 
     // 먹다남은음식: 전투방을 정리할 때마다 체력을 조금 회복한다.
