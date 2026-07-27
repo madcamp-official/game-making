@@ -26,7 +26,8 @@ public class ButterfreeBossController : MonoBehaviour
 
     // 최대 체력은 Health 컴포넌트의 값을 그대로 쓴다 (프리팹에서 240).
     [Header("기본")]
-    [SerializeField, Min(0f)] private float moveSpeed = 2.8f;
+    [Tooltip("이동 속도. 플레이어는 5다. 명세 초깃값은 2.8이었으나 너무 느려서 올렸다.")]
+    [SerializeField, Min(0f)] private float moveSpeed = 4.2f;
     [SerializeField, Min(0f)] private float introDelay = 1f;
     [Tooltip("전투 영역의 중심. 비워 두면 부모(방)의 위치를 쓴다.")]
     [SerializeField] private Transform arenaCenter;

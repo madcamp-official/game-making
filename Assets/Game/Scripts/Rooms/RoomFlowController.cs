@@ -59,6 +59,18 @@ public class RoomFlowController : MonoBehaviour
         LoadRoom(CurrentRoomIndex + 1);
     }
 
+    /// <summary>
+    /// 개발용: 임의의 층·방으로 바로 이동한다. <paramref name="roomIndex"/>가 음수면 그 층의 마지막 방(보스방).
+    /// <see cref="DevHackPanel"/>에서만 쓰며, 개발이 끝나면 같이 지운다.
+    /// </summary>
+    public void WarpTo(int floorIndex, int roomIndex)
+    {
+        if (floors == null || floors.Length == 0) return;
+        CurrentFloorIndex = Mathf.Clamp(floorIndex, 0, floors.Length - 1);
+        int roomCount = floors[CurrentFloorIndex].roomPrefabs.Length;
+        LoadRoom(roomIndex < 0 ? roomCount - 1 : Mathf.Clamp(roomIndex, 0, roomCount - 1));
+    }
+
     private void LoadRoom(int index)
     {
         if (currentRoom != null) Destroy(currentRoom);

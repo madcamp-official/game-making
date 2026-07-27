@@ -52,6 +52,17 @@ public class PlayerEvolution : MonoBehaviour
         StartCoroutine(EvolveRoutine());
     }
 
+    /// <summary>
+    /// 개발용: 연출 없이 지정 단계로 바로 바꾼다.
+    /// <see cref="DevHackPanel"/>에서만 쓰며, 개발이 끝나면 같이 지운다.
+    /// </summary>
+    public void SetStageImmediate(int index)
+    {
+        if (stages == null || stages.Length == 0 || IsEvolving) return;
+        CurrentStageIndex = Mathf.Clamp(index, 0, stages.Length - 1);
+        ApplyStage(stages[CurrentStageIndex]);
+    }
+
     private IEnumerator EvolveRoutine()
     {
         PlayerController controller = GetComponent<PlayerController>();

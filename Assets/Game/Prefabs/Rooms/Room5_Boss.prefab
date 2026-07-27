@@ -5862,7 +5862,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0dd14af3f2466bbd19c68b9881bed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButterfreeBossController
-  moveSpeed: 2.8
+  moveSpeed: 4.2
   introDelay: 1
   arenaCenter: {fileID: 5874861080203317405}
   arenaHalfSize: {x: 8.2, y: 5.2}

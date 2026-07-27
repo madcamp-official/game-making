@@ -11,8 +11,8 @@ using UnityEngine.UI;
 /// </summary>
 public class RelicTooltip : MonoBehaviour
 {
-    private const int PanelWidth = 620;
-    private const int Padding = 18;
+    private const int PanelWidth = 420;
+    private const int Padding = 12;
     private const int GapToIcon = 10;
     private const int ScreenMargin = 12;
 
@@ -57,8 +57,8 @@ public class RelicTooltip : MonoBehaviour
         panel.sizeDelta = new Vector2(PanelWidth, 100f);
 
         Transform fill = panel.GetChild(0);
-        nameText = PixelUi.MakeText(fill, "Name", 48, new Color(1f, 0.86f, 0.42f), TextAnchor.UpperLeft);
-        descText = PixelUi.MakeText(fill, "Desc", 36, new Color(0.86f, 0.89f, 0.95f), TextAnchor.UpperLeft);
+        nameText = PixelUi.MakeText(fill, "Name", 36, new Color(1f, 0.86f, 0.42f), TextAnchor.UpperLeft);
+        descText = PixelUi.MakeText(fill, "Desc", 24, new Color(0.86f, 0.89f, 0.95f), TextAnchor.UpperLeft);
     }
 
     private void Update()

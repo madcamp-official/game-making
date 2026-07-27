@@ -10,8 +10,8 @@ using UnityEngine.UI;
 /// </summary>
 public class RelicPopup : MonoBehaviour
 {
-    private const int PanelWidth = 880;
-    private const int TopOffset = 100;   // 화면 위 HUD 한 줄을 비워 둔다
+    private const int PanelWidth = 620;
+    private const int BottomOffset = 48;   // 화면 아래 조작 안내 줄을 비워 둔다
     private const int Margin = 12;
 
     /// <summary>글자·아이콘 크기 한 벌. 폰트 크기는 모두 12의 배수여야 한다.</summary>
@@ -28,8 +28,8 @@ public class RelicPopup : MonoBehaviour
     // 큰 쪽을 먼저 쓰고, 창이 낮아 패널이 잘릴 때만 작은 쪽으로 내린다.
     private static readonly Tier[] Tiers =
     {
-        new Tier(36, 72, 60, 96, 24),
-        new Tier(24, 48, 36, 64, 16),
+        new Tier(24, 48, 36, 48, 12),
+        new Tier(12, 36, 24, 40, 10),
     };
 
     private RectTransform panel;
@@ -48,10 +48,10 @@ public class RelicPopup : MonoBehaviour
     private void Build()
     {
         panel = PixelUi.MakePanel(transform, "Panel");
-        // 화면 위쪽에 붙인다. 중앙 기준으로 두면 창이 낮을 때 플레이어를 가린다.
-        panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 1f);
-        panel.pivot = new Vector2(0.5f, 1f);
-        panel.anchoredPosition = new Vector2(0f, -TopOffset);
+        // 화면 아래 가운데. 설명을 읽는 동안에도 화면 중앙의 캐릭터가 가려지지 않아야 한다.
+        panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0f);
+        panel.pivot = new Vector2(0.5f, 0f);
+        panel.anchoredPosition = new Vector2(0f, BottomOffset);
         panel.sizeDelta = new Vector2(PanelWidth, 300f);
 
         Transform fill = panel.GetChild(0);
@@ -92,9 +92,9 @@ public class RelicPopup : MonoBehaviour
             if (height <= available) break;
         }
 
-        // 아래가 잘리지 않는 선에서 최대한 위쪽에 붙인다.
-        float top = Mathf.Min(TopOffset, Mathf.Max(Margin, area.height - height - Margin));
-        panel.anchoredPosition = new Vector2(0f, -top);
+        // 위가 잘리지 않는 선에서 최대한 아래쪽에 붙인다.
+        float bottom = Mathf.Min(BottomOffset, Mathf.Max(Margin, area.height - height - Margin));
+        panel.anchoredPosition = new Vector2(0f, bottom);
 
         panel.gameObject.SetActive(true);
         if (routine != null) StopCoroutine(routine);
