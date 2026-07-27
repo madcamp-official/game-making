@@ -2,11 +2,12 @@
 
 라틴 시트: 15px 간격 13x12 격자, 흰 글자 + 우하단 1px 검은 그림자(원본 그대로).
 한글 시트: 10x13px 격자 64x38, 흰 글자만 있으므로 같은 그림자를 생성해 붙인다.
+글리프는 셀 폭 10px을 전부 쓴다 — `ㅏ`의 가로획이 마지막 열에 있어서 9px로 자르면 `ㅣ`가 된다.
 """
 import png
 
-LAT = 'pmd_font_latin.png'
-KOR = 'pmd_font_korean.png'
+LAT = 'PMD_Font_Latin.png'
+KOR = 'PMD_Font_Korean.png'
 
 CELL_W, CELL_H = 12, 14      # 아틀라스 셀 간격
 COLS = 64
@@ -100,20 +101,20 @@ def load_korean():
     glyphs = {}
     for i, ch in enumerate(order):
         c, r = i % 64, i // 64
-        gw, gh = 10, 11                        # 9x10 + 그림자 1px
+        gw, gh = 11, 11                        # 10x10 + 그림자 1px
         bmp = bytearray(gw * gh * 4)
         def put(x, y, c3):
             d = (y * gw + x) * 4
             bmp[d:d + 3] = bytes(c3)
             bmp[d + 3] = 255
-        src = [[px[(((r * 13 + y) * w) + c * 10 + x) * 4] > 128 for x in range(9)]
+        src = [[px[(((r * 13 + y) * w) + c * 10 + x) * 4] > 128 for x in range(10)]
                for y in range(10)]
         for y in range(10):
-            for x in range(9):
+            for x in range(10):
                 if src[y][x]:
                     put(x + 1, y + 1, (0, 0, 0))
         for y in range(10):
-            for x in range(9):
+            for x in range(10):
                 if src[y][x]:
                     put(x, y, (255, 255, 255))
         glyphs[ch] = (gw, gh, BASELINE + 1, bmp)   # 한글 블록은 베이스라인 1px 아래까지
@@ -138,9 +139,7 @@ def main():
                 s = (y * gw + x) * 4
                 d = ((ay + y) * W + ax + x) * 4
                 atlas[d:d + 4] = bmp[s:s + 4]
-        # 라틴은 그림자가 글자 사이 간격 역할을 하므로 폭 그대로,
-        # 한글은 획이 셀을 가득 채워 붙어 보이므로 1px을 더 띄운다.
-        advance = gw + (1 if ord(ch) >= 0x1100 else 0)
+        advance = gw                                      # 그림자 1px이 글자 사이 간격 역할을 한다
         meta.append((ord(ch), ax, ay, gw, gh, advance, 0, top - gh, ))
     png.write('PMDFont_Atlas.png', W, H, atlas)
     with open('PMDFont_glyphs.txt', 'w', encoding='utf-8') as f:
