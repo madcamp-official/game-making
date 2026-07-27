@@ -4736,7 +4736,7 @@ MonoBehaviour:
     count: 4
     recordInterval: 0.28
     activationDelay: 0.6
-    radius: 0.9
+    radius: 1.26
     duration: 6
     recovery: 0.7
     predictIndex: -1
@@ -4745,14 +4745,14 @@ MonoBehaviour:
     count: 6
     recordInterval: 0.2
     activationDelay: 0.5
-    radius: 0.95
+    radius: 1.33
     duration: 7.5
     recovery: 0.6
     predictIndex: 3
     predictLead: 1.2
   poisonDamage: 8
   poisonTickInterval: 1
-  poisonMinSeparation: 0.85
+  poisonMinSeparation: 1.19
   poisonArenaMargin: 0.55
   poisonMaxZones: 8
   poisonMaxAreaRatio: 0.55
@@ -4789,7 +4789,8 @@ MonoBehaviour:
   poisonWarningColor: {r: 0.75, g: 0.35, b: 0.85, a: 0.35}
   poisonZoneColor: {r: 0.45, g: 0.12, b: 0.6, a: 0.65}
   silverColor: {r: 0.6, g: 1, b: 0.95, a: 1}
-  safeZoneColor: {r: 0.3, g: 0.7, b: 1, a: 0.4}
+  safeZoneColor: {r: 0.8, g: 0.93, b: 1, a: 0.16}
+  dangerZoneColor: {r: 0.85, g: 0.1, b: 0.3, a: 0.5}
   windupTint: {r: 1, g: 0.7, b: 0.7, a: 1}
 --- !u!1 &7658749920411860896
 GameObject:

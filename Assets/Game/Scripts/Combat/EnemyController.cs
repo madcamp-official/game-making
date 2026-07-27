@@ -18,6 +18,9 @@ public class EnemyController : MonoBehaviour
     [SerializeField, Min(0)] private int attackDamage = 1;
     [SerializeField, Min(0f)] private float attackCooldown = 1.0f;
     [SerializeField, Min(0)] private int goldReward = 2;
+    [Tooltip("이 거리를 유지하려 한다. 0이면 그냥 플레이어에게 붙는다. " +
+             "원거리 적이 근접전에 말려들지 않게 하는 값이다.")]
+    [SerializeField, Min(0f)] private float keepDistance;
     [SerializeField, Min(0f)] private float knockbackStunDuration = 0.15f;
     [Tooltip("넉백 배율. 0이면 넉백 면역. 보스는 패턴 위치가 무너지지 않도록 0을 쓴다.")]
     [SerializeField, Min(0f)] private float knockbackMultiplier = 1f;
@@ -119,14 +122,30 @@ public class EnemyController : MonoBehaviour
         }
         else if (IsAggro)
         {
-            Vector2 direction = ((Vector2)player.position - (Vector2)transform.position).normalized;
-            body.linearVelocity = direction * moveSpeed;
+            body.linearVelocity = DesiredVelocity(distance);
         }
         else
         {
             body.linearVelocity = Vector2.zero;
         }
     }
+
+    /// <summary>
+    /// 추적 속도. <see cref="keepDistance"/>가 0이면 곧장 다가가고, 값이 있으면
+    /// 그 거리를 사이에 두고 너무 가까우면 물러난다. 딱 그 거리 부근(±<see cref="DistanceDeadZone"/>)에서는
+    /// 멈춘다 — 안 그러면 경계선에서 앞뒤로 떨리기만 한다.
+    /// </summary>
+    private Vector2 DesiredVelocity(float distance)
+    {
+        Vector2 toPlayer = ((Vector2)player.position - (Vector2)transform.position).normalized;
+        if (keepDistance <= 0f) return toPlayer * moveSpeed;
+
+        float gap = distance - keepDistance;
+        if (Mathf.Abs(gap) <= DistanceDeadZone) return Vector2.zero;
+        return toPlayer * (gap > 0f ? moveSpeed : -moveSpeed);
+    }
+
+    private const float DistanceDeadZone = 0.35f;
 
     /// <summary>
     /// 중심 거리 또는 콜라이더 표면 거리 중 하나라도 만족하면 공격 범위 안이다.

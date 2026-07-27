@@ -165,21 +165,22 @@ public class ButterfreeBossController : MonoBehaviour
     [SerializeField] private PoisonSettings poisonPhase1 = new PoisonSettings
     {
         count = 4, recordInterval = 0.28f, activationDelay = 0.6f,
-        radius = 0.9f, duration = 6f, recovery = 0.7f, predictIndex = -1,
+        radius = 1.26f, duration = 6f, recovery = 0.7f, predictIndex = -1,
     };
 
     [Header("독가루 — 2페이즈")]
     [SerializeField] private PoisonSettings poisonPhase2 = new PoisonSettings
     {
         count = 6, recordInterval = 0.2f, activationDelay = 0.5f,
-        radius = 0.95f, duration = 7.5f, recovery = 0.6f, predictIndex = 3, predictLead = 1.2f,
+        radius = 1.33f, duration = 7.5f, recovery = 0.6f, predictIndex = 3, predictLead = 1.2f,
     };
 
     [Header("독가루 — 공통")]
     [SerializeField, Min(0)] private int poisonDamage = 8;
     [SerializeField, Min(0f)] private float poisonTickInterval = 1f;
-    [Tooltip("직전 장판 중심과 최소한 이만큼 떨어뜨린다. 더 가까우면 이동 방향으로 밀거나 생략한다.")]
-    [SerializeField, Min(0f)] private float poisonMinSeparation = 0.85f;
+    [Tooltip("직전 장판 중심과 최소한 이만큼 떨어뜨린다. 더 가까우면 이동 방향으로 밀거나 생략한다. " +
+             "장판 크기와 함께 움직여야 한다 — 반지름만 키우면 장판들이 한 덩어리로 뭉친다.")]
+    [SerializeField, Min(0f)] private float poisonMinSeparation = 1.19f;
     [Tooltip("장판 중심을 방 경계에서 이만큼 안쪽으로 유지한다.")]
     [SerializeField, Min(0f)] private float poisonArenaMargin = 0.55f;
     [Tooltip("예고 중인 것까지 포함한 장판 수 상한.")]
@@ -232,8 +233,10 @@ public class ButterfreeBossController : MonoBehaviour
     [SerializeField] private Color poisonWarningColor = new Color(0.75f, 0.35f, 0.85f, 0.35f);
     [SerializeField] private Color poisonZoneColor = new Color(0.45f, 0.12f, 0.6f, 0.65f);
     [SerializeField] private Color silverColor = new Color(0.6f, 1f, 0.95f, 1f);
-    // 숲 바닥이 초록이라 초록 계열 안전 표시는 거의 보이지 않는다. 파랑 계열로 대비를 준다.
-    [SerializeField] private Color safeZoneColor = new Color(0.3f, 0.7f, 1f, 0.4f);
+    // 은빛바람은 위험한 쪽을 진하게 칠하고 안전한 쪽은 옅게 남긴다.
+    // 숲 바닥이 초록이라 초록 계열로는 어느 쪽도 읽히지 않아, 둘 다 초록을 피한다.
+    [SerializeField] private Color safeZoneColor = new Color(0.8f, 0.93f, 1f, 0.16f);
+    [SerializeField] private Color dangerZoneColor = new Color(0.85f, 0.1f, 0.3f, 0.5f);
     [SerializeField] private Color windupTint = new Color(1f, 0.7f, 0.7f, 1f);
 
     private const float TelegraphLineLength = 5f;
@@ -803,21 +806,32 @@ public class ButterfreeBossController : MonoBehaviour
             state = BossState.Windup;
             SetWindupTint(true);
 
-            // 파동당 원형 예고 1개 + 안전 부채꼴 1개만 쓴다 (탄마다 예고선을 만들지 않는다).
+            // 파동당 원형 예고 1개 + 부채꼴 2개만 쓴다 (탄마다 예고선을 만들지 않는다).
             AttackTelegraph ring = AttackTelegraph.CreateRing(
                 attackRoot, origin, silverTelegraphRadius, silverColor * 0.8f);
             ring.Pulse(windup);
+
+            // 칠하는 쪽은 탄이 실제로 날아오는 구역이다. 안전 구역은 그 여집합이라
+            // 안전 부채꼴의 정반대 방향으로 나머지 각도를 덮는다.
+            AttackTelegraph danger = AttackTelegraph.CreateSector(
+                attackRoot, origin, silverTelegraphRadius,
+                safeCenter + 180f, 360f - safeSweep, dangerZoneColor);
+            danger.Pulse(windup);
+
             // 안전 표시는 깜빡이지 않는다. 어두워지는 순간에 안 보이면 안전 구역을 읽을 수 없다.
             AttackTelegraph safe = AttackTelegraph.CreateSector(
                 attackRoot, origin, silverTelegraphRadius, safeCenter, safeSweep, safeZoneColor);
             safe.Hold(windup);
 
             // 첫 예고에서만 안전 구역이 어느 쪽으로 돌지 흐릿한 부채꼴로 보여 준다.
+            // 안전색이 옅어져서 그대로 곱하면 안 보인다. 알파만 되돌려 쓴다.
             if (wave == 0 && settings.waves > 1)
             {
+                Color hintColor = safeZoneColor;
+                hintColor.a = Mathf.Min(1f, safeZoneColor.a * 2.5f);
                 AttackTelegraph hint = AttackTelegraph.CreateSector(
                     attackRoot, origin, silverTelegraphRadius * 0.75f, safeCenter, safeSweep,
-                    safeZoneColor * 0.6f);
+                    hintColor);
                 hint.SweepTo(safeCenter, safeCenter + rotation, windup);
             }
 

@@ -54,8 +54,10 @@ public static class PrimitiveSprites
     /// </summary>
     public static Sprite Sector(float sweepDegrees)
     {
-        // 5도 단위로 묶어 캐시한다. 은빛바람은 90·120도만 쓰므로 실제로는 두 장이면 된다.
-        int key = Mathf.Clamp(Mathf.RoundToInt(sweepDegrees / 5f) * 5, 5, 360);
+        // 1도 단위로 캐시한다. 은빛바람은 안전 부채꼴과 그 여집합인 위험 부채꼴을 맞붙여 그리는데,
+        // 각도를 뭉뚱그리면 경계가 실제 탄 궤적과 어긋나 예고가 거짓말이 된다.
+        // 실제로 쓰는 각도는 페이즈당 두 종류뿐이라 캐시가 커질 일은 없다.
+        int key = Mathf.Clamp(Mathf.RoundToInt(sweepDegrees), 1, 360);
         if (!sectors.TryGetValue(key, out Sprite sprite) || sprite == null)
         {
             sprite = MakeSector(key);
