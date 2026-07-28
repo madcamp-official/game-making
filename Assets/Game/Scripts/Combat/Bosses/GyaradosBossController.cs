@@ -170,15 +170,10 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float enterClearance = 1.6f;
 
     [Header("노출 상태")]
-    [SerializeField, Min(1f)] private float exposedDurationPhase1 = 11f;
-    [SerializeField, Min(1f)] private float exposedDurationPhase2 = 9f;
+    [SerializeField, Min(1f)] private float exposedDurationPhase1 = 6.5f;
+    [SerializeField, Min(1f)] private float exposedDurationPhase2 = 5f;
     [SerializeField, Min(0f)] private float innerGapPhase1 = 0.22f;
     [SerializeField, Min(0f)] private float innerGapPhase2 = 0.14f;
-    [Tooltip("내부 패턴 셔플 백 한 벌에 넣는 똬리치기 수. 소환보다 화면 시간이 두 배 넘게 길어 " +
-             "반씩 넣으면 똬리치기만 하는 것처럼 느껴진다.")]
-    [SerializeField, Min(1)] private int coilPerInnerBag = 1;
-    [Tooltip("내부 패턴 셔플 백 한 벌에 넣는 잉어킹 소환 수.")]
-    [SerializeField, Min(1)] private int summonPerInnerBag = 2;
 
     [Header("잠항 상태")]
     [Tooltip("한 번의 잠항에서 사용하는 외부 패턴 수")]
@@ -332,15 +327,11 @@ public class GyaradosBossController : MonoBehaviour
     /// <summary>상태·페이즈·사망으로 예약된 공격을 무효화하는 세대 번호.</summary>
     private int attackGeneration;
 
-    // 셔플 백. 외부·내부 패턴을 따로 관리한다.
+    // 셔플 백. 외부 패턴에만 쓴다 — 내부 패턴은 "이탈 직전 한 번의 소환, 그 밖에는 똬리치기"로
+    // 규칙이 정해져 있어 뽑을 것이 없다.
     private readonly List<OuterPattern> outerBag = new List<OuterPattern>(2);
-    private readonly List<InnerPattern> innerBag = new List<InnerPattern>(2);
     private bool hasLastOuter;
     private OuterPattern lastOuter;
-    private bool hasLastInner;
-    private InnerPattern lastInner;
-    /// <summary>첫 전투의 첫 내부 패턴은 똬리치기로 고정한다.</summary>
-    private bool firstInnerPattern = true;
 
     private float exposedEndTime;
 
@@ -621,7 +612,16 @@ public class GyaradosBossController : MonoBehaviour
                 break;
             }
 
-            InnerPattern next = firstInnerPattern ? InnerPattern.Coil : DrawInner();
+            // 잉어킹 소환은 이탈 <b>직전</b>에만 쓴다. 잉어킹은 갸라도스가 잠항한 뒤에도 남아
+            // 하이드로펌프와 범람을 피할 길을 좁히는 장애물이므로, 노출이 끝나기 직전에 깔아야
+            // 제 값을 한다. 노출 중간에 깔면 때리는 동안 치워 버리기만 한다.
+            // 그래서 똬리치기를 한 번 더 넣을 자리가 있는 동안에는 똬리치기를 쓰고, 그만한
+            // 시간이 남지 않으면 소환으로 마무리하고 곧바로 이탈한다.
+            float gap = inPhase2 ? innerGapPhase2 : innerGapPhase1;
+            bool closing = remaining < MinInnerDuration(InnerPattern.Coil) + gap
+                                       + MinInnerDuration(InnerPattern.Summon);
+            InnerPattern next = closing ? InnerPattern.Summon : InnerPattern.Coil;
+
             float minimum = MinInnerDuration(next);
             if (remaining < minimum)
             {
@@ -630,21 +630,16 @@ public class GyaradosBossController : MonoBehaviour
                 break;
             }
 
-            if (firstInnerPattern)
-            {
-                // 셔플 백은 두 번째 패턴부터 쓴다. 첫 패턴은 고정이므로 직전 기록만 남긴다.
-                firstInnerPattern = false;
-                hasLastInner = true;
-            }
-            lastInner = next;
-            Trace(string.Format("  내부 패턴 {0} 시작 (남은 노출 {1:0.00}초, 백 {2})",
-                next, remaining, InnerBagText()));
+            Trace(string.Format("  내부 패턴 {0} 시작 (남은 노출 {1:0.00}초{2})",
+                next, remaining, closing ? ", 이탈 직전 마무리" : ""));
 
             if (next == InnerPattern.Summon) yield return SummonRoutine();
             else yield return CoilRoutine();
 
             if (health.IsDead) yield break;
-            yield return new WaitForSeconds(inPhase2 ? innerGapPhase2 : innerGapPhase1);
+            // 소환은 이탈 직전의 마지막 한 수다. 쓰고 나면 더 붙잡지 않고 물속으로 사라진다.
+            if (closing) break;
+            yield return new WaitForSeconds(gap);
         }
     }
 
@@ -787,11 +782,9 @@ public class GyaradosBossController : MonoBehaviour
         currentField.ForceChangeNow();
         Trace("2페이즈 해류 " + currentField.SignText());
 
-        // 두 셔플 백을 모두 비운다.
+        // 외부 패턴 셔플 백을 비운다.
         outerBag.Clear();
-        innerBag.Clear();
         hasLastOuter = false;
-        hasLastInner = false;
 
         yield return ExitRoutine();
     }
@@ -826,52 +819,6 @@ public class GyaradosBossController : MonoBehaviour
         outerBag.RemoveAt(index);
         return next;
     }
-
-    /// <summary>
-    /// 다음 내부 패턴. 셔플 백을 <see cref="coilPerInnerBag"/>:<see cref="summonPerInnerBag"/>로
-    /// 채운다.
-    ///
-    /// 반씩 넣으면 <b>횟수</b>는 같아도 화면에 나오는 <b>시간</b>은 똬리치기가 두 배 넘게 길다 —
-    /// 똬리치기는 두 번 때리느라 예고·간격·후딜을 합쳐 2초에 가깝고, 잉어킹 소환은 1초가 채 안
-    /// 된다. 그래서 "똬리치기만 한다"고 느껴진다. 소환을 더 많이 넣어 시간 비중을 맞춘다.
-    /// </summary>
-    private InnerPattern DrawInner()
-    {
-        if (innerBag.Count == 0)
-        {
-            for (int i = 0; i < coilPerInnerBag; i++) innerBag.Add(InnerPattern.Coil);
-            for (int i = 0; i < summonPerInnerBag; i++) innerBag.Add(InnerPattern.Summon);
-            Shuffle(innerBag);
-
-            // 꺼내는 쪽은 리스트의 끝이다. 직전과 같은 패턴이 연달아 나오지 않게, 다른 패턴이
-            // 백에 있으면 끝으로 끌어온다.
-            int last = innerBag.Count - 1;
-            if (hasLastInner && innerBag[last] == lastInner)
-                for (int i = 0; i < last; i++)
-                    if (innerBag[i] != lastInner)
-                    {
-                        (innerBag[i], innerBag[last]) = (innerBag[last], innerBag[i]);
-                        break;
-                    }
-        }
-
-        int index = innerBag.Count - 1;
-        InnerPattern next = innerBag[index];
-        innerBag.RemoveAt(index);
-        hasLastInner = true;
-        return next;
-    }
-
-    private static void Shuffle(List<InnerPattern> list)
-    {
-        for (int i = list.Count - 1; i > 0; i--)
-        {
-            int j = Random.Range(0, i + 1);
-            (list[i], list[j]) = (list[j], list[i]);
-        }
-    }
-
-    private string InnerBagText() => innerBag.Count == 0 ? "비어 있음" : string.Join(", ", innerBag);
 
     /// <summary>패턴이 판정과 후딜까지 끝내는 데 최소로 걸리는 시간. 남은 노출 시간과 견준다.</summary>
     private float MinInnerDuration(InnerPattern pattern)

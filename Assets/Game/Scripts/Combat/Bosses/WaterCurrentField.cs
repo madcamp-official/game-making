@@ -41,6 +41,7 @@ public class WaterCurrentField : MonoBehaviour
 
     private bool running;
     private float nextChangeTime;
+    private float telegraphStartTime;
     private float telegraphEndTime;
 
     private Transform player;
@@ -56,6 +57,8 @@ public class WaterCurrentField : MonoBehaviour
     private float arrowScrollSpeed;
     private Color arrowColor;
     private Color boundaryColor;
+    /// <summary>수로마다 쌓인 화살표 흐름 거리. 방향이 도는 동안에도 튀지 않게 누적으로 관리한다.</summary>
+    private readonly float[] scrollOffset = new float[LaneCount];
 
     /// <summary>방향 변경을 예고하는 중인지. 화살표 점멸 연출이 이 값을 본다.</summary>
     public bool IsChanging { get; private set; }
@@ -199,6 +202,7 @@ public class WaterCurrentField : MonoBehaviour
         PreviousSignText = SignText();
         RollSigns(pendingSigns, signs);
         IsChanging = true;
+        telegraphStartTime = Time.time;
         telegraphEndTime = Time.time + telegraphTime;
         ChangeTelegraphStarted?.Invoke();
     }
@@ -325,37 +329,56 @@ public class WaterCurrentField : MonoBehaviour
     }
 
     /// <summary>
-    /// 화살표를 흐르는 방향으로 흘려보낸다. 변경을 예고하는 동안에는 기존 방향과 새 방향을
-    /// 번갈아 보여 줘서, 어느 쪽으로 바뀔지 미리 읽을 수 있게 한다.
+    /// 화살표를 흐르는 방향으로 흘려보낸다.
+    ///
+    /// 방향 변경을 예고하는 동안에는 예전 방향과 새 방향을 <b>번갈아 보여 주지 않는다.</b> 그렇게
+    /// 하면 화살표가 초당 몇 번씩 홱홱 뒤집혀, 어느 쪽으로 바뀌는지 읽히기는커녕 화면만 어지럽다.
+    /// 대신 예고 시간에 걸쳐 <b>천천히 돌린다</b> — 도는 것이 곧 예고이고, 다 돌아간 방향이 곧
+    /// 새 방향이다. 흐르는 속도도 같은 비율로 줄었다가 반대로 붙으므로, 화살표가 서서히 멈추고
+    /// 뒤돌아 다시 흐르는 모습이 된다.
     /// </summary>
     private void AnimateArrows()
     {
         if (arrows == null) return;
 
-        bool showPending = IsChanging && Mathf.Repeat(Time.time * 6f, 2f) >= 1f;
-        ApplyArrowDirections(showPending ? pendingSigns : signs);
+        // 예고 진행도. 0이면 아직 예전 방향, 1이면 완전히 새 방향이다.
+        float turn = 0f;
+        if (IsChanging && telegraphEndTime > telegraphStartTime)
+            turn = Mathf.SmoothStep(0f, 1f,
+                Mathf.Clamp01((Time.time - telegraphStartTime) / (telegraphEndTime - telegraphStartTime)));
 
-        float laneHeight = halfSize.y * 2f / 3f;
-        float alpha = arrowColor.a * (IsChanging ? 0.55f + 0.45f * Mathf.Abs(Mathf.Sin(Time.time * 9f)) : 1f);
+        // 도는 동안에는 옅게 숨 쉬어 "지금 바뀌는 중"임을 한 번 더 알린다. 깜빡임이 아니라
+        // 완만한 호흡이라 눈에 거슬리지 않는다.
+        float alpha = arrowColor.a * (IsChanging ? 0.75f + 0.25f * Mathf.Abs(Mathf.Sin(Time.time * 4f)) : 1f);
 
         for (int lane = 0; lane < LaneCount; lane++)
         {
             // 수로 한가운데 높이. 경계가 center.y ± halfSize.y/3이므로 각 수로의 높이는
-            // laneHeight로 같고, 중심은 아래·가운데·위가 각각 -laneHeight, 0, +laneHeight다.
+            // 모두 같고, 중심은 아래·가운데·위가 각각 -laneHeight, 0, +laneHeight다.
             float laneY = LaneCenterY(lane);
-            int sign = (showPending ? pendingSigns : signs)[lane];
             SpriteRenderer[] row = arrows[lane];
-            // 흐름이 눈에 보이도록 방향대로 계속 밀어 준다. 줄 전체 길이를 한 바퀴 돌면 제자리로
-            // 돌아오므로, 어느 방향으로 흘러도 화살표가 전투장 밖으로 새지 않는다.
-            float span = arrowSpacing * row.Length;
-            float scroll = Time.time * arrowScrollSpeed * sign;
 
+            // 이 수로가 실제로 방향을 바꾸는 경우에만 돌린다. 그대로인 수로는 흔들리지 않는다.
+            float from = signs[lane];
+            float to = IsChanging ? pendingSigns[lane] : signs[lane];
+            float flow = Mathf.Lerp(from, to, turn);
+            float angle = Mathf.Lerp(from < 0f ? 180f : 0f, to < 0f ? 180f : 360f, turn);
+            if (Mathf.Approximately(from, to)) angle = from < 0f ? 180f : 0f;
+
+            // 흐름이 눈에 보이도록 계속 밀어 준다. 부호가 도중에 뒤집히므로 시각(Time.time)에
+            // 곱하지 않고 프레임마다 누적한다 — 곱했다가는 뒤집히는 순간 위치가 통째로 튄다.
+            float span = arrowSpacing * row.Length;
+            scrollOffset[lane] += Time.deltaTime * arrowScrollSpeed * flow;
+            scrollOffset[lane] = Mathf.Repeat(scrollOffset[lane], span);
+
+            Quaternion rotation = Quaternion.Euler(0f, 0f, angle);
             for (int i = 0; i < row.Length; i++)
             {
                 if (row[i] == null) continue;
                 float x = center.x - halfSize.x +
-                          Mathf.Repeat(i * arrowSpacing + arrowSpacing * 0.5f + scroll, span);
+                          Mathf.Repeat(i * arrowSpacing + arrowSpacing * 0.5f + scrollOffset[lane], span);
                 row[i].transform.position = new Vector3(x, laneY, 0f);
+                row[i].transform.rotation = rotation;
                 Color c = arrowColor;
                 c.a = alpha;
                 row[i].color = c;

@@ -2613,12 +2613,10 @@ MonoBehaviour:
   exitDuration: 0.34
   enterDuration: 0.42
   enterClearance: 1.6
-  exposedDurationPhase1: 11
-  exposedDurationPhase2: 9
+  exposedDurationPhase1: 6.5
+  exposedDurationPhase2: 5
   innerGapPhase1: 0.22
   innerGapPhase2: 0.14
-  coilPerInnerBag: 1
-  summonPerInnerBag: 2
   outerPatternsPhase1: 1
   outerPatternsPhase2: 2
   outerGapPhase2: 0.18
