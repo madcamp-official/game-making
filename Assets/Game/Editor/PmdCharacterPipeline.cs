@@ -44,11 +44,33 @@ public static class PmdCharacterPipeline
         }
     }
 
+    /// <summary>
+    /// 다른 시트의 한 프레임만 떼어 만드는 정지 클립. 자세를 유지해야 하는 상태에 쓴다.
+    ///
+    /// 클립을 끝 프레임에 멈춰 두는 방법도 있지만, 끝 프레임이 원하는 자세라는 보장이 없다 —
+    /// 고지의 Attack은 "말기 → 구르기 → 펴기"라 마지막이 <b>일어선</b> 그림이다. 방어 자세는
+    /// 가운데의 공 모양 프레임이므로, 쓸 프레임을 이름으로 못박는 편이 읽기도 고치기도 쉽다.
+    /// </summary>
+    public class FrameClipSpec
+    {
+        public string name;    // 만들 클립·상태 이름
+        public string source;  // 가져올 시트 (게임 쪽 동작 이름)
+        public int frame;      // 그 시트의 몇 번째 열
+
+        public FrameClipSpec(string name, string source, int frame)
+        {
+            this.name = name;
+            this.source = source;
+            this.frame = frame;
+        }
+    }
+
     public class CharacterSpec
     {
         public string name;        // Characters/ 아래 폴더 이름
         public string thirdParty;  // ThirdParty/PMDCollab/ 아래 폴더 이름
         public AnimSpec[] anims;
+        public FrameClipSpec[] frameClips = new FrameClipSpec[0];
 
         public CharacterSpec(string name, string thirdParty, params AnimSpec[] anims)
         {
@@ -65,8 +87,13 @@ public static class PmdCharacterPipeline
             new AnimSpec("Walk", "Walk", true),
             // 후려치기. 정면 할퀴기 한 번.
             new AnimSpec("Strike", "Strike", false),
-            // 방어 자세: 한 번 재생하고 마지막 프레임(웅크림)에서 굳는다.
-            new AnimSpec("Attack", "Attack", false)),
+            // 몸을 말아 굴러가는 동작. 물러날 때 쓴다 (말기 0~2 · 구르기 3~9 · 펴기 10).
+            new AnimSpec("Attack", "Attack", false))
+        {
+            // 방어 자세는 굴러가는 도중의 공 모양이다. Attack의 마지막 프레임은 몸을 다시 편
+            // 그림이라 그대로 멈추면 무방비로 서 있는 것처럼 보인다.
+            frameClips = new[] { new FrameClipSpec("Guard", "Attack", 6) },
+        },
         new CharacterSpec("Marowak", "0105_Marowak",
             new AnimSpec("Walk", "Walk", true),
             // 뼈다귀가 돌아올 때까지 던진 자세로 기다린다.
@@ -105,6 +132,9 @@ public static class PmdCharacterPipeline
         bool hasRealIdle = spec.anims.Any(a => a.target == "Idle");
 
         var clips = new List<AnimationClip>();
+        // 정지 클립이 다른 시트의 프레임을 집어야 해서, 시트별 스프라이트를 들고 있는다.
+        var spritesByAnim = new Dictionary<string, Dictionary<string, Sprite>>();
+
         foreach (AnimSpec anim in spec.anims)
         {
             if (!animData.TryGetValue(anim.source, out AnimEntry entry))
@@ -115,13 +145,23 @@ public static class PmdCharacterPipeline
 
             Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(sheetPath).OfType<Sprite>().ToArray();
             var byName = sprites.ToDictionary(s => s.name);
+            spritesByAnim[anim.target] = byName;
 
             for (int row = 0; row < 8; row++)
             {
                 clips.Add(MakeClip(charRoot, anim.target, row, entry, byName, anim.loop));
                 if (!hasRealIdle && anim.target == "Walk")
-                    clips.Add(MakeIdleFromWalk(charRoot, row, byName));
+                    clips.Add(MakeHoldClip(charRoot, "Idle_" + row, byName["Walk_" + row + "_0"]));
             }
+        }
+
+        foreach (FrameClipSpec frameClip in spec.frameClips)
+        {
+            if (!spritesByAnim.TryGetValue(frameClip.source, out var byName))
+                return spec.name + ": " + frameClip.source + " 시트를 먼저 넣어야 한다";
+            for (int row = 0; row < 8; row++)
+                clips.Add(MakeHoldClip(charRoot, frameClip.name + "_" + row,
+                    byName[frameClip.source + "_" + row + "_" + frameClip.frame]));
         }
 
         BuildController(charRoot + "/" + spec.name + ".controller", clips);
@@ -238,15 +278,15 @@ public static class PmdCharacterPipeline
         return SaveClip(charRoot, animName + "_" + row, keys, loop);
     }
 
-    private static AnimationClip MakeIdleFromWalk(string charRoot, int row, Dictionary<string, Sprite> byName)
+    /// <summary>한 장으로 된 정지 클립. 자세를 그대로 유지한다.</summary>
+    private static AnimationClip MakeHoldClip(string charRoot, string clipName, Sprite sprite)
     {
-        Sprite sprite = byName["Walk_" + row + "_0"];
         var keys = new List<ObjectReferenceKeyframe>
         {
             new ObjectReferenceKeyframe { time = 0f, value = sprite },
             new ObjectReferenceKeyframe { time = 1f / 60f, value = sprite },
         };
-        return SaveClip(charRoot, "Idle_" + row, keys, true);
+        return SaveClip(charRoot, clipName, keys, true);
     }
 
     private static AnimationClip SaveClip(string charRoot, string clipName,

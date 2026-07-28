@@ -230,7 +230,7 @@ MonoBehaviour:
   goldReward: 12
   keepDistance: 0
   knockbackStunDuration: 0.15
-  knockbackMultiplier: 0.5
+  knockbackMultiplier: 1.6
   basicAIEnabled: 0
   aggroOnSpawn: 1
 --- !u!114 &5564974578039116592
@@ -275,7 +275,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBurrowAbility
   range: 20
   minRange: 0
-  cooldown: 4.5
+  cooldown: 2
   initialDelay: 1.4
   diveSpeed: 9.5
   maxDiveTime: 2.4
@@ -284,6 +284,6 @@ MonoBehaviour:
   surfaceWindup: 0.55
   surfaceRadius: 1.25
   damage: 16
-  recovery: 0.9
+  recovery: 0.7
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.45}
   burstColor: {r: 0.75, g: 0.5, b: 0.25, a: 0.7}

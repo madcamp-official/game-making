@@ -34,7 +34,8 @@ public static class Floor2EnemySetup
         // 고지 — 방어형 전위. 붙으면 정면을 할퀴고 물러나 웅크린다.
         new EnemySpec
         {
-            name = "Sandslash", health = 140, scale = 1.25f, moveSpeed = 3.6f,
+            // 이속은 3.0(처음)과 3.6(상향) 사이. 붙는 맛은 살리되 플레이어(5)를 따라붙지는 못한다.
+            name = "Sandslash", health = 140, scale = 1.25f, moveSpeed = 3.3f,
             contactDamage = 12, gold = 12, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyGuardAbility),
             abilityValues = new (string, object)[]
@@ -56,15 +57,19 @@ public static class Floor2EnemySetup
         // 닥트리오 — 지중 기습. 걸어다니지 않고(기본 AI 꺼짐) 제자리에 있다가 파고든다.
         new EnemySpec
         {
+            // 넉백 배율 1.6 — 몸통박치기(힘 6)에 맞으면 9.6으로 밀려난다. 파고들 때의 속도(9.5)와
+            // 같게 맞춘 값이다. 맞고 땅속으로 밀려나는 것도 이 적에게는 '이동'이라 느리면 답답하다.
             name = "Dugtrio", health = 95, scale = 1.2f, moveSpeed = 2.5f,
-            contactDamage = 10, gold = 12, knockbackMultiplier = 0.5f, basicAI = false,
+            contactDamage = 10, gold = 12, knockbackMultiplier = 1.6f, basicAI = false,
             boxSize = new Vector2(0.9f, 0.55f),
             ability = typeof(EnemyBurrowAbility),
             abilityValues = new (string, object)[]
             {
                 // 사거리 = 방 전체. 잠수가 유일한 이동 수단이라, 사거리 밖이면 조각상이 되어
                 // 어그로가 풀린 것처럼 보인다.
-                ("range", 20f), ("cooldown", 4.5f), ("initialDelay", 1.4f),
+                // 한 번 파고들고 다시 나오기까지 옛 6.1초 → 3.5초. 쿨타임만 줄이면 후딜이 남아
+                // 체감이 덜해서 후딜도 함께 줄였다.
+                ("range", 20f), ("cooldown", 2f), ("initialDelay", 1.4f), ("recovery", 0.7f),
                 // 맞고 나서 땅속으로 사라지는 것이 유일한 도피다. 플레이어(5)보다 확실히 빨라야
                 // 쫓아가 잡는 게 아니라 놓치는 느낌이 된다.
                 ("diveSpeed", 9.5f),

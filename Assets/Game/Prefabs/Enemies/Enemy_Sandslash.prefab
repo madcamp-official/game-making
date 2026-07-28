@@ -221,7 +221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3.6
+  moveSpeed: 3.3
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -283,7 +283,7 @@ MonoBehaviour:
   strikeReach: 1
   strikeRadius: 0.95
   retreatSpeed: 4.5
-  retreatDuration: 0.35
+  retreatDuration: 0.32
   guardDuration: 1
   damageReduction: 0.7
   recovery: 0.5

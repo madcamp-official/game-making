@@ -21,7 +21,6 @@ public class EnemyAnimator : MonoBehaviour
     private Vector2 facing = Vector2.down;
     private string currentState = "";
     private string actionState;
-    private float actionNormalizedTime = -1f;
 
     private void Awake()
     {
@@ -34,22 +33,16 @@ public class EnemyAnimator : MonoBehaviour
     /// 시전 동작으로 고정한다. <paramref name="stateName"/>이 비면 Idle/Walk로 돌아간다.
     /// 해당 상태가 컨트롤러에 없으면 조용히 무시된다 (Charge 시트가 없는 적도 있다).
     ///
-    /// <paramref name="normalizedTime"/>을 0~1로 주면 그 지점부터 재생한다. 1이면 마지막
-    /// 프레임에서 시작하는데 반복 없는 클립이라 그대로 굳는다 — 고지가 물러나는 내내
-    /// 웅크린 그림을 유지하는 데 쓴다. 음수(기본값)면 처음부터 평범하게 재생한다.
+    /// 자세를 오래 유지해야 하면 클립을 끝에 멈추는 대신 한 장짜리 정지 상태를 따로 만들어 쓴다
+    /// (고지의 Guard). 끝 프레임이 원하는 자세라는 보장이 없기 때문이다.
     /// </summary>
-    public void SetActionState(string stateName, Vector2 lookDirection, float normalizedTime = -1f)
+    public void SetActionState(string stateName, Vector2 lookDirection)
     {
         if (lookDirection.sqrMagnitude > 0.0001f) facing = lookDirection.normalized;
         actionState = string.IsNullOrEmpty(stateName) ? null : stateName;
-        actionNormalizedTime = normalizedTime;
     }
 
-    public void ClearActionState()
-    {
-        actionState = null;
-        actionNormalizedTime = -1f;
-    }
+    public void ClearActionState() => actionState = null;
 
     private void Update()
     {
@@ -75,13 +68,7 @@ public class EnemyAnimator : MonoBehaviour
         if (state != currentState)
         {
             currentState = state;
-            if (animator.HasState(0, Animator.StringToHash(state)))
-            {
-                if (actionState != null && actionNormalizedTime >= 0f)
-                    animator.Play(state, 0, actionNormalizedTime);
-                else
-                    animator.Play(state);
-            }
+            if (animator.HasState(0, Animator.StringToHash(state))) animator.Play(state);
         }
     }
 }

@@ -42,6 +42,9 @@ public class EnemyController : MonoBehaviour
     /// <summary>지금 향하고 있는 방향. 막혀서 속도가 0이어도 마지막 방향을 유지한다.</summary>
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
 
+    /// <summary>아직 넉백으로 밀려나는 중인지. 이 동안에는 능력을 시전하지 않는다.</summary>
+    public bool IsKnockedBack => knockbackActive && Time.time < stunnedUntil;
+
     /// <summary>
     /// 기본 추적 AI를 켜고 끈다. 전용 컨트롤러와 이 스크립트가 동시에 Rigidbody를 조작하면
     /// 서로 속도를 덮어써서 움직임이 망가지므로, 보스는 이걸 꺼 두고 직접 이동한다.
@@ -62,6 +65,8 @@ public class EnemyController : MonoBehaviour
     private Collider2D playerCollider;
     private float lastAttackTime = -999f;
     private float stunnedUntil = -999f;
+    /// <summary>넉백으로 넣은 속도가 아직 남아 있는지.</summary>
+    private bool knockbackActive;
 
     /// <summary>플레이어 공격 등으로 밀려나며 잠시 행동 불능이 된다.</summary>
     public void ApplyKnockback(Vector2 direction, float force)
@@ -71,7 +76,15 @@ public class EnemyController : MonoBehaviour
         // 넉백 면역이면 경직도 걸지 않는다. 경직만 남으면 보스 패턴이 끊긴다.
         if (scaled <= 0f) return;
         stunnedUntil = Time.time + knockbackStunDuration;
+        knockbackActive = true;
         body.linearVelocity = direction.normalized * scaled;
+    }
+
+    /// <summary>밀려나던 속도를 거둔다. 시전 중인 능력이 있으면 다음 프레임에 제 속도를 다시 넣는다.</summary>
+    private void EndKnockback()
+    {
+        knockbackActive = false;
+        body.linearVelocity = Vector2.zero;
     }
 
     private void Awake()
@@ -112,10 +125,17 @@ public class EnemyController : MonoBehaviour
     private void FixedUpdate()
     {
         // 전용 컨트롤러가 이동을 맡는 동안에는 Rigidbody를 건드리지 않는다.
-        if (!basicAIEnabled) return;
+        // 단 넉백만은 여기서 끝낸다 — 안 그러면 되돌릴 주체가 없어 맞은 적이 방 끝까지 미끄러진다.
+        // (닥트리오처럼 기본 AI를 끄고 능력으로만 움직이는 적에서 실제로 드러난다.)
+        if (!basicAIEnabled)
+        {
+            if (knockbackActive && Time.time >= stunnedUntil) EndKnockback();
+            return;
+        }
 
         // 넉백 중에는 밀려나는 속도를 유지한다.
         if (Time.time < stunnedUntil) return;
+        knockbackActive = false;
 
         if (health.IsDead || player == null)
         {

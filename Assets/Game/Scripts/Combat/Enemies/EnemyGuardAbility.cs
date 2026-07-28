@@ -2,11 +2,11 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 고지의 공격. 플레이어가 붙으면 정면을 할퀴고(Strike), 뒤로 물러나며 웅크린 뒤(Attack을
-/// 한 번 재생해 마지막 프레임에서 굳는다), 그 자세로 받는 피해를 크게 줄인 채 버틴다.
+/// 고지의 공격. 플레이어가 붙으면 정면을 할퀴고(Strike), 고슴도치처럼 몸을 말아 뒤로 굴러
+/// 물러난 뒤(Attack), 공 모양 그대로 굳어(Guard) 받는 피해를 크게 줄인 채 버틴다.
 ///
 /// 할퀴기는 예고 없이 정면만 때린다 — 몸 바로 앞이라 자세만 보고 피해야 한다.
-/// 웅크린 동안이 반격의 틈처럼 보이지만 실제로는 가장 단단한 순간이다. 굳은 고지를
+/// 말린 동안이 반격의 틈처럼 보이지만 실제로는 가장 단단한 순간이다. 굳은 고지를
 /// 계속 때릴 것인지, 풀릴 때까지 다른 적부터 정리할 것인지를 고르게 한다.
 /// </summary>
 public class EnemyGuardAbility : EnemyAbility
@@ -22,15 +22,16 @@ public class EnemyGuardAbility : EnemyAbility
     [Tooltip("타격 중심에서 이 반지름 안이면 맞는다.")]
     [SerializeField, Min(0f)] private float strikeRadius = 0.95f;
 
-    [Header("후퇴")]
+    [Header("굴러서 물러나기")]
     [SerializeField, Min(0f)] private float retreatSpeed = 4.5f;
-    [Tooltip("Attack 동작의 길이에 맞춘 값. 물러나기가 끝나면 웅크린 자세로 굳어 있다.")]
-    [SerializeField, Min(0f)] private float retreatDuration = 0.35f;
+    [Tooltip("Attack의 '말기 + 구르기' 구간 길이(0.32초). 몸을 펴는 마지막 프레임이 나오기 전에 " +
+             "Guard로 넘겨야 굴러가다 공 모양으로 자연스럽게 굳는다.")]
+    [SerializeField, Min(0f)] private float retreatDuration = 0.32f;
 
-    [Header("웅크리기")]
-    [Tooltip("웅크린 채 버티는 시간.")]
+    [Header("방어")]
+    [Tooltip("공 모양으로 굳어 버티는 시간.")]
     [SerializeField, Min(0.1f)] private float guardDuration = 1f;
-    [Tooltip("웅크린 동안 줄이는 피해 비율. 0.7이면 30%만 받는다.")]
+    [Tooltip("말린 동안 줄이는 피해 비율. 0.7이면 30%만 받는다.")]
     [SerializeField, Range(0f, 1f)] private float damageReduction = 0.7f;
     [SerializeField, Min(0f)] private float recovery = 0.5f;
 
@@ -50,11 +51,9 @@ public class EnemyGuardAbility : EnemyAbility
         yield return new WaitForSeconds(strikeFollowThrough);
         if (Health.IsDead) yield break;
 
-        // 2. 웅크린 채로 뒤로 물러난다. Attack의 마지막 프레임(웅크림)에서 시작해 그대로 굳으므로,
-        //    물러나는 내내 방어 자세가 유지된다 — 물러나면서 공격 동작이 흐르면 지금 무방비인지
-        //    단단한지가 읽히지 않는다.
+        // 2. 몸을 말아 뒤로 굴러 물러난다. Attack이 곧 구르는 동작이라 이동 방향과 그림이 맞는다.
         //    시선은 플레이어 쪽 그대로 — 등을 보이며 도망가는 게 아니라 방어 태세로 빠지는 것이다.
-        PlayAction("Attack", aim, 1f);
+        PlayAction("Attack", aim);
         float retreatEnd = Time.time + retreatDuration;
         while (Time.time < retreatEnd && !Health.IsDead)
         {
@@ -62,7 +61,8 @@ public class EnemyGuardAbility : EnemyAbility
             yield return null;
         }
 
-        // 3. 웅크려 버틴다. 밀려도 제자리를 지킨다.
+        // 3. 공 모양 그대로 굳어 버틴다. 밀려도 제자리를 지킨다.
+        PlayAction("Guard", aim);
         Health.DamageTakenMultiplier = 1f - damageReduction;
         float guardEnd = Time.time + guardDuration;
         while (Time.time < guardEnd && !Health.IsDead)

@@ -59,12 +59,10 @@ public abstract class EnemyAbility : MonoBehaviour
     /// <summary>
     /// 시전 동작을 재생하며 바라보는 방향을 고정한다.
     /// Charge 시트가 없는 적이면 <see cref="EnemyAnimator"/>가 알아서 무시한다.
-    /// <paramref name="normalizedTime"/>은 재생을 시작할 지점 (1이면 마지막 프레임에서 굳는다).
     /// </summary>
-    protected void PlayAction(string stateName, Vector2 lookDirection, float normalizedTime = -1f)
+    protected void PlayAction(string stateName, Vector2 lookDirection)
     {
-        if (enemyAnimator != null)
-            enemyAnimator.SetActionState(stateName, lookDirection, normalizedTime);
+        if (enemyAnimator != null) enemyAnimator.SetActionState(stateName, lookDirection);
     }
 
     protected void StopAction()
@@ -88,6 +86,9 @@ public abstract class EnemyAbility : MonoBehaviour
         if (casting || Health.IsDead || Player == null) return;
         if (PlayerHealth != null && PlayerHealth.IsDead) return;
         if (!Controller.IsAggro) return;
+        // 밀려나는 도중에 시전을 시작하면 Cast가 속도를 0으로 눌러 넉백이 한 프레임 만에 끊긴다.
+        // 맞으면 밀려나는 것부터 끝내야 때린 보람이 있다.
+        if (Controller.IsKnockedBack) return;
         if (Time.time < nextReadyTime) return;
 
         float distance = Vector2.Distance(transform.position, Player.position);
