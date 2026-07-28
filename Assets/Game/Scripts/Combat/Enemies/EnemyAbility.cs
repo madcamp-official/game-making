@@ -97,6 +97,8 @@ public abstract class EnemyAbility : MonoBehaviour
     private IEnumerator Cast()
     {
         casting = true;
+        // "켜짐"이 아니라 원래 값으로 되돌린다. 닥트리오는 처음부터 꺼져 있다.
+        bool hadBasicAI = Controller.BasicAIEnabled;
         Controller.SetBasicAIEnabled(false);
         Body.linearVelocity = Vector2.zero;
 
@@ -105,7 +107,7 @@ public abstract class EnemyAbility : MonoBehaviour
         // Perform이 중간에 빠져나가도 동작이 얼어붙은 채 남지 않게 여기서 반드시 되돌린다.
         StopAction();
         // 시전 도중에 죽었으면 되돌릴 게 없다. HandleDeath가 이미 정리했다.
-        if (!Health.IsDead) Controller.SetBasicAIEnabled(true);
+        if (!Health.IsDead) Controller.SetBasicAIEnabled(hadBasicAI);
         nextReadyTime = Time.time + cooldown;
         casting = false;
     }

@@ -12,10 +12,15 @@
 | 이상해풀 | 0002 | CHUNSOFT (공식 PMD 유래) |
 | 이상해꽃 | 0003 | CHUNSOFT (공식 PMD 유래) |
 | 캐터피 | 0010 | CHUNSOFT (공식 PMD 유래) |
+| 고지 | 0028 | CHUNSOFT + Emmuffin 리워크 (PMDCollab 라이선스) |
+| 나인테일 | 0038 | CHUNSOFT + baronessfaron 리워크 (Walk, PMDCollab 라이선스) |
 | 단데기 | 0011 | CHUNSOFT (공식 PMD 유래) |
 | 버터플 | 0012 | CHUNSOFT (공식 PMD 유래) |
 | 콘팡 | 0048 | CHUNSOFT (공식 PMD 유래) |
+| 닥트리오 | 0051 | CHUNSOFT (공식 PMD 유래) |
 | 모다피 | 0069 | CHUNSOFT (공식 PMD 유래) |
+| 데구리 | 0075 | CHUNSOFT + Roll(Special0)은 Emmuffin 제작 (CC BY-NC 4.0) |
+| 텅구리 | 0105 | CHUNSOFT (공식 PMD 유래) |
 | 시라소몬 | 0106 | CHUNSOFT (공식 PMD 유래) |
 | 홍수몬 | 0107 | CHUNSOFT (공식 PMD 유래) |
 | 코뿌리 | 0112 | CHUNSOFT (공식 PMD 유래) |

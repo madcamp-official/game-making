@@ -26,6 +26,12 @@ public class Health : MonoBehaviour
     /// <summary>회복량 배율 (큰뿌리). 플레이어 쪽에서만 설정한다.</summary>
     public float HealMultiplier { get; set; } = 1f;
 
+    /// <summary>
+    /// 받는 피해 배율. 고지가 웅크리는 동안 낮춰서 단단해진다.
+    /// 배율이 아무리 낮아도 최소 1은 깎인다 — 완전 무적은 <see cref="BeginInvulnerability"/>의 몫이다.
+    /// </summary>
+    public float DamageTakenMultiplier { get; set; } = 1f;
+
     /// <summary>최대 체력 배율 (생명의구슬). 줄어들면 현재 체력도 같이 깎인다.</summary>
     public float MaxHealthMultiplier
     {
@@ -83,6 +89,9 @@ public class Health : MonoBehaviour
     private void Deduct(int amount, bool grantInvincibility)
     {
         if (IsDead || amount <= 0) return;
+
+        if (!Mathf.Approximately(DamageTakenMultiplier, 1f))
+            amount = Mathf.Max(1, GameMath.RoundHalfUp(amount * DamageTakenMultiplier));
 
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
         OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);

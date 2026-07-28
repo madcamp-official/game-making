@@ -48,6 +48,12 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     public void SetBasicAIEnabled(bool enabled) => basicAIEnabled = enabled;
 
+    /// <summary>
+    /// 지금 기본 추적 AI가 켜져 있는지. 시전이 끝난 능력이 "켜짐"으로 복원해 버리면
+    /// 원래부터 추적하지 않는 적(닥트리오)까지 걸어다니게 되므로, 이전 값을 읽어 되돌린다.
+    /// </summary>
+    public bool BasicAIEnabled => basicAIEnabled;
+
     private Rigidbody2D body;
     private Health health;
     private Collider2D ownCollider;

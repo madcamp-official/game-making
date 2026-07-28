@@ -2,7 +2,8 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 스라크의 공격. 돌진할 선을 미리 그려 보여 준 뒤 그 선을 따라 몸을 던진다.
+/// 돌진 공격. 돌진할 선을 미리 그려 보여 준 뒤 그 선을 따라 몸을 던진다.
+/// 스라크(베기 자세)와 데구리(웅크려 구르기)가 동작 이름만 바꿔 같이 쓴다.
 ///
 /// 예고한 방향으로만 달린다 — 달리는 도중에 플레이어를 다시 쫓지 않는다.
 /// 그래야 예고선 밖으로 비키는 것이 정답이 된다.
@@ -10,6 +11,12 @@ using UnityEngine;
 /// </summary>
 public class EnemyDashAbility : EnemyAbility
 {
+    [Header("동작 이름")]
+    [Tooltip("예고하는 동안 재생할 상태. 시트에 없으면 무시된다.")]
+    [SerializeField] private string windupState = "Charge";
+    [Tooltip("달리는 동안 재생할 상태. 데구리는 구르기(Roll)를 쓴다.")]
+    [SerializeField] private string dashState = "Walk";
+
     [Header("돌진")]
     [SerializeField, Min(0f)] private float windup = 0.7f;
     [SerializeField, Min(0f)] private float dashSpeed = 11f;
@@ -30,11 +37,43 @@ public class EnemyDashAbility : EnemyAbility
     private const float StallWindow = 0.15f;
 
     private SpriteRenderer spriteRenderer;
+    // 돌진 중에만 플레이어와의 충돌을 끈다 (코뿌리 이판사판과 같은 이유).
+    // 몸이 플레이어에게 막히면 밀기만 하다 판정 거리 밖에서 멈춰, 정면 돌진이 절대 맞지 않는다.
+    private readonly System.Collections.Generic.List<Collider2D> ownColliders =
+        new System.Collections.Generic.List<Collider2D>();
+    private readonly System.Collections.Generic.List<Collider2D> playerColliders =
+        new System.Collections.Generic.List<Collider2D>();
 
     protected override void Awake()
     {
         base.Awake();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        CollectSolid(GetComponentsInChildren<Collider2D>(true), ownColliders);
+    }
+
+    protected override void Start()
+    {
+        base.Start();
+        PlayerController pc = FindAnyObjectByType<PlayerController>();
+        if (pc != null) CollectSolid(pc.GetComponentsInChildren<Collider2D>(true), playerColliders);
+    }
+
+    private static void CollectSolid(Collider2D[] source,
+                                     System.Collections.Generic.List<Collider2D> into)
+    {
+        into.Clear();
+        foreach (Collider2D collider in source)
+            if (collider != null && !collider.isTrigger) into.Add(collider);
+    }
+
+    private void SetPassThroughPlayer(bool ignore)
+    {
+        foreach (Collider2D mine in ownColliders)
+        {
+            if (mine == null) continue;
+            foreach (Collider2D theirs in playerColliders)
+                if (theirs != null) Physics2D.IgnoreCollision(mine, theirs, ignore);
+        }
     }
 
     protected override IEnumerator Perform()
@@ -45,13 +84,13 @@ public class EnemyDashAbility : EnemyAbility
         AttackTelegraph telegraph = AttackTelegraph.CreateLine(
             EffectRoot, origin, direction, dashDistance, TelegraphWidth, warningColor);
         telegraph.Pulse(windup);
-        PlayAction("Charge", direction);
+        PlayAction(windupState, direction);
 
         yield return new WaitForSeconds(windup);
         if (Health.IsDead) yield break;
 
-        // 돌진하는 동안에도 예고한 방향을 계속 보게 둔다 (Walk로 돌아가되 방향은 고정).
-        PlayAction("Walk", direction);
+        // 돌진하는 동안에도 예고한 방향을 계속 보게 둔다 (동작만 바꾸고 방향은 고정).
+        PlayAction(dashState, direction);
         yield return Dash(direction);
         StopAction();
 
@@ -62,6 +101,7 @@ public class EnemyDashAbility : EnemyAbility
     private IEnumerator Dash(Vector2 direction)
     {
         SetTint(dashTint);
+        SetPassThroughPlayer(true);
 
         float duration = dashDistance / Mathf.Max(0.01f, dashSpeed);
         float elapsed = 0f;
@@ -95,6 +135,8 @@ public class EnemyDashAbility : EnemyAbility
             yield return null;
         }
 
+        // 죽어서 빠져나온 경우까지 포함해 반드시 되돌린다.
+        SetPassThroughPlayer(false);
         Body.linearVelocity = Vector2.zero;
         SetTint(Color.white);
     }
