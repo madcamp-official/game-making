@@ -33,7 +33,6 @@ public class RelicManager : MonoBehaviour
     [SerializeField, Min(0)] private int leftoversHealPerRoom = 8;
     [SerializeField, Min(1)] private int shellBellDamagePerHeal = 40;
     [SerializeField, Min(0)] private int shellBellHealAmount = 3;
-    [SerializeField, Min(0f)] private float magikarpScaleMaxHealthBonus = 0.2f;
 
     private readonly List<RelicData> relics = new List<RelicData>();
     private readonly List<RelicData> upcoming = new List<RelicData>();
@@ -243,9 +242,6 @@ public class RelicManager : MonoBehaviour
                     MeleeDamageMultiplier *= 1f + lifeOrbDamageBonus;
                     RangedDamageMultiplier *= 1f + lifeOrbDamageBonus;
                     MaxHealthMultiplier *= 1f - lifeOrbMaxHealthPenalty;
-                    break;
-                case RelicEffect.MagikarpScale:
-                    MaxHealthMultiplier *= 1f + magikarpScaleMaxHealthBonus;
                     break;
             }
         }

@@ -27,6 +27,7 @@
 | 스라크 | 0123 | CHUNSOFT (공식 PMD 유래) |
 | 잉어킹 | 0129 | CHUNSOFT (공식 PMD 유래) |
 | 갸라도스 | 0130 | CHUNSOFT (공식 PMD 유래) |
+| 라프라스 | 0131 | CHUNSOFT (공식 PMD 유래) |
 | 잠만보 | 0143 | CHUNSOFT (공식 PMD 유래) |
 
 각 포켓몬의 원본 `credits.txt`는 `Assets/ThirdParty/PMDCollab/<도감번호_이름>/`에 보관되어 있다.
@@ -34,10 +35,9 @@
 ## 대사창 얼굴
 
 `Assets/Game/Art/Portraits/` — 같은 저장소의 `portrait/<도감번호>/Normal.png` (40×40).
-잠만보·시라소몬·홍수몬·잉어킹 네 장을 이벤트 대사창에 쓴다. 원본 `credits.txt`는
+잠만보·시라소몬·홍수몬·라프라스 네 장을 이벤트 대사창에 쓴다 (잉어킹 얼굴은 이벤트가
+사라져 지금은 쓰는 곳이 없지만 보스전 소환물과 함께 보관한다). 원본 `credits.txt`는
 스프라이트와 같은 폴더에 `portrait_credits.txt`로 함께 보관한다.
-
-`잉어킹의 비늘` 유물 아이콘은 아이템 시트에 비늘류가 없어 잉어킹 얼굴을 임시로 쓰고 있다.
 
 ## 아이템 아이콘
 

@@ -147,12 +147,20 @@ public static class PmdCharacterPipeline
     };
 
     /// <summary>
+    /// 3층 이벤트의 라프라스. 계곡 왼쪽에서 쉼 없이 Idle을 반복하고, 태워 줄 때는
+    /// 같은 Idle인 채 방향(행)만 동쪽으로 바꾼다 — 헤엄 전용 시트가 따로 없다.
+    /// </summary>
+    public static readonly CharacterSpec[] Floor3EventNpcs =
+    {
+        new CharacterSpec("Lapras", "0131_Lapras",
+            new AnimSpec("Idle", "Idle", true)),
+    };
+
+    /// <summary>
     /// 3층 보스가 불러내는 소환물.
     ///
     /// 잉어킹은 갸라도스가 세워 두는 <b>고정 장애물</b>이라 걸어 다니지 않는다. 제자리에서
-    /// 파닥이는 Hop 하나면 충분하다. 이벤트방(<see cref="MagikarpEvent"/>)이 쓰는 Idle 시트는
-    /// 슬라이스 이름 규칙이 달라 여기 목록에 넣지 않는다 — 다시 구우면 스프라이트 이름과
-    /// 참조가 바뀌어 그 방의 그림이 깨진다.
+    /// 파닥이는 Hop 하나면 충분하다.
     /// </summary>
     public static readonly CharacterSpec[] Floor3Summons =
     {
@@ -181,6 +189,16 @@ public static class PmdCharacterPipeline
     {
         var log = new System.Text.StringBuilder();
         foreach (CharacterSpec spec in Floor3Summons)
+            log.AppendLine(Import(spec));
+        AssetDatabase.SaveAssets();
+        return log.ToString();
+    }
+
+    /// <summary>3층 이벤트 NPC(라프라스)만 굽는다. 나누는 이유는 <see cref="ImportFloor3Summons"/>와 같다.</summary>
+    public static string ImportFloor3EventNpcs()
+    {
+        var log = new System.Text.StringBuilder();
+        foreach (CharacterSpec spec in Floor3EventNpcs)
             log.AppendLine(Import(spec));
         AssetDatabase.SaveAssets();
         return log.ToString();
