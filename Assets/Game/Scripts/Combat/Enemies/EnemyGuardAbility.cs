@@ -50,9 +50,11 @@ public class EnemyGuardAbility : EnemyAbility
         yield return new WaitForSeconds(strikeFollowThrough);
         if (Health.IsDead) yield break;
 
-        // 2. 뒤로 물러나며 웅크린다. Attack이 한 번 재생되고 끝 프레임에서 굳는다.
+        // 2. 웅크린 채로 뒤로 물러난다. Attack의 마지막 프레임(웅크림)에서 시작해 그대로 굳으므로,
+        //    물러나는 내내 방어 자세가 유지된다 — 물러나면서 공격 동작이 흐르면 지금 무방비인지
+        //    단단한지가 읽히지 않는다.
         //    시선은 플레이어 쪽 그대로 — 등을 보이며 도망가는 게 아니라 방어 태세로 빠지는 것이다.
-        PlayAction("Attack", aim);
+        PlayAction("Attack", aim, 1f);
         float retreatEnd = Time.time + retreatDuration;
         while (Time.time < retreatEnd && !Health.IsDead)
         {

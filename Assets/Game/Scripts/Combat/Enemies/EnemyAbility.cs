@@ -59,10 +59,12 @@ public abstract class EnemyAbility : MonoBehaviour
     /// <summary>
     /// 시전 동작을 재생하며 바라보는 방향을 고정한다.
     /// Charge 시트가 없는 적이면 <see cref="EnemyAnimator"/>가 알아서 무시한다.
+    /// <paramref name="normalizedTime"/>은 재생을 시작할 지점 (1이면 마지막 프레임에서 굳는다).
     /// </summary>
-    protected void PlayAction(string stateName, Vector2 lookDirection)
+    protected void PlayAction(string stateName, Vector2 lookDirection, float normalizedTime = -1f)
     {
-        if (enemyAnimator != null) enemyAnimator.SetActionState(stateName, lookDirection);
+        if (enemyAnimator != null)
+            enemyAnimator.SetActionState(stateName, lookDirection, normalizedTime);
     }
 
     protected void StopAction()

@@ -12,7 +12,8 @@ using UnityEngine;
 public class EnemyBurrowAbility : EnemyAbility
 {
     [Header("잠수")]
-    [SerializeField, Min(0.5f)] private float diveSpeed = 6f;
+    [Tooltip("땅속 이동 속도. 플레이어(5)보다 확실히 빨라야 맞고 사라지는 것이 '도망'으로 읽힌다.")]
+    [SerializeField, Min(0.5f)] private float diveSpeed = 9.5f;
     [Tooltip("파고드는 시간의 상한. 플레이어가 도망 다녀도 이 시간이 지나면 그 자리에서 솟는다.")]
     [SerializeField, Min(0.5f)] private float maxDiveTime = 2.4f;
     [Tooltip("플레이어와 이 거리 안이면 도착으로 본다.")]
