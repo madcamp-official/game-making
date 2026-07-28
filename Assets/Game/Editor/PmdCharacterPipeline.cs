@@ -65,12 +65,33 @@ public static class PmdCharacterPipeline
         }
     }
 
+    /// <summary>
+    /// 다른 시트의 프레임 구간만 잘라 만드는 한 번짜리 클립.
+    /// 정지 자세(FrameClipSpec)에서 원래 자세로 <b>돌아가는</b> 뒷부분만 필요할 때 쓴다 —
+    /// 고지가 공 모양에서 몸을 펴는 Uncurl이 Attack의 7~10 프레임이다.
+    /// </summary>
+    public class RangeClipSpec
+    {
+        public string name;    // 만들 클립·상태 이름
+        public string source;  // 가져올 시트 (게임 쪽 동작 이름)
+        public int from, to;   // 프레임 구간 (양 끝 포함)
+
+        public RangeClipSpec(string name, string source, int from, int to)
+        {
+            this.name = name;
+            this.source = source;
+            this.from = from;
+            this.to = to;
+        }
+    }
+
     public class CharacterSpec
     {
         public string name;        // Characters/ 아래 폴더 이름
         public string thirdParty;  // ThirdParty/PMDCollab/ 아래 폴더 이름
         public AnimSpec[] anims;
         public FrameClipSpec[] frameClips = new FrameClipSpec[0];
+        public RangeClipSpec[] rangeClips = new RangeClipSpec[0];
 
         public CharacterSpec(string name, string thirdParty, params AnimSpec[] anims)
         {
@@ -90,9 +111,11 @@ public static class PmdCharacterPipeline
             // 몸을 말아 굴러가는 동작. 물러날 때 쓴다 (말기 0~2 · 구르기 3~9 · 펴기 10).
             new AnimSpec("Attack", "Attack", false))
         {
-            // 방어 자세는 굴러가는 도중의 공 모양이다. Attack의 마지막 프레임은 몸을 다시 편
-            // 그림이라 그대로 멈추면 무방비로 서 있는 것처럼 보인다.
+            // 방어 자세는 구르기가 가장 멀리 나아가 잠깐 멈춰 보이는 구간(5~8, 오프셋 +19.6px로
+            // 동일)의 공 모양이다. Attack의 마지막 프레임은 몸을 다시 편 그림이라 쓰면 안 된다.
             frameClips = new[] { new FrameClipSpec("Guard", "Attack", 6) },
+            // 방어가 풀리면 남은 프레임으로 몸을 편다.
+            rangeClips = new[] { new RangeClipSpec("Uncurl", "Attack", 7, 10) },
         },
         new CharacterSpec("Marowak", "0105_Marowak",
             new AnimSpec("Walk", "Walk", true),
@@ -132,8 +155,9 @@ public static class PmdCharacterPipeline
         bool hasRealIdle = spec.anims.Any(a => a.target == "Idle");
 
         var clips = new List<AnimationClip>();
-        // 정지 클립이 다른 시트의 프레임을 집어야 해서, 시트별 스프라이트를 들고 있는다.
+        // 정지·구간 클립이 다른 시트의 프레임을 집어야 해서, 시트별 스프라이트와 시간표를 들고 있는다.
         var spritesByAnim = new Dictionary<string, Dictionary<string, Sprite>>();
+        var entriesByAnim = new Dictionary<string, AnimEntry>();
 
         foreach (AnimSpec anim in spec.anims)
         {
@@ -146,6 +170,7 @@ public static class PmdCharacterPipeline
             Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(sheetPath).OfType<Sprite>().ToArray();
             var byName = sprites.ToDictionary(s => s.name);
             spritesByAnim[anim.target] = byName;
+            entriesByAnim[anim.target] = entry;
 
             for (int row = 0; row < 8; row++)
             {
@@ -162,6 +187,15 @@ public static class PmdCharacterPipeline
             for (int row = 0; row < 8; row++)
                 clips.Add(MakeHoldClip(charRoot, frameClip.name + "_" + row,
                     byName[frameClip.source + "_" + row + "_" + frameClip.frame]));
+        }
+
+        foreach (RangeClipSpec rangeClip in spec.rangeClips)
+        {
+            if (!spritesByAnim.TryGetValue(rangeClip.source, out var byName))
+                return spec.name + ": " + rangeClip.source + " 시트를 먼저 넣어야 한다";
+            AnimEntry entry = entriesByAnim[rangeClip.source];
+            for (int row = 0; row < 8; row++)
+                clips.Add(MakeRangeClip(charRoot, rangeClip, row, entry, byName));
         }
 
         BuildController(charRoot + "/" + spec.name + ".controller", clips);
@@ -276,6 +310,24 @@ public static class PmdCharacterPipeline
         if (last != null) keys.Add(new ObjectReferenceKeyframe { time = time, value = last });
 
         return SaveClip(charRoot, animName + "_" + row, keys, loop);
+    }
+
+    /// <summary>시트의 프레임 구간만 잘라 만든 한 번짜리 클립. 시간표는 AnimData 그대로다.</summary>
+    private static AnimationClip MakeRangeClip(string charRoot, RangeClipSpec range, int row,
+                                               AnimEntry entry, Dictionary<string, Sprite> byName)
+    {
+        var keys = new List<ObjectReferenceKeyframe>();
+        float time = 0f;
+        Sprite last = null;
+        for (int i = range.from; i <= range.to && i < entry.durations.Length; i++)
+        {
+            Sprite sprite = byName[range.source + "_" + row + "_" + i];
+            keys.Add(new ObjectReferenceKeyframe { time = time, value = sprite });
+            time += entry.durations[i] / 60f;
+            last = sprite;
+        }
+        if (last != null) keys.Add(new ObjectReferenceKeyframe { time = time, value = last });
+        return SaveClip(charRoot, range.name + "_" + row, keys, false);
     }
 
     /// <summary>한 장으로 된 정지 클립. 자세를 그대로 유지한다.</summary>

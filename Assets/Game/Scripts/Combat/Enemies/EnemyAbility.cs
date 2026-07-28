@@ -48,6 +48,15 @@ public abstract class EnemyAbility : MonoBehaviour
     private float nextReadyTime;
     private bool casting;
 
+    /// <summary>지금 Perform이 도는 중인지. 파생형이 시전 밖 행동(도망 등)과 겹치지 않게 확인한다.</summary>
+    protected bool IsCasting => casting;
+
+    /// <summary>
+    /// 파생형이 시전 밖에서 몸을 쓰는 동안(닥트리오의 도망) 참으로 둔다.
+    /// 그동안 기본 시전을 시작하지 않는다 — 도망치다 말고 되돌아 공격하면 도망이 아니다.
+    /// </summary>
+    protected bool ExternallyBusy { get; set; }
+
     protected virtual void Awake()
     {
         Controller = GetComponent<EnemyController>();
@@ -83,7 +92,7 @@ public abstract class EnemyAbility : MonoBehaviour
 
     private void Update()
     {
-        if (casting || Health.IsDead || Player == null) return;
+        if (casting || ExternallyBusy || Health.IsDead || Player == null) return;
         if (PlayerHealth != null && PlayerHealth.IsDead) return;
         if (!Controller.IsAggro) return;
         // 밀려나는 도중에 시전을 시작하면 Cast가 속도를 0으로 눌러 넉백이 한 프레임 만에 끊긴다.

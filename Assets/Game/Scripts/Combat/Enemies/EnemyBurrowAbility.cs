@@ -4,10 +4,12 @@ using UnityEngine;
 /// <summary>
 /// 닥트리오의 공격. 평소에는 제자리에서 Idle로 서 있다가(기본 추적 AI를 꺼 둔다),
 /// 땅속으로 잠수해 플레이어 발밑까지 파고들어 예고 후 솟아오르며 때린다.
+/// 땅 위에서 맞으면 반대로 플레이어에게서 <b>도망</b>친다 — 땅속으로 사라져 멀어진 뒤 다시 솟는다.
 ///
 /// 잠수 중에는 Walk 동작에 몸이 반투명해지고, 콜라이더가 꺼져 서로 부딪히지도
-/// 맞지도 않는다 — 땅속에 있으니 당연하고, 대신 솟는 자리를 원으로 미리 알린다.
-/// 솟아오르면 Idle로 다시 나타난다. 현재 위치와 파고드는 경로를 동시에 봐야 하는 적이다.
+/// 맞지도 않는다 — 땅속에 있으니 다른 적도 벽처럼 막지 못하고 뚫고 지나간다.
+/// 그리는 순서도 캐릭터(10) 아래로 내려, 땅 위의 몸들 밑을 지나가는 것으로 보이게 한다.
+/// 공격 잠수는 솟는 자리를 원으로 미리 알린다. 현재 위치와 파고드는 경로를 동시에 봐야 하는 적이다.
 /// </summary>
 public class EnemyBurrowAbility : EnemyAbility
 {
@@ -27,16 +29,34 @@ public class EnemyBurrowAbility : EnemyAbility
     [SerializeField, Min(0)] private int damage = 16;
     [SerializeField, Min(0f)] private float recovery = 0.9f;
 
+    [Header("도망")]
+    [Tooltip("땅 위에서 맞으면 플레이어 반대쪽으로 이만큼 파고들어 달아난다.")]
+    [SerializeField, Min(0f)] private float fleeDistance = 4.5f;
+    [Tooltip("달아나 솟은 뒤 잠깐 숨을 고르는 시간.")]
+    [SerializeField, Min(0f)] private float fleeRecovery = 0.35f;
+    [Tooltip("한 번 달아난 뒤 이 시간 안에는 다시 달아나지 않는다. 연타에 무한 도망을 막는다.")]
+    [SerializeField, Min(0f)] private float fleeCooldown = 1.5f;
+    [Tooltip("도망 목표점을 가두는 범위 (방 중심 기준 반너비·반높이). 콜라이더가 꺼진 채 달아나므로 " +
+             "벽이 막아 주지 않는다. 벽 콜라이더(±6.6부터)에 겹친 채 솟으면 물리가 밀어내니 여유를 둔다.")]
+    [SerializeField] private Vector2 fleeBounds = new Vector2(5.8f, 3.8f);
+
     [Header("색")]
     [SerializeField] private Color warningColor = new Color(0.85f, 0.1f, 0.28f, 0.45f);
     [SerializeField] private Color burstColor = new Color(0.75f, 0.5f, 0.25f, 0.7f);
 
+    /// <summary>땅속에 있는 동안의 그리기 순서. 지형·장판(1)보다 위, 캐릭터(10)보다 아래 —
+    /// 다른 몸들 밑을 지나가는 것으로 보여야 겹침이 어색하지 않다.</summary>
+    private const int SubmergedSortingOrder = 5;
+
     private SpriteRenderer spriteRenderer;
+    private int surfaceSortingOrder;
+    private float nextFleeTime;
 
     protected override void Awake()
     {
         base.Awake();
         spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        if (spriteRenderer != null) surfaceSortingOrder = spriteRenderer.sortingOrder;
     }
 
     protected override IEnumerator Perform()
@@ -80,7 +100,77 @@ public class EnemyBurrowAbility : EnemyAbility
         yield return new WaitForSeconds(recovery);
     }
 
-    /// <summary>땅속 상태. 반투명해지고 콜라이더가 꺼진다 (부딪히지도, 맞지도 않는다).</summary>
+    protected override void Start()
+    {
+        base.Start();
+        Health.OnDamaged += HandleDamaged;
+    }
+
+    private void OnDestroy()
+    {
+        if (Health != null) Health.OnDamaged -= HandleDamaged;
+    }
+
+    /// <summary>땅 위에서 맞으면 도망친다. 땅속(시전 중)은 어차피 맞을 수 없다.</summary>
+    private void HandleDamaged()
+    {
+        if (Health.IsDead || IsCasting || ExternallyBusy) return;
+        if (Time.time < nextFleeTime) return;
+        StartCoroutine(Flee());
+    }
+
+    /// <summary>
+    /// 땅속으로 사라져 플레이어에게서 멀어진 뒤 다시 솟는다. 공격 잠수와 달리
+    /// 방향이 반대고, 솟을 때 예고도 피해도 없다 — 순수한 도피다.
+    /// </summary>
+    private IEnumerator Flee()
+    {
+        ExternallyBusy = true;
+
+        // 한 프레임 기다린다. OnDamaged는 넉백이 걸리기 전에 불리므로,
+        // 바로 재면 "아직 안 밀렸다"로 보고 넉백을 잘라먹는다.
+        yield return null;
+        // 밀려나는 것부터 끝낸다. 도망이 넉백을 잘라먹으면 때린 값이 사라진다.
+        while (Controller.IsKnockedBack && !Health.IsDead) yield return null;
+        if (Health.IsDead) { ExternallyBusy = false; yield break; }
+
+        PlayAction("Walk", -DirectionToPlayer);
+        SetSubmerged(true);
+
+        // 콜라이더가 꺼져 있어 벽이 막아 주지 않는다. 매 프레임 위치를 가두는 방식은
+        // 프레임 사이에 물리가 여러 스텝을 돌아 새어 나갔다 — 대신 목표점을 먼저 범위 안으로
+        // 가두고 그 점으로만 이동한다. 직선 경로는 범위 밖을 지나지 않는다.
+        Vector2 center = transform.parent != null ? (Vector2)transform.parent.position : Vector2.zero;
+        Vector2 target = Body.position + (-DirectionToPlayer) * fleeDistance;
+        target.x = Mathf.Clamp(target.x, center.x - fleeBounds.x, center.x + fleeBounds.x);
+        target.y = Mathf.Clamp(target.y, center.y - fleeBounds.y, center.y + fleeBounds.y);
+
+        float deadline = Time.time + fleeDistance / Mathf.Max(0.5f, diveSpeed) + 0.5f;
+        while (Time.time < deadline && !Health.IsDead)
+        {
+            Vector2 toTarget = target - Body.position;
+            // 한 프레임 이동량(~0.3)보다 넉넉히 커야 목표 주변에서 앞뒤로 떨지 않는다.
+            if (toTarget.magnitude <= 0.45f) break;
+            Vector2 direction = toTarget.normalized;
+            Body.linearVelocity = direction * diveSpeed;
+            PlayAction("Walk", direction);
+            yield return null;
+        }
+
+        Body.linearVelocity = Vector2.zero;
+        SetSubmerged(false);
+        PlayAction("Idle", DirectionToPlayer);
+        yield return new WaitForSeconds(fleeRecovery);
+
+        StopAction();
+        nextFleeTime = Time.time + fleeCooldown;
+        ExternallyBusy = false;
+    }
+
+    /// <summary>
+    /// 땅속 상태. 반투명해지고 콜라이더가 꺼지며(부딪히지도, 맞지도 않는다 — 다른 적도
+    /// 뚫고 지나간다) 그리기 순서가 캐릭터 아래로 내려간다.
+    /// </summary>
     private void SetSubmerged(bool submerged)
     {
         if (spriteRenderer != null)
@@ -88,6 +178,7 @@ public class EnemyBurrowAbility : EnemyAbility
             Color c = spriteRenderer.color;
             c.a = submerged ? submergedAlpha : 1f;
             spriteRenderer.color = c;
+            spriteRenderer.sortingOrder = submerged ? SubmergedSortingOrder : surfaceSortingOrder;
         }
         foreach (Collider2D col in GetComponents<Collider2D>())
             col.enabled = !submerged;

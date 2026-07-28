@@ -285,5 +285,9 @@ MonoBehaviour:
   surfaceRadius: 1.25
   damage: 16
   recovery: 0.7
+  fleeDistance: 4.5
+  fleeRecovery: 0.35
+  fleeCooldown: 1.5
+  fleeBounds: {x: 6.2, y: 4.2}
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.45}
   burstColor: {r: 0.75, g: 0.5, b: 0.25, a: 0.7}
