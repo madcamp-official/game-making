@@ -24,6 +24,9 @@ using UnityEngine;
 ///
 /// ⚠️ <c>TextureImporter.spritesheet</c>는 Unity 6에서 조용히 무시된다.
 /// 반드시 <see cref="ISpriteEditorDataProvider"/>로 슬라이스해야 한다.
+///
+/// ⚠️ 다시 실행하면 컨트롤러를 지우고 새로 만들어 GUID가 바뀐다.
+/// 그 컨트롤러를 참조하는 프리팹도 반드시 다시 구워야 한다 (<see cref="Floor2EnemySetup.BuildPrefabs"/>).
 /// </summary>
 public static class PmdCharacterPipeline
 {
@@ -60,7 +63,9 @@ public static class PmdCharacterPipeline
     {
         new CharacterSpec("Sandslash", "0028_Sandslash",
             new AnimSpec("Walk", "Walk", true),
-            // 방어 자세: 한 번 재생하고 마지막 프레임에서 굳는다.
+            // 후려치기. 정면 할퀴기 한 번.
+            new AnimSpec("Strike", "Strike", false),
+            // 방어 자세: 한 번 재생하고 마지막 프레임(웅크림)에서 굳는다.
             new AnimSpec("Attack", "Attack", false)),
         new CharacterSpec("Marowak", "0105_Marowak",
             new AnimSpec("Walk", "Walk", true),

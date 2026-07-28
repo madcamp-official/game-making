@@ -2,61 +2,76 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 고지의 공격. 플레이어가 붙으면 웅크려 받는 피해를 크게 줄인 채 버티다가,
-/// 몸 주변에 짧은 범위 공격을 터뜨린다.
+/// 고지의 공격. 플레이어가 붙으면 정면을 할퀴고(Strike), 뒤로 물러나며 웅크린 뒤(Attack을
+/// 한 번 재생해 마지막 프레임에서 굳는다), 그 자세로 받는 피해를 크게 줄인 채 버틴다.
 ///
-/// 웅크린 자세는 Attack 동작을 한 번 재생하고 마지막 프레임에서 굳혀 만든다
-/// (클립이 반복 없음이라 재생이 끝나면 저절로 멈춘다). 웅크린 동안이 곧 예고다 —
-/// 굳은 고지를 계속 때릴 것인지, 터지기 전에 물러날 것인지를 고르게 한다.
+/// 할퀴기는 예고 없이 정면만 때린다 — 몸 바로 앞이라 자세만 보고 피해야 한다.
+/// 웅크린 동안이 반격의 틈처럼 보이지만 실제로는 가장 단단한 순간이다. 굳은 고지를
+/// 계속 때릴 것인지, 풀릴 때까지 다른 적부터 정리할 것인지를 고르게 한다.
 /// </summary>
 public class EnemyGuardAbility : EnemyAbility
 {
+    [Header("후려치기")]
+    [SerializeField, Min(0)] private int strikeDamage = 14;
+    [Tooltip("Strike 동작이 시작되고 실제로 때리기까지의 시간. 타격 프레임에 맞춘 값이다.")]
+    [SerializeField, Min(0f)] private float strikeHitDelay = 0.18f;
+    [Tooltip("때린 뒤 남은 동작이 끝나기를 기다리는 시간.")]
+    [SerializeField, Min(0f)] private float strikeFollowThrough = 0.28f;
+    [Tooltip("몸 앞 이 거리 지점을 중심으로 때린다.")]
+    [SerializeField, Min(0f)] private float strikeReach = 1f;
+    [Tooltip("타격 중심에서 이 반지름 안이면 맞는다.")]
+    [SerializeField, Min(0f)] private float strikeRadius = 0.95f;
+
+    [Header("후퇴")]
+    [SerializeField, Min(0f)] private float retreatSpeed = 4.5f;
+    [Tooltip("Attack 동작의 길이에 맞춘 값. 물러나기가 끝나면 웅크린 자세로 굳어 있다.")]
+    [SerializeField, Min(0f)] private float retreatDuration = 0.35f;
+
     [Header("웅크리기")]
-    [Tooltip("웅크린 채 버티는 시간. 이 동안 범위 예고가 차오른다.")]
-    [SerializeField, Min(0.1f)] private float guardDuration = 1.1f;
+    [Tooltip("웅크린 채 버티는 시간.")]
+    [SerializeField, Min(0.1f)] private float guardDuration = 1f;
     [Tooltip("웅크린 동안 줄이는 피해 비율. 0.7이면 30%만 받는다.")]
     [SerializeField, Range(0f, 1f)] private float damageReduction = 0.7f;
-
-    [Header("터뜨리기")]
-    [SerializeField, Min(0f)] private float burstRadius = 1.7f;
-    [SerializeField, Min(0)] private int burstDamage = 16;
-    [SerializeField, Min(0f)] private float recovery = 0.7f;
-
-    [Header("색")]
-    [SerializeField] private Color warningColor = new Color(0.85f, 0.1f, 0.28f, 0.4f);
-    [SerializeField] private Color burstColor = new Color(0.95f, 0.75f, 0.3f, 0.7f);
+    [SerializeField, Min(0f)] private float recovery = 0.5f;
 
     protected override IEnumerator Perform()
     {
+        // 1. 후려치기 — 정면만, 예고 없이.
         Vector2 aim = DirectionToPlayer;
+        PlayAction("Strike", aim);
+        yield return new WaitForSeconds(strikeHitDelay);
+        if (Health.IsDead) yield break;
+
+        Vector2 hitCenter = (Vector2)transform.position + aim * strikeReach;
+        if (PlayerHealth != null && !PlayerHealth.IsDead && !PlayerHealth.IsInvincible &&
+            Vector2.Distance(hitCenter, PlayerPosition) <= strikeRadius)
+            PlayerHealth.TakeDamage(strikeDamage);
+
+        yield return new WaitForSeconds(strikeFollowThrough);
+        if (Health.IsDead) yield break;
+
+        // 2. 뒤로 물러나며 웅크린다. Attack이 한 번 재생되고 끝 프레임에서 굳는다.
+        //    시선은 플레이어 쪽 그대로 — 등을 보이며 도망가는 게 아니라 방어 태세로 빠지는 것이다.
         PlayAction("Attack", aim);
-        Health.DamageTakenMultiplier = 1f - damageReduction;
-
-        AttackTelegraph warning = AttackTelegraph.CreateCircle(
-            EffectRoot, transform.position, burstRadius, warningColor);
-        warning.Pulse(guardDuration);
-
-        float end = Time.time + guardDuration;
-        while (Time.time < end && !Health.IsDead)
+        float retreatEnd = Time.time + retreatDuration;
+        while (Time.time < retreatEnd && !Health.IsDead)
         {
-            // 웅크린 동안에는 밀려도 제자리를 지킨다. 방어형이 밀려나면 뒤를 지키는 뜻이 없다.
+            Body.linearVelocity = -aim * retreatSpeed;
+            yield return null;
+        }
+
+        // 3. 웅크려 버틴다. 밀려도 제자리를 지킨다.
+        Health.DamageTakenMultiplier = 1f - damageReduction;
+        float guardEnd = Time.time + guardDuration;
+        while (Time.time < guardEnd && !Health.IsDead)
+        {
             Body.linearVelocity = Vector2.zero;
             yield return null;
         }
 
-        // 어떤 경로로 빠져나가든 배율은 반드시 되돌린다. 죽은 뒤에도 남으면 안 되는 값은 아니지만
-        // (오브젝트가 곧 사라진다), 살아서 나가는 길이 여럿이라 여기 한 곳에서 처리한다.
+        // 살아서 나가는 길이 여럿이라 배율 복원은 여기 한 곳에서 처리한다.
         Health.DamageTakenMultiplier = 1f;
         if (Health.IsDead) yield break;
-
-        // 터뜨리기. 판정은 한 번, 그린 원과 같은 반지름이다.
-        AttackTelegraph burst = AttackTelegraph.CreateCircle(
-            EffectRoot, transform.position, burstRadius, burstColor);
-        burst.Hold(0.18f);
-
-        if (PlayerHealth != null && !PlayerHealth.IsDead &&
-            Vector2.Distance(transform.position, PlayerPosition) <= burstRadius + 0.3f)
-            PlayerHealth.TakeDamage(burstDamage);
 
         StopAction();
         yield return new WaitForSeconds(recovery);

@@ -89,7 +89,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -530822252542669481, guid: 8ba88baf845d144a9b51be16f4f55eed, type: 3}
+  m_Sprite: {fileID: -942107140, guid: 69cb8f8db72324f9facf813a00452c40, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -138,7 +138,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.25, y: 1.5}
+    oldSize: {x: 1, y: 1.5}
     newSize: {x: 1.25, y: 1.5}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -221,7 +221,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 2.8
+  moveSpeed: 3.2
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -280,10 +280,10 @@ MonoBehaviour:
   windupState: Charge
   dashState: Roll
   windup: 0.8
-  dashSpeed: 13
+  dashSpeed: 16
   dashDistance: 7.5
   damage: 20
   recovery: 0.9
   hitRadius: 0.65
   warningColor: {r: 1, g: 0.35, b: 0.3, a: 0.45}
-  dashTint: {r: 1, g: 0.6, b: 0.6, a: 1}
+  dashTint: {r: 1, g: 1, b: 1, a: 1}

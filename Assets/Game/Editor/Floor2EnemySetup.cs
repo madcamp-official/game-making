@@ -31,15 +31,15 @@ public static class Floor2EnemySetup
 
     private static readonly EnemySpec[] Specs =
     {
-        // 고지 — 방어형 전위. 느리지만 단단하고, 붙으면 웅크렸다가 터뜨린다.
+        // 고지 — 방어형 전위. 붙으면 정면을 할퀴고 물러나 웅크린다.
         new EnemySpec
         {
-            name = "Sandslash", health = 140, scale = 1.25f, moveSpeed = 3f,
+            name = "Sandslash", health = 140, scale = 1.25f, moveSpeed = 3.6f,
             contactDamage = 12, gold = 12, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyGuardAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 2.3f), ("cooldown", 5f), ("initialDelay", 1f),
+                ("range", 2.3f), ("cooldown", 4f), ("initialDelay", 1f),
             },
         },
         // 텅구리 — 중거리 견제. 거리를 지키며 왕복하는 뼈를 던진다.
@@ -62,7 +62,9 @@ public static class Floor2EnemySetup
             ability = typeof(EnemyBurrowAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 8.5f), ("cooldown", 4.5f), ("initialDelay", 1.4f),
+                // 사거리 = 방 전체. 잠수가 유일한 이동 수단이라, 사거리 밖이면 조각상이 되어
+                // 어그로가 풀린 것처럼 보인다.
+                ("range", 20f), ("cooldown", 4.5f), ("initialDelay", 1.4f),
             },
         },
         // 나인테일 — 공간 통제. 멀찍이 물러서서 긴 화염 줄기로 길을 막는다.
@@ -74,12 +76,13 @@ public static class Floor2EnemySetup
             abilityValues = new (string, object)[]
             {
                 ("range", 7.5f), ("minRange", 1f), ("cooldown", 4.5f), ("initialDelay", 1.2f),
+                ("flameDuration", 5f),
             },
         },
         // 데구리 — 엘리트. 코뿌리의 이판사판을 닮은, 웅크려 구르는 긴 돌진.
         new EnemySpec
         {
-            name = "Graveler", health = 180, scale = 1.3f, moveSpeed = 2.8f,
+            name = "Graveler", health = 180, scale = 1.3f, moveSpeed = 3.2f,
             contactDamage = 14, gold = 20, knockbackMultiplier = 0.3f,
             boxSize = new Vector2(0.75f, 0.7f),
             ability = typeof(EnemyDashAbility),
@@ -88,9 +91,12 @@ public static class Floor2EnemySetup
                 // minRange 0 — 코뿌리의 이판사판처럼 코앞에서도 구른다. 최소 거리를 두면
                 // 한 번 붙은 뒤로는 영영 구르지 않고 평범한 근접몹이 돼 버린다.
                 ("range", 7f), ("minRange", 0f), ("cooldown", 4f), ("initialDelay", 1.3f),
-                ("windup", 0.8f), ("dashSpeed", 13f), ("dashDistance", 7.5f),
+                ("windup", 0.8f), ("dashSpeed", 16f), ("dashDistance", 7.5f),
                 ("damage", 20), ("recovery", 0.9f), ("hitRadius", 0.65f),
                 ("windupState", "Charge"), ("dashState", "Roll"),
+                // 구르기 스프라이트가 이미 "굴러가는 돌"이다. 스라크처럼 붉게 물들이면
+                // 오히려 바위 같지 않아 보인다.
+                ("dashTint", Color.white),
             },
         },
     };
@@ -156,14 +162,17 @@ public static class Floor2EnemySetup
             root.name = "Enemy_" + spec.name;
             root.transform.localScale = Vector3.one * spec.scale;
 
-            // 겉모습 — 남쪽을 보는 걷기 첫 프레임과 전용 컨트롤러.
+            // 겉모습 — 전용 컨트롤러를 먼저, 스프라이트를 나중에.
+            // 순서가 반대면 플레이 모드에서 구울 때 스프라이트가 본(스라크) 것으로 되돌아간다:
+            // 컨트롤러를 갈아 끼우는 순간 애니메이터가 다시 바인딩되며, 처음 바인딩 때
+            // 기록해 둔 기본값(본의 스프라이트)을 SpriteRenderer에 도로 써 넣기 때문이다.
             string artRoot = "Assets/Game/Art/Characters/" + spec.name;
-            Sprite idle = FindSprite(artRoot + "/Sprites/Walk.png", "Walk_0_0");
-            var renderer = root.GetComponent<SpriteRenderer>();
-            renderer.sprite = idle;
             var animator = root.GetComponent<Animator>();
             animator.runtimeAnimatorController =
                 AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(artRoot + "/" + spec.name + ".controller");
+            Sprite idle = FindSprite(artRoot + "/Sprites/Walk.png", "Walk_0_0");
+            var renderer = root.GetComponent<SpriteRenderer>();
+            renderer.sprite = idle;
 
             var box = root.GetComponent<BoxCollider2D>();
             box.size = spec.boxSize;
@@ -254,6 +263,7 @@ public static class Floor2EnemySetup
                 case float f: prop.floatValue = f; break;
                 case bool b: prop.boolValue = b; break;
                 case string s: prop.stringValue = s; break;
+                case Color c: prop.colorValue = c; break;
                 default: throw new ArgumentException(field + ": 지원하지 않는 형 " + value.GetType());
             }
         }
