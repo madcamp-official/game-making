@@ -95,6 +95,7 @@ GameObject:
   - component: {fileID: 1489783095321110572}
   - component: {fileID: 5150133387888412026}
   - component: {fileID: 7532043419653032673}
+  - component: {fileID: 2313023429351520298}
   m_Layer: 0
   m_Name: Boss_Rhydon
   m_TagString: Untagged
@@ -262,8 +263,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 220
-  invincibleDuration: 0.3
+  maxHealth: 700
+  invincibleDuration: 0.25
 --- !u!114 &5764212027173477630
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -276,16 +277,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 2.4
+  moveSpeed: 3.4
   detectRange: 9
   attackRange: 1.3
   attackContactReach: 0.25
-  attackDamage: 18
+  attackDamage: 0
   attackCooldown: 1
-  goldReward: 35
+  goldReward: 45
+  keepDistance: 0
   knockbackStunDuration: 0.15
-  knockbackMultiplier: 1
-  basicAIEnabled: 1
+  knockbackMultiplier: 0
+  basicAIEnabled: 0
+  aggroOnSpawn: 1
 --- !u!95 &1489783095321110572
 Animator:
   serializedVersion: 7
@@ -335,6 +338,100 @@ MonoBehaviour:
   offsetY: 1.1
   width: 1.5
   height: 0.12
+  showValue: 0
+--- !u!114 &2313023429351520298
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2155811858085580901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e050c70be132a4f3d8e86d01e0b37c2f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RhydonBossController
+  moveSpeed: 3.4
+  introDelay: 0.15
+  arenaCenter: {fileID: 0}
+  arenaHalfSize: {x: 6.2, y: 4.2}
+  stoneApproachDistance: 1.6
+  hornApproachDistance: 2.4
+  approachMaxDuration: 1.6
+  patternGapPhase1: 0.6
+  patternGapPhase2: 0.45
+  stonePhase1:
+    radius: 3.2
+    windup: 0.7
+    stoneCount: 9
+    spawnInterval: 0.24
+    fallTime: 0.7
+    recovery: 0.75
+  stonePhase2:
+    radius: 3.92
+    windup: 0.6
+    stoneCount: 13
+    spawnInterval: 0.2
+    fallTime: 0.538
+    recovery: 0.6
+  stoneDamage: 22
+  stoneRadius: 0.62
+  stoneImpactDuration: 0.22
+  stoneDropHeight: 6
+  stoneAimAtPlayerRatio: 0.4
+  hornPhase1:
+    chargeTime: 0.75
+    length: 3.4
+    baseWidth: 1.7
+    thrustTime: 0.15
+    holdTime: 0.1
+    retractTime: 0.14
+    stabs: 2
+    stabGap: 0.28
+    lunge: 0.9
+    recovery: 0.8
+  hornPhase2:
+    chargeTime: 0.42
+    length: 4.5
+    baseWidth: 2.4
+    thrustTime: 0.13
+    holdTime: 0.1
+    retractTime: 0.12
+    stabs: 2
+    stabGap: 0.22
+    lunge: 1.2
+    recovery: 0.65
+  hornDamage: 26
+  takeDownPhase1:
+    dashes: 3
+    aimTime: 0.42
+    dashSpeed: 15
+    dashMaxDuration: 1.3
+    betweenDashes: 0.2
+    recovery: 0.9
+  takeDownPhase2:
+    dashes: 5
+    aimTime: 0.34
+    dashSpeed: 19.5
+    dashMaxDuration: 1.2
+    betweenDashes: 0.16
+    recovery: 0.7
+  dashDamage: 24
+  dashHitRadius: 1.05
+  dashStopDistance: 0.4
+  phase2GraceTime: 0.6
+  contactDamage: 14
+  contactInterval: 1
+  logPatterns: 0
+  stoneAreaColor: {r: 0.55, g: 0.36, b: 0.18, a: 0.2}
+  stoneEdgeColor: {r: 0.72, g: 0.47, b: 0.22, a: 0.85}
+  stoneShadowColor: {r: 0.1, g: 0.07, b: 0.04, a: 0.45}
+  stoneColor: {r: 0.42, g: 0.3, b: 0.19, a: 1}
+  stoneImpactColor: {r: 0.85, g: 0.55, b: 0.25, a: 0.8}
+  hornWarningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.62}
+  hornColor: {r: 0.22, g: 0.24, b: 0.3, a: 1}
+  dashWarningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.5}
+  windupTint: {r: 1, g: 0.72, b: 0.62, a: 1}
 --- !u!1 &2664919949399868721
 GameObject:
   m_ObjectHideFlags: 0

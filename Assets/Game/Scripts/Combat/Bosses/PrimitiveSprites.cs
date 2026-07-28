@@ -15,6 +15,7 @@ public static class PrimitiveSprites
     private static Sprite square;
     private static Sprite circle;
     private static Sprite ring;
+    private static Sprite triangle;
     // 부채꼴은 각도마다 모양이 달라서 각도별로 하나씩 만들어 재사용한다.
     private static readonly Dictionary<int, Sprite> sectors = new Dictionary<int, Sprite>();
 
@@ -46,6 +47,47 @@ public static class PrimitiveSprites
             if (ring == null) ring = MakeCircle(RingInnerRatio);
             return ring;
         }
+    }
+
+    /// <summary>
+    /// 1×1유닛의 채워진 삼각형. 밑변이 -X 끝, 꼭짓점이 +X 끝이다.
+    /// localScale을 (길이, 밑변 너비)로 주면 창끝 모양이 된다 — 코뿌리의 뿔드릴이 쓴다.
+    /// </summary>
+    public static Sprite Triangle
+    {
+        get
+        {
+            if (triangle == null) triangle = MakeTriangle();
+            return triangle;
+        }
+    }
+
+    private static Sprite MakeTriangle()
+    {
+        Texture2D tex = new Texture2D(Resolution, Resolution) { filterMode = FilterMode.Bilinear };
+        Color[] pixels = new Color[Resolution * Resolution];
+
+        for (int y = 0; y < Resolution; y++)
+        {
+            for (int x = 0; x < Resolution; x++)
+            {
+                // u: 밑변(0)에서 꼭짓점(1)까지, v: 중심선에서의 거리
+                float u = (x + 0.5f) / Resolution;
+                float v = Mathf.Abs((y + 0.5f) / Resolution - 0.5f);
+                // 꼭짓점으로 갈수록 폭이 0으로 좁아진다.
+                float halfWidth = 0.5f * (1f - u);
+                // 가장자리 1픽셀을 부드럽게 깎아 계단을 줄인다.
+                float alpha = Mathf.Clamp01((halfWidth - v) * Resolution);
+                pixels[y * Resolution + x] = new Color(1f, 1f, 1f, alpha);
+            }
+        }
+
+        tex.SetPixels(pixels);
+        tex.Apply();
+        Sprite sprite = Sprite.Create(tex, new Rect(0, 0, Resolution, Resolution),
+                                      new Vector2(0.5f, 0.5f), Resolution);
+        sprite.name = "Triangle";
+        return sprite;
     }
 
     /// <summary>

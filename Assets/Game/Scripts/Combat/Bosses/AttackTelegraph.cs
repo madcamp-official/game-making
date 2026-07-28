@@ -26,6 +26,20 @@ public class AttackTelegraph : MonoBehaviour
         return telegraph;
     }
 
+    /// <summary>
+    /// 창끝 모양 예고. 밑변이 <paramref name="origin"/>에 붙고 꼭짓점이 <paramref name="direction"/> 쪽을 본다.
+    /// 코뿌리의 뿔드릴이 실제로 찌를 범위를 그대로 그린다.
+    /// </summary>
+    public static AttackTelegraph CreateTriangle(Transform parent, Vector2 origin, Vector2 direction,
+                                                 float length, float baseWidth, Color color)
+    {
+        Vector2 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
+        AttackTelegraph telegraph = Create(parent, origin + dir * (length * 0.5f), PrimitiveSprites.Triangle, color);
+        telegraph.transform.localScale = new Vector3(length, baseWidth, 1f);
+        telegraph.transform.rotation = Quaternion.FromToRotation(Vector3.right, dir);
+        return telegraph;
+    }
+
     /// <summary>장판 예고. <paramref name="radius"/>는 실제 장판 반지름과 같아야 한다.</summary>
     public static AttackTelegraph CreateCircle(Transform parent, Vector2 center, float radius, Color color)
     {
