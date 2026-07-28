@@ -247,6 +247,76 @@ public static class Floor2EnemySetup
         return log.ToString();
     }
 
+    /// <summary>
+    /// 2층 이벤트 방의 시라소몬·홍수몬 NPC를 세운다. 가운데 기준 왼쪽/오른쪽에 일반
+    /// 포켓몬 크기로 서서, 남쪽(아래)을 보고 수련 동작을 반복한다. 제자로 선택되면
+    /// <see cref="MartialArtsEvent"/>가 그 스승만 Idle로 바꾼다.
+    ///
+    /// ⚠️ 반드시 에디트 모드에서, 파이프라인 재실행과 다른 명령으로 실행할 것
+    /// (컨트롤러 먼저·스프라이트 나중 규칙과 같은 이유 — progress.md 참고).
+    /// </summary>
+    public static string SetupMartialArtsNpcs()
+    {
+        string path = "Assets/Game/Prefabs/Rooms/F2Room3_Event.prefab";
+        GameObject room = PrefabUtility.LoadPrefabContents(path);
+        try
+        {
+            var npcs = new (string name, string state, float x)[]
+            {
+                ("Hitmonlee", "Kick_0", -1.5f),
+                ("Hitmonchan", "Punch_0", 1.5f),
+            };
+
+            var poses = new Dictionary<string, EventNpcPose>();
+            foreach ((string name, string state, float x) in npcs)
+            {
+                Transform npc = FindChildByName(room.transform, name);
+                if (npc == null) return name + "을(를) 방에서 찾지 못했다";
+
+                npc.localPosition = new Vector3(x, 0f, 0f);
+                // 시라소몬·홍수몬은 시트 자체가 커서(발차기 80×88) 1.2배면 플레이어의 두 배로 보인다.
+                npc.localScale = Vector3.one;
+
+                string artRoot = "Assets/Game/Art/Characters/" + name;
+                Animator animator = npc.GetComponent<Animator>();
+                if (animator == null) animator = npc.gameObject.AddComponent<Animator>();
+                animator.runtimeAnimatorController = AssetDatabase.LoadAssetAtPath<RuntimeAnimatorController>(
+                    artRoot + "/" + name + ".controller");
+
+                // 기본 스프라이트는 수련 동작의 남쪽 첫 프레임. (컨트롤러를 먼저 할당했다.)
+                string sheet = state.Substring(0, state.IndexOf('_'));
+                var renderer = npc.GetComponent<SpriteRenderer>();
+                renderer.sprite = FindSprite(artRoot + "/Sprites/" + sheet + ".png", sheet + "_0_0");
+
+                EventNpcPose pose = npc.GetComponent<EventNpcPose>();
+                if (pose == null) pose = npc.gameObject.AddComponent<EventNpcPose>();
+                Set(pose, ("initialState", state));
+                poses[name] = pose;
+            }
+
+            MartialArtsEvent martial = room.GetComponentInChildren<MartialArtsEvent>();
+            if (martial == null) return "MartialArtsEvent를 찾지 못했다";
+            var so = new SerializedObject(martial);
+            so.FindProperty("hitmonleeNpc").objectReferenceValue = poses["Hitmonlee"];
+            so.FindProperty("hitmonchanNpc").objectReferenceValue = poses["Hitmonchan"];
+            so.ApplyModifiedPropertiesWithoutUndo();
+
+            PrefabUtility.SaveAsPrefabAsset(room, path);
+            return "이벤트 방 NPC 재배선 완료 (±1.5, 크기 1.0, Kick_0/Punch_0)";
+        }
+        finally
+        {
+            PrefabUtility.UnloadPrefabContents(room);
+        }
+    }
+
+    private static Transform FindChildByName(Transform root, string name)
+    {
+        foreach (Transform child in root.GetComponentsInChildren<Transform>(true))
+            if (child.name == name) return child;
+        return null;
+    }
+
     // ---------------------------------------------------------------- 도구
 
     private static Sprite FindSprite(string sheetPath, string name)

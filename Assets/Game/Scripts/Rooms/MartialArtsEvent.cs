@@ -14,6 +14,12 @@ public class MartialArtsEvent : ChoiceEvent
     [Tooltip("홍수몬 — 원거리 강화")]
     [SerializeField] private Sprite hitmonchanPortrait;
 
+    [Header("방 안의 NPC")]
+    [Tooltip("제자로 선택되면 수련(발차기)을 멈추고 쉰다.")]
+    [SerializeField] private EventNpcPose hitmonleeNpc;
+    [Tooltip("제자로 선택되면 수련(주먹질)을 멈추고 쉰다.")]
+    [SerializeField] private EventNpcPose hitmonchanNpc;
+
     [Header("강화 폭")]
     [SerializeField, Range(0f, 1f)] private float meleeBonus = 0.2f;
     [SerializeField, Range(0f, 1f)] private float rangedBonus = 0.2f;
@@ -41,6 +47,8 @@ public class MartialArtsEvent : ChoiceEvent
     private EventOutcome LearnMelee()
     {
         EventBuffs.Instance.AddMeleeDamage(meleeBonus);
+        // 선택된 스승은 수련을 멈추고 쉰다.
+        if (hitmonleeNpc != null) hitmonleeNpc.SetIdle();
         return EventOutcome.Say("당연히 나를 골라야지!",
             "근접공격이 " + Percent(meleeBonus) + "% 강해졌습니다.", hitmonleePortrait);
     }
@@ -48,6 +56,7 @@ public class MartialArtsEvent : ChoiceEvent
     private EventOutcome LearnRanged()
     {
         EventBuffs.Instance.AddRangedDamage(rangedBonus);
+        if (hitmonchanNpc != null) hitmonchanNpc.SetIdle();
         return EventOutcome.Say("현명한 선택을 하셨군요.",
             "원거리공격이 " + Percent(rangedBonus) + "% 강해졌습니다.", hitmonchanPortrait);
     }

@@ -88,6 +88,8 @@ GameObject:
   m_Component:
   - component: {fileID: 4779092631832212175}
   - component: {fileID: 1275221081456613389}
+  - component: {fileID: 1289079857746413933}
+  - component: {fileID: 4728107050681256132}
   m_Layer: 0
   m_Name: Hitmonchan
   m_TagString: Untagged
@@ -104,7 +106,7 @@ Transform:
   m_GameObject: {fileID: 478297212196792896}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1, y: 0, z: 0}
+  m_LocalPosition: {x: 1.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -159,17 +161,52 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4723107735738678597, guid: defd12815fa9448498221e6676bca5c2, type: 3}
+  m_Sprite: {fileID: -936886849, guid: 19e9ee0cc1a0a4ccdb434937f0d0df4b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.71875, y: 0.84375}
+  m_Size: {x: 2, y: 2.25}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!95 &1289079857746413933
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478297212196792896}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: c0cf5cb7c2ca749da8cc3671213f71fd, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &4728107050681256132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 478297212196792896}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0dd97db764194415bc42deb767f9aca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EventNpcPose
+  initialState: Punch_0
 --- !u!1 &2179579388004919707
 GameObject:
   m_ObjectHideFlags: 0
@@ -4781,6 +4818,8 @@ GameObject:
   m_Component:
   - component: {fileID: 8160041934224700886}
   - component: {fileID: 4046360823634418667}
+  - component: {fileID: 6607215897306600520}
+  - component: {fileID: 7526966331726042903}
   m_Layer: 0
   m_Name: Hitmonlee
   m_TagString: Untagged
@@ -4797,7 +4836,7 @@ Transform:
   m_GameObject: {fileID: 8426442580330389588}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1, y: 0, z: 0}
+  m_LocalPosition: {x: -1.5, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4852,17 +4891,52 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 10
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 4723107735738678597, guid: ca2f7add765c4403da169d49cce4be57, type: 3}
+  m_Sprite: {fileID: 865912819, guid: ca854a6c6bef641659de0646bee20034, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.96875, y: 0.84375}
+  m_Size: {x: 2.5, y: 2.75}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
   m_BlendShapeWeights: []
+--- !u!95 &6607215897306600520
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8426442580330389588}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 8979019c78cd045c98b400dd6cb57bce, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &7526966331726042903
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8426442580330389588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b0dd97db764194415bc42deb767f9aca, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EventNpcPose
+  initialState: Kick_0
 --- !u!1 &8765202127521417573
 GameObject:
   m_ObjectHideFlags: 0
@@ -4961,6 +5035,8 @@ MonoBehaviour:
   portrait: {fileID: 0}
   hitmonleePortrait: {fileID: 21300000, guid: 9e3f136fdeb8246eaa23bfdcd0de01aa, type: 3}
   hitmonchanPortrait: {fileID: 21300000, guid: 143d6b3c5c50141e7a335de5a6f2a1e5, type: 3}
+  hitmonleeNpc: {fileID: 7526966331726042903}
+  hitmonchanNpc: {fileID: 4728107050681256132}
   meleeBonus: 0.2
   rangedBonus: 0.2
   speedBonus: 0.15

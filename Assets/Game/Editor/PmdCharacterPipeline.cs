@@ -134,12 +134,26 @@ public static class PmdCharacterPipeline
             new AnimSpec("Roll", "Special0", true)),
     };
 
+    /// <summary>2층 이벤트의 NPC 스승 둘. 아래(남쪽)를 보고 수련 동작을 반복한다.</summary>
+    public static readonly CharacterSpec[] EventNpcs =
+    {
+        new CharacterSpec("Hitmonlee", "0106_Hitmonlee",
+            new AnimSpec("Idle", "Idle", true),
+            // 수련 중 — 계속 반복한다.
+            new AnimSpec("Kick", "Kick", true)),
+        new CharacterSpec("Hitmonchan", "0107_Hitmonchan",
+            new AnimSpec("Idle", "Idle", true),
+            new AnimSpec("Punch", "Punch", true)),
+    };
+
     private const int PixelsPerUnit = 32;
 
     public static string ImportAll()
     {
         var log = new System.Text.StringBuilder();
         foreach (CharacterSpec spec in Floor2Enemies)
+            log.AppendLine(Import(spec));
+        foreach (CharacterSpec spec in EventNpcs)
             log.AppendLine(Import(spec));
         AssetDatabase.SaveAssets();
         return log.ToString();

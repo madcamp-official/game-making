@@ -22,10 +22,15 @@ public class CameraFollow : MonoBehaviour
 
     public void SetTarget(Transform newTarget) => target = newTarget;
 
-    /// <summary>지정 시간 동안 카메라를 흔든다. 시간이 지날수록 잦아든다.</summary>
+    /// <summary>
+    /// 지정 시간 동안 카메라를 흔든다. 시간이 지날수록 잦아든다.
+    ///
+    /// 언스케일드 시간으로 잰다. 이벤트 대사창이 timeScale을 0으로 세운 채 피해를 주는데
+    /// (잠만보 공격), 스케일 시간은 그동안 멈춰 있어 흔들림이 영영 끝나지 않았다.
+    /// </summary>
     public void Shake(float duration, float magnitude)
     {
-        shakeUntil = Time.time + duration;
+        shakeUntil = Time.unscaledTime + duration;
         shakeDuration = Mathf.Max(0.0001f, duration);
         shakeMagnitude = magnitude;
     }
@@ -60,9 +65,9 @@ public class CameraFollow : MonoBehaviour
         followPosition = Vector3.SmoothDamp(followPosition, goal, ref velocity, smoothTime);
 
         Vector3 shakeOffset = Vector3.zero;
-        if (Time.time < shakeUntil)
+        if (Time.unscaledTime < shakeUntil)
         {
-            float falloff = (shakeUntil - Time.time) / shakeDuration; // 1 → 0
+            float falloff = (shakeUntil - Time.unscaledTime) / shakeDuration; // 1 → 0
             shakeOffset = (Vector3)(Random.insideUnitCircle * (shakeMagnitude * falloff));
         }
 
