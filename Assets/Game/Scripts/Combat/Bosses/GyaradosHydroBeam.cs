@@ -10,7 +10,11 @@ using UnityEngine;
 /// 플레이어에게 보여 주는 것은 첫 방향뿐이고, 그 뒤는 "벽에서 똑같은 각도로 튕긴다"는 규칙 하나로
 /// 읽을 수 있어야 하기 때문이다.
 ///
-/// 선두가 지나간 구간은 정해진 시간 동안 피해 판정으로 남는다. 굵기와 판정은 반사 전후가 같다.
+/// 발사는 <b>즉발</b>이다. 선두가 경로를 훑어 가는 것이 아니라, 예고가 끝나는 순간 꺾인 경로
+/// 전체가 한꺼번에 번쩍이며 동시에 판정을 낸다. 그래서 플레이어는 물줄기가 오는 것을 보고
+/// 피하는 것이 아니라, 예고선의 각도에서 반사 경로를 미리 읽고 발사 전에 비켜서 있어야 한다.
+/// 번쩍인 경로는 <c>trailDuration</c> 동안 옅어지며 남고, 그동안 계속 피해 판정을 유지한다.
+/// 굵기와 판정은 반사 전후가 같다.
 /// </summary>
 public class GyaradosHydroBeam : MonoBehaviour
 {
@@ -55,11 +59,7 @@ public class GyaradosHydroBeam : MonoBehaviour
 
     private readonly List<Strip> strips = new List<Strip>(4);
     private List<Segment> path;
-    private int segmentIndex;
-    private float travelled;
-    private bool headDone;
 
-    private float speed;
     private float width;
     private float trailDuration;
     private int damage;
@@ -69,7 +69,7 @@ public class GyaradosHydroBeam : MonoBehaviour
     private Transform player;
     private Health playerHealth;
 
-    /// <summary>선두가 끝까지 갔고 남은 판정도 모두 사라졌는지. 다음 외부 패턴은 이걸 기다린다.</summary>
+    /// <summary>번쩍인 경로가 모두 사라졌는지. 다음 외부 패턴은 이걸 기다린다.</summary>
     public bool IsFinished { get; private set; }
 
     // ---------------------------------------------------------------- 경로 계산
@@ -213,7 +213,8 @@ public class GyaradosHydroBeam : MonoBehaviour
 
     // ---------------------------------------------------------------- 발사
 
-    public static GyaradosHydroBeam Launch(Transform parent, List<Segment> path, float speed, float width,
+    /// <summary>경로 전체를 즉시 번쩍이며 발사한다. <paramref name="trailDuration"/>은 번쩍임이 남는 시간이다.</summary>
+    public static GyaradosHydroBeam Launch(Transform parent, List<Segment> path, float width,
                                            float trailDuration, int damage, Color color, Color splashColor)
     {
         GameObject go = new GameObject("HydroBeam");
@@ -221,7 +222,6 @@ public class GyaradosHydroBeam : MonoBehaviour
 
         GyaradosHydroBeam beam = go.AddComponent<GyaradosHydroBeam>();
         beam.path = path;
-        beam.speed = Mathf.Max(0.1f, speed);
         beam.width = Mathf.Max(0.05f, width);
         beam.trailDuration = Mathf.Max(0f, trailDuration);
         beam.damage = damage;
@@ -245,50 +245,33 @@ public class GyaradosHydroBeam : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        BeginSegment(0);
+
+        // 즉발: 모든 구간을 한 프레임에 제 길이로 펼치고, 곧바로 사라지기 시작한다.
+        float expireAt = Time.time + trailDuration;
+        for (int i = 0; i < path.Count; i++)
+        {
+            Strip strip = CreateStrip(i);
+            SetStripLength(strip, path[i].Length);
+            strip.ExpireAt = expireAt;
+            // 반사점의 물보라. 어디서 꺾였는지 눈에 남기는 연출이고 피해는 없다.
+            if (i > 0) SpawnSplash(path[i].A);
+        }
     }
 
     private void Update()
     {
-        AdvanceHead();
         DamagePlayer();
         RetireStrips();
 
-        if (headDone && strips.Count == 0 && !IsFinished)
+        if (strips.Count == 0 && !IsFinished)
         {
             IsFinished = true;
             Destroy(gameObject);
         }
     }
 
-    /// <summary>선두가 경로를 따라 전진하며 지금 구간을 늘린다.</summary>
-    private void AdvanceHead()
-    {
-        if (headDone) return;
-
-        travelled += speed * Time.deltaTime;
-        float segmentLength = path[segmentIndex].Length;
-
-        while (travelled >= segmentLength)
-        {
-            FinishSegment(segmentLength);
-            travelled -= segmentLength;
-            segmentIndex++;
-            if (segmentIndex >= path.Count)
-            {
-                headDone = true;
-                return;
-            }
-            // 벽 반사점의 물보라. 새 경로를 알려 주는 연출이고 피해는 없다.
-            SpawnSplash(path[segmentIndex].A);
-            BeginSegment(segmentIndex);
-            segmentLength = path[segmentIndex].Length;
-        }
-
-        SetStripLength(strips[strips.Count - 1], travelled);
-    }
-
-    private void BeginSegment(int index)
+    /// <summary>구간 하나의 렌더러를 만든다. 길이 0으로 시작하므로 부르는 쪽이 채워 준다.</summary>
+    private Strip CreateStrip(int index)
     {
         Segment segment = path[index];
 
@@ -309,14 +292,7 @@ public class GyaradosHydroBeam : MonoBehaviour
         };
         strips.Add(strip);
         SetStripLength(strip, 0f);
-    }
-
-    private void FinishSegment(float fullLength)
-    {
-        Strip strip = strips[strips.Count - 1];
-        SetStripLength(strip, fullLength);
-        // 지나간 구간은 유지 시간 동안 피해 판정으로 남는다.
-        strip.ExpireAt = Time.time + trailDuration;
+        return strip;
     }
 
     private void SetStripLength(Strip strip, float length)

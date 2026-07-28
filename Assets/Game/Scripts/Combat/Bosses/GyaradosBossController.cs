@@ -52,11 +52,10 @@ public class GyaradosBossController : MonoBehaviour
         [Tooltip("전투장 벽에서 튕기는 횟수. 1페이즈는 1, 2페이즈는 2다. 진입은 반사로 세지 않는다.")]
         [FormerlySerializedAs("refractions")]
         [Range(1, 2)] public int reflections = 1;
-        [Tooltip("최초 발사 방향만 보여 주는 예고 시간")]
+        [Tooltip("최초 발사 방향만 보여 주는 예고 시간. 발사는 즉발이라 이 시간이 유일한 회피 여유다.")]
         [Min(0.05f)] public float telegraph = 0.65f;
-        [Min(0.1f)] public float speed = 15f;
         [Min(0.05f)] public float width = 0.8f;
-        [Tooltip("선두가 지나간 구간이 피해 판정으로 남는 시간")]
+        [Tooltip("번쩍인 경로가 남아 피해 판정을 유지하는 시간")]
         [Min(0f)] public float trailDuration = 0.5f;
         [Min(0)] public int damage = 28;
         [Min(0f)] public float recovery = 0.45f;
@@ -165,31 +164,31 @@ public class GyaradosBossController : MonoBehaviour
     [Header("상태 시간")]
     [Tooltip("포효와 물결을 보여 주는 시간. 이 동안 보스만 무적이고 둘 다 움직일 수 있다.")]
     [SerializeField, Min(0f)] private float introDuration = 0.8f;
-    [SerializeField, Min(0f)] private float exitDuration = 0.65f;
-    [SerializeField, Min(0f)] private float enterDuration = 0.8f;
+    [SerializeField, Min(0f)] private float exitDuration = 0.45f;
+    [SerializeField, Min(0f)] private float enterDuration = 0.55f;
     [Tooltip("진입 위치가 플레이어와 이만큼 가까우면 옆으로 비켜 올라온다.")]
     [SerializeField, Min(0f)] private float enterClearance = 1.6f;
 
     [Header("노출 상태")]
     [SerializeField, Min(1f)] private float exposedDurationPhase1 = 11f;
     [SerializeField, Min(1f)] private float exposedDurationPhase2 = 9f;
-    [SerializeField, Min(0f)] private float innerGapPhase1 = 0.5f;
-    [SerializeField, Min(0f)] private float innerGapPhase2 = 0.35f;
+    [SerializeField, Min(0f)] private float innerGapPhase1 = 0.3f;
+    [SerializeField, Min(0f)] private float innerGapPhase2 = 0.2f;
 
     [Header("잠항 상태")]
     [Tooltip("한 번의 잠항에서 사용하는 외부 패턴 수")]
     [SerializeField, Range(1, 2)] private int outerPatternsPhase1 = 1;
     [SerializeField, Range(1, 2)] private int outerPatternsPhase2 = 2;
-    [SerializeField, Min(0f)] private float outerGapPhase2 = 0.45f;
+    [SerializeField, Min(0f)] private float outerGapPhase2 = 0.28f;
 
     [Header("삼중 해류")]
     [SerializeField] private CurrentSettings currentPhase1 = new CurrentSettings
     {
-        speed = 1.05f, minHold = 5f, maxHold = 7f, telegraph = 0.85f,
+        speed = 1.3f, minHold = 3.5f, maxHold = 5f, telegraph = 0.7f,
     };
     [SerializeField] private CurrentSettings currentPhase2 = new CurrentSettings
     {
-        speed = 1.05f, minHold = 3.5f, maxHold = 5f, telegraph = 0.7f,
+        speed = 1.45f, minHold = 2.5f, maxHold = 3.8f, telegraph = 0.6f,
     };
     [Tooltip("수로 하나에 그리는 화살표 수")]
     [SerializeField, Min(2)] private int arrowsPerLane = 7;
@@ -200,13 +199,13 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField] private HydroSettings hydroPhase1 = new HydroSettings
     {
         reflections = 1, telegraph = 0.65f,
-        speed = 15f, width = 0.8f, trailDuration = 0.5f, damage = 28, recovery = 0.45f,
+        width = 0.8f, trailDuration = 0.4f, damage = 28, recovery = 0.3f,
         cornerMargin = 0.6f, minSegmentLength = 1f,
     };
     [SerializeField] private HydroSettings hydroPhase2 = new HydroSettings
     {
         reflections = 2, telegraph = 0.55f,
-        speed = 16.5f, width = 0.9f, trailDuration = 0.6f, damage = 32, recovery = 0.35f,
+        width = 0.9f, trailDuration = 0.45f, damage = 32, recovery = 0.22f,
         cornerMargin = 0.6f, minSegmentLength = 1f,
     };
     [Tooltip("경로 후보를 몇 번까지 다시 만들지. 실패하면 조준점을 전투장 중심 쪽으로 당겨 가며 다시 시도한다.")]
@@ -215,26 +214,26 @@ public class GyaradosBossController : MonoBehaviour
     [Header("격류 압착")]
     [SerializeField] private FloodSettings floodPhase1 = new FloodSettings
     {
-        depthRatio = 0.55f, telegraph = 1.05f, holdAfterSecond = 1f,
+        depthRatio = 0.4f, telegraph = 0.8f, holdAfterSecond = 0.75f,
         damage = 28, damageRetryInterval = 0.6f, slowMultiplier = 0.75f, slowDuration = 0.75f,
-        recovery = 0.45f,
+        recovery = 0.3f,
     };
     [SerializeField] private FloodSettings floodPhase2 = new FloodSettings
     {
-        depthRatio = 0.55f, telegraph = 0.95f, holdAfterSecond = 0.85f,
-        thirdTelegraph = 1.3f, holdAfterThird = 0.85f,
+        depthRatio = 0.4f, telegraph = 0.72f, holdAfterSecond = 0.65f,
+        thirdTelegraph = 1f, holdAfterThird = 0.65f,
         damage = 32, damageRetryInterval = 0.55f, slowMultiplier = 0.7f, slowDuration = 0.8f,
-        recovery = 0.35f,
+        recovery = 0.22f,
     };
 
     [Header("잉어킹 소환")]
     [SerializeField] private SummonSettings summonPhase1 = new SummonSettings
     {
-        count = 3, telegraph = 0.75f, magikarpHealth = 70, bodyRadius = 0.55f, recovery = 0.45f,
+        count = 3, telegraph = 0.6f, magikarpHealth = 70, bodyRadius = 0.55f, recovery = 0.3f,
     };
     [SerializeField] private SummonSettings summonPhase2 = new SummonSettings
     {
-        count = 4, telegraph = 0.65f, magikarpHealth = 90, bodyRadius = 0.55f, recovery = 0.35f,
+        count = 4, telegraph = 0.52f, magikarpHealth = 90, bodyRadius = 0.55f, recovery = 0.22f,
     };
 
     [Header("잉어킹 배치 규칙")]
@@ -251,14 +250,14 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField] private CoilSettings coilPhase1 = new CoilSettings
     {
         ringInner = 1.85f, ringOuter = 4.5f, innerRadius = 1.85f,
-        firstTelegraph = 0.65f, secondTelegraph = 0.55f, betweenStrikes = 0.55f,
-        ringDamage = 30, innerDamage = 32, recovery = 0.55f,
+        firstTelegraph = 0.55f, secondTelegraph = 0.46f, betweenStrikes = 0.55f,
+        ringDamage = 30, innerDamage = 32, recovery = 0.38f,
     };
     [SerializeField] private CoilSettings coilPhase2 = new CoilSettings
     {
         ringInner = 1.75f, ringOuter = 4.7f, innerRadius = 2.05f,
-        firstTelegraph = 0.52f, secondTelegraph = 0.48f, betweenStrikes = 0.42f,
-        ringDamage = 34, innerDamage = 36, recovery = 0.42f,
+        firstTelegraph = 0.45f, secondTelegraph = 0.42f, betweenStrikes = 0.42f,
+        ringDamage = 34, innerDamage = 36, recovery = 0.3f,
     };
 
     [Header("접촉 피해 — 노출 상태에서만")]
@@ -863,9 +862,12 @@ public class GyaradosBossController : MonoBehaviour
     /// 외곽 바다의 네 방향 중 한 곳에서 굵은 물대포를 쏜다. 물대포는 전투장 <b>벽</b>에 닿을 때마다
     /// 입사각과 같은 각도로 튕긴다.
     ///
+    /// 발사는 즉발이다. 예고가 끝나는 순간 꺾인 경로 <b>전체</b>가 한꺼번에 번쩍이며 동시에 판정을 낸다.
+    /// 물줄기가 날아오는 것을 보고 피할 여지는 없고, 예고선이 떠 있는 동안 반사 경로를 미리 읽어
+    /// 비켜서 있어야 한다. 그래서 예고 시간이 이 패턴의 유일한 회피 여유다 — 줄일 때 주의할 것.
+    ///
     /// 플레이어에게 보여 주는 예고는 최초 발사 방향뿐이다. 반사 이후 경로는 미리 그리지 않고,
-    /// 벽에 닿는 물보라와 진행하는 물줄기로만 읽게 한다. 경로가 해류와 무관하므로 물줄기가
-    /// 날아가는 동안에도 해류 방향은 평소대로 바뀐다.
+    /// "벽에서 똑같은 각도로 튕긴다"는 규칙 하나로 읽게 한다.
     /// </summary>
     private IEnumerator HydroPumpRoutine()
     {
@@ -907,10 +909,11 @@ public class GyaradosBossController : MonoBehaviour
         if (marker != null) Destroy(marker);
         if (health.IsDead) yield break;
 
-        GyaradosHydroBeam beam = GyaradosHydroBeam.Launch(attackRoot, path, settings.speed,
+        // 즉발이다 — 경로 전체가 이 순간 한꺼번에 번쩍이며 판정을 낸다.
+        GyaradosHydroBeam beam = GyaradosHydroBeam.Launch(attackRoot, path,
             settings.width, settings.trailDuration, settings.damage, beamColor, splashColor);
 
-        // 남은 물줄기 판정까지 사라진 뒤에 다음 외부 패턴으로 넘어간다.
+        // 번쩍임이 사라진 뒤에 다음 외부 패턴으로 넘어간다.
         int generation = attackGeneration;
         while (beam != null && !beam.IsFinished && generation == attackGeneration && !health.IsDead)
             yield return null;
