@@ -146,6 +146,20 @@ public static class PmdCharacterPipeline
             new AnimSpec("Punch", "Punch", true)),
     };
 
+    /// <summary>
+    /// 3층 보스가 불러내는 소환물.
+    ///
+    /// 잉어킹은 갸라도스가 세워 두는 <b>고정 장애물</b>이라 걸어 다니지 않는다. 제자리에서
+    /// 파닥이는 Hop 하나면 충분하다. 이벤트방(<see cref="MagikarpEvent"/>)이 쓰는 Idle 시트는
+    /// 슬라이스 이름 규칙이 달라 여기 목록에 넣지 않는다 — 다시 구우면 스프라이트 이름과
+    /// 참조가 바뀌어 그 방의 그림이 깨진다.
+    /// </summary>
+    public static readonly CharacterSpec[] Floor3Summons =
+    {
+        new CharacterSpec("Magikarp", "0129_Magikarp",
+            new AnimSpec("Hop", "Hop", true)),
+    };
+
     private const int PixelsPerUnit = 32;
 
     public static string ImportAll()
@@ -154,6 +168,19 @@ public static class PmdCharacterPipeline
         foreach (CharacterSpec spec in Floor2Enemies)
             log.AppendLine(Import(spec));
         foreach (CharacterSpec spec in EventNpcs)
+            log.AppendLine(Import(spec));
+        AssetDatabase.SaveAssets();
+        return log.ToString();
+    }
+
+    /// <summary>
+    /// 소환물만 다시 굽는다. <see cref="ImportAll"/>과 나눠 둔 이유는 컨트롤러를 새로 만들면
+    /// GUID가 바뀌기 때문이다 — 필요 없는 캐릭터까지 함께 구우면 그 프리팹들도 전부 다시 구워야 한다.
+    /// </summary>
+    public static string ImportFloor3Summons()
+    {
+        var log = new System.Text.StringBuilder();
+        foreach (CharacterSpec spec in Floor3Summons)
             log.AppendLine(Import(spec));
         AssetDatabase.SaveAssets();
         return log.ToString();
