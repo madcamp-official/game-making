@@ -9,8 +9,7 @@ using UnityEngine;
 /// 쓰지 않는다. 세 패턴 모두 몸이 닿는 거리에서만 위험하고, 그래서 압박은 "피해라"가 아니라
 /// "어디에 서 있을 것이냐"로 온다.
 ///
-/// * 스톤샤워 — 자기 주변에 갈색 원을 깔고 그 안에 돌을 떨어뜨린다. 원 안이 곧 자기 몸 주변이라,
-///   때리려면 원 안에 있어야 하고 원 안에 있으면 맞는다.
+/// * 스톤샤워 — 방 전체에 돌을 떨어뜨린다. 안전 구역이 없어 그림자를 하나씩 읽고 비켜야 한다.
 /// * 뿔드릴 — 짧게 차지한 뒤 거대한 삼각뿔을 창처럼 찌른다.
 /// * 이판사판 — 방 반대편까지 연속으로 돌진한다.
 ///
@@ -31,18 +30,16 @@ public class RhydonBossController : MonoBehaviour
     [System.Serializable]
     private class StoneSettings
     {
-        [Tooltip("돌이 떨어지는 갈색 원의 반지름. 코뿌리 자신을 중심으로 깔린다.")]
-        public float radius = 3.2f;
-        [Tooltip("원이 깔리고 첫 돌이 떨어지기까지의 시간")]
-        public float windup = 0.7f;
-        [Tooltip("떨어뜨릴 돌 수")]
-        public int stoneCount = 9;
+        [Tooltip("코뿌리가 발을 구르고 첫 돌이 떨어지기까지의 시간")]
+        public float windup = 0.5f;
+        [Tooltip("떨어뜨릴 돌 수. 방 전체에 흩어지므로 수가 곧 밀도다.")]
+        public int stoneCount = 14;
         [Tooltip("돌을 하나씩 떨구는 간격")]
-        public float spawnInterval = 0.24f;
+        public float spawnInterval = 0.17f;
         [Tooltip("그림자가 생기고 돌이 바닥에 닿기까지의 시간. 짧을수록 반응하기 어렵다.")]
-        public float fallTime = 0.7f;
+        public float fallTime = 0.5f;
         [Tooltip("마지막 돌이 떨어진 뒤 후딜레이")]
-        public float recovery = 0.75f;
+        public float recovery = 0.5f;
     }
 
     [System.Serializable]
@@ -90,8 +87,8 @@ public class RhydonBossController : MonoBehaviour
     private const float MinAimTime = 0.28f;
 
     [Header("기본")]
-    [Tooltip("걸어다닐 때의 속도. 플레이어는 5다. 코뿌리는 느린 대신 돌진이 빠르다.")]
-    [SerializeField, Min(0f)] private float moveSpeed = 3.4f;
+    [Tooltip("걸어다닐 때의 속도. 플레이어는 5다. 코뿌리는 조금 느린 대신 돌진이 아주 빠르다.")]
+    [SerializeField, Min(0f)] private float moveSpeed = 4.2f;
     [SerializeField, Min(0f)] private float introDelay = 0.15f;
     [Tooltip("전투 영역의 중심. 비워 두면 부모(방)의 위치를 쓴다.")]
     [SerializeField] private Transform arenaCenter;
@@ -99,31 +96,30 @@ public class RhydonBossController : MonoBehaviour
     [SerializeField] private Vector2 arenaHalfSize = new Vector2(6.2f, 4.2f);
 
     [Header("접근")]
-    [Tooltip("스톤샤워를 깔기 전에 이만큼까지 붙는다. 원이 자기 주변이라 붙어야 의미가 있다.")]
-    [SerializeField, Min(0f)] private float stoneApproachDistance = 1.6f;
-    [Tooltip("뿔드릴을 쓰기 전에 이만큼까지 붙는다. 뿔 길이보다 짧아야 한다.")]
+    [Tooltip("뿔드릴을 쓰기 전에 이만큼까지 붙는다. 뿔 길이보다 짧아야 한다. " +
+             "스톤샤워는 방 전체에 떨어지므로 미리 붙지 않는다.")]
     [SerializeField, Min(0f)] private float hornApproachDistance = 2.4f;
     [Tooltip("한 번의 접근에 쓸 수 있는 최대 시간. 벽에 막혀도 패턴이 무한히 밀리지 않게 한다.")]
-    [SerializeField, Min(0f)] private float approachMaxDuration = 1.6f;
+    [SerializeField, Min(0f)] private float approachMaxDuration = 1.3f;
 
     [Header("패턴 사이 대기")]
-    [SerializeField, Min(0f)] private float patternGapPhase1 = 0.6f;
-    [SerializeField, Min(0f)] private float patternGapPhase2 = 0.45f;
+    [SerializeField, Min(0f)] private float patternGapPhase1 = 0.45f;
+    [SerializeField, Min(0f)] private float patternGapPhase2 = 0.32f;
 
     [Header("스톤샤워 — 1페이즈")]
     [SerializeField] private StoneSettings stonePhase1 = new StoneSettings
     {
-        radius = 3.2f, windup = 0.7f, stoneCount = 9,
-        spawnInterval = 0.24f, fallTime = 0.7f, recovery = 0.75f,
+        windup = 0.5f, stoneCount = 14,
+        spawnInterval = 0.17f, fallTime = 0.5f, recovery = 0.5f,
     };
 
-    // 2페이즈: 원의 "넓이"를 50% 늘리므로 반지름은 √1.5 = 1.2247배다 (3.2 → 3.92).
-    // 떨어지는 속도는 30% 빨라지므로 낙하 시간은 1/1.3배가 된다 (0.7 → 0.538).
+    // 2페이즈: 방 전체가 대상이라 "원을 넓히는" 강화는 뜻이 없어졌다. 대신 수를 크게 늘리고
+    // 낙하 시간을 더 줄여, 같은 방에서 서 있을 자리가 계속 줄어들게 한다.
     [Header("스톤샤워 — 2페이즈")]
     [SerializeField] private StoneSettings stonePhase2 = new StoneSettings
     {
-        radius = 3.92f, windup = 0.6f, stoneCount = 13,
-        spawnInterval = 0.2f, fallTime = 0.538f, recovery = 0.6f,
+        windup = 0.42f, stoneCount = 22,
+        spawnInterval = 0.13f, fallTime = 0.4f, recovery = 0.4f,
     };
 
     [Header("스톤샤워 — 공통")]
@@ -134,25 +130,25 @@ public class RhydonBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float stoneImpactDuration = 0.22f;
     [Tooltip("돌이 화면 위 어디에서부터 떨어지는지")]
     [SerializeField, Min(0f)] private float stoneDropHeight = 6f;
-    [Tooltip("이 비율만큼은 플레이어의 현재 위치를 노린다. 나머지는 원 안 무작위. " +
-             "전부 무작위면 원 안에서 가만히 서 있는 게 통해 버린다.")]
+    [Tooltip("이 비율만큼은 플레이어의 현재 위치를 노린다. 나머지는 방 안 무작위. " +
+             "전부 무작위면 구석에서 가만히 서 있는 게 통해 버린다.")]
     [SerializeField, Range(0f, 1f)] private float stoneAimAtPlayerRatio = 0.4f;
 
     [Header("뿔드릴 — 1페이즈")]
     [SerializeField] private HornSettings hornPhase1 = new HornSettings
     {
-        chargeTime = 0.75f, length = 3.4f, baseWidth = 1.7f,
-        thrustTime = 0.15f, holdTime = 0.1f, retractTime = 0.14f,
-        stabs = 2, stabGap = 0.28f, lunge = 0.9f, recovery = 0.8f,
+        chargeTime = 0.38f, length = 4.5f, baseWidth = 2.4f,
+        thrustTime = 0.13f, holdTime = 0.1f, retractTime = 0.12f,
+        stabs = 2, stabGap = 0.18f, lunge = 1.2f, recovery = 0.5f,
     };
 
-    // 2페이즈: 뿔이 커지고 차지가 짧아진다.
+    // 2페이즈: 뿔이 더 커지고 차지가 더 짧아지며, 한 번 더 찌른다.
     [Header("뿔드릴 — 2페이즈")]
     [SerializeField] private HornSettings hornPhase2 = new HornSettings
     {
-        chargeTime = 0.42f, length = 4.5f, baseWidth = 2.4f,
-        thrustTime = 0.13f, holdTime = 0.1f, retractTime = 0.12f,
-        stabs = 2, stabGap = 0.22f, lunge = 1.2f, recovery = 0.65f,
+        chargeTime = 0.32f, length = 5.4f, baseWidth = 3f,
+        thrustTime = 0.12f, holdTime = 0.1f, retractTime = 0.1f,
+        stabs = 3, stabGap = 0.16f, lunge = 1.5f, recovery = 0.4f,
     };
 
     [Header("뿔드릴 — 공통")]
@@ -161,16 +157,16 @@ public class RhydonBossController : MonoBehaviour
     [Header("이판사판 — 1페이즈")]
     [SerializeField] private TakeDownSettings takeDownPhase1 = new TakeDownSettings
     {
-        dashes = 3, aimTime = 0.42f, dashSpeed = 15f,
-        dashMaxDuration = 1.3f, betweenDashes = 0.2f, recovery = 0.9f,
+        dashes = 3, aimTime = 0.3f, dashSpeed = 19.5f,
+        dashMaxDuration = 1.2f, betweenDashes = 0.14f, recovery = 0.55f,
     };
 
-    // 2페이즈: 속도 30% 증가(15 → 19.5), 돌진 3회 → 5회.
+    // 2페이즈: 한 번 더 돌진하고 더 빠르게 지나간다.
     [Header("이판사판 — 2페이즈")]
     [SerializeField] private TakeDownSettings takeDownPhase2 = new TakeDownSettings
     {
-        dashes = 5, aimTime = 0.34f, dashSpeed = 19.5f,
-        dashMaxDuration = 1.2f, betweenDashes = 0.16f, recovery = 0.7f,
+        dashes = 4, aimTime = 0.28f, dashSpeed = 24f,
+        dashMaxDuration = 1.1f, betweenDashes = 0.12f, recovery = 0.45f,
     };
 
     [Header("이판사판 — 공통")]
@@ -193,10 +189,8 @@ public class RhydonBossController : MonoBehaviour
     [SerializeField] private bool logPatterns;
 
     [Header("연출 색상")]
-    [Tooltip("스톤샤워 원의 안쪽")]
-    [SerializeField] private Color stoneAreaColor = new Color(0.55f, 0.36f, 0.18f, 0.2f);
-    [Tooltip("스톤샤워 원의 테두리")]
-    [SerializeField] private Color stoneEdgeColor = new Color(0.72f, 0.47f, 0.22f, 0.85f);
+    [Tooltip("페이즈 전환 충격파와 몸 색 변화에 쓰는 바위색")]
+    [SerializeField] private Color rockColor = new Color(0.72f, 0.47f, 0.22f, 0.85f);
     [Tooltip("돌이 떨어질 자리 그림자")]
     [SerializeField] private Color stoneShadowColor = new Color(0.1f, 0.07f, 0.04f, 0.45f);
     [Tooltip("떨어지는 돌 자체")]
@@ -380,8 +374,7 @@ public class RhydonBossController : MonoBehaviour
             switch (next)
             {
                 case Pattern.StoneShower:
-                    yield return ApproachRoutine(stoneApproachDistance);
-                    if (health.IsDead) yield break;
+                    // 돌은 방 전체에 떨어지므로 미리 붙을 이유가 없다.
                     yield return StoneShowerRoutine();
                     break;
                 case Pattern.HornDrill:
@@ -502,9 +495,11 @@ public class RhydonBossController : MonoBehaviour
     // ---------------------------------------------------------------- 패턴 1 · 스톤샤워
 
     /// <summary>
-    /// 코뿌리를 중심으로 갈색 원을 깔고, 그 안에 돌을 하나씩 떨어뜨린다.
-    /// 원이 곧 코뿌리 주변이라 때리려면 원 안에 서야 하고, 원 안에 있으면 맞는다 —
-    /// 이 패턴만큼은 공격을 포기하고 나가는 게 정답이다.
+    /// 코뿌리가 발을 구르면 <b>방 전체</b>에 돌이 떨어진다. 안전한 구역이 따로 없어서
+    /// 도망칠 곳을 찾는 게 아니라 그림자를 하나씩 읽고 비켜 서야 한다.
+    ///
+    /// 예전에는 코뿌리 주변에만 원을 깔았는데, 그러면 "원 밖으로 나가면 끝"이라 답이 하나뿐이었다.
+    /// 지금은 코뿌리 옆에 붙어서도 피할 수 있으니 계속 때릴 것인지 스스로 고르게 된다.
     /// </summary>
     private IEnumerator StoneShowerRoutine()
     {
@@ -516,16 +511,7 @@ public class RhydonBossController : MonoBehaviour
         SetWindupTint(true);
         FaceTowardPlayer();
 
-        // 원은 시전 시작 시점의 자리에 고정한다. 코뿌리는 이 패턴 동안 움직이지 않는다.
-        Vector2 center = transform.position;
         int stones = Mathf.Max(1, settings.stoneCount);
-        float showerTime = settings.windup + (stones - 1) * settings.spawnInterval + fallTime;
-
-        AttackTelegraph area = AttackTelegraph.CreateCircle(attackRoot, center, settings.radius, stoneAreaColor);
-        area.Hold(showerTime);
-        // 테두리가 있어야 "여기서부터 안전"이 한눈에 읽힌다.
-        AttackTelegraph edge = AttackTelegraph.CreateRing(attackRoot, center, settings.radius, stoneEdgeColor);
-        edge.Hold(showerTime);
 
         yield return new WaitForSeconds(settings.windup);
         SetWindupTint(false);
@@ -536,11 +522,11 @@ public class RhydonBossController : MonoBehaviour
         for (int i = 0; i < stones; i++)
         {
             if (health.IsDead) yield break;
-            StartCoroutine(FallingStoneRoutine(NextStoneTarget(center, settings), fallTime, attackGeneration));
+            StartCoroutine(FallingStoneRoutine(NextStoneTarget(), fallTime, attackGeneration));
             if (i < stones - 1) yield return new WaitForSeconds(settings.spawnInterval);
         }
 
-        Trace(string.Format("  스톤샤워: 반지름 {0:0.00}, {1}개, 낙하 {2:0.00}초", settings.radius, stones, fallTime));
+        Trace(string.Format("  스톤샤워: 방 전체 {0}개, 낙하 {1:0.00}초", stones, fallTime));
 
         // 마지막 돌이 떨어질 때까지 기다린 뒤 후딜레이. 안 그러면 후딜 중에 돌이 떨어진다.
         yield return new WaitForSeconds(fallTime);
@@ -548,22 +534,16 @@ public class RhydonBossController : MonoBehaviour
     }
 
     /// <summary>돌 하나가 떨어질 자리. 일부는 플레이어를 직접 노려 제자리 버티기를 막는다.</summary>
-    private Vector2 NextStoneTarget(Vector2 center, StoneSettings settings)
+    private Vector2 NextStoneTarget()
     {
-        Vector2 raw;
         if (Random.value < stoneAimAtPlayerRatio && player != null)
-        {
-            // 원 밖으로 도망친 뒤라면 노려도 소용없다. 원 안으로 당겨 둔다.
-            Vector2 toPlayer = PlayerPosition - center;
-            raw = center + Vector2.ClampMagnitude(toPlayer, settings.radius);
-        }
-        else
-        {
-            // 반지름에 √를 씌워야 원 안에 고르게 흩어진다. 안 그러면 중심에 몰린다.
-            float angle = Random.value * 360f;
-            float distance = settings.radius * Mathf.Sqrt(Random.value);
-            raw = center + Rotate(Vector2.right, angle) * distance;
-        }
+            return ClampToArena(PlayerPosition, stoneRadius);
+
+        // 방 전체에 고르게 흩뿌린다.
+        Vector2 center = ArenaCenter;
+        Vector2 raw = new Vector2(
+            center.x + Random.Range(-arenaHalfSize.x, arenaHalfSize.x),
+            center.y + Random.Range(-arenaHalfSize.y, arenaHalfSize.y));
         return ClampToArena(raw, stoneRadius);
     }
 
@@ -866,7 +846,7 @@ public class RhydonBossController : MonoBehaviour
             float t = Mathf.Clamp01(elapsed);
             transform.localScale = baseScale * Mathf.Lerp(1f, 1.18f, t);
             if (spriteRenderer != null)
-                spriteRenderer.color = Color.Lerp(Color.white, stoneEdgeColor, t);
+                spriteRenderer.color = Color.Lerp(Color.white, rockColor, t);
             yield return null;
         }
         transform.localScale = baseScale;
@@ -875,7 +855,7 @@ public class RhydonBossController : MonoBehaviour
 
         // 피해 없는 충격파
         AttackTelegraph wave = AttackTelegraph.CreateRing(
-            attackRoot, transform.position, 0.6f, stoneEdgeColor);
+            attackRoot, transform.position, 0.6f, rockColor);
         wave.Expand(0.6f, 6f, 0.6f);
         yield return new WaitForSeconds(0.6f);
         if (health.IsDead) yield break;
@@ -924,14 +904,5 @@ public class RhydonBossController : MonoBehaviour
     {
         if (enemyAnimator == null) return;
         enemyAnimator.SetActionState("Idle", DirectionTo(PlayerPosition));
-    }
-
-    private static Vector2 Rotate(Vector2 direction, float degrees)
-    {
-        float radians = degrees * Mathf.Deg2Rad;
-        float cos = Mathf.Cos(radians);
-        float sin = Mathf.Sin(radians);
-        return new Vector2(direction.x * cos - direction.y * sin,
-                           direction.x * sin + direction.y * cos);
     }
 }
