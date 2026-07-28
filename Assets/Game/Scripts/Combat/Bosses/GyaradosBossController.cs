@@ -164,31 +164,36 @@ public class GyaradosBossController : MonoBehaviour
     [Header("상태 시간")]
     [Tooltip("포효와 물결을 보여 주는 시간. 이 동안 보스만 무적이고 둘 다 움직일 수 있다.")]
     [SerializeField, Min(0f)] private float introDuration = 0.8f;
-    [SerializeField, Min(0f)] private float exitDuration = 0.45f;
-    [SerializeField, Min(0f)] private float enterDuration = 0.55f;
+    [SerializeField, Min(0f)] private float exitDuration = 0.34f;
+    [SerializeField, Min(0f)] private float enterDuration = 0.42f;
     [Tooltip("진입 위치가 플레이어와 이만큼 가까우면 옆으로 비켜 올라온다.")]
     [SerializeField, Min(0f)] private float enterClearance = 1.6f;
 
     [Header("노출 상태")]
     [SerializeField, Min(1f)] private float exposedDurationPhase1 = 11f;
     [SerializeField, Min(1f)] private float exposedDurationPhase2 = 9f;
-    [SerializeField, Min(0f)] private float innerGapPhase1 = 0.3f;
-    [SerializeField, Min(0f)] private float innerGapPhase2 = 0.2f;
+    [SerializeField, Min(0f)] private float innerGapPhase1 = 0.22f;
+    [SerializeField, Min(0f)] private float innerGapPhase2 = 0.14f;
+    [Tooltip("내부 패턴 셔플 백 한 벌에 넣는 똬리치기 수. 소환보다 화면 시간이 두 배 넘게 길어 " +
+             "반씩 넣으면 똬리치기만 하는 것처럼 느껴진다.")]
+    [SerializeField, Min(1)] private int coilPerInnerBag = 1;
+    [Tooltip("내부 패턴 셔플 백 한 벌에 넣는 잉어킹 소환 수.")]
+    [SerializeField, Min(1)] private int summonPerInnerBag = 2;
 
     [Header("잠항 상태")]
     [Tooltip("한 번의 잠항에서 사용하는 외부 패턴 수")]
     [SerializeField, Range(1, 2)] private int outerPatternsPhase1 = 1;
     [SerializeField, Range(1, 2)] private int outerPatternsPhase2 = 2;
-    [SerializeField, Min(0f)] private float outerGapPhase2 = 0.28f;
+    [SerializeField, Min(0f)] private float outerGapPhase2 = 0.18f;
 
     [Header("삼중 해류")]
     [SerializeField] private CurrentSettings currentPhase1 = new CurrentSettings
     {
-        speed = 1.3f, minHold = 3.5f, maxHold = 5f, telegraph = 0.7f,
+        speed = 1.45f, minHold = 2.8f, maxHold = 4f, telegraph = 0.6f,
     };
     [SerializeField] private CurrentSettings currentPhase2 = new CurrentSettings
     {
-        speed = 1.45f, minHold = 2.5f, maxHold = 3.8f, telegraph = 0.6f,
+        speed = 1.6f, minHold = 2f, maxHold = 3f, telegraph = 0.5f,
     };
     [Tooltip("수로 하나에 그리는 화살표 수")]
     [SerializeField, Min(2)] private int arrowsPerLane = 7;
@@ -198,14 +203,14 @@ public class GyaradosBossController : MonoBehaviour
     [Header("하이드로펌프")]
     [SerializeField] private HydroSettings hydroPhase1 = new HydroSettings
     {
-        reflections = 1, telegraph = 0.65f,
-        width = 0.8f, trailDuration = 0.4f, damage = 28, recovery = 0.3f,
+        reflections = 1, telegraph = 0.58f,
+        width = 0.8f, trailDuration = 0.35f, damage = 28, recovery = 0.2f,
         cornerMargin = 0.6f, minSegmentLength = 1f,
     };
     [SerializeField] private HydroSettings hydroPhase2 = new HydroSettings
     {
-        reflections = 2, telegraph = 0.55f,
-        width = 0.9f, trailDuration = 0.45f, damage = 32, recovery = 0.22f,
+        reflections = 2, telegraph = 0.5f,
+        width = 0.9f, trailDuration = 0.4f, damage = 32, recovery = 0.15f,
         cornerMargin = 0.6f, minSegmentLength = 1f,
     };
     [Tooltip("경로 후보를 몇 번까지 다시 만들지. 실패하면 조준점을 전투장 중심 쪽으로 당겨 가며 다시 시도한다.")]
@@ -214,26 +219,26 @@ public class GyaradosBossController : MonoBehaviour
     [Header("격류 압착")]
     [SerializeField] private FloodSettings floodPhase1 = new FloodSettings
     {
-        depthRatio = 0.4f, telegraph = 0.8f, holdAfterSecond = 0.75f,
+        depthRatio = 0.4f, telegraph = 0.68f, holdAfterSecond = 0.6f,
         damage = 28, damageRetryInterval = 0.6f, slowMultiplier = 0.75f, slowDuration = 0.75f,
-        recovery = 0.3f,
+        recovery = 0.2f,
     };
     [SerializeField] private FloodSettings floodPhase2 = new FloodSettings
     {
-        depthRatio = 0.4f, telegraph = 0.72f, holdAfterSecond = 0.65f,
-        thirdTelegraph = 1f, holdAfterThird = 0.65f,
+        depthRatio = 0.4f, telegraph = 0.6f, holdAfterSecond = 0.5f,
+        thirdTelegraph = 0.85f, holdAfterThird = 0.5f,
         damage = 32, damageRetryInterval = 0.55f, slowMultiplier = 0.7f, slowDuration = 0.8f,
-        recovery = 0.22f,
+        recovery = 0.14f,
     };
 
     [Header("잉어킹 소환")]
     [SerializeField] private SummonSettings summonPhase1 = new SummonSettings
     {
-        count = 3, telegraph = 0.6f, magikarpHealth = 70, bodyRadius = 0.55f, recovery = 0.3f,
+        count = 3, telegraph = 0.52f, magikarpHealth = 70, bodyRadius = 0.55f, recovery = 0.2f,
     };
     [SerializeField] private SummonSettings summonPhase2 = new SummonSettings
     {
-        count = 4, telegraph = 0.52f, magikarpHealth = 90, bodyRadius = 0.55f, recovery = 0.22f,
+        count = 4, telegraph = 0.45f, magikarpHealth = 90, bodyRadius = 0.55f, recovery = 0.14f,
     };
 
     [Header("잉어킹 배치 규칙")]
@@ -250,14 +255,14 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField] private CoilSettings coilPhase1 = new CoilSettings
     {
         ringInner = 1.85f, ringOuter = 4.5f, innerRadius = 1.85f,
-        firstTelegraph = 0.55f, secondTelegraph = 0.46f, betweenStrikes = 0.55f,
-        ringDamage = 30, innerDamage = 32, recovery = 0.38f,
+        firstTelegraph = 0.48f, secondTelegraph = 0.4f, betweenStrikes = 0.55f,
+        ringDamage = 30, innerDamage = 32, recovery = 0.26f,
     };
     [SerializeField] private CoilSettings coilPhase2 = new CoilSettings
     {
         ringInner = 1.75f, ringOuter = 4.7f, innerRadius = 2.05f,
-        firstTelegraph = 0.45f, secondTelegraph = 0.42f, betweenStrikes = 0.42f,
-        ringDamage = 34, innerDamage = 36, recovery = 0.3f,
+        firstTelegraph = 0.4f, secondTelegraph = 0.36f, betweenStrikes = 0.42f,
+        ringDamage = 34, innerDamage = 36, recovery = 0.2f,
     };
 
     [Header("접촉 피해 — 노출 상태에서만")]
@@ -277,14 +282,14 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField] private bool logPatterns;
 
     [Header("연출 색상")]
-    [SerializeField] private Color currentArrowColor = new Color(0.55f, 0.9f, 1f, 0.5f);
-    [SerializeField] private Color laneBoundaryColor = new Color(0.85f, 0.97f, 1f, 0.3f);
+    [SerializeField] private Color currentArrowColor = new Color(0.08f, 0.28f, 0.62f, 0.85f);
+    [SerializeField] private Color laneBoundaryColor = new Color(0.9f, 0.98f, 1f, 0.5f);
     [SerializeField] private Color warningColor = new Color(0.85f, 0.1f, 0.28f, 0.55f);
     [SerializeField] private Color beamColor = new Color(0.3f, 0.75f, 1f, 0.9f);
     [SerializeField] private Color splashColor = new Color(0.85f, 0.97f, 1f, 0.7f);
     [SerializeField] private Color floodColor = new Color(0.1f, 0.35f, 0.75f, 0.6f);
     [SerializeField] private Color foamColor = new Color(1f, 1f, 1f, 0.75f);
-    [SerializeField] private Color summonMarkerColor = new Color(0.3f, 0.8f, 1f, 0.5f);
+    [SerializeField] private Color summonMarkerColor = new Color(0.06f, 0.2f, 0.55f, 0.8f);
     [SerializeField] private Color diveMarkerColor = new Color(0.05f, 0.12f, 0.3f, 0.75f);
     [SerializeField] private Color eyeGlowColor = new Color(1f, 0.85f, 0.3f, 0.9f);
 
@@ -822,15 +827,32 @@ public class GyaradosBossController : MonoBehaviour
         return next;
     }
 
+    /// <summary>
+    /// 다음 내부 패턴. 셔플 백을 <see cref="coilPerInnerBag"/>:<see cref="summonPerInnerBag"/>로
+    /// 채운다.
+    ///
+    /// 반씩 넣으면 <b>횟수</b>는 같아도 화면에 나오는 <b>시간</b>은 똬리치기가 두 배 넘게 길다 —
+    /// 똬리치기는 두 번 때리느라 예고·간격·후딜을 합쳐 2초에 가깝고, 잉어킹 소환은 1초가 채 안
+    /// 된다. 그래서 "똬리치기만 한다"고 느껴진다. 소환을 더 많이 넣어 시간 비중을 맞춘다.
+    /// </summary>
     private InnerPattern DrawInner()
     {
         if (innerBag.Count == 0)
         {
-            innerBag.Add(InnerPattern.Summon);
-            innerBag.Add(InnerPattern.Coil);
-            if (Random.value < 0.5f) (innerBag[0], innerBag[1]) = (innerBag[1], innerBag[0]);
-            if (hasLastInner && innerBag[1] == lastInner)
-                (innerBag[0], innerBag[1]) = (innerBag[1], innerBag[0]);
+            for (int i = 0; i < coilPerInnerBag; i++) innerBag.Add(InnerPattern.Coil);
+            for (int i = 0; i < summonPerInnerBag; i++) innerBag.Add(InnerPattern.Summon);
+            Shuffle(innerBag);
+
+            // 꺼내는 쪽은 리스트의 끝이다. 직전과 같은 패턴이 연달아 나오지 않게, 다른 패턴이
+            // 백에 있으면 끝으로 끌어온다.
+            int last = innerBag.Count - 1;
+            if (hasLastInner && innerBag[last] == lastInner)
+                for (int i = 0; i < last; i++)
+                    if (innerBag[i] != lastInner)
+                    {
+                        (innerBag[i], innerBag[last]) = (innerBag[last], innerBag[i]);
+                        break;
+                    }
         }
 
         int index = innerBag.Count - 1;
@@ -838,6 +860,15 @@ public class GyaradosBossController : MonoBehaviour
         innerBag.RemoveAt(index);
         hasLastInner = true;
         return next;
+    }
+
+    private static void Shuffle(List<InnerPattern> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (list[i], list[j]) = (list[j], list[i]);
+        }
     }
 
     private string InnerBagText() => innerBag.Count == 0 ? "비어 있음" : string.Join(", ", innerBag);
@@ -1160,8 +1191,16 @@ public class GyaradosBossController : MonoBehaviour
 
         foreach (Vector2 spot in accepted)
         {
-            AttackTelegraph ripple = AttackTelegraph.CreateRing(
+            // 물빛 바닥 위에서는 가는 테두리 하나로는 눈에 띄지 않는다. 속을 채운 원으로
+            // 자리를 분명히 깔고, 그 위에 진한 테두리를 얹어 경계를 세운다.
+            AttackTelegraph fill = AttackTelegraph.CreateCircle(
                 attackRoot, spot, settings.bodyRadius, summonMarkerColor);
+            fill.Pulse(settings.telegraph);
+
+            Color edge = summonMarkerColor;
+            edge.a = Mathf.Clamp01(summonMarkerColor.a * 1.6f);
+            AttackTelegraph ripple = AttackTelegraph.CreateRing(
+                attackRoot, spot, settings.bodyRadius * 1.15f, edge);
             ripple.Pulse(settings.telegraph);
         }
 

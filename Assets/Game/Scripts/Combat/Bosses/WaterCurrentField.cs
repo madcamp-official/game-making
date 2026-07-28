@@ -75,6 +75,14 @@ public class WaterCurrentField : MonoBehaviour
     public float BoundaryY(int index) =>
         center.y + (index == 0 ? -halfSize.y / 3f : halfSize.y / 3f);
 
+    /// <summary>
+    /// 그 수로의 한가운데 높이. 화살표를 여기에 띄운다 — 경계선에 붙어 그리면 어느 수로의
+    /// 방향인지 헷갈린다. 아래 수로는 [-halfSize.y, -halfSize.y/3], 가운데는 그 사이,
+    /// 위 수로는 [halfSize.y/3, halfSize.y]이므로 중심은 각각 ∓(halfSize.y*2/3)과 0이다.
+    /// </summary>
+    public float LaneCenterY(int lane) =>
+        center.y + (Mathf.Clamp(lane, 0, LaneCount - 1) - 1) * (halfSize.y * 2f / 3f);
+
     /// <summary>이 Y가 들어 있는 수로. 전투 영역 밖이면 가장 가까운 수로로 본다.</summary>
     public int LaneAt(float y)
     {
@@ -280,7 +288,7 @@ public class WaterCurrentField : MonoBehaviour
                 sr.sprite = PrimitiveSprites.Triangle;
                 sr.color = arrowColor;
                 sr.sortingOrder = ArrowSortingOrder;
-                go.transform.localScale = new Vector3(laneHeight * 0.34f, laneHeight * 0.28f, 1f);
+                go.transform.localScale = new Vector3(laneHeight * 0.42f, laneHeight * 0.34f, 1f);
                 arrows[lane][i] = sr;
             }
         }
@@ -332,7 +340,9 @@ public class WaterCurrentField : MonoBehaviour
 
         for (int lane = 0; lane < LaneCount; lane++)
         {
-            float laneY = center.y + (lane - 1) * laneHeight;
+            // 수로 한가운데 높이. 경계가 center.y ± halfSize.y/3이므로 각 수로의 높이는
+            // laneHeight로 같고, 중심은 아래·가운데·위가 각각 -laneHeight, 0, +laneHeight다.
+            float laneY = LaneCenterY(lane);
             int sign = (showPending ? pendingSigns : signs)[lane];
             SpriteRenderer[] row = arrows[lane];
             // 흐름이 눈에 보이도록 방향대로 계속 밀어 준다. 줄 전체 길이를 한 바퀴 돌면 제자리로
