@@ -16,6 +16,25 @@ public class CombatRoomController : MonoBehaviour
 
     private readonly List<Health> aliveEnemies = new List<Health>();
 
+    /// <summary>
+    /// 지금 있는 방이 전투방(보스방 포함)인지. 기술은 여기서만 쓸 수 있다.
+    ///
+    /// 방 종류를 따로 들고 있는 데이터가 없어서, 이 컴포넌트가 붙어 있느냐로 판별한다 —
+    /// 전투방과 보스방에만 붙어 있으므로 그 자체가 곧 방 종류다.
+    /// </summary>
+    public static bool InCombatRoom => activeRooms > 0;
+
+    private static int activeRooms;
+
+    /// <summary>정적 값이라 판이 바뀌어도 살아남는다. 판마다 0에서 시작해야 한다.</summary>
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+    private static void ResetRoomCount() => activeRooms = 0;
+
+    // 방을 옮길 때 옛 방은 프레임 끝에 지워지고 새 방은 곧바로 생긴다. 그래서 잠깐 둘이 겹치는데,
+    // 세어 두면 그 사이에도 0으로 떨어지지 않는다.
+    private void OnEnable() => activeRooms++;
+    private void OnDisable() => activeRooms = Mathf.Max(0, activeRooms - 1);
+
     private void Start()
     {
         foreach (EnemyController enemy in GetComponentsInChildren<EnemyController>())

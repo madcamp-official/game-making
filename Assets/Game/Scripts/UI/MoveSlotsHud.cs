@@ -19,6 +19,8 @@ public class MoveSlotsHud : MonoBehaviour
 
     private static readonly Color ReadyColor = new Color(0.20f, 0.34f, 0.52f, 0.95f);
     private static readonly Color LockedColor = new Color(0.16f, 0.16f, 0.18f, 0.7f);
+    /// <summary>배웠지만 지금은 쓸 수 없을 때 (전투방 밖).</summary>
+    private static readonly Color RestingColor = new Color(0.18f, 0.22f, 0.3f, 0.8f);
     private static readonly Color CooldownVeil = new Color(0f, 0f, 0f, 0.62f);
 
     private class Slot
@@ -109,6 +111,10 @@ public class MoveSlotsHud : MonoBehaviour
     {
         if (combat == null || moves == null) Bind();
 
+        // 전투방 밖에서는 기술을 쓸 수 없다. 눌러도 아무 일이 없으면 고장으로 보이므로
+        // 칸 전체를 흐리게 해서 지금은 쓸 수 없다는 걸 알린다.
+        bool usable = PlayerCombat.MovesUsable;
+
         for (int i = 0; i < slots.Length; i++)
         {
             Slot slot = slots[i];
@@ -125,11 +131,9 @@ public class MoveSlotsHud : MonoBehaviour
                 continue;
             }
 
-            slot.background.color = ReadyColor;
+            slot.background.color = usable ? ReadyColor : RestingColor;
             slot.nameText.text = MoveInfo.NameOf(move);
-            // 아직 효과가 없는 기술은 이름을 흐리게 둬서 배웠지만 못 쓴다는 걸 구분한다.
-            slot.nameText.color = MoveInfo.IsImplemented(move)
-                ? Color.white : new Color(1f, 1f, 1f, 0.55f);
+            slot.nameText.color = usable ? Color.white : new Color(1f, 1f, 1f, 0.45f);
             slot.keyText.text = MoveInfo.KeyLabelOf(move);
 
             float progress = combat != null ? combat.CooldownProgress01(move) : 1f;

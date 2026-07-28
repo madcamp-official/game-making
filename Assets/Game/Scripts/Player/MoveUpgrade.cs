@@ -9,6 +9,12 @@ public enum MoveUpgradeId
     VineRange = 3,       // 사거리 +20%
     VineStun = 4,        // 공격 후 경직 -20%
     VineCooldown = 5,    // 쿨타임 -20%
+    SeedHeal = 6,        // 회복량 +2 (6 → 8)
+    SeedDuration = 7,    // 지속시간 +2초
+    SeedRadius = 8,      // 장판 크기 +30%
+    PetalRadius = 9,     // 장판 크기 +20%
+    PetalDamage = 10,    // 피해량 +20%
+    PetalDuration = 11,  // 지속시간 +1초
 }
 
 /// <summary>강화 선택지 하나의 표시 정보와 소속 기술.</summary>
@@ -38,6 +44,15 @@ public static class MoveUpgrades
     public const float StunStep = 0.8f;        // 경직 -20%
     public const float CooldownStep = 0.8f;    // 쿨타임 -20%
 
+    // 장판 계열. 회복량과 지속시간은 비율이 아니라 고정값으로 더한다 —
+    // 명세가 "33% 증가(실제로는 2 증가)"처럼 실제 더할 값을 못박아 두었다.
+    public const int SeedHealStep = 2;         // 초당 회복 6 → 8
+    public const float SeedDurationStep = 2f;  // 5초 → 7초
+    public const float SeedRadiusStep = 1.3f;  // 크기 +30%
+    public const float PetalRadiusStep = 1.2f; // 크기 +20%
+    public const float PetalDamageStep = 1.2f; // 피해 +20%
+    public const float PetalDurationStep = 1f; // 3초 → 4초
+
     public static readonly MoveUpgradeOption[] All =
     {
         new MoveUpgradeOption(MoveUpgradeId.TackleDamage, MoveType.Tackle,
@@ -52,5 +67,17 @@ public static class MoveUpgrades
             "덩굴채찍", "공격 후 경직 20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.VineCooldown, MoveType.VineWhip,
             "덩굴채찍", "쿨타임 20% 감소"),
+        new MoveUpgradeOption(MoveUpgradeId.SeedHeal, MoveType.SeedSow,
+            "씨뿌리기", "회복량 33% 증가"),
+        new MoveUpgradeOption(MoveUpgradeId.SeedDuration, MoveType.SeedSow,
+            "씨뿌리기", "장판 지속시간 2초 증가"),
+        new MoveUpgradeOption(MoveUpgradeId.SeedRadius, MoveType.SeedSow,
+            "씨뿌리기", "장판 크기 30% 증가"),
+        new MoveUpgradeOption(MoveUpgradeId.PetalRadius, MoveType.PetalDance,
+            "꽃잎댄스", "장판 크기 20% 증가"),
+        new MoveUpgradeOption(MoveUpgradeId.PetalDamage, MoveType.PetalDance,
+            "꽃잎댄스", "피해량 20% 증가"),
+        new MoveUpgradeOption(MoveUpgradeId.PetalDuration, MoveType.PetalDance,
+            "꽃잎댄스", "장판 지속시간 1초 증가"),
     };
 }

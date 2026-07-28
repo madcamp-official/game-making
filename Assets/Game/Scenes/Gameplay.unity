@@ -470,53 +470,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 633222640}
   m_CullTransparentMesh: 1
---- !u!1 &689315467
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 689315469}
-  - component: {fileID: 689315468}
-  m_Layer: 0
-  m_Name: CombatRoomController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &689315468
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 689315467}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67ac61069c2e840418d75df47835eb19, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::CombatRoomController
-  exitDoor: {fileID: 0}
-  isBossRoom: 0
-  bossRewardRelic: {fileID: 0}
---- !u!4 &689315469
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 689315467}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &698633939
 GameObject:
   m_ObjectHideFlags: 0
@@ -588,7 +541,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 10.979167
+  orthographic size: 10.041667
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
@@ -1157,6 +1110,7 @@ MonoBehaviour:
   leftoversHealPerRoom: 8
   shellBellDamagePerHeal: 40
   shellBellHealAmount: 3
+  magikarpScaleMaxHealthBonus: 0.2
 --- !u!1 &1906208093
 GameObject:
   m_ObjectHideFlags: 0
@@ -1400,7 +1354,6 @@ SceneRoots:
   - {fileID: 698633942}
   - {fileID: 2117187776}
   - {fileID: 5612608592070019887}
-  - {fileID: 689315469}
   - {fileID: 1804104384}
   - {fileID: 826172832}
   - {fileID: 453288738}

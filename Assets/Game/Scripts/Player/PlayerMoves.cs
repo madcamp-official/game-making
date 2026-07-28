@@ -29,6 +29,14 @@ public class PlayerMoves : MonoBehaviour
     public float VineStunMultiplier { get; private set; } = 1f;
     public float VineCooldownMultiplier { get; private set; } = 1f;
 
+    // 장판 계열. 회복량과 지속시간은 명세가 더할 값을 못박아 두어 배율이 아니라 덧셈으로 쌓인다.
+    public int SeedHealBonus { get; private set; }
+    public float SeedDurationBonus { get; private set; }
+    public float SeedRadiusMultiplier { get; private set; } = 1f;
+    public float PetalRadiusMultiplier { get; private set; } = 1f;
+    public float PetalDamageMultiplier { get; private set; } = 1f;
+    public float PetalDurationBonus { get; private set; }
+
     public IReadOnlyList<MoveType> Learned => learned;
 
     public bool Has(MoveType move) => learned.Contains(move);
@@ -146,6 +154,18 @@ public class PlayerMoves : MonoBehaviour
                 VineStunMultiplier *= MoveUpgrades.StunStep; break;
             case MoveUpgradeId.VineCooldown:
                 VineCooldownMultiplier *= MoveUpgrades.CooldownStep; break;
+            case MoveUpgradeId.SeedHeal:
+                SeedHealBonus += MoveUpgrades.SeedHealStep; break;
+            case MoveUpgradeId.SeedDuration:
+                SeedDurationBonus += MoveUpgrades.SeedDurationStep; break;
+            case MoveUpgradeId.SeedRadius:
+                SeedRadiusMultiplier *= MoveUpgrades.SeedRadiusStep; break;
+            case MoveUpgradeId.PetalRadius:
+                PetalRadiusMultiplier *= MoveUpgrades.PetalRadiusStep; break;
+            case MoveUpgradeId.PetalDamage:
+                PetalDamageMultiplier *= MoveUpgrades.PetalDamageStep; break;
+            case MoveUpgradeId.PetalDuration:
+                PetalDurationBonus += MoveUpgrades.PetalDurationStep; break;
         }
 
         OnMovesChanged?.Invoke();
