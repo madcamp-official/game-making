@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 3층 최종 보스 갸라도스의 전투 로직.
@@ -9,7 +10,7 @@ using UnityEngine;
 /// 있는가</b>를 더한다. 전투장 안팎을 오가며 때릴 수 있는 시간(<c>Exposed</c>)과 살아남기만 하는
 /// 시간(<c>Submerged</c>)이 교대로 오고, 그 위에 전투 내내 도는 삼중 해류가 겹친다.
 ///
-/// * 잠항 — 해류 굴절 하이드로펌프, 격류 압착. 보스는 무적이고 바깥 바다에서 공격만 보낸다.
+/// * 잠항 — 반사 하이드로펌프, 격류 압착. 보스는 무적이고 바깥 바다에서 공격만 보낸다.
 /// * 노출 — 잉어킹 소환, 똬리치기. 이 시간에만 갸라도스를 때릴 수 있다.
 ///
 /// 노출은 <b>고정된 시간</b>으로 끝나고 잠항은 <b>사용한 패턴 수</b>로 끝난다. 그래서 센 빌드는
@@ -48,10 +49,9 @@ public class GyaradosBossController : MonoBehaviour
     [System.Serializable]
     private class HydroSettings
     {
-        [Tooltip("수로 경계에서 꺾이는 횟수. 1페이즈는 1, 2페이즈는 2다.")]
-        [Range(1, 2)] public int refractions = 1;
-        [Tooltip("굴절 강도. 진행 방향에 더하는 수평 성분의 크기다.")]
-        [Min(0f)] public float refractionStrength = 0.55f;
+        [Tooltip("전투장 벽에서 튕기는 횟수. 1페이즈는 1, 2페이즈는 2다. 진입은 반사로 세지 않는다.")]
+        [FormerlySerializedAs("refractions")]
+        [Range(1, 2)] public int reflections = 1;
         [Tooltip("최초 발사 방향만 보여 주는 예고 시간")]
         [Min(0.05f)] public float telegraph = 0.65f;
         [Min(0.1f)] public float speed = 15f;
@@ -60,6 +60,10 @@ public class GyaradosBossController : MonoBehaviour
         [Min(0f)] public float trailDuration = 0.5f;
         [Min(0)] public int damage = 28;
         [Min(0f)] public float recovery = 0.45f;
+        [Tooltip("반사점이 모서리에서 떨어져야 하는 최소 거리. 모서리 이중 반사를 막는다.")]
+        [Min(0f)] public float cornerMargin = 0.6f;
+        [Tooltip("이어지는 두 접점 사이의 최소 길이. 벽에 붙어 떠는 짧은 구간을 막는다.")]
+        [Min(0f)] public float minSegmentLength = 1f;
     }
 
     [System.Serializable]
@@ -68,11 +72,11 @@ public class GyaradosBossController : MonoBehaviour
         [Tooltip("각 축 길이의 몇 할까지 물이 차오르는지")]
         [Range(0.1f, 0.9f)] public float depthRatio = 0.55f;
         [Tooltip("첫째·둘째 범람의 예고 시간")]
-        [Min(0.05f)] public float telegraph = 0.85f;
+        [Min(0.05f)] public float telegraph = 1.05f;
         [Tooltip("두 번째 범람이 활성화된 뒤 유지하는 시간")]
         [Min(0f)] public float holdAfterSecond = 1f;
         [Tooltip("2페이즈 세 번째 범람의 예고 시간. 먼 거리를 요구하므로 더 길다.")]
-        [Min(0.05f)] public float thirdTelegraph = 1.1f;
+        [Min(0.05f)] public float thirdTelegraph = 1.3f;
         [Tooltip("2페이즈 마지막 조합을 유지하는 시간")]
         [Min(0f)] public float holdAfterThird = 0.85f;
         [Min(0)] public int damage = 28;
@@ -98,8 +102,8 @@ public class GyaradosBossController : MonoBehaviour
     [System.Serializable]
     private class CoilSettings
     {
-        [Tooltip("바깥 고리의 안쪽 반지름. 이 안쪽은 안전하다.")]
-        [Min(0f)] public float ringInner = 1.55f;
+        [Tooltip("바깥 고리의 안쪽 반지름. 이 안쪽은 안전하다. 키울수록 고리의 위험 범위가 좁아진다.")]
+        [Min(0f)] public float ringInner = 1.85f;
         [Min(0f)] public float ringOuter = 4.5f;
         [Tooltip("안쪽 원의 반지름. 중심부터 여기까지가 위험하다.")]
         [Min(0f)] public float innerRadius = 1.85f;
@@ -117,8 +121,13 @@ public class GyaradosBossController : MonoBehaviour
     /// Inspector 값이 더 짧아도 여기서 붙들어, 두 번째 판정이 첫 피격의 무적에 통째로 먹히지 않게 한다.
     /// </summary>
     private const float MinStrikeInterval = 0.55f;
-    /// <summary>물줄기가 경계에 붙어 떨지 않도록 교차점에서 새 방향으로 더하는 여유값.</summary>
-    private const float RefractionEpsilon = 0.03f;
+    /// <summary>물줄기가 벽에 붙어 떨지 않도록 반사점에서 새 방향으로 더하는 여유값.</summary>
+    private const float ReflectionEpsilon = 0.03f;
+    /// <summary>
+    /// 조준 후보가 모두 실패했을 때 쓰는 예비 각도. 발사 면에서 전투장 중심으로 향하는 정면을
+    /// 좌우로 기울인 값이며, 정면(0도)은 반대쪽 벽에 수직으로 부딪혀 되짚어 오므로 넣지 않는다.
+    /// </summary>
+    private static readonly float[] HydroFallbackTilts = { 22f, -22f, 38f, -38f, 55f, -55f };
     /// <summary>공중을 지나가는 연출은 캐릭터(10)보다 앞에 그린다.</summary>
     private const int AirborneSortingOrder = 12;
 
@@ -129,6 +138,9 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField] private Transform arenaBounds;
     [Tooltip("전투 계산에 쓰는 반너비·반높이. arenaBounds가 있으면 그쪽이 우선한다.")]
     [SerializeField] private Vector2 arenaHalfSize = new Vector2(6.2f, 4.2f);
+    [Tooltip("하이드로펌프가 반사되는 네 벽의 안쪽 면. 물대포가 부딪히는 벽과 눈으로 일치해야 한다. " +
+             "비워 두면 arenaBounds를 쓰지만, 그 면이 벽과 다르면 허공에서 꺾여 보인다.")]
+    [SerializeField] private Transform hydroReflectBounds;
     [Tooltip("노출 상태에서 갸라도스가 머무는 자리. 비워 두면 전투장 중앙.")]
     [SerializeField] private Transform exposedAnchor;
     [Tooltip("외곽 바다의 잠항 위치. 비워 둔 자리는 전투장 밖으로 자동 계산한다.")]
@@ -136,9 +148,11 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField] private Transform diveAnchorBottom;
     [SerializeField] private Transform diveAnchorLeft;
     [SerializeField] private Transform diveAnchorRight;
-    [Tooltip("하이드로펌프가 중앙으로 들어오는 발사 원점. 좌우는 쓰지 않는다 — 수로 경계를 지나야 하기 때문이다.")]
+    [Tooltip("하이드로펌프가 중앙으로 들어오는 네 방향 발사 원점. 비워 둔 자리는 반사 경계 밖으로 자동 계산한다.")]
     [SerializeField] private Transform hydroOriginTop;
     [SerializeField] private Transform hydroOriginBottom;
+    [SerializeField] private Transform hydroOriginLeft;
+    [SerializeField] private Transform hydroOriginRight;
     [Tooltip("세 수로의 표시 기준점. 판정 경계는 arenaHalfSize.y에서 계산하며, 이 기준점은 배치 확인용이다.")]
     [SerializeField] private Transform currentLaneTop;
     [SerializeField] private Transform currentLaneMiddle;
@@ -185,28 +199,30 @@ public class GyaradosBossController : MonoBehaviour
     [Header("하이드로펌프")]
     [SerializeField] private HydroSettings hydroPhase1 = new HydroSettings
     {
-        refractions = 1, refractionStrength = 0.55f, telegraph = 0.65f,
+        reflections = 1, telegraph = 0.65f,
         speed = 15f, width = 0.8f, trailDuration = 0.5f, damage = 28, recovery = 0.45f,
+        cornerMargin = 0.6f, minSegmentLength = 1f,
     };
     [SerializeField] private HydroSettings hydroPhase2 = new HydroSettings
     {
-        refractions = 2, refractionStrength = 0.65f, telegraph = 0.55f,
+        reflections = 2, telegraph = 0.55f,
         speed = 16.5f, width = 0.9f, trailDuration = 0.6f, damage = 32, recovery = 0.35f,
+        cornerMargin = 0.6f, minSegmentLength = 1f,
     };
-    [Tooltip("경로 후보를 몇 번까지 다시 만들지. 실패하면 X 조준 보정을 줄여 가며 다시 시도한다.")]
+    [Tooltip("경로 후보를 몇 번까지 다시 만들지. 실패하면 조준점을 전투장 중심 쪽으로 당겨 가며 다시 시도한다.")]
     [SerializeField, Min(1)] private int hydroAimAttempts = 6;
 
     [Header("격류 압착")]
     [SerializeField] private FloodSettings floodPhase1 = new FloodSettings
     {
-        depthRatio = 0.55f, telegraph = 0.85f, holdAfterSecond = 1f,
+        depthRatio = 0.55f, telegraph = 1.05f, holdAfterSecond = 1f,
         damage = 28, damageRetryInterval = 0.6f, slowMultiplier = 0.75f, slowDuration = 0.75f,
         recovery = 0.45f,
     };
     [SerializeField] private FloodSettings floodPhase2 = new FloodSettings
     {
-        depthRatio = 0.55f, telegraph = 0.75f, holdAfterSecond = 0.85f,
-        thirdTelegraph = 1.1f, holdAfterThird = 0.85f,
+        depthRatio = 0.55f, telegraph = 0.95f, holdAfterSecond = 0.85f,
+        thirdTelegraph = 1.3f, holdAfterThird = 0.85f,
         damage = 32, damageRetryInterval = 0.55f, slowMultiplier = 0.7f, slowDuration = 0.8f,
         recovery = 0.35f,
     };
@@ -234,13 +250,13 @@ public class GyaradosBossController : MonoBehaviour
     [Header("똬리치기")]
     [SerializeField] private CoilSettings coilPhase1 = new CoilSettings
     {
-        ringInner = 1.55f, ringOuter = 4.5f, innerRadius = 1.85f,
+        ringInner = 1.85f, ringOuter = 4.5f, innerRadius = 1.85f,
         firstTelegraph = 0.65f, secondTelegraph = 0.55f, betweenStrikes = 0.55f,
         ringDamage = 30, innerDamage = 32, recovery = 0.55f,
     };
     [SerializeField] private CoilSettings coilPhase2 = new CoilSettings
     {
-        ringInner = 1.45f, ringOuter = 4.7f, innerRadius = 2.05f,
+        ringInner = 1.75f, ringOuter = 4.7f, innerRadius = 2.05f,
         firstTelegraph = 0.52f, secondTelegraph = 0.48f, betweenStrikes = 0.42f,
         ringDamage = 34, innerDamage = 36, recovery = 0.42f,
     };
@@ -305,6 +321,9 @@ public class GyaradosBossController : MonoBehaviour
     private readonly List<MagikarpObstacle> magikarps = new List<MagikarpObstacle>(4);
     private readonly List<Collider2D> ownColliders = new List<Collider2D>();
     private readonly List<GyaradosFloodZone> activeFloods = new List<GyaradosFloodZone>(3);
+    /// <summary>기준점이 비어 자동 계산으로 넘어간 발사 면. 경고를 면마다 한 번만 남기려고 둔다.</summary>
+    private readonly HashSet<GyaradosHydroBeam.HydroFace> missingHydroOrigins =
+        new HashSet<GyaradosHydroBeam.HydroFace>();
 
     /// <summary>상태·페이즈·사망으로 예약된 공격을 무효화하는 세대 번호.</summary>
     private int attackGeneration;
@@ -349,12 +368,41 @@ public class GyaradosBossController : MonoBehaviour
     private Vector2 DivePosition(Transform anchor, Vector2 outward) =>
         anchor != null ? (Vector2)anchor.position : FallbackDivePosition(outward);
 
-    private Vector2 HydroOrigin(bool fromTop)
+    /// <summary>물대포가 튕기는 네 벽의 안쪽 면. 기준점이 없으면 전투 영역으로 물러선다.</summary>
+    private Vector2 ReflectCenter =>
+        hydroReflectBounds != null ? (Vector2)hydroReflectBounds.position : ArenaCenter;
+
+    private Vector2 ReflectHalfSize => hydroReflectBounds != null
+        ? new Vector2(Mathf.Abs(hydroReflectBounds.localScale.x) * 0.5f,
+                      Mathf.Abs(hydroReflectBounds.localScale.y) * 0.5f)
+        : ArenaHalfSize;
+
+    private Transform HydroOriginAnchor(GyaradosHydroBeam.HydroFace face)
     {
-        Transform anchor = fromTop ? hydroOriginTop : hydroOriginBottom;
+        switch (face)
+        {
+            case GyaradosHydroBeam.HydroFace.Top: return hydroOriginTop;
+            case GyaradosHydroBeam.HydroFace.Bottom: return hydroOriginBottom;
+            case GyaradosHydroBeam.HydroFace.Left: return hydroOriginLeft;
+            default: return hydroOriginRight;
+        }
+    }
+
+    /// <summary>
+    /// 그 면의 발사 원점. 기준점이 비어 있으면 반사 경계 바깥으로 자동 계산하고 한 번만 경고한다 —
+    /// 자동 계산은 방을 꾸미다 만 상태에서도 전투가 굴러가게 하는 예비 처리일 뿐이다.
+    /// </summary>
+    private Vector2 HydroOrigin(GyaradosHydroBeam.HydroFace face)
+    {
+        Transform anchor = HydroOriginAnchor(face);
         if (anchor != null) return anchor.position;
-        Vector2 half = ArenaHalfSize;
-        return ArenaCenter + new Vector2(0f, (fromTop ? 1f : -1f) * (half.y + 2.2f));
+
+        if (missingHydroOrigins.Add(face))
+            Debug.LogWarning("[갸라도스] HydroOrigin_" + face + " 기준점이 비어 있다 — 경계 밖으로 자동 계산한다", this);
+
+        Vector2 outward = -GyaradosHydroBeam.InwardNormal(face);
+        Vector2 half = ReflectHalfSize;
+        return ReflectCenter + new Vector2(outward.x * (half.x + 1.6f), outward.y * (half.y + 1.6f));
     }
 
     // ---------------------------------------------------------------- 수명 주기
@@ -812,137 +860,139 @@ public class GyaradosBossController : MonoBehaviour
     // ---------------------------------------------------------------- 잠항 패턴 1 · 하이드로펌프
 
     /// <summary>
-    /// 위 또는 아래 외곽 바다에서 굵은 물대포를 쏜다. 벽에 튕기지 않고 <b>수로 경계</b>에서 꺾인다.
+    /// 외곽 바다의 네 방향 중 한 곳에서 굵은 물대포를 쏜다. 물대포는 전투장 <b>벽</b>에 닿을 때마다
+    /// 입사각과 같은 각도로 튕긴다.
     ///
-    /// 플레이어에게 보여 주는 예고는 최초 발사 방향뿐이다. 이후 경로는 지금 화면에 떠 있는 세 수로의
-    /// 화살표와 항상 같은 굴절 규칙으로 예측한다 — 그래서 물줄기가 날아가는 동안에는 해류 방향을
-    /// 다시 뽑지 않는다.
+    /// 플레이어에게 보여 주는 예고는 최초 발사 방향뿐이다. 반사 이후 경로는 미리 그리지 않고,
+    /// 벽에 닿는 물보라와 진행하는 물줄기로만 읽게 한다. 경로가 해류와 무관하므로 물줄기가
+    /// 날아가는 동안에도 해류 방향은 평소대로 바뀐다.
     /// </summary>
     private IEnumerator HydroPumpRoutine()
     {
         HydroSettings settings = Hydro;
 
-        // 방향 변경 예고가 진행 중이면 먼저 끝낸다. 화살표와 실제 굴절이 어긋나면 안 된다.
-        while (currentField.IsChanging && !health.IsDead) yield return null;
+        // 네 발사 면을 같은 확률로 고른다.
+        GyaradosHydroBeam.HydroFace face = (GyaradosHydroBeam.HydroFace)Random.Range(0, 4);
+        Vector2 origin = HydroOrigin(face);
+
+        // 외곽 바다에 갸라도스의 그림자와 눈빛을 띄워 어디서 오는지 알린다.
+        GameObject marker = CreateDiveMarker(origin);
+
+        List<Vector2> reflectionPoints = new List<Vector2>(2);
+        List<GyaradosHydroBeam.Segment> path =
+            PlanHydroPath(origin, face, settings, reflectionPoints, out Vector2 entry);
+
+        if (path == null)
+        {
+            // 무한 재시도하지 않는다. 짧은 후딜만 두고 다음 상태로 넘어간다.
+            Trace("  하이드로펌프 경로 실패 — 패턴을 취소한다");
+            if (marker != null) Destroy(marker);
+            yield return new WaitForSeconds(settings.recovery);
+            yield break;
+        }
+
+        Trace(string.Format(
+            "  하이드로펌프 {0} 원점({1:0.00}, {2:0.00}) 첫 방향 {3} 진입({4:0.00}, {5:0.00}) 반사 {6}회",
+            FaceName(face), origin.x, origin.y, Format(path[0]), entry.x, entry.y, settings.reflections));
+        foreach (Vector2 point in reflectionPoints)
+            Trace(string.Format("    반사점 ({0:0.00}, {1:0.00})", point.x, point.y));
+
+        // 예고선은 발사 원점부터 첫 번째 반사 지점까지만 보여 준다.
+        GyaradosHydroBeam.Segment first = path[0];
+        AttackTelegraph line = AttackTelegraph.CreateLine(
+            attackRoot, first.A, first.Direction, first.Length, settings.width, warningColor);
+        line.Pulse(settings.telegraph);
+
+        yield return new WaitForSeconds(settings.telegraph);
+        if (marker != null) Destroy(marker);
         if (health.IsDead) yield break;
 
-        currentField.FreezeDirectionChanges();
-        // 이 아래로는 어디서 끝나든 반드시 잠금을 푼다.
-        try
-        {
-            bool fromTop = Random.value < 0.5f;
-            Vector2 origin = HydroOrigin(fromTop);
-            int[] signs =
-            {
-                currentField.SignOf(WaterCurrentField.LaneBottom),
-                currentField.SignOf(WaterCurrentField.LaneMiddle),
-                currentField.SignOf(WaterCurrentField.LaneTop),
-            };
-            int firstLane = fromTop ? WaterCurrentField.LaneTop : WaterCurrentField.LaneBottom;
+        GyaradosHydroBeam beam = GyaradosHydroBeam.Launch(attackRoot, path, settings.speed,
+            settings.width, settings.trailDuration, settings.damage, beamColor, splashColor);
 
-            // 외곽 바다에 갸라도스의 그림자와 눈빛을 띄워 어디서 오는지 알린다.
-            GameObject marker = CreateDiveMarker(origin);
+        // 남은 물줄기 판정까지 사라진 뒤에 다음 외부 패턴으로 넘어간다.
+        int generation = attackGeneration;
+        while (beam != null && !beam.IsFinished && generation == attackGeneration && !health.IsDead)
+            yield return null;
 
-            List<Vector2> crossings = new List<Vector2>(2);
-            List<GyaradosHydroBeam.Segment> path =
-                PlanHydroPath(origin, fromTop, firstLane, signs, settings, crossings);
-
-            if (path == null)
-            {
-                Trace("  하이드로펌프 경로 실패 — 발사를 건너뛴다");
-                if (marker != null) Destroy(marker);
-                yield return new WaitForSeconds(settings.recovery);
-                yield break;
-            }
-
-            Trace(string.Format(
-                "  하이드로펌프 {0} 원점({1:0.00}, {2:0.00}) 해류 {3} 첫 방향 {4} 교차 {5}개 굴절 {6}회",
-                fromTop ? "위" : "아래", origin.x, origin.y, currentField.SignText(),
-                Format(path[0]), crossings.Count, settings.refractions));
-            foreach (Vector2 crossing in crossings)
-                Trace(string.Format("    경계 교차점 ({0:0.00}, {1:0.00})", crossing.x, crossing.y));
-
-            // 예고선은 발사 원점부터 첫 번째 수로 경계까지만 보여 준다.
-            GyaradosHydroBeam.Segment first = path[0];
-            AttackTelegraph line = AttackTelegraph.CreateLine(
-                attackRoot, first.A, first.Direction, first.Length, settings.width, warningColor);
-            line.Pulse(settings.telegraph);
-
-            yield return new WaitForSeconds(settings.telegraph);
-            if (marker != null) Destroy(marker);
-            if (health.IsDead) yield break;
-
-            GyaradosHydroBeam beam = GyaradosHydroBeam.Launch(attackRoot, path, settings.speed,
-                settings.width, settings.trailDuration, settings.damage, beamColor, splashColor);
-
-            // 남은 물줄기 판정까지 사라진 뒤에 다음 외부 패턴으로 넘어간다.
-            int generation = attackGeneration;
-            while (beam != null && !beam.IsFinished && generation == attackGeneration && !health.IsDead)
-                yield return null;
-
-            if (health.IsDead) yield break;
-            yield return new WaitForSeconds(settings.recovery);
-        }
-        finally
-        {
-            // 사망으로 코루틴이 끊겨도 여기를 지난다. 해류가 잠긴 채 남으면 안 된다.
-            if (currentField != null) currentField.ResumeDirectionChanges();
-        }
+        if (health.IsDead) yield break;
+        yield return new WaitForSeconds(settings.recovery);
     }
 
     /// <summary>
-    /// 발사 경로를 미리 시뮬레이션해 페이즈가 요구하는 굴절 횟수를 채우는 후보만 고른다.
+    /// 발사 경로를 미리 시뮬레이션해 페이즈가 요구하는 반사 횟수를 채우는 후보만 고른다.
     ///
-    /// 후보는 세 단계로 만든다.
     /// 1. 예고 시작 시점의 플레이어 위치를 겨눈다. 이후 추적하지 않는다.
-    /// 2. 실패하면 X축 조준 보정을 줄여 가며 다시 시도하고, 마지막에는 전투장 중앙을 곧게 겨눈다.
-    /// 3. 그래도 실패하면 <b>굴절이 미는 반대쪽</b>을 겨눈다. `좌좌`처럼 두 수로가 같은 방향으로
-    ///    흐르면 물줄기가 한쪽으로 계속 누적해 휘어, 중앙을 겨눠도 두 번째 경계 전에 옆으로 빠진다.
-    ///    반대쪽에서 출발해야 휘어 들어올 공간이 생긴다.
+    /// 2. 실패하면 조준점을 전투장 중심 쪽으로 당겨 가며 다시 시도한다.
+    /// 3. 그래도 실패하면 발사 면 정면에서 좌우로 기울인 예비 각도를 쓴다. 정면을 그대로 겨누면
+    ///    반대쪽 벽에 수직으로 부딪혀 왔던 길을 되짚어 오므로, 기운 각도만 후보로 둔다.
+    ///
+    /// 마지막 예비 각도까지 실패하면 <c>null</c>이다. 부르는 쪽은 패턴을 취소한다.
     /// </summary>
-    private List<GyaradosHydroBeam.Segment> PlanHydroPath(Vector2 origin, bool fromTop, int firstLane,
-                                                          int[] signs, HydroSettings settings,
-                                                          List<Vector2> crossings)
+    private List<GyaradosHydroBeam.Segment> PlanHydroPath(Vector2 origin, GyaradosHydroBeam.HydroFace face,
+                                                          HydroSettings settings,
+                                                          List<Vector2> reflectionPoints, out Vector2 entry)
     {
-        Vector2 center = ArenaCenter;
-        Vector2 half = ArenaHalfSize;
+        Vector2 center = ReflectCenter;
         Vector2 aim = PlayerPosition;
         int steps = Mathf.Max(2, hydroAimAttempts);
 
-        // 굴절이 미는 쪽. 첫 수로와 가운데 수로가 함께 미는 방향이다.
-        int drift = signs[firstLane] + signs[WaterCurrentField.LaneMiddle];
-        float driftSign = drift != 0 ? Mathf.Sign(drift) : signs[WaterCurrentField.LaneMiddle];
-
-        for (int attempt = 0; attempt < steps * 2; attempt++)
+        for (int attempt = 0; attempt < steps; attempt++)
         {
-            float aimX;
-            if (attempt < steps)
-            {
-                // 마지막 시도가 정확히 중앙이 되도록 나눈다.
-                float shrink = 1f - attempt / (float)(steps - 1);
-                aimX = center.x + (aim.x - center.x) * shrink;
-            }
-            else
-            {
-                float t = (attempt - steps + 1) / (float)steps;
-                aimX = center.x - driftSign * half.x * t;
-            }
-
-            Vector2 baseAim = new Vector2(aimX - origin.x, aim.y - origin.y);
-            if (baseAim.sqrMagnitude < 0.0001f) continue;
-
-            Vector2 direction =
-                (baseAim.normalized + Vector2.right * (signs[firstLane] * settings.refractionStrength)).normalized;
-            List<GyaradosHydroBeam.Segment> path = GyaradosHydroBeam.BuildPath(
-                origin, direction, center, half, signs, fromTop, settings.refractions,
-                settings.refractionStrength, RefractionEpsilon, crossings);
+            // 마지막 시도가 정확히 전투장 중심이 되도록 나눈다.
+            float shrink = 1f - attempt / (float)(steps - 1);
+            Vector2 target = center + (aim - center) * shrink;
+            List<GyaradosHydroBeam.Segment> path =
+                TryHydroPath(origin, target - origin, face, settings, reflectionPoints, out entry);
             if (path == null) continue;
 
             if (attempt > 0)
-                Trace(string.Format("    조준 후보 {0}회 만에 성공 (조준 X {1:0.00})", attempt + 1, aimX));
+                Trace(string.Format("    조준 후보 {0}회 만에 성공 (조준 ({1:0.00}, {2:0.00}))",
+                    attempt + 1, target.x, target.y));
             return path;
         }
+
+        // 예비 각도. 면 정면에서 좌우로 기울여 가며 찾는다.
+        Vector2 straight = center - origin;
+        foreach (float tilt in HydroFallbackTilts)
+        {
+            List<GyaradosHydroBeam.Segment> path = TryHydroPath(
+                origin, Rotate(straight, tilt), face, settings, reflectionPoints, out entry);
+            if (path == null) continue;
+
+            Trace(string.Format("    조준 실패 — 예비 각도 {0:0}도 사용", tilt));
+            return path;
+        }
+
+        entry = origin;
         return null;
+    }
+
+    private List<GyaradosHydroBeam.Segment> TryHydroPath(Vector2 origin, Vector2 direction,
+                                                         GyaradosHydroBeam.HydroFace face,
+                                                         HydroSettings settings,
+                                                         List<Vector2> reflectionPoints, out Vector2 entry) =>
+        GyaradosHydroBeam.BuildPath(origin, direction, ReflectCenter, ReflectHalfSize, face,
+                                    settings.reflections, ReflectionEpsilon, settings.cornerMargin,
+                                    settings.minSegmentLength, out entry, reflectionPoints);
+
+    private static Vector2 Rotate(Vector2 v, float degrees)
+    {
+        float radians = degrees * Mathf.Deg2Rad;
+        float cos = Mathf.Cos(radians);
+        float sin = Mathf.Sin(radians);
+        return new Vector2(v.x * cos - v.y * sin, v.x * sin + v.y * cos);
+    }
+
+    private static string FaceName(GyaradosHydroBeam.HydroFace face)
+    {
+        switch (face)
+        {
+            case GyaradosHydroBeam.HydroFace.Top: return "위";
+            case GyaradosHydroBeam.HydroFace.Bottom: return "아래";
+            case GyaradosHydroBeam.HydroFace.Left: return "왼쪽";
+            default: return "오른쪽";
+        }
     }
 
     private static string Format(GyaradosHydroBeam.Segment segment)
@@ -1660,6 +1710,13 @@ public class GyaradosBossController : MonoBehaviour
             float y = center.y + (i == 0 ? -half.y / 3f : half.y / 3f);
             Gizmos.DrawLine(new Vector3(center.x - half.x, y, 0f), new Vector3(center.x + half.x, y, 0f));
         }
+
+        // 반사 경계는 벽의 안쪽 면과 눈으로 맞춰야 한다. 전투 영역과 따로 그린다.
+        if (hydroReflectBounds == null) return;
+        Gizmos.color = new Color(1f, 0.75f, 0.3f, 0.9f);
+        Gizmos.DrawWireCube(hydroReflectBounds.position,
+            new Vector3(Mathf.Abs(hydroReflectBounds.localScale.x),
+                        Mathf.Abs(hydroReflectBounds.localScale.y), 0f));
     }
 }
 

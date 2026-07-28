@@ -2,18 +2,22 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 갸라도스의 해류 굴절 하이드로펌프. 위 또는 아래 외곽 바다에서 들어와 수로 경계를 지날 때마다
-/// 그 수로의 흐름에 끌려 좌우로 꺾인다.
+/// 갸라도스의 반사 하이드로펌프. 외곽 바다의 네 방향 중 한 곳에서 들어와, 전투장 벽에 닿을 때마다
+/// 입사각과 같은 각도로 튕겨 나간다.
 ///
 /// 경로는 발사 전에 <see cref="BuildPath"/>로 한 번에 계산해 구간 목록으로 들고 있는다.
-/// 물리 레이캐스트를 쓰지 않으므로 장식 콜라이더나 잉어킹 때문에 경로가 달라지지 않는다 —
-/// 플레이어가 화살표만 보고 굴절을 예측할 수 있어야 하기 때문이다.
+/// 물리 레이캐스트를 쓰지 않으므로 장식 콜라이더나 잉어킹, 플레이어 때문에 경로가 달라지지 않는다 —
+/// 플레이어에게 보여 주는 것은 첫 방향뿐이고, 그 뒤는 "벽에서 똑같은 각도로 튕긴다"는 규칙 하나로
+/// 읽을 수 있어야 하기 때문이다.
 ///
-/// 선두가 지나간 구간은 정해진 시간 동안 피해 판정으로 남는다. 굵기와 판정은 굴절 전후가 같다.
+/// 선두가 지나간 구간은 정해진 시간 동안 피해 판정으로 남는다. 굵기와 판정은 반사 전후가 같다.
 /// </summary>
 public class GyaradosHydroBeam : MonoBehaviour
 {
-    /// <summary>물줄기 한 구간. 굴절 지점에서 끊긴다.</summary>
+    /// <summary>물대포가 들어오는 네 발사 면.</summary>
+    public enum HydroFace { Top, Bottom, Left, Right }
+
+    /// <summary>물줄기 한 구간. 반사 지점에서 끊긴다.</summary>
     public readonly struct Segment
     {
         public readonly Vector2 A;
@@ -70,87 +74,141 @@ public class GyaradosHydroBeam : MonoBehaviour
 
     // ---------------------------------------------------------------- 경로 계산
 
+    /// <summary>진행 방향이 축과 거의 나란하면 그 축의 벽은 영영 만나지 못한다.</summary>
+    private const float DirectionEpsilon = 0.0001f;
+    /// <summary>발사 면 안쪽으로 이만큼도 향하지 않는 후보는 벽을 스칠 뿐이라 버린다.</summary>
+    private const float MinInwardDot = 0.1f;
+    /// <summary>두 면까지의 거리가 이 안에서 같으면 모서리로 본다. 모서리 이중 반사는 허용하지 않는다.</summary>
+    private const float CornerTolerance = 0.05f;
+
     /// <summary>
-    /// 발사 원점에서 시작해 수로 경계에서 <paramref name="refractions"/>번 꺾이는 경로를 만든다.
-    /// 필요한 굴절을 채우기 전에 좌우 경계로 빠지면 <c>null</c>을 돌려준다 — 그런 후보는 버린다.
+    /// 외곽 원점에서 <paramref name="face"/>로 들어와 벽에서 <paramref name="reflections"/>번 튕긴 뒤
+    /// 다음 벽에서 끝나는 경로를 만든다. 렌더링·코루틴을 건드리지 않는 순수 함수라 네 발사 면과
+    /// 모서리 사례를 따로 검증할 수 있다.
+    ///
+    /// 다음 세 가지 중 하나라도 어기면 <c>null</c>을 돌려준다. 그런 후보는 발사하지 않고 버린다.
+    /// <list type="bullet">
+    ///   <item>최초 방향이 선택한 면의 바깥을 향하거나 모서리를 스치기만 한다.</item>
+    ///   <item>반사점이 모서리에서 <paramref name="cornerMargin"/>보다 가깝거나 두 면에 동시에 닿는다.</item>
+    ///   <item>이어지는 두 접점 사이가 <paramref name="minSegmentLength"/>보다 짧다.</item>
+    /// </list>
     /// </summary>
-    /// <param name="laneSigns">수로별 방향. 인덱스는 <see cref="WaterCurrentField.LaneBottom"/> 계열 상수.</param>
-    /// <param name="downward">위에서 아래로 쏘는지. 수로를 지나는 순서가 뒤집힌다.</param>
-    /// <param name="crossings">채워 주면 경계 교차점을 순서대로 담는다. 디버그 로그용.</param>
+    /// <param name="entryPoint">선택한 면을 처음 통과하는 지점. 진입은 반사로 세지 않는다.</param>
+    /// <param name="reflectionPoints">채워 주면 실제로 꺾인 지점을 순서대로 담는다. 디버그 로그용.</param>
     public static List<Segment> BuildPath(Vector2 origin, Vector2 firstDirection,
-                                          Vector2 arenaCenter, Vector2 arenaHalf,
-                                          int[] laneSigns, bool downward, int refractions,
-                                          float refractionStrength, float epsilon,
-                                          List<Vector2> crossings = null)
+                                          Vector2 boundsCenter, Vector2 boundsHalf, HydroFace face,
+                                          int reflections, float epsilon, float cornerMargin,
+                                          float minSegmentLength, out Vector2 entryPoint,
+                                          List<Vector2> reflectionPoints = null)
     {
+        entryPoint = origin;
+        reflectionPoints?.Clear();
         if (firstDirection.sqrMagnitude < 0.000001f) return null;
 
-        // 위에서 쏘면 위 → 가운데 → 아래, 아래에서 쏘면 아래 → 가운데 → 위 순으로 지난다.
-        int[] laneOrder = downward
-            ? new[] { WaterCurrentField.LaneTop, WaterCurrentField.LaneMiddle, WaterCurrentField.LaneBottom }
-            : new[] { WaterCurrentField.LaneBottom, WaterCurrentField.LaneMiddle, WaterCurrentField.LaneTop };
-        // 지나는 순서대로의 수로 경계 Y.
-        float third = arenaHalf.y / 3f;
-        float[] boundaries = downward
-            ? new[] { arenaCenter.y + third, arenaCenter.y - third }
-            : new[] { arenaCenter.y - third, arenaCenter.y + third };
-
-        List<Segment> result = new List<Segment>(refractions + 2);
-        Vector2 position = origin;
         Vector2 direction = firstDirection.normalized;
-        crossings?.Clear();
+        // 최초 방향은 반드시 전투장 안쪽을 향해야 한다.
+        if (Vector2.Dot(direction, InwardNormal(face)) < MinInwardDot) return null;
+        if (!TryEnterFace(origin, direction, face, boundsCenter, boundsHalf, cornerMargin, out entryPoint))
+            return null;
 
-        int steps = Mathf.Clamp(refractions, 0, boundaries.Length);
-        for (int i = 0; i < steps; i++)
+        // 첫 구간은 외곽 원점부터 첫 반사점까지 이어 그린다. 진입점에 시각적 틈이 생기면 안 된다.
+        List<Vector2> contacts = new List<Vector2>(reflections + 3) { origin };
+        Vector2 previous = entryPoint;
+        Vector2 position = entryPoint + direction * epsilon;
+
+        // 목표 반사 횟수만큼 꺾은 뒤, 다음 벽에 닿는 구간까지 포함하고 끝낸다.
+        for (int i = 0; i <= reflections; i++)
         {
-            if (!TryHorizontalHit(position, direction, boundaries[i], out Vector2 hit)) return null;
-            // 굴절하기 전에 좌우로 빠져나가면 필요한 횟수를 채울 수 없다.
-            if (Mathf.Abs(hit.x - arenaCenter.x) > arenaHalf.x) return null;
+            bool last = i == reflections;
+            if (!TryNextWall(position, direction, boundsCenter, boundsHalf,
+                             last ? 0f : cornerMargin, out Vector2 hit, out bool vertical))
+                return null;
+            if (Vector2.Distance(hit, previous) < minSegmentLength) return null;
 
-            result.Add(new Segment(position, hit));
-            crossings?.Add(hit);
+            contacts.Add(hit);
+            previous = hit;
+            if (last) break;
 
-            // 새로 들어가는 수로의 방향을 적용한다. 수평 성분만 더하므로 위·아래 진행 부호는 그대로다.
-            int sign = laneSigns[laneOrder[i + 1]];
-            direction = (direction + Vector2.right * (sign * refractionStrength)).normalized;
-            // 교차점에 그대로 두면 다음 계산이 같은 경계에 다시 걸려 제자리에서 떤다.
+            // reflected = d - 2 * dot(d, n) * n — 축 정렬된 벽이라 닿은 축의 부호만 뒤집힌다.
+            direction = vertical ? new Vector2(-direction.x, direction.y)
+                                 : new Vector2(direction.x, -direction.y);
+            reflectionPoints?.Add(hit);
+            // 반사점에 그대로 두면 다음 계산이 같은 벽에 다시 걸려 제자리에서 떤다.
             position = hit + direction * epsilon;
         }
 
-        Vector2 exit = ArenaExitPoint(position, direction, arenaCenter, arenaHalf);
-        result.Add(new Segment(position, exit));
+        List<Segment> result = new List<Segment>(contacts.Count - 1);
+        for (int i = 1; i < contacts.Count; i++) result.Add(new Segment(contacts[i - 1], contacts[i]));
         return result;
     }
 
-    /// <summary>주어진 Y선과 만나는 지점. 진행 방향이 그 선을 향하지 않으면 실패한다.</summary>
-    private static bool TryHorizontalHit(Vector2 position, Vector2 direction, float y, out Vector2 hit)
+    /// <summary>그 면에서 전투장 안쪽을 가리키는 법선.</summary>
+    public static Vector2 InwardNormal(HydroFace face)
     {
-        hit = position;
-        if (Mathf.Abs(direction.y) < 0.0001f) return false;
-        float t = (y - position.y) / direction.y;
-        if (t <= 0f) return false;
-        hit = position + direction * t;
-        return true;
+        switch (face)
+        {
+            case HydroFace.Top: return Vector2.down;
+            case HydroFace.Bottom: return Vector2.up;
+            case HydroFace.Left: return Vector2.right;
+            default: return Vector2.left;
+        }
     }
 
-    /// <summary>전투 영역 바깥 경계와 만나는 지점. 물대포는 여기서 방향을 바꾸지 않고 사라진다.</summary>
-    private static Vector2 ArenaExitPoint(Vector2 position, Vector2 direction,
-                                          Vector2 arenaCenter, Vector2 arenaHalf)
+    /// <summary>
+    /// 외곽 원점에서 선택한 면을 통과하는 진입점. 이 통과는 <b>진입</b>이지 반사가 아니다.
+    /// 면의 끝자락을 스치기만 하는 후보는 여기서 걸러 낸다.
+    /// </summary>
+    private static bool TryEnterFace(Vector2 origin, Vector2 direction, HydroFace face,
+                                     Vector2 center, Vector2 half, float cornerMargin, out Vector2 entry)
     {
-        float best = Mathf.Max(arenaHalf.x, arenaHalf.y) * 4f;
-        if (Mathf.Abs(direction.x) > 0.0001f)
-        {
-            float edge = arenaCenter.x + Mathf.Sign(direction.x) * arenaHalf.x;
-            float t = (edge - position.x) / direction.x;
-            if (t > 0f) best = Mathf.Min(best, t);
-        }
-        if (Mathf.Abs(direction.y) > 0.0001f)
-        {
-            float edge = arenaCenter.y + Mathf.Sign(direction.y) * arenaHalf.y;
-            float t = (edge - position.y) / direction.y;
-            if (t > 0f) best = Mathf.Min(best, t);
-        }
-        return position + direction * best;
+        entry = origin;
+        bool vertical = face == HydroFace.Left || face == HydroFace.Right;
+
+        float plane = vertical ? center.x - InwardNormal(face).x * half.x
+                               : center.y - InwardNormal(face).y * half.y;
+        float along = vertical ? direction.x : direction.y;
+        if (Mathf.Abs(along) < DirectionEpsilon) return false;
+
+        float t = (plane - (vertical ? origin.x : origin.y)) / along;
+        if (t <= 0f) return false;
+        entry = origin + direction * t;
+
+        float lateral = vertical ? Mathf.Abs(entry.y - center.y) : Mathf.Abs(entry.x - center.x);
+        float limit = (vertical ? half.y : half.x) - cornerMargin;
+        return limit > 0f && lateral <= limit;
+    }
+
+    /// <summary>
+    /// 전투장 안에서 진행 방향으로 가장 먼저 만나는 벽 하나. 양의 거리 중 가까운 쪽만 고르고,
+    /// 두 면까지의 거리가 같으면 모서리이므로 실패로 본다.
+    /// </summary>
+    /// <param name="vertical">닿은 벽이 왼쪽·오른쪽이면 참, 위·아래면 거짓.</param>
+    private static bool TryNextWall(Vector2 position, Vector2 direction, Vector2 center, Vector2 half,
+                                    float cornerMargin, out Vector2 hit, out bool vertical)
+    {
+        hit = position;
+        vertical = false;
+
+        float toVertical = AxisDistance(position.x, direction.x, center.x, half.x);
+        float toHorizontal = AxisDistance(position.y, direction.y, center.y, half.y);
+        if (float.IsPositiveInfinity(Mathf.Min(toVertical, toHorizontal))) return false;
+        if (Mathf.Abs(toVertical - toHorizontal) < CornerTolerance) return false;
+
+        vertical = toVertical < toHorizontal;
+        hit = position + direction * (vertical ? toVertical : toHorizontal);
+
+        // 반사점은 모서리에서 충분히 떨어져야 한다. 종료 벽에는 여유값을 요구하지 않는다.
+        float lateral = vertical ? Mathf.Abs(hit.y - center.y) : Mathf.Abs(hit.x - center.x);
+        float limit = (vertical ? half.y : half.x) - cornerMargin;
+        return limit > 0f && lateral <= limit;
+    }
+
+    /// <summary>한 축의 벽까지 남은 거리. 그 축으로 나아가지 않으면 무한대다.</summary>
+    private static float AxisDistance(float from, float delta, float center, float half)
+    {
+        if (Mathf.Abs(delta) < DirectionEpsilon) return float.PositiveInfinity;
+        float t = (center + Mathf.Sign(delta) * half - from) / delta;
+        return t > 0f ? t : float.PositiveInfinity;
     }
 
     // ---------------------------------------------------------------- 발사
@@ -221,7 +279,7 @@ public class GyaradosHydroBeam : MonoBehaviour
                 headDone = true;
                 return;
             }
-            // 굴절 지점의 물보라. 새 경로를 알려 주는 연출이고 피해는 없다.
+            // 벽 반사점의 물보라. 새 경로를 알려 주는 연출이고 피해는 없다.
             SpawnSplash(path[segmentIndex].A);
             BeginSegment(segmentIndex);
             segmentLength = path[segmentIndex].Length;

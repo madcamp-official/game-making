@@ -42,8 +42,6 @@ public class WaterCurrentField : MonoBehaviour
     private bool running;
     private float nextChangeTime;
     private float telegraphEndTime;
-    /// <summary>0보다 크면 방향 재추첨을 멈춘다. 하이드로펌프가 날아가는 동안 잠근다.</summary>
-    private int freezeLocks;
 
     private Transform player;
     private Rigidbody2D playerBody;
@@ -59,7 +57,7 @@ public class WaterCurrentField : MonoBehaviour
     private Color arrowColor;
     private Color boundaryColor;
 
-    /// <summary>방향 변경을 예고하는 중인지. 하이드로펌프는 이게 끝난 뒤에 예고를 시작한다.</summary>
+    /// <summary>방향 변경을 예고하는 중인지. 화살표 점멸 연출이 이 값을 본다.</summary>
     public bool IsChanging { get; private set; }
 
     /// <summary>지금 세 수로의 방향. 인덱스는 <see cref="LaneBottom"/> 계열 상수를 쓴다.</summary>
@@ -126,19 +124,6 @@ public class WaterCurrentField : MonoBehaviour
         SetVisualsVisible(false);
     }
 
-    /// <summary>
-    /// 방향 재추첨을 잠근다. 하이드로펌프가 화면에 있는 동안 화살표와 실제 굴절이 어긋나면 안 된다.
-    /// 해류의 힘 자체는 계속 걸린다. 반드시 <see cref="ResumeDirectionChanges"/>와 짝을 맞춘다.
-    /// </summary>
-    public void FreezeDirectionChanges() => freezeLocks++;
-
-    /// <summary>잠금을 하나 푼다. 마지막 잠금이 풀리면 남은 시간을 잇지 않고 새로 뽑는다.</summary>
-    public void ResumeDirectionChanges()
-    {
-        freezeLocks = Mathf.Max(0, freezeLocks - 1);
-        if (freezeLocks == 0) ScheduleNextChange();
-    }
-
     /// <summary>페이즈 전환에서 예고 없이 즉시 새 방향을 뽑는다.</summary>
     public void ForceChangeNow()
     {
@@ -185,7 +170,7 @@ public class WaterCurrentField : MonoBehaviour
                 Changed?.Invoke();
             }
         }
-        else if (freezeLocks == 0 && Time.time >= nextChangeTime)
+        else if (Time.time >= nextChangeTime)
         {
             BeginChange();
         }

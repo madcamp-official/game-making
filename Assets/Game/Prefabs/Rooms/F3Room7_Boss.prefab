@@ -47,6 +47,9 @@ Transform:
   - {fileID: 1999650200610887782}
   - {fileID: 2361008101045858724}
   - {fileID: 248735214489291719}
+  - {fileID: 4411220033558870012}
+  - {fileID: 4411220033558870022}
+  - {fileID: 4411220033558870032}
   - {fileID: 3798904638137170226}
   - {fileID: 1348606434067675868}
   - {fileID: 2664988778556869521}
@@ -2592,6 +2595,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GyaradosBossController
   arenaBounds: {fileID: 5362023187134835220}
   arenaHalfSize: {x: 6.2, y: 4.2}
+  hydroReflectBounds: {fileID: 4411220033558870032}
   exposedAnchor: {fileID: 8887287835185909638}
   diveAnchorTop: {fileID: 3023060686363213610}
   diveAnchorBottom: {fileID: 4076962246759884009}
@@ -2599,6 +2603,8 @@ MonoBehaviour:
   diveAnchorRight: {fileID: 1999650200610887782}
   hydroOriginTop: {fileID: 2361008101045858724}
   hydroOriginBottom: {fileID: 248735214489291719}
+  hydroOriginLeft: {fileID: 4411220033558870012}
+  hydroOriginRight: {fileID: 4411220033558870022}
   currentLaneTop: {fileID: 3798904638137170226}
   currentLaneMiddle: {fileID: 1348606434067675868}
   currentLaneBottom: {fileID: 2664988778556869521}
@@ -2627,29 +2633,31 @@ MonoBehaviour:
   arrowsPerLane: 7
   arrowScrollSpeed: 1.4
   hydroPhase1:
-    refractions: 1
-    refractionStrength: 0.55
+    reflections: 1
     telegraph: 0.65
     speed: 15
     width: 0.8
     trailDuration: 0.5
     damage: 28
     recovery: 0.45
+    cornerMargin: 0.6
+    minSegmentLength: 1
   hydroPhase2:
-    refractions: 2
-    refractionStrength: 0.65
+    reflections: 2
     telegraph: 0.55
     speed: 16.5
     width: 0.9
     trailDuration: 0.6
     damage: 32
     recovery: 0.35
+    cornerMargin: 0.6
+    minSegmentLength: 1
   hydroAimAttempts: 6
   floodPhase1:
     depthRatio: 0.55
-    telegraph: 0.85
+    telegraph: 1.05
     holdAfterSecond: 1
-    thirdTelegraph: 1.1
+    thirdTelegraph: 1.3
     holdAfterThird: 0.85
     damage: 28
     damageRetryInterval: 0.6
@@ -2658,9 +2666,9 @@ MonoBehaviour:
     recovery: 0.45
   floodPhase2:
     depthRatio: 0.55
-    telegraph: 0.75
+    telegraph: 0.95
     holdAfterSecond: 0.85
-    thirdTelegraph: 1.1
+    thirdTelegraph: 1.3
     holdAfterThird: 0.85
     damage: 32
     damageRetryInterval: 0.55
@@ -2686,7 +2694,7 @@ MonoBehaviour:
   safeCorridorWidth: 1.25
   minEscapeAngle: 70
   coilPhase1:
-    ringInner: 1.55
+    ringInner: 1.85
     ringOuter: 4.5
     innerRadius: 1.85
     firstTelegraph: 0.65
@@ -2696,7 +2704,7 @@ MonoBehaviour:
     innerDamage: 32
     recovery: 0.55
   coilPhase2:
-    ringInner: 1.45
+    ringInner: 1.75
     ringOuter: 4.7
     innerRadius: 2.05
     firstTelegraph: 0.52
@@ -5521,3 +5529,96 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!1 &4411220033558870011
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4411220033558870012}
+  m_Layer: 0
+  m_Name: HydroOrigin_Left
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4411220033558870012
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411220033558870011}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -8.6, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7107600823644834301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4411220033558870021
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4411220033558870022}
+  m_Layer: 0
+  m_Name: HydroOrigin_Right
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4411220033558870022
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411220033558870021}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 8.6, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7107600823644834301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4411220033558870031
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4411220033558870032}
+  m_Layer: 0
+  m_Name: HydroReflectBounds
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4411220033558870032
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4411220033558870031}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 14, y: 10, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7107600823644834301}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
