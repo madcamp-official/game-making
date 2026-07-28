@@ -361,21 +361,24 @@ MonoBehaviour:
   patternGapPhase2: 0.32
   stonePhase1:
     windup: 0.5
-    stoneCount: 14
-    spawnInterval: 0.17
-    fallTime: 0.5
+    stoneCount: 20
+    spawnInterval: 0.14
+    fallTime: 0.75
     recovery: 0.5
   stonePhase2:
     windup: 0.42
-    stoneCount: 22
-    spawnInterval: 0.13
-    fallTime: 0.4
+    stoneCount: 30
+    spawnInterval: 0.11
+    fallTime: 0.6
     recovery: 0.4
   stoneDamage: 22
-  stoneRadius: 0.62
+  stoneRadius: 0.74
   stoneImpactDuration: 0.22
   stoneDropHeight: 6
-  stoneAimAtPlayerRatio: 0.4
+  stoneAimAtPlayerRatio: 0.3
+  stoneNearPlayerRatio: 0.45
+  stoneScatterInner: 0.9
+  stoneScatterOuter: 3.4
   hornPhase1:
     chargeTime: 0.38
     length: 4.5

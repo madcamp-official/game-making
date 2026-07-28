@@ -7,10 +7,13 @@ using UnityEngine.Serialization;
 /// <summary>
 /// 플레이어의 네 기술. 마우스 조준(360도 자유각) 기준이다.
 ///
-/// * 좌클릭 — 몸통박치기 (근거리)
-/// * 우클릭 — 덩굴채찍 (2칸 사거리, 휘두른 뒤 짧은 경직)
-/// * Space — 씨뿌리기 (발밑에 회복 장판)
-/// * 좌측 Shift — 꽃잎댄스 (발밑에 피해 장판)
+/// * 좌클릭 — 몸통박치기 (근접)
+/// * 우클릭 — 덩굴채찍 (원거리, 2칸 사거리, 휘두른 뒤 짧은 경직)
+/// * Space — 씨뿌리기 (발밑에 회복 장판, 전투방마다 한 번)
+/// * 좌측 Shift — 꽃잎댄스 (몸을 따라다니는 피해 장판, 근접)
+///
+/// 피해를 주는 기술에는 사거리 속성이 붙어 있다 (<see cref="MoveInfo.KindOf"/>).
+/// 유물과 이벤트 강화는 그 속성만 보고 배율을 매긴다.
 ///
 /// 기술은 전투방과 보스방에서만 쓸 수 있다 (<see cref="MovesUsable"/>).
 /// 수치는 모두 Inspector에서 조정한다.
@@ -47,7 +50,6 @@ public class PlayerCombat : MonoBehaviour
     [Tooltip("장판 위에 서 있는 동안 한 번에 차오르는 체력.")]
     [SerializeField, Min(0)] private int seedHealPerTick = 6;
     [SerializeField, Min(0.05f)] private float seedTickInterval = 1f;
-    [SerializeField, Min(0f)] private float seedCooldown = 14f;
     // 1층 숲 바닥이 초록이라 흔한 초록으로는 묻힌다. 밝은 연둣빛으로 띄운다.
     [SerializeField] private Color seedColor = new Color(0.6f, 1f, 0.45f, 0.4f);
 
@@ -79,8 +81,9 @@ public class PlayerCombat : MonoBehaviour
     private SpriteRenderer vineMarker;  // 재사용하는 덩굴채찍 연출
     private float lastMeleeTime = -999f;
     private float lastVineTime = -999f;
-    private float lastSeedTime = -999f;
     private float lastPetalTime = -999f;
+    /// <summary>씨뿌리기를 쓴 전투방의 번호. 방이 바뀌면 다시 쓸 수 있다.</summary>
+    private int seedUsedInRoom = -1;
     private float slowUntil = -999f;
 
     private void Awake()
@@ -129,11 +132,18 @@ public class PlayerCombat : MonoBehaviour
     /// <summary>
     /// 꽃잎댄스 한 틱의 피해. 몸통박치기의 <b>기본</b> 피해가 기준이라, 몸통박치기를 강화해도
     /// 이쪽이 같이 세지지는 않는다 — 한 기술의 강화가 다른 기술로 새면 선택의 뜻이 사라진다.
-    /// 유물 배율은 근접 쪽을 따른다 (바닥을 밟는 근접 기술이다).
+    /// 배율은 기술에 붙은 속성(근접)을 따른다.
     /// </summary>
     private int EffectivePetalDamage =>
-        ScaleDamage(meleeDamage, petalDamageRatio * RelicMultiplier(true) *
+        ScaleDamage(meleeDamage, petalDamageRatio * KindMultiplier(MoveType.PetalDance) *
             (moves != null ? moves.PetalDamageMultiplier : 1f));
+
+    /// <summary>
+    /// 씨뿌리기는 전투방마다 한 번만 쓸 수 있다. 시간이 지나 돌아오는 게 아니라
+    /// 방을 넘어가야 돌아오므로, "이 방에서 언제 쓸 것인가"가 곧 선택이 된다.
+    /// </summary>
+    private bool SeedReady =>
+        CombatRoomController.InCombatRoom && seedUsedInRoom != CombatRoomController.VisitId;
 
     /// <summary>
     /// 기술 칸 HUD가 쓰는 쿨타임 진행도. 1이면 바로 쓸 수 있고, 0이면 방금 썼다.
@@ -141,12 +151,14 @@ public class PlayerCombat : MonoBehaviour
     /// </summary>
     public float CooldownProgress01(MoveType move)
     {
+        // 씨뿌리기는 시간으로 차지 않는다. 이 방에서 썼으면 방을 나갈 때까지 계속 0이다.
+        if (move == MoveType.SeedSow) return SeedReady ? 1f : 0f;
+
         float last, cooldown;
         switch (move)
         {
             case MoveType.Tackle: last = lastMeleeTime; cooldown = EffectiveMeleeCooldown; break;
             case MoveType.VineWhip: last = lastVineTime; cooldown = EffectiveVineCooldown; break;
-            case MoveType.SeedSow: last = lastSeedTime; cooldown = seedCooldown; break;
             case MoveType.PetalDance: last = lastPetalTime; cooldown = petalCooldown; break;
             default: return 1f;
         }
@@ -161,25 +173,19 @@ public class PlayerCombat : MonoBehaviour
         vineDamage = vine;
     }
 
-    // 유물 배율이 걸린 실제 피해량. 배율이 아무리 낮아도 최소 1은 들어간다.
+    // 속성 배율이 걸린 실제 피해량. 배율이 아무리 낮아도 최소 1은 들어간다.
     private int EffectiveMeleeDamage =>
-        ScaleDamage(meleeDamage, RelicMultiplier(true) *
+        ScaleDamage(meleeDamage, KindMultiplier(MoveType.Tackle) *
             (moves != null ? moves.TackleDamageMultiplier : 1f));
-    // 덩굴채찍은 사거리가 2칸이라 몸으로 붙는 좌클릭과 역할이 다르다. 구애 시리즈에서는
-    // 잎날가르기가 있던 자리를 그대로 이어받아 "원거리" 쪽 배율을 쓴다.
-    private int EffectiveVineDamage => ScaleDamage(vineDamage, RelicMultiplier(false));
+    private int EffectiveVineDamage =>
+        ScaleDamage(vineDamage, KindMultiplier(MoveType.VineWhip));
 
     private static int ScaleDamage(int baseDamage, float multiplier) =>
         baseDamage <= 0 ? 0 : Mathf.Max(1, GameMath.RoundHalfUp(baseDamage * multiplier));
 
-    // 유물 배율과 이벤트 강화(2층 시라소몬·홍수몬)를 함께 곱한다.
-    private static float RelicMultiplier(bool melee)
-    {
-        float multiplier = melee ? EventBuffs.Melee : EventBuffs.Ranged;
-        RelicManager relics = RelicManager.Instance;
-        if (relics == null) return multiplier;
-        return multiplier * (melee ? relics.MeleeDamageMultiplier : relics.RangedDamageMultiplier);
-    }
+    /// <summary>기술에 붙은 속성(근접·원거리)에 걸린 유물·이벤트 배율.</summary>
+    private static float KindMultiplier(MoveType move) =>
+        AttackKinds.DamageMultiplier(MoveInfo.KindOf(move));
 
     private void Update()
     {
@@ -207,7 +213,7 @@ public class PlayerCombat : MonoBehaviour
         }
         else if (kb != null && kb.spaceKey.wasPressedThisFrame && CanUse(MoveType.SeedSow))
         {
-            lastSeedTime = Time.time;
+            seedUsedInRoom = CombatRoomController.VisitId;
             SowSeeds();
         }
         else if (kb != null && kb.leftShiftKey.wasPressedThisFrame && CanUse(MoveType.PetalDance))
@@ -335,13 +341,14 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>
-    /// 꽃잎댄스. 발밑에 분홍 장판을 깔고, 그 위에 있는 적을 주기적으로 때린다.
-    /// 플레이어에게는 아무 영향이 없으므로 적을 이 위로 끌어들이는 게 요령이다.
+    /// 꽃잎댄스. 몸 주위에 분홍 장판이 돌고, 그 안에 있는 적을 주기적으로 때린다.
+    /// 장판이 플레이어를 따라다니므로 적에게 붙어 있는 동안 계속 피해가 들어간다 —
+    /// 근접 기술답게 "붙을 것인가"가 곧 선택이 된다.
     /// </summary>
     private void PetalDance()
     {
         MoveZone.SpawnDamage(transform.position, EffectivePetalRadius, EffectivePetalDuration,
-                             EffectivePetalDamage, petalTickInterval, petalColor);
+                             EffectivePetalDamage, petalTickInterval, petalColor, transform);
     }
 
     /// <summary>채찍이 뻗었다가 사라지는 연출. 마커 하나를 계속 재사용한다.</summary>

@@ -8,7 +8,10 @@ using UnityEngine;
 /// 대상이 반대인 이 둘을 끼워 넣으면 조건문만 늘어난다. 대신 판정 방식은 같게 맞췄다 —
 /// 물리 트리거가 아니라 중심 거리로 재서, 그린 원이 곧 효과 범위가 된다.
 ///
-/// 시전한 자리에 고정된다. 따라다니면 "장판 위에 서 있기"라는 선택 자체가 없어진다.
+/// 자리를 잡는 방식은 둘로 갈린다.
+/// * 씨뿌리기 — 시전한 자리에 고정. 따라다니면 "장판 위에 서 있기"라는 선택 자체가 없어진다.
+/// * 꽃잎댄스 — 플레이어를 따라다닌다. 적을 장판 위로 끌어들이는 게 아니라, 적에게 붙어
+///   비비는 근접 기술이라 몸에 붙어 있어야 쓸모가 있다.
 /// </summary>
 public class MoveZone : MonoBehaviour
 {
@@ -34,19 +37,26 @@ public class MoveZone : MonoBehaviour
     private float edgeBaseAlpha;
     private Transform player;
     private Health playerHealth;
+    /// <summary>비어 있지 않으면 매 프레임 이 대상의 위치로 따라간다.</summary>
+    private Transform follow;
 
-    /// <summary>씨뿌리기: 안에 선 플레이어를 주기적으로 회복시킨다.</summary>
+    /// <summary>씨뿌리기: 안에 선 플레이어를 주기적으로 회복시킨다. 깔린 자리에 고정된다.</summary>
     public static MoveZone SpawnHeal(Vector2 center, float radius, float duration,
                                      int healPerTick, float tickInterval, Color color) =>
-        Spawn(Mode.HealPlayer, "SeedZone", center, radius, duration, healPerTick, tickInterval, color);
+        Spawn(Mode.HealPlayer, "SeedZone", center, radius, duration, healPerTick, tickInterval, color, null);
 
-    /// <summary>꽃잎댄스: 안에 있는 적을 주기적으로 때린다.</summary>
+    /// <summary>
+    /// 꽃잎댄스: 안에 있는 적을 주기적으로 때린다.
+    /// <paramref name="follow"/>를 주면 그 대상을 중심으로 따라다닌다.
+    /// </summary>
     public static MoveZone SpawnDamage(Vector2 center, float radius, float duration,
-                                       int damagePerTick, float tickInterval, Color color) =>
-        Spawn(Mode.DamageEnemies, "PetalZone", center, radius, duration, damagePerTick, tickInterval, color);
+                                       int damagePerTick, float tickInterval, Color color,
+                                       Transform follow = null) =>
+        Spawn(Mode.DamageEnemies, "PetalZone", center, radius, duration, damagePerTick, tickInterval,
+              color, follow);
 
     private static MoveZone Spawn(Mode mode, string name, Vector2 center, float radius, float duration,
-                                  int amount, float tickInterval, Color color)
+                                  int amount, float tickInterval, Color color, Transform follow)
     {
         GameObject go = new GameObject(name);
         go.transform.position = center;
@@ -75,6 +85,7 @@ public class MoveZone : MonoBehaviour
         zone.radius = radius;
         zone.amount = amount;
         zone.tickInterval = tickInterval;
+        zone.follow = follow;
         zone.expireTime = Time.time + duration;
         // 깔자마자 한 번 효과가 들어가야 짧은 장판이 헛돌지 않는다.
         zone.nextTickTime = Time.time;
@@ -92,6 +103,9 @@ public class MoveZone : MonoBehaviour
     private void Update()
     {
         if (Time.time >= expireTime) { Destroy(gameObject); return; }
+
+        // 따라다니는 장판은 판정보다 먼저 자리를 옮긴다. 순서가 반대면 한 틱 늦은 자리에서 때린다.
+        if (follow != null) transform.position = follow.position;
 
         // 사라지기 직전 0.6초 동안 옅어져서 곧 없어진다는 걸 알린다.
         float remaining = expireTime - Time.time;

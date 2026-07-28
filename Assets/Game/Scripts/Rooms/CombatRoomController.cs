@@ -24,15 +24,31 @@ public class CombatRoomController : MonoBehaviour
     /// </summary>
     public static bool InCombatRoom => activeRooms > 0;
 
+    /// <summary>
+    /// 지금 전투방의 일련번호. 방에 들어설 때마다 올라간다.
+    /// "방마다 한 번"인 기술(씨뿌리기)은 이 번호를 기억해 두고 달라졌을 때 다시 채운다 —
+    /// 시간으로 재는 쿨타임과 달리, 방을 넘어가는 순간이 곧 기준이 된다.
+    /// </summary>
+    public static int VisitId { get; private set; }
+
     private static int activeRooms;
 
     /// <summary>정적 값이라 판이 바뀌어도 살아남는다. 판마다 0에서 시작해야 한다.</summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-    private static void ResetRoomCount() => activeRooms = 0;
+    private static void ResetRoomCount()
+    {
+        activeRooms = 0;
+        VisitId = 0;
+    }
 
     // 방을 옮길 때 옛 방은 프레임 끝에 지워지고 새 방은 곧바로 생긴다. 그래서 잠깐 둘이 겹치는데,
     // 세어 두면 그 사이에도 0으로 떨어지지 않는다.
-    private void OnEnable() => activeRooms++;
+    private void OnEnable()
+    {
+        activeRooms++;
+        VisitId++;
+    }
+
     private void OnDisable() => activeRooms = Mathf.Max(0, activeRooms - 1);
 
     private void Start()

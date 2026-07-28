@@ -22,6 +22,8 @@ public class MoveSlotsHud : MonoBehaviour
     /// <summary>배웠지만 지금은 쓸 수 없을 때 (전투방 밖).</summary>
     private static readonly Color RestingColor = new Color(0.18f, 0.22f, 0.3f, 0.8f);
     private static readonly Color CooldownVeil = new Color(0f, 0f, 0f, 0.62f);
+    /// <summary>속성 꼬리표. 기술 이름보다 한 단계 물러나 보여야 한다.</summary>
+    private static readonly Color TagColor = new Color(0.72f, 0.78f, 0.88f, 0.85f);
 
     private class Slot
     {
@@ -30,6 +32,8 @@ public class MoveSlotsHud : MonoBehaviour
         public Image veil;
         public Text nameText;
         public Text keyText;
+        /// <summary>왼쪽 아래 꼬리표 — 근접·원거리 같은 공격 속성.</summary>
+        public Text tagText;
     }
 
     private readonly Slot[] slots = new Slot[MoveInfo.MaxMoves];
@@ -83,6 +87,14 @@ public class MoveSlotsHud : MonoBehaviour
             slot.keyText.rectTransform.offsetMin = new Vector2(4f, 3f);
             slot.keyText.rectTransform.offsetMax = new Vector2(-6f, 0f);
 
+            // 조작키 반대편(왼쪽 아래)에 속성을 적는다. 유물과 이벤트가 "근접 +20%"처럼
+            // 속성 단위로 걸리는데, 어느 기술이 무슨 속성인지 알 길이 없으면 고를 수가 없다.
+            slot.tagText = PixelUi.MakeText(panel, "Tag", 12, TagColor, TextAnchor.LowerLeft);
+            slot.tagText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            Stretch(slot.tagText.rectTransform, 0f, 0f);
+            slot.tagText.rectTransform.offsetMin = new Vector2(6f, 3f);
+            slot.tagText.rectTransform.offsetMax = new Vector2(-4f, 0f);
+
             // 덮개는 글자 위에 와야 쿨타임 중이라는 게 확실히 보인다.
             GameObject veilGo = new GameObject("Veil");
             veilGo.transform.SetParent(panel, false);
@@ -127,6 +139,7 @@ public class MoveSlotsHud : MonoBehaviour
                 slot.nameText.text = "—";
                 slot.nameText.color = new Color(1f, 1f, 1f, 0.35f);
                 slot.keyText.text = "";
+                slot.tagText.text = "";
                 slot.veil.fillAmount = 0f;
                 continue;
             }
@@ -135,6 +148,8 @@ public class MoveSlotsHud : MonoBehaviour
             slot.nameText.text = MoveInfo.NameOf(move);
             slot.nameText.color = usable ? Color.white : new Color(1f, 1f, 1f, 0.45f);
             slot.keyText.text = MoveInfo.KeyLabelOf(move);
+            slot.tagText.text = MoveInfo.TagOf(move);
+            slot.tagText.color = usable ? TagColor : new Color(TagColor.r, TagColor.g, TagColor.b, 0.4f);
 
             float progress = combat != null ? combat.CooldownProgress01(move) : 1f;
             slot.veil.fillAmount = 1f - progress;

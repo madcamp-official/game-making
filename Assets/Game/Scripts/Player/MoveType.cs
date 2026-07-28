@@ -51,6 +51,36 @@ public static class MoveInfo
         return "";
     }
 
+    /// <summary>
+    /// 기술의 사거리 속성. 유물·이벤트 배율이 여기서 갈린다 (<see cref="AttackKinds"/>).
+    ///
+    /// 덩굴채찍은 2칸 밖에서 닿으므로 원거리다 — 구애 시리즈에서 잎날가르기가 있던 자리를
+    /// 그대로 이어받는다. 꽃잎댄스는 발밑 장판이라 몸으로 붙어야 하니 근접이고,
+    /// 씨뿌리기는 피해가 없어 속성이 없다.
+    /// </summary>
+    public static AttackKind KindOf(MoveType move)
+    {
+        switch (move)
+        {
+            case MoveType.Tackle: return AttackKind.Melee;
+            case MoveType.VineWhip: return AttackKind.Ranged;
+            case MoveType.SeedSow: return AttackKind.None;
+            case MoveType.PetalDance: return AttackKind.Melee;
+        }
+        return AttackKind.None;
+    }
+
+    /// <summary>
+    /// 기술 칸에 적는 꼬리표. 속성이 기본이고, 속성만으로 설명되지 않는 규칙은 뒤에 덧붙인다.
+    /// </summary>
+    public static string TagOf(MoveType move)
+    {
+        // 씨뿌리기는 때리는 기술이 아니라 속성이 없다. 그 자리에 "방마다 한 번"이라는
+        // 제약을 적는다 — 어두워진 칸만으로는 언제 다시 차는지 알 수 없다.
+        if (move == MoveType.SeedSow) return "방당 1회";
+        return AttackKinds.LabelOf(KindOf(move));
+    }
+
     /// <summary>실제로 동작하는 기술인지. 네 기술 모두 구현됐다.</summary>
     public static bool IsImplemented(MoveType move) => true;
 }

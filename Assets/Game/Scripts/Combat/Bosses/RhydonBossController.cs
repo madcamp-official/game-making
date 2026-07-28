@@ -109,8 +109,8 @@ public class RhydonBossController : MonoBehaviour
     [Header("스톤샤워 — 1페이즈")]
     [SerializeField] private StoneSettings stonePhase1 = new StoneSettings
     {
-        windup = 0.5f, stoneCount = 14,
-        spawnInterval = 0.17f, fallTime = 0.5f, recovery = 0.5f,
+        windup = 0.5f, stoneCount = 20,
+        spawnInterval = 0.14f, fallTime = 0.75f, recovery = 0.5f,
     };
 
     // 2페이즈: 방 전체가 대상이라 "원을 넓히는" 강화는 뜻이 없어졌다. 대신 수를 크게 늘리고
@@ -118,21 +118,27 @@ public class RhydonBossController : MonoBehaviour
     [Header("스톤샤워 — 2페이즈")]
     [SerializeField] private StoneSettings stonePhase2 = new StoneSettings
     {
-        windup = 0.42f, stoneCount = 22,
-        spawnInterval = 0.13f, fallTime = 0.4f, recovery = 0.4f,
+        windup = 0.42f, stoneCount = 30,
+        spawnInterval = 0.11f, fallTime = 0.6f, recovery = 0.4f,
     };
 
     [Header("스톤샤워 — 공통")]
     [SerializeField, Min(0)] private int stoneDamage = 22;
     [Tooltip("돌 하나가 때리는 반지름")]
-    [SerializeField, Min(0f)] private float stoneRadius = 0.62f;
+    [SerializeField, Min(0f)] private float stoneRadius = 0.74f;
     [Tooltip("착탄 판정이 남아 있는 시간. 짧게 두어 지나간 자리는 곧 안전해진다.")]
     [SerializeField, Min(0f)] private float stoneImpactDuration = 0.22f;
     [Tooltip("돌이 화면 위 어디에서부터 떨어지는지")]
     [SerializeField, Min(0f)] private float stoneDropHeight = 6f;
-    [Tooltip("이 비율만큼은 플레이어의 현재 위치를 노린다. 나머지는 방 안 무작위. " +
-             "전부 무작위면 구석에서 가만히 서 있는 게 통해 버린다.")]
-    [SerializeField, Range(0f, 1f)] private float stoneAimAtPlayerRatio = 0.4f;
+    [Tooltip("이 비율만큼은 플레이어가 지금 선 자리를 그대로 노린다.")]
+    [SerializeField, Range(0f, 1f)] private float stoneAimAtPlayerRatio = 0.3f;
+    [Tooltip("이 비율만큼은 플레이어 주변에 흩뿌린다. 나머지가 방 전체 무작위다. " +
+             "제자리만 노리면 앞으로 걷는 것만으로 전부 피해지므로, 갈 곳까지 함께 덮는다.")]
+    [SerializeField, Range(0f, 1f)] private float stoneNearPlayerRatio = 0.45f;
+    [Tooltip("주변 낙하가 시작되는 거리. 이 안쪽은 제자리 조준이 맡는다.")]
+    [SerializeField, Min(0f)] private float stoneScatterInner = 0.9f;
+    [Tooltip("주변 낙하가 닿는 가장 먼 거리. 예고 시간 동안 걸어갈 수 있는 거리보다 넓어야 한다.")]
+    [SerializeField, Min(0f)] private float stoneScatterOuter = 3.4f;
 
     [Header("뿔드릴 — 1페이즈")]
     [SerializeField] private HornSettings hornPhase1 = new HornSettings
@@ -217,6 +223,8 @@ public class RhydonBossController : MonoBehaviour
     private bool holdPosition = true;
     /// <summary>돌진 중에는 접촉 피해 대신 더 아픈 돌진 피해를 쓴다.</summary>
     private bool dashing;
+    /// <summary>지금 플레이어와의 충돌을 꺼 둔 상태인지 (돌진 중에만 참).</summary>
+    private bool passingThroughPlayer;
 
     private EnemyController enemyController;
     private EnemyAnimator enemyAnimator;
@@ -232,6 +240,9 @@ public class RhydonBossController : MonoBehaviour
     private Transform attackRoot;
     /// <summary>아직 떨어지는 중인 돌. 페이즈 전환에서 한 번에 지운다.</summary>
     private readonly List<GameObject> fallingStones = new List<GameObject>();
+    // 돌진 중 플레이어를 통과시키려면 이 둘의 충돌만 골라서 꺼야 한다. 벽과의 충돌은 남는다.
+    private readonly List<Collider2D> ownColliders = new List<Collider2D>();
+    private readonly List<Collider2D> playerColliders = new List<Collider2D>();
     /// <summary>페이즈 전환 등으로 공격을 정리한 뒤, 예약된 착탄이 되살아나지 못하게 한다.</summary>
     private int attackGeneration;
 
@@ -254,6 +265,8 @@ public class RhydonBossController : MonoBehaviour
         fallbackArenaCenter = transform.parent != null
             ? (Vector2)transform.parent.position : (Vector2)transform.position;
 
+        CollectSolidColliders(GetComponentsInChildren<Collider2D>(true), ownColliders);
+
         health.OnDamaged += HandleDamaged;
         health.OnDied += HandleDied;
     }
@@ -262,6 +275,9 @@ public class RhydonBossController : MonoBehaviour
     {
         // 기본 추적 AI와 이 컨트롤러가 동시에 Rigidbody를 만지면 안 된다.
         enemyController.SetBasicAIEnabled(false);
+        // 돌진 도중에 꺼졌다면 통과 상태가 남아 있을 수 있다. 다시 켜질 때 초기값으로 되돌려
+        // 다음 돌진이 끝날 때 반드시 원래대로 돌아오게 한다 (꺼진 콜라이더는 직접 만지지 않는다).
+        passingThroughPlayer = false;
     }
 
     private void OnDisable()
@@ -278,6 +294,7 @@ public class RhydonBossController : MonoBehaviour
         {
             player = pc.transform;
             playerHealth = pc.GetComponent<Health>();
+            CollectSolidColliders(pc.GetComponentsInChildren<Collider2D>(true), playerColliders);
         }
 
         // 배율 1인 씬 루트에 둔다. 보스(1.2배) 아래에 두면 돌과 뿔까지 커진다.
@@ -317,6 +334,8 @@ public class RhydonBossController : MonoBehaviour
     {
         EndPhaseInvulnerability();
         StopAllCoroutines();
+        // 돌진 중에 죽으면 DashRoutine의 뒷정리가 돌지 않는다. 여기서 통과를 되돌린다.
+        SetPassThroughPlayer(false);
         holdPosition = true;
         dashing = false;
         body.linearVelocity = Vector2.zero;
@@ -533,11 +552,23 @@ public class RhydonBossController : MonoBehaviour
         yield return new WaitForSeconds(settings.recovery);
     }
 
-    /// <summary>돌 하나가 떨어질 자리. 일부는 플레이어를 직접 노려 제자리 버티기를 막는다.</summary>
+    /// <summary>
+    /// 돌 하나가 떨어질 자리. 세 갈래로 나뉜다.
+    /// * 플레이어가 지금 선 자리 — 제자리 버티기를 막는다.
+    /// * 플레이어 주변 — 도망칠 방향까지 함께 덮는다. 이게 없으면 예고를 보고 앞으로
+    ///   한 걸음 걷는 것만으로 전부 피해져, 패턴이 사실상 없는 것과 같아진다.
+    /// * 방 전체 무작위 — 멀리 떨어져 있어도 안전지대가 생기지 않게 한다.
+    /// </summary>
     private Vector2 NextStoneTarget()
     {
-        if (Random.value < stoneAimAtPlayerRatio && player != null)
-            return ClampToArena(PlayerPosition, stoneRadius);
+        if (player != null)
+        {
+            float roll = Random.value;
+            if (roll < stoneAimAtPlayerRatio)
+                return ClampToArena(PlayerPosition, stoneRadius);
+            if (roll < stoneAimAtPlayerRatio + stoneNearPlayerRatio)
+                return ClampToArena(PlayerPosition + RandomScatterOffset(), stoneRadius);
+        }
 
         // 방 전체에 고르게 흩뿌린다.
         Vector2 center = ArenaCenter;
@@ -545,6 +576,17 @@ public class RhydonBossController : MonoBehaviour
             center.x + Random.Range(-arenaHalfSize.x, arenaHalfSize.x),
             center.y + Random.Range(-arenaHalfSize.y, arenaHalfSize.y));
         return ClampToArena(raw, stoneRadius);
+    }
+
+    /// <summary>
+    /// 플레이어를 둘러싼 고리 안의 한 점. 거리를 제곱근으로 펴야 넓은 바깥쪽이 성기지 않다 —
+    /// 그냥 뽑으면 안쪽에만 몰려, 결국 제자리 조준과 같아진다.
+    /// </summary>
+    private Vector2 RandomScatterOffset()
+    {
+        float angle = Random.value * Mathf.PI * 2f;
+        float distance = Mathf.Lerp(stoneScatterInner, stoneScatterOuter, Mathf.Sqrt(Random.value));
+        return new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * distance;
     }
 
     /// <summary>그림자가 먼저 뜨고, 돌이 하늘에서 떨어져 착탄한다.</summary>
@@ -724,6 +766,9 @@ public class RhydonBossController : MonoBehaviour
     /// <summary>
     /// 조준한 방향으로 방 반대편까지 그대로 밀고 나간다. 연속으로 여러 번 하며,
     /// 돌진마다 다시 조준하므로 한 번 피한 자리에 그대로 서 있으면 다음 돌진에 받힌다.
+    ///
+    /// 돌진 중에는 플레이어를 뚫고 지나간다 (<see cref="SetPassThroughPlayer"/>).
+    /// 이때만이고, 걸어다닐 때는 평소처럼 몸이 부딪힌다.
     /// </summary>
     private IEnumerator TakeDownRoutine()
     {
@@ -775,6 +820,9 @@ public class RhydonBossController : MonoBehaviour
     {
         holdPosition = false;
         dashing = true;
+        // 돌진할 때만 플레이어를 통과한다. 몸으로 막히면 방 반대편까지 밀고 나간다는
+        // 패턴 자체가 성립하지 않고, 앞을 가로막고 서 있는 게 최선의 방어가 돼 버린다.
+        SetPassThroughPlayer(true);
         float deadline = Time.time + settings.dashMaxDuration;
         // 돌진 방향은 시작할 때 고정한다. 매 프레임 목표 쪽으로 다시 겨누면, 프레임이 길어
         // 한 번에 목표를 지나친 순간 뒤로 돌아 제자리에서 앞뒤로 튀게 된다.
@@ -791,9 +839,40 @@ public class RhydonBossController : MonoBehaviour
             yield return null;
         }
 
+        SetPassThroughPlayer(false);
         dashing = false;
         holdPosition = true;
         body.linearVelocity = Vector2.zero;
+    }
+
+    /// <summary>
+    /// 플레이어와의 충돌만 껐다 켠다. 벽·다른 적과의 충돌은 그대로 남으므로
+    /// 돌진이 방 밖으로 새지 않는다.
+    /// </summary>
+    private void SetPassThroughPlayer(bool ignore)
+    {
+        if (passingThroughPlayer == ignore) return;
+        passingThroughPlayer = ignore;
+
+        for (int i = 0; i < ownColliders.Count; i++)
+        {
+            Collider2D mine = ownColliders[i];
+            if (mine == null) continue;
+            for (int j = 0; j < playerColliders.Count; j++)
+            {
+                Collider2D theirs = playerColliders[j];
+                if (theirs == null) continue;
+                Physics2D.IgnoreCollision(mine, theirs, ignore);
+            }
+        }
+    }
+
+    /// <summary>몸을 막는 콜라이더만 모은다. 트리거는 상호작용용이라 건드리면 안 된다.</summary>
+    private static void CollectSolidColliders(Collider2D[] source, List<Collider2D> into)
+    {
+        into.Clear();
+        foreach (Collider2D collider in source)
+            if (collider != null && !collider.isTrigger) into.Add(collider);
     }
 
     /// <summary>돌진 중 플레이어를 들이받았는지. 무적 시간이 연타를 막아 준다.</summary>
@@ -832,6 +911,7 @@ public class RhydonBossController : MonoBehaviour
     {
         holdPosition = true;
         dashing = false;
+        SetPassThroughPlayer(false);
         body.linearVelocity = Vector2.zero;
         BeginPhaseInvulnerability();
         // 전환 연출 중에는 새 공격 판정이 남아 있으면 안 된다.
