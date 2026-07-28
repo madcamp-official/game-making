@@ -18,16 +18,21 @@
 | 버터플 | 0012 | CHUNSOFT (공식 PMD 유래) |
 | 콘팡 | 0048 | CHUNSOFT (공식 PMD 유래) |
 | 닥트리오 | 0051 | CHUNSOFT (공식 PMD 유래) |
+| 강챙이 | 0062 | CHUNSOFT (공식 PMD 유래) |
 | 모다피 | 0069 | CHUNSOFT (공식 PMD 유래) |
+| 쥬래곤 | 0087 | CHUNSOFT (공식 PMD 유래) |
+| 킹크랩 | 0099 | CHUNSOFT (공식 PMD 유래) |
 | 데구리 | 0075 | CHUNSOFT + Roll(Special0)은 Emmuffin 제작 (CC BY-NC 4.0) |
 | 텅구리 | 0105 | CHUNSOFT (공식 PMD 유래) |
 | 시라소몬 | 0106 | CHUNSOFT (공식 PMD 유래) |
 | 홍수몬 | 0107 | CHUNSOFT (공식 PMD 유래) |
 | 코뿌리 | 0112 | CHUNSOFT (공식 PMD 유래) |
+| 아쿠스타 | 0121 | CHUNSOFT (공식 PMD 유래) |
 | 스라크 | 0123 | CHUNSOFT (공식 PMD 유래) |
 | 잉어킹 | 0129 | CHUNSOFT (공식 PMD 유래) |
 | 갸라도스 | 0130 | CHUNSOFT (공식 PMD 유래) |
 | 라프라스 | 0131 | CHUNSOFT (공식 PMD 유래) |
+| 신뇽 | 0148 | CHUNSOFT (공식 PMD 유래) |
 | 잠만보 | 0143 | CHUNSOFT (공식 PMD 유래) |
 
 각 포켓몬의 원본 `credits.txt`는 `Assets/ThirdParty/PMDCollab/<도감번호_이름>/`에 보관되어 있다.

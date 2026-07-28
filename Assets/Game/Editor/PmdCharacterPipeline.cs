@@ -147,6 +147,30 @@ public static class PmdCharacterPipeline
     };
 
     /// <summary>
+    /// 3층 일반 적 다섯. CC 연계가 컨셉이라 공격 동작이 저마다 다른 시트를 쓴다.
+    /// 킹크랩 가위(Strike)만 한 번짜리고, 나머지(흡인·냉기·레이저·해류)는 지속 동작이라 반복이다.
+    /// </summary>
+    public static readonly CharacterSpec[] Floor3Enemies =
+    {
+        new CharacterSpec("Kingler", "0099_Kingler",
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Strike", "Strike", false)),
+        new CharacterSpec("Poliwrath", "0062_Poliwrath",
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Charge", "Charge", true),   // 흡인
+            new AnimSpec("Idle", "Idle", true)),      // 충격파도 이 동작으로 낸다
+        new CharacterSpec("Dewgong", "0087_Dewgong",
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Charge", "Charge", true)),  // 냉기 분사
+        new CharacterSpec("Starmie", "0121_Starmie",
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Idle", "Idle", true)),      // 레이저 중 배속 회전
+        new CharacterSpec("Dragonair", "0148_Dragonair",
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Charge", "Charge", true)),  // 해류 전환
+    };
+
+    /// <summary>
     /// 3층 이벤트의 라프라스. 계곡 왼쪽에서 쉼 없이 Idle을 반복하고, 태워 줄 때는
     /// 같은 Idle인 채 방향(행)만 동쪽으로 바꾼다 — 헤엄 전용 시트가 따로 없다.
     /// </summary>
@@ -189,6 +213,16 @@ public static class PmdCharacterPipeline
     {
         var log = new System.Text.StringBuilder();
         foreach (CharacterSpec spec in Floor3Summons)
+            log.AppendLine(Import(spec));
+        AssetDatabase.SaveAssets();
+        return log.ToString();
+    }
+
+    /// <summary>3층 일반 적만 굽는다. 나누는 이유는 <see cref="ImportFloor3Summons"/>와 같다.</summary>
+    public static string ImportFloor3Enemies()
+    {
+        var log = new System.Text.StringBuilder();
+        foreach (CharacterSpec spec in Floor3Enemies)
             log.AppendLine(Import(spec));
         AssetDatabase.SaveAssets();
         return log.ToString();
