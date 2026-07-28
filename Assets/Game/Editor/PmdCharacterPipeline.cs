@@ -162,6 +162,10 @@ public static class PmdCharacterPipeline
     public static string Import(CharacterSpec spec)
     {
         string charRoot = "Assets/Game/Art/Characters/" + spec.name;
+        // 빈 폴더는 리프레시에서 사라질 수 있다. 클립을 만들기 전에 반드시 보장한다.
+        if (!AssetDatabase.IsValidFolder(charRoot + "/Animations"))
+            AssetDatabase.CreateFolder(charRoot, "Animations");
+
         string animDataPath = "Assets/ThirdParty/PMDCollab/" + spec.thirdParty + "/Source/AnimData.xml";
         var animData = LoadAnimData(animDataPath);
 

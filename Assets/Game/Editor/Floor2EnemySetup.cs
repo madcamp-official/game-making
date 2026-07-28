@@ -267,6 +267,15 @@ public static class Floor2EnemySetup
                 ("Hitmonchan", "Punch_0", 1.5f),
             };
 
+            // ⚠ 두 NPC의 부모 "Masters"가 (3, 2)로 비균일하게 늘어나 있었다 — 스프라이트가
+            // 눌려 보인 진짜 원인. 자식 스케일을 아무리 1로 둬도 소용없으니 부모부터 편다.
+            Transform holder = FindChildByName(room.transform, "Masters");
+            if (holder != null)
+            {
+                holder.localPosition = Vector3.zero;
+                holder.localScale = Vector3.one;
+            }
+
             var poses = new Dictionary<string, EventNpcPose>();
             foreach ((string name, string state, float x) in npcs)
             {
@@ -274,8 +283,15 @@ public static class Floor2EnemySetup
                 if (npc == null) return name + "을(를) 방에서 찾지 못했다";
 
                 npc.localPosition = new Vector3(x, 0f, 0f);
-                // 시라소몬·홍수몬은 시트 자체가 커서(발차기 80×88) 1.2배면 플레이어의 두 배로 보인다.
+                // 실측 기준: 두 스승의 몸이 25px, 플레이어(21px × 1.2배) = 25.2px — 1배가 곧
+                // 플레이어와 같은 한 타일 크기다.
                 npc.localScale = Vector3.one;
+
+                // NPC는 몸으로 막는다. Rigidbody 없는 정적 콜라이더라 밀리지도 않는다.
+                BoxCollider2D box = npc.GetComponent<BoxCollider2D>();
+                if (box == null) box = npc.gameObject.AddComponent<BoxCollider2D>();
+                box.size = new Vector2(0.6f, 0.5f);
+                box.offset = new Vector2(0f, -0.15f);   // 발치만 막아 머리 위로는 지나가 보인다
 
                 string artRoot = "Assets/Game/Art/Characters/" + name;
                 Animator animator = npc.GetComponent<Animator>();
@@ -301,13 +317,51 @@ public static class Floor2EnemySetup
             so.FindProperty("hitmonchanNpc").objectReferenceValue = poses["Hitmonchan"];
             so.ApplyModifiedPropertiesWithoutUndo();
 
+            int drained = DrainPond(room);
+
             PrefabUtility.SaveAsPrefabAsset(room, path);
-            return "이벤트 방 NPC 재배선 완료 (±1.5, 크기 1.0, Kick_0/Punch_0)";
+            return "이벤트 방 NPC 재배선 완료 (±1.5, 크기 1.0, Kick_0/Punch_0), 호수 타일 " + drained + "칸 제거";
         }
         finally
         {
             PrefabUtility.UnloadPrefabContents(room);
         }
+    }
+
+    /// <summary>
+    /// 방의 호수를 모래로 메운다. 물 타일(D_24~26_*)을 전부 바닥 타일(D_13_1)로 갈고
+    /// 물에 빠지지 않게 막던 PondCollider도 지운다.
+    /// </summary>
+    private static int DrainPond(GameObject room)
+    {
+        int replaced = 0;
+        foreach (var map in room.GetComponentsInChildren<UnityEngine.Tilemaps.Tilemap>())
+        {
+            // 바닥 타일 에셋을 맵에서 직접 찾는다 (이름으로 에셋을 뒤지는 것보다 확실하다).
+            UnityEngine.Tilemaps.TileBase sand = null;
+            foreach (var pos in map.cellBounds.allPositionsWithin)
+            {
+                var tile = map.GetTile(pos);
+                if (tile != null && tile.name == "D_13_1") { sand = tile; break; }
+            }
+            if (sand == null) continue;
+
+            foreach (var pos in map.cellBounds.allPositionsWithin)
+            {
+                var tile = map.GetTile(pos);
+                if (tile == null) continue;
+                if (tile.name.StartsWith("D_24_") || tile.name.StartsWith("D_25_") ||
+                    tile.name.StartsWith("D_26_"))
+                {
+                    map.SetTile(pos, sand);
+                    replaced++;
+                }
+            }
+        }
+
+        Transform pond = FindChildByName(room.transform, "PondCollider");
+        if (pond != null) UnityEngine.Object.DestroyImmediate(pond.gameObject);
+        return replaced;
     }
 
     private static Transform FindChildByName(Transform root, string name)
