@@ -46,8 +46,14 @@ public class PlayerRelicEffects : MonoBehaviour
         // 최대 체력 배율을 회복보다 먼저 반영해야 기력의 덩어리가 올바른 최대치를 기준으로 회복한다.
         health.MaxHealthMultiplier = relics.MaxHealthMultiplier;
         health.HealMultiplier = relics.HealMultiplier;
-        controller.RelicSpeedMultiplier = relics.MoveSpeedMultiplier;
+        controller.RelicSpeedMultiplier = relics.MoveSpeedMultiplier * EventBuffs.MoveSpeed;
     }
+
+    /// <summary>
+    /// 이동 속도만 다시 반영한다. 이벤트 강화는 유물 목록을 건드리지 않아
+    /// <see cref="Apply"/>를 부르는 신호가 오지 않으므로, 그쪽에서 직접 호출한다.
+    /// </summary>
+    public void RefreshSpeed() => Apply();
 
     /// <summary>
     /// 플레이어가 적에게 준 피해를 알린다 (조개껍질방울). 근접 공격과 투사체 양쪽에서 호출한다.

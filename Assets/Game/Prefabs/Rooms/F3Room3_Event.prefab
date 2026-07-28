@@ -238,7 +238,7 @@ GameObject:
   - component: {fileID: 4609110254737697362}
   - component: {fileID: 6791236721678790132}
   - component: {fileID: 1474246108576102752}
-  - component: {fileID: 8771704537385563907}
+  - component: {fileID: 1882540782553503659}
   m_Layer: 0
   m_Name: TreasureChest
   m_TagString: Untagged
@@ -258,7 +258,8 @@ Transform:
   m_LocalPosition: {x: 2, y: 0, z: 0}
   m_LocalScale: {x: 1.2, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 6757791340729950134}
   m_Father: {fileID: 8664031974118653474}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &6791236721678790132
@@ -365,9 +366,9 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 1.5, y: 1.5}
+  m_Size: {x: 3.4, y: 2}
   m_EdgeRadius: 0
---- !u!114 &8771704537385563907
+--- !u!114 &1882540782553503659
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -376,18 +377,16 @@ MonoBehaviour:
   m_GameObject: {fileID: 2175549854005171129}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7f24b735d0e844c98b11e8c6bd5fef78, type: 3}
+  m_Script: {fileID: 11500000, guid: 8c16aeaa7099c48848a93e10c8ba010a, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EventInteractable
-  prompt: "E : \uAC00\uB77C\uC549\uC740 \uBCF4\uBB3C\uC0C1\uC790 \uC5F4\uAE30"
-  resultMessage: "\uBCF4\uBB3C\uC0C1\uC790\uC5D0\uC11C \uACE8\uB4DC\uC640 \uC790\uBB49\uC5F4\uB9E4\uAC00
-    \uB098\uC654\uB2E4! (+15G)"
-  goldReward: 15
-  healAmount: 0
-  givesRelic: 1
-  rewardRelic: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::MagikarpEvent
+  prompt: "E : \uD3ED\uD3EC\uB97C \uC0B4\uD3B4\uBCF8\uB2E4"
   exitDoor: {fileID: 8322763104860190034}
-  disappearAfterUse: 1
+  portrait: {fileID: 0}
+  magikarpScale: {fileID: 11400000, guid: bd6b6caa1427148d88110e54ddd3e9bd, type: 2}
+  chestGold: 80
+  cheerSuccessChance: 50
+  cheerRelicCount: 2
 --- !u!1 &3236779435123139719
 GameObject:
   m_ObjectHideFlags: 0
@@ -2279,6 +2278,98 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 2.5, y: 2.5}
   m_EdgeRadius: 0
+--- !u!1 &5685871936793842107
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6757791340729950134}
+  - component: {fileID: 485513462276866766}
+  m_Layer: 0
+  m_Name: Magikarp
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6757791340729950134
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5685871936793842107}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -1.4, y: 0.2, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 4609110254737697362}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!212 &485513462276866766
+SpriteRenderer:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5685871936793842107}
+  m_Enabled: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 0
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 0
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 10
+  m_MaskInteraction: 0
+  m_Sprite: {fileID: 4723107735738678597, guid: 15215290b505b4cf4b906e24fdd50bb6, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_FlipX: 0
+  m_FlipY: 0
+  m_DrawMode: 0
+  m_Size: {x: 0.75, y: 0.75}
+  m_AdaptiveModeThreshold: 0.5
+  m_SpriteTileMode: 0
+  m_WasSpriteAssigned: 1
+  m_SpriteSortPoint: 0
+  m_BlendShapeWeights: []
 --- !u!1 &6161338847589379926
 GameObject:
   m_ObjectHideFlags: 0

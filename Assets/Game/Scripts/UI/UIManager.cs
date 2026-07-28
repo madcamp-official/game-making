@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
     private RelicTooltip relicTooltip;
     private RelicPopup relicPopup;
     private MoveUpgradePanel upgradePanel;
+    private EventDialogue eventDialogue;
 
     private void Awake()
     {
@@ -87,15 +88,23 @@ public class UIManager : MonoBehaviour
         tooltipGo.transform.SetAsLastSibling();
         relicTooltip = tooltipGo.AddComponent<RelicTooltip>();
 
-        // 강화 팔레트는 모든 HUD 위에 뜬다.
+        // 강화 팔레트와 이벤트 대사창은 모든 HUD 위에 뜬다.
         GameObject upgradeGo = MakeFullScreenChild(canvasRoot, "MoveUpgradePanel");
         upgradeGo.transform.SetAsLastSibling();
         upgradePanel = upgradeGo.AddComponent<MoveUpgradePanel>();
+
+        GameObject eventGo = MakeFullScreenChild(canvasRoot, "EventDialogue");
+        eventGo.transform.SetAsLastSibling();
+        eventDialogue = eventGo.AddComponent<EventDialogue>();
     }
 
     /// <summary>레벨이 올랐을 때 기술 강화 팔레트를 띄운다.</summary>
     public bool ShowMoveUpgrades(PlayerMoves moves) =>
         upgradePanel != null && upgradePanel.Open(moves);
+
+    /// <summary>이벤트 대사창과 선택지를 띄운다. 다 끝나면 <paramref name="onClosed"/>가 불린다.</summary>
+    public bool ShowEvent(EventPrompt prompt, System.Action onClosed) =>
+        eventDialogue != null && eventDialogue.Open(prompt, onClosed);
 
     /// <summary>화면 전체를 덮는 빈 컨테이너. 안쪽 패널이 화면 기준으로 배치될 수 있게 한다.</summary>
     private static GameObject MakeFullScreenChild(Transform parent, string name)

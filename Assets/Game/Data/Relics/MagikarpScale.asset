@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b91b3799f87bf4d2eb41794c54a827dd, type: 3}
+  m_Name: MagikarpScale
+  m_EditorClassIdentifier: Assembly-CSharp::RelicData
+  relicName: "\uC789\uC5B4\uD0B9\uC758 \uBE44\uB298"
+  description: "\uCD5C\uB300 \uCCB4\uB825\uC774 20% \uC99D\uAC00\uD55C\uB2E4"
+  icon: {fileID: 21300000, guid: dcf5b74e5257f4550864905b7742df66, type: 3}
+  effect: 12

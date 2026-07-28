@@ -31,7 +31,8 @@ public class PlayerInteractor : MonoBehaviour
 
     private void Update()
     {
-        if (health != null && health.IsDead)
+        // 이벤트 대사창이 떠 있는 동안에는 E가 대사창 넘기기로 쓰이므로 여기서 또 받으면 안 된다.
+        if ((health != null && health.IsDead) || EventDialogue.IsOpen)
         {
             if (UIManager.Instance != null) UIManager.Instance.SetHint("");
             return;

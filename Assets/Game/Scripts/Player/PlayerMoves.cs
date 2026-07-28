@@ -76,7 +76,11 @@ public class PlayerMoves : MonoBehaviour
             learned.Add(move);
             OnMovesChanged?.Invoke();
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage("새로운 기술 " + MoveInfo.NameOf(move) + "을(를) 배웠다!", 2.5f);
+            {
+                string name = MoveInfo.NameOf(move);
+                UIManager.Instance.ShowMessage(
+                    "새로운 기술 " + name + KoreanText.ObjectParticle(name) + " 배웠다!", 2.5f);
+            }
             return;
         }
     }

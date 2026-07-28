@@ -18,6 +18,7 @@ public enum RelicEffect
     ShellBell = 9,    // 조개껍질방울: 누적 40 피해마다 체력 3 회복
     LifeOrb = 10,     // 생명의구슬: 최대 체력 -30%, 공격력 +30%
     SitrusBerry = 11, // 자뭉열매: 획득 즉시 최대 체력의 33% 회복
+    MagikarpScale = 12, // 잉어킹의 비늘: 최대 체력 +20% (3층 이벤트 전용, 유물 더미에 넣지 않는다)
 }
 
 /// <summary>

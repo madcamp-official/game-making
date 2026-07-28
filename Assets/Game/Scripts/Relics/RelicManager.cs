@@ -33,6 +33,7 @@ public class RelicManager : MonoBehaviour
     [SerializeField, Min(0)] private int leftoversHealPerRoom = 8;
     [SerializeField, Min(1)] private int shellBellDamagePerHeal = 40;
     [SerializeField, Min(0)] private int shellBellHealAmount = 3;
+    [SerializeField, Min(0f)] private float magikarpScaleMaxHealthBonus = 0.2f;
 
     private readonly List<RelicData> relics = new List<RelicData>();
     private readonly List<RelicData> upcoming = new List<RelicData>();
@@ -115,18 +116,48 @@ public class RelicManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 등장 순서에서 구애 시리즈를 건너뛰고 다음 유물을 꺼낸다.
+    /// 이벤트 보상처럼 "무엇이 나올지 모르는" 자리에서 판을 통째로 결정짓는 유물이 나오면
+    /// 선택이 도박이 되어 버리므로, 그런 자리에서는 이쪽을 쓴다.
+    /// </summary>
+    public RelicData DrawNextNonChoice()
+    {
+        int index = upcoming.FindIndex(r => !r.IsChoiceItem);
+        if (index < 0) return null;
+        RelicData next = upcoming[index];
+        upcoming.RemoveAt(index);
+        return next;
+    }
+
+    /// <summary>
     /// 보상으로 유물 하나를 지급한다. <paramref name="fixedRelic"/>이 지정돼 있고 아직 없는
     /// 유물이면 그것을, 아니면 등장 순서에서 다음 유물을 준다. 줄 유물이 없으면 아무 일도 없다.
     /// </summary>
-    public static void GrantReward(RelicData fixedRelic)
+    public static void GrantReward(RelicData fixedRelic) => GrantRewardAndReturn(fixedRelic);
+
+    /// <summary><see cref="GrantReward"/>와 같되 실제로 준 유물을 돌려준다. 없으면 null.</summary>
+    public static RelicData GrantRewardAndReturn(RelicData fixedRelic)
     {
         RelicManager manager = Instance;
-        if (manager == null) return;
+        if (manager == null) return null;
 
         RelicData relic = fixedRelic != null && !manager.Has(fixedRelic)
             ? fixedRelic
             : manager.DrawNext();
-        if (relic != null) manager.AddRelic(relic);
+        if (relic == null) return null;
+        manager.AddRelic(relic);
+        return relic;
+    }
+
+    /// <summary>구애 시리즈를 뺀 유물 하나를 준다. 실제로 준 유물을 돌려준다(없으면 null).</summary>
+    public static RelicData GrantNonChoiceReward()
+    {
+        RelicManager manager = Instance;
+        if (manager == null) return null;
+        RelicData relic = manager.DrawNextNonChoice();
+        if (relic == null) return null;
+        manager.AddRelic(relic);
+        return relic;
     }
 
     /// <summary>
@@ -212,6 +243,9 @@ public class RelicManager : MonoBehaviour
                     MeleeDamageMultiplier *= 1f + lifeOrbDamageBonus;
                     RangedDamageMultiplier *= 1f + lifeOrbDamageBonus;
                     MaxHealthMultiplier *= 1f - lifeOrbMaxHealthPenalty;
+                    break;
+                case RelicEffect.MagikarpScale:
+                    MaxHealthMultiplier *= 1f + magikarpScaleMaxHealthBonus;
                     break;
             }
         }

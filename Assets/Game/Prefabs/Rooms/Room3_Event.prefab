@@ -153,10 +153,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00470cbf9575d456092a7b12635d1633, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SnorlaxEvent
+  prompt: "E : \uC7A0\uB9CC\uBCF4\uB97C \uC0B4\uD3B4\uBCF8\uB2E4"
   exitDoor: {fileID: 7400304123308564998}
-  goldReward: 10
-  givesRelic: 1
-  rewardRelic: {fileID: 0}
+  portrait: {fileID: 21300000, guid: 1f4a6338cb4fb49cf960ba547db55a85, type: 3}
+  attackSelfDamage: 15
+  attackGoldReward: 50
+  leaveAfterEvent: 1
 --- !u!95 &8617542859854920208
 Animator:
   serializedVersion: 7

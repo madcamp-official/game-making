@@ -66,7 +66,23 @@ public class Health : MonoBehaviour
 
     public void TakeDamage(int amount)
     {
-        if (IsDead || IsInvincible || amount <= 0) return;
+        if (IsInvincible) return;
+        Deduct(amount, grantInvincibility: true);
+    }
+
+    /// <summary>
+    /// 무적 시간을 쓰지도, 새로 만들지도 않고 체력을 깎는다. 이벤트에서 치르는 대가처럼
+    /// "맞은 것"이 아닌 감소에 쓴다.
+    ///
+    /// 평범한 <see cref="TakeDamage"/>를 쓰면 안 되는 이유: 무적 시간은 스케일 시간으로 흐르는데
+    /// 이벤트 대사창은 <see cref="Time.timeScale"/>을 0으로 세운다. 그래서 창이 떠 있는 동안에는
+    /// 무적이 절대 풀리지 않아, 잠만보를 몇 번을 흔들어도 체력이 처음 한 번만 깎였다.
+    /// </summary>
+    public void TakeToll(int amount) => Deduct(amount, grantInvincibility: false);
+
+    private void Deduct(int amount, bool grantInvincibility)
+    {
+        if (IsDead || amount <= 0) return;
 
         CurrentHealth = Mathf.Max(0, CurrentHealth - amount);
         OnHealthChanged?.Invoke(CurrentHealth, MaxHealth);
@@ -81,7 +97,7 @@ public class Health : MonoBehaviour
             invulnerabilityLocks = 0;
             OnDied?.Invoke();
         }
-        else
+        else if (grantInvincibility)
         {
             if (flashRoutine != null) StopCoroutine(flashRoutine);
             flashRoutine = StartCoroutine(InvincibleFlash());

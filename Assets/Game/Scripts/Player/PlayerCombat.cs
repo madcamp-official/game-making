@@ -122,11 +122,13 @@ public class PlayerCombat : MonoBehaviour
     private static int ScaleDamage(int baseDamage, float multiplier) =>
         baseDamage <= 0 ? 0 : Mathf.Max(1, GameMath.RoundHalfUp(baseDamage * multiplier));
 
+    // 유물 배율과 이벤트 강화(2층 시라소몬·홍수몬)를 함께 곱한다.
     private static float RelicMultiplier(bool melee)
     {
+        float multiplier = melee ? EventBuffs.Melee : EventBuffs.Ranged;
         RelicManager relics = RelicManager.Instance;
-        if (relics == null) return 1f;
-        return melee ? relics.MeleeDamageMultiplier : relics.RangedDamageMultiplier;
+        if (relics == null) return multiplier;
+        return multiplier * (melee ? relics.MeleeDamageMultiplier : relics.RangedDamageMultiplier);
     }
 
     private void Update()
@@ -137,8 +139,8 @@ public class PlayerCombat : MonoBehaviour
         if (!controller.ControlEnabled || (health != null && health.IsDead)) return;
         // 경직 중에는 공격도 못 한다. 후딜이 없는 것과 같아지면 경직을 넣은 의미가 없다.
         if (controller.IsStunned) return;
-        // 강화 팔레트가 떠 있는 동안에는 클릭이 공격으로 새면 안 된다.
-        if (MoveUpgradePanel.IsOpen) return;
+        // 강화 팔레트나 이벤트 대사창이 떠 있는 동안에는 클릭이 공격으로 새면 안 된다.
+        if (MoveUpgradePanel.IsOpen || EventDialogue.IsOpen) return;
 
         Mouse mouse = Mouse.current;
         if (mouse == null) return;
