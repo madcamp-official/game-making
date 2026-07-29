@@ -2,7 +2,11 @@ using UnityEngine;
 
 /// <summary>
 /// Health 컴포넌트가 있는 오브젝트 머리 위에 표시되는 월드 스페이스 체력바.
-/// 배경(검정)과 채움(초록→빨강) 스프라이트를 런타임에 생성한다.
+/// 배경(검정)과 채움 스프라이트를 런타임에 생성한다.
+///
+/// <b>색은 누구 것인지만 말한다 — 적은 빨강, 나는 초록.</b> 예전에는 남은 비율로
+/// 초록에서 빨강으로 물들였는데, 그러면 위급할 때 내 바와 적 바가 같은 색이 되어
+/// 화면의 빨간 바가 누구 것인지 알 수 없었다. 남은 양은 길이가 말한다.
 ///
 /// 수치는 기본적으로 그리지 않는다. 적이 여럿 붙으면 머리 위 숫자가 서로 겹쳐
 /// 화면이 어지럽고, 플레이어 체력은 좌하단 <see cref="PlayerHealthHud"/>에 크게 나온다.
@@ -15,6 +19,11 @@ public class HealthBar : MonoBehaviour
     [SerializeField] private float height = 0.12f;
     [Tooltip("바 옆에 \"현재/최대\"를 함께 그린다. 디버그용이며 평소에는 꺼 둔다.")]
     [SerializeField] private bool showValue;
+
+    /// <summary>내 바. 좌하단 <see cref="PlayerHealthHud"/>와 같은 초록이다.</summary>
+    private static readonly Color PlayerFill = new Color(0.3f, 0.85f, 0.3f, 1f);
+    /// <summary>적 바.</summary>
+    private static readonly Color EnemyFill = new Color(0.85f, 0.15f, 0.15f, 1f);
 
     private static Sprite whiteSprite;
 
@@ -49,7 +58,10 @@ public class HealthBar : MonoBehaviour
         fillPivot.localPosition = new Vector3(-width * 0.5f, 0f, 0f);
         fill = fillPivot;
 
-        fillRenderer = CreatePart("Fill", fillPivot, Color.green, 41);
+        // 프리팹마다 색을 따로 넣게 하면 적을 하나 추가할 때마다 빠뜨릴 자리가 생긴다.
+        // 누구 몸에 붙었는지 보고 정한다.
+        Color fillColor = GetComponent<PlayerController>() != null ? PlayerFill : EnemyFill;
+        fillRenderer = CreatePart("Fill", fillPivot, fillColor, 41);
         fillRenderer.transform.localPosition = new Vector3(width * 0.5f, 0f, 0f);
         fillRenderer.transform.localScale = new Vector3(width, height * 0.7f, 1f);
 
@@ -97,9 +109,9 @@ public class HealthBar : MonoBehaviour
 
     private void UpdateBar(int current, int max)
     {
+        // 색은 건드리지 않는다. 길이만 줄어든다.
         float ratio = max > 0 ? (float)current / max : 0f;
         fill.localScale = new Vector3(ratio, 1f, 1f);
-        fillRenderer.color = Color.Lerp(Color.red, Color.green, ratio);
         if (valueText != null) valueText.text = current + "/" + max;
     }
 

@@ -55,8 +55,12 @@ public static class MoveInfo
     /// 기술의 사거리 속성. 유물·이벤트 배율이 여기서 갈린다 (<see cref="AttackKinds"/>).
     ///
     /// 덩굴채찍은 2칸 밖에서 닿으므로 원거리다 — 구애 시리즈에서 잎날가르기가 있던 자리를
-    /// 그대로 이어받는다. 꽃잎댄스는 발밑 장판이라 몸으로 붙어야 하니 근접이고,
+    /// 그대로 이어받는다. 꽃잎댄스도 원거리다: 발밑에 까는 장판이지만 깔아 두고 물러나 있어도
+    /// 계속 때리므로, 몸을 붙여야 성립하는 몸통박치기와 같은 부류로 묶을 수 없다.
     /// 씨뿌리기는 피해가 없어 속성이 없다.
+    ///
+    /// 덩굴채찍이 견제기가 되어 피해가 낮아진 뒤로, <b>원거리 피해 배율(리보플라빈·구애안경)의
+    /// 실질 대상은 꽃잎댄스</b>다. 셋 중 하나를 옮길 때는 이 균형부터 본다.
     /// </summary>
     public static AttackKind KindOf(MoveType move)
     {
@@ -65,7 +69,7 @@ public static class MoveInfo
             case MoveType.Tackle: return AttackKind.Melee;
             case MoveType.VineWhip: return AttackKind.Ranged;
             case MoveType.SeedSow: return AttackKind.None;
-            case MoveType.PetalDance: return AttackKind.Melee;
+            case MoveType.PetalDance: return AttackKind.Ranged;
         }
         return AttackKind.None;
     }

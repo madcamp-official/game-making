@@ -55,7 +55,9 @@ public class EnemyStarLaserAbility : EnemyAbility
         AttackTelegraph marker = AttackTelegraph.CreateRing(
             EffectRoot, destination, 0.7f, warningColor);
         marker.Pulse(teleportTelegraph);
-        yield return new WaitForSeconds(teleportTelegraph);
+        // 예고하는 동안 제자리에 붙들어 둔다. 시전 직전까지 걷던 관성이나 다른 적에게
+        // 밀린 힘이 남아 있으면, 예고 원은 여기 그렸는데 몸은 저기 가 있게 된다.
+        yield return HoldStill(teleportTelegraph);
         if (Health.IsDead) yield break;
 
         Body.position = destination;
@@ -70,13 +72,16 @@ public class EnemyStarLaserAbility : EnemyAbility
             : new[] { Vector2.right, Vector2.up, Vector2.left, Vector2.down };
 
         // 3. 네 갈래 예고. 순간이동 직후라도 이 시간은 통째로 보장한다.
+        //    원점은 여기서 한 번 정해 예고·빔·판정이 전부 같은 값을 쓴다. 매번 Body.position을
+        //    다시 읽으면, 예고하는 동안 몸이 한 뼘이라도 밀렸을 때 빔이 예고선을 벗어난다.
+        Vector2 origin = destination;
         foreach (Vector2 direction in directions)
         {
             AttackTelegraph line = AttackTelegraph.CreateLine(
-                EffectRoot, Body.position, direction, laserLength, laserWidth, warningColor);
+                EffectRoot, origin, direction, laserLength, laserWidth, warningColor);
             line.Pulse(laserTelegraph);
         }
-        yield return new WaitForSeconds(laserTelegraph);
+        yield return HoldStill(laserTelegraph);
         if (Health.IsDead) yield break;
 
         // 4. 동시 발사. Idle을 배속해 빙글 도는 것으로 발사를 표현한다.
@@ -87,13 +92,16 @@ public class EnemyStarLaserAbility : EnemyAbility
 
         var beams = new List<SpriteRenderer>(4);
         foreach (Vector2 direction in directions)
-            beams.Add(CreateBeam(direction));
+            beams.Add(CreateBeam(origin, direction));
 
         float damageEnd = Time.time + laserDuration;
         while (Time.time < damageEnd && !Health.IsDead)
         {
+            // 쏘는 동안에도 원점에 못 박는다. 빔은 이미 그려져 움직이지 않으므로,
+            // 몸만 밀려나면 그림과 판정이 어긋난다.
             Body.linearVelocity = Vector2.zero;
-            TryDamage(directions);
+            Body.position = origin;
+            TryDamage(origin, directions);
             yield return null;
         }
 
@@ -133,11 +141,24 @@ public class EnemyStarLaserAbility : EnemyAbility
         return center + Vector2.Scale(away, arenaHalf - Vector2.one * edgeInset);
     }
 
-    private SpriteRenderer CreateBeam(Vector2 direction)
+    /// <summary>예고하는 동안 몸을 제자리에 못 박는다. 예고 위치와 실제 위치를 같게 유지한다.</summary>
+    private IEnumerator HoldStill(float seconds)
+    {
+        Vector2 anchor = Body.position;
+        float end = Time.time + seconds;
+        while (Time.time < end && !Health.IsDead)
+        {
+            Body.linearVelocity = Vector2.zero;
+            Body.position = anchor;
+            yield return null;
+        }
+    }
+
+    private SpriteRenderer CreateBeam(Vector2 origin, Vector2 direction)
     {
         GameObject go = new GameObject("StarLaser");
         go.transform.SetParent(EffectRoot, false);
-        go.transform.position = Body.position + direction * (laserLength * 0.5f);
+        go.transform.position = origin + direction * (laserLength * 0.5f);
         go.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);
         go.transform.localScale = new Vector3(laserLength, laserWidth, 1f);
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
@@ -147,10 +168,9 @@ public class EnemyStarLaserAbility : EnemyAbility
         return sr;
     }
 
-    private void TryDamage(Vector2[] directions)
+    private void TryDamage(Vector2 origin, Vector2[] directions)
     {
         if (PlayerHealth == null || PlayerHealth.IsDead || PlayerHealth.IsInvincible) return;
-        Vector2 origin = Body.position;
         Vector2 offset = PlayerPosition - origin;
         float halfWidth = laserWidth * 0.5f;
 

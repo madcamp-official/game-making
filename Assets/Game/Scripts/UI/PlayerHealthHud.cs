@@ -20,8 +20,12 @@ public class PlayerHealthHud : MonoBehaviour
     private const int Border = 2;
     private const int FontSize = 24;   // PMD 폰트라 12의 배수여야 한다
 
-    private static readonly Color LowColor = new Color(0.85f, 0.15f, 0.15f, 1f);
-    private static readonly Color HighColor = new Color(0.3f, 0.85f, 0.3f, 1f);
+    /// <summary>
+    /// 내 체력은 남은 양과 상관없이 늘 초록이다. 예전에는 줄어들수록 빨강으로 물들었는데,
+    /// 적 체력바도 같은 그라데이션이라 위급할 때 화면의 빨간 바가 내 것인지 적 것인지
+    /// 구분이 되지 않았다. 색은 <b>누구 것인지</b>만 말하고, 남은 양은 길이가 말한다.
+    /// </summary>
+    private static readonly Color FillColor = new Color(0.3f, 0.85f, 0.3f, 1f);
 
     private Health health;
     private Image fill;
@@ -100,7 +104,7 @@ public class PlayerHealthHud : MonoBehaviour
         if (fill != null)
         {
             fill.fillAmount = ratio;
-            fill.color = Color.Lerp(LowColor, HighColor, ratio);
+            fill.color = FillColor;
         }
         if (valueText != null) valueText.text = current + " / " + max;
     }

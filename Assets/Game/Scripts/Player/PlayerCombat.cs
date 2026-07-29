@@ -24,15 +24,21 @@ public class PlayerCombat : MonoBehaviour
     [Header("기본 공격 1 — 근거리")]
     [SerializeField, Min(0)] private int meleeDamage = 12;
     [SerializeField, Min(0f)] private float meleeRange = 0.9f;
-    [SerializeField, Min(0f)] private float meleeRadius = 0.6f;
+    [Tooltip("휘두르는 원의 반지름. 0.6에서 넓이가 두 배가 되도록 √2를 곱했다 — " +
+             "몰려드는 잡몹을 한 번에 쓸어야 근접이 근접다워진다.")]
+    [SerializeField, Min(0f)] private float meleeRadius = 0.85f;
     [SerializeField, Min(0f)] private float meleeCooldown = 0.5f;
     [SerializeField, Min(0f)] private float meleeKnockbackForce = 6f;
     [SerializeField] private GameObject attackEffectPrefab;
 
-    [Header("기본 공격 2 — 덩굴채찍")]
+    [Header("기본 공격 2 — 덩굴채찍 (원거리 견제)")]
     // 피해량은 진화 단계가 덮어쓴다(PlayerEvolution.stages). 여기 값은 1단계와 같게 맞춰 둔다.
+    //
+    // 덩굴채찍은 딜을 담당하지 않는다. 값어치는 사거리·넉백·경직에 있고, 피해는 몸통박치기의
+    // 4할쯤에 묶어 둔다. 예전에는 한 대가 몸통박치기와 맞먹어(14 대 12) 붙지 않고 채찍만
+    // 휘두르는 편이 이득인 구간이 있었다 — 근접 포켓몬이 근접할 이유가 없어졌다.
     [FormerlySerializedAs("razorDamage")]
-    [SerializeField, Min(0)] private int vineDamage = 14;
+    [SerializeField, Min(0)] private int vineDamage = 5;
     [FormerlySerializedAs("razorCooldown")]
     [SerializeField, Min(0f)] private float vineCooldown = 2.2f;
     [Tooltip("채찍이 닿는 거리. 타일 한 칸이 1이다.")]
@@ -54,10 +60,11 @@ public class PlayerCombat : MonoBehaviour
     // 1층 숲 바닥이 초록이라 흔한 초록으로는 묻힌다. 밝은 연둣빛으로 띄운다.
     [SerializeField] private Color seedColor = new Color(0.6f, 1f, 0.45f, 0.4f);
 
-    [Header("기술 4 — 꽃잎댄스")]
+    [Header("기술 4 — 꽃잎댄스 (원거리)")]
     [SerializeField, Min(0f)] private float petalRadius = 1.8f;
     [SerializeField, Min(0f)] private float petalDuration = 2.5f;
-    [Tooltip("한 틱의 피해량이 몸통박치기 기본 피해의 몇 배인지.")]
+    [Tooltip("한 틱의 피해량이 몸통박치기 기본 피해의 몇 배인지. 꽃잎댄스는 원거리 기술이지만 " +
+             "기준값은 몸통박치기를 쓴다 — 덩굴채찍은 견제기라 피해가 낮아 기준으로 삼을 수 없다.")]
     [SerializeField, Min(0f)] private float petalDamageRatio = 1f;
     [SerializeField, Min(0.05f)] private float petalTickInterval = 0.5f;
     [SerializeField, Min(0f)] private float petalCooldown = 12f;
