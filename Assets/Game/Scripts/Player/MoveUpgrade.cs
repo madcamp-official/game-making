@@ -51,7 +51,7 @@ public static class MoveUpgrades
     public const float SeedRadiusStep = 1.3f;  // 크기 +30%
     public const float PetalRadiusStep = 1.2f; // 크기 +20%
     public const float PetalDamageStep = 1.2f; // 피해 +20%
-    public const float PetalDurationStep = 1f; // 3초 → 4초
+    public const float PetalDurationStep = 1f; // 2.5초 → 3.5초
 
     public static readonly MoveUpgradeOption[] All =
     {

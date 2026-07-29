@@ -9,8 +9,8 @@ using UnityEngine.Serialization;
 ///
 /// * 좌클릭 — 몸통박치기 (근접)
 /// * 우클릭 — 덩굴채찍 (원거리, 2칸 사거리, 휘두른 뒤 짧은 경직)
-/// * Space — 씨뿌리기 (발밑에 회복 장판, 전투방마다 한 번)
-/// * 좌측 Shift — 꽃잎댄스 (몸을 따라다니는 피해 장판, 근접)
+/// * 좌측 Shift — 씨뿌리기 (발밑에 회복 장판, 전투방마다 한 번)
+/// * Space — 꽃잎댄스 (몸을 따라다니는 피해 장판, 근접)
 ///
 /// 피해를 주는 기술에는 사거리 속성이 붙어 있다 (<see cref="MoveInfo.KindOf"/>).
 /// 유물과 이벤트 강화는 그 속성만 보고 배율을 매긴다.
@@ -30,17 +30,18 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private GameObject attackEffectPrefab;
 
     [Header("기본 공격 2 — 덩굴채찍")]
+    // 피해량은 진화 단계가 덮어쓴다(PlayerEvolution.stages). 여기 값은 1단계와 같게 맞춰 둔다.
     [FormerlySerializedAs("razorDamage")]
-    [SerializeField, Min(0)] private int vineDamage = 8;
+    [SerializeField, Min(0)] private int vineDamage = 14;
     [FormerlySerializedAs("razorCooldown")]
-    [SerializeField, Min(0f)] private float vineCooldown = 5f;
+    [SerializeField, Min(0f)] private float vineCooldown = 2.2f;
     [Tooltip("채찍이 닿는 거리. 타일 한 칸이 1이다.")]
-    [SerializeField, Min(0f)] private float vineRange = 2f;
+    [SerializeField, Min(0f)] private float vineRange = 2.8f;
     [Tooltip("채찍 판정의 굵기.")]
-    [SerializeField, Min(0f)] private float vineWidth = 0.7f;
-    [SerializeField, Min(0f)] private float vineKnockbackForce = 4f;
+    [SerializeField, Min(0f)] private float vineWidth = 0.9f;
+    [SerializeField, Min(0f)] private float vineKnockbackForce = 5f;
     [Tooltip("휘두른 뒤 움직이지 못하는 시간.")]
-    [SerializeField, Min(0f)] private float vineStunDuration = 0.5f;
+    [SerializeField, Min(0f)] private float vineStunDuration = 0.25f;
     [SerializeField] private Color vineColor = new Color(0.3f, 0.85f, 0.25f, 0.95f);
 
     [Header("기술 3 — 씨뿌리기")]
@@ -54,12 +55,12 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Color seedColor = new Color(0.6f, 1f, 0.45f, 0.4f);
 
     [Header("기술 4 — 꽃잎댄스")]
-    [SerializeField, Min(0f)] private float petalRadius = 2.2f;
-    [SerializeField, Min(0f)] private float petalDuration = 3f;
+    [SerializeField, Min(0f)] private float petalRadius = 1.8f;
+    [SerializeField, Min(0f)] private float petalDuration = 2.5f;
     [Tooltip("한 틱의 피해량이 몸통박치기 기본 피해의 몇 배인지.")]
-    [SerializeField, Min(0f)] private float petalDamageRatio = 1.5f;
+    [SerializeField, Min(0f)] private float petalDamageRatio = 1f;
     [SerializeField, Min(0.05f)] private float petalTickInterval = 0.5f;
-    [SerializeField, Min(0f)] private float petalCooldown = 10f;
+    [SerializeField, Min(0f)] private float petalCooldown = 12f;
     [SerializeField] private Color petalColor = new Color(1f, 0.45f, 0.75f, 0.38f);
 
     [Header("공통")]
@@ -211,12 +212,12 @@ public class PlayerCombat : MonoBehaviour
             lastVineTime = Time.time;
             VineWhipAttack(GetMouseDirection());
         }
-        else if (kb != null && kb.spaceKey.wasPressedThisFrame && CanUse(MoveType.SeedSow))
+        else if (kb != null && kb.leftShiftKey.wasPressedThisFrame && CanUse(MoveType.SeedSow))
         {
             seedUsedInRoom = CombatRoomController.VisitId;
             SowSeeds();
         }
-        else if (kb != null && kb.leftShiftKey.wasPressedThisFrame && CanUse(MoveType.PetalDance))
+        else if (kb != null && kb.spaceKey.wasPressedThisFrame && CanUse(MoveType.PetalDance))
         {
             lastPetalTime = Time.time;
             PetalDance();

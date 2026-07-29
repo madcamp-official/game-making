@@ -278,8 +278,8 @@ MonoBehaviour:
   minRange: 0
   cooldown: 3
   initialDelay: 3
-  arenaHalf: {x: 5.8, y: 3.8}
-  bandThickness: 2.4
+  arenaHalf: {x: 7, y: 5}
+  telegraphArrowSize: 2.4
   pushSpeed: 2.4
   telegraph: 0.8
   bandDuration: 4

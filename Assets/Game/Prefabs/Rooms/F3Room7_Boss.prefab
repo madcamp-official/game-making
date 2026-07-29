@@ -97,7 +97,7 @@ Transform:
   m_GameObject: {fileID: 1727235366413134015}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: -2.8, z: 0}
+  m_LocalPosition: {x: 0, y: -3.33, z: 0}
   m_LocalScale: {x: 12.4, y: 2.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2688,7 +2688,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GyaradosBossController
   arenaBounds: {fileID: 5362023187134835220}
-  arenaHalfSize: {x: 6.2, y: 4.2}
+  arenaHalfSize: {x: 7, y: 5}
   hydroReflectBounds: {fileID: 4411220033558870032}
   exposedAnchor: {fileID: 8887287835185909638}
   diveAnchorTop: {fileID: 3023060686363213610}
@@ -5372,7 +5372,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 12.4, y: 8.4, z: 1}
+  m_LocalScale: {x: 14, y: 10, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7107600823644834301}
@@ -5542,7 +5542,7 @@ Transform:
   m_GameObject: {fileID: 8153343390574743460}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 2.8, z: 0}
+  m_LocalPosition: {x: 0, y: 3.33, z: 0}
   m_LocalScale: {x: 12.4, y: 2.8, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

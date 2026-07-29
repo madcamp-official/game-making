@@ -5,8 +5,8 @@ public enum MoveType
 {
     Tackle = 0,      // 몸통박치기 — 좌클릭 근접
     VineWhip = 1,    // 덩굴채찍 — 우클릭, 2칸 사거리
-    SeedSow = 2,     // 씨뿌리기 — 스페이스바, 회복 장판
-    PetalDance = 3,  // 꽃잎댄스 — 좌측 Shift, 피해 장판
+    SeedSow = 2,     // 씨뿌리기 — 좌측 Shift, 회복 장판
+    PetalDance = 3,  // 꽃잎댄스 — 스페이스바, 피해 장판
 }
 
 /// <summary>기술의 이름·조작키 같은 표시용 정보. 로직은 <see cref="PlayerMoves"/>가 갖는다.</summary>
@@ -45,8 +45,8 @@ public static class MoveInfo
         {
             case MoveType.Tackle: return "좌클릭";
             case MoveType.VineWhip: return "우클릭";
-            case MoveType.SeedSow: return "Space";
-            case MoveType.PetalDance: return "Shift";
+            case MoveType.SeedSow: return "Shift";
+            case MoveType.PetalDance: return "Space";
         }
         return "";
     }

@@ -135,8 +135,9 @@ public class GyaradosBossController : MonoBehaviour
     [Header("맵 기준점 — F3Room7_Boss에 배치해 연결한다")]
     [Tooltip("중앙 플레이 영역. 위치가 중심, localScale이 전체 크기다. 비워 두면 부모(방)와 아래 반크기를 쓴다.")]
     [SerializeField] private Transform arenaBounds;
-    [Tooltip("전투 계산에 쓰는 반너비·반높이. arenaBounds가 있으면 그쪽이 우선한다.")]
-    [SerializeField] private Vector2 arenaHalfSize = new Vector2(6.2f, 4.2f);
+    [Tooltip("전투 계산에 쓰는 반너비·반높이. arenaBounds가 있으면 그쪽이 우선한다. " +
+             "벽 안쪽 면과 맞춰야 한다 — 좁으면 범람이 벽까지 닿지 않아 가장자리가 안전지대가 된다.")]
+    [SerializeField] private Vector2 arenaHalfSize = new Vector2(7f, 5f);
     [Tooltip("하이드로펌프가 반사되는 네 벽의 안쪽 면. 물대포가 부딪히는 벽과 눈으로 일치해야 한다. " +
              "비워 두면 arenaBounds를 쓰지만, 그 면이 벽과 다르면 허공에서 꺾여 보인다.")]
     [SerializeField] private Transform hydroReflectBounds;

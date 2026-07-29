@@ -224,23 +224,23 @@ MonoBehaviour:
   meleeCooldown: 0.5
   meleeKnockbackForce: 6
   attackEffectPrefab: {fileID: 0}
-  vineDamage: 8
-  vineCooldown: 5
-  vineRange: 2
-  vineWidth: 0.7
-  vineKnockbackForce: 4
-  vineStunDuration: 0.5
+  vineDamage: 14
+  vineCooldown: 2.2
+  vineRange: 2.8
+  vineWidth: 0.9
+  vineKnockbackForce: 5
+  vineStunDuration: 0.25
   vineColor: {r: 0.3, g: 0.85, b: 0.25, a: 0.95}
   seedRadius: 2
   seedDuration: 5
   seedHealPerTick: 6
   seedTickInterval: 1
   seedColor: {r: 0.6, g: 1, b: 0.45, a: 0.4}
-  petalRadius: 2.2
-  petalDuration: 3
-  petalDamageRatio: 1.5
+  petalRadius: 1.8
+  petalDuration: 2.5
+  petalDamageRatio: 1
   petalTickInterval: 0.5
-  petalCooldown: 10
+  petalCooldown: 12
   petalColor: {r: 1, g: 0.45, b: 0.75, a: 0.38}
   attackMoveSpeedMultiplier: 0.5
   attackAnimDuration: 0.467
@@ -309,19 +309,19 @@ MonoBehaviour:
     portrait: {fileID: 0}
     maxHealth: 100
     attackDamage: 12
-    vineDamage: 8
+    vineDamage: 14
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
     portrait: {fileID: 0}
     maxHealth: 130
     attackDamage: 18
-    vineDamage: 12
+    vineDamage: 21
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
     portrait: {fileID: 0}
     maxHealth: 170
     attackDamage: 25
-    vineDamage: 17
+    vineDamage: 29
   flashStepDuration: 0.15
   healMissingFraction: 0.6
 --- !u!114 &510344029345414639

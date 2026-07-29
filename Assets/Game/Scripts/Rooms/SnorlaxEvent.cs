@@ -38,7 +38,7 @@ public class SnorlaxEvent : ChoiceEvent
             EventEffectLine.Good(chance + "% 확률로 잠만보가 유물을 줍니다.")));
         prompt.choices.Add(new EventChoice("잠만보를 공격한다", Attack,
             EventEffectLine.Bad("체력을 " + attackSelfDamage + " 잃습니다."),
-            EventEffectLine.Good("잠만보가 골드를 떨어뜨립니다.")));
+            EventEffectLine.Good("잠만보가 " + attackGoldReward + "G를 떨어뜨립니다.")));
         prompt.choices.Add(new EventChoice("슬며시 지나간다", SneakPast));
         return prompt;
     }
