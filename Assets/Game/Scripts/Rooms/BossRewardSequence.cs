@@ -8,9 +8,9 @@ using UnityEngine.UI;
 /// 보스를 잡은 뒤의 보상을 <b>하나씩 차례로</b> 보여 주는 흐름.
 ///
 /// 예전에는 진화 연출·기술 습득 안내·유물 획득 팝업이 같은 순간에 한꺼번에 터져서 무엇을
-/// 얻었는지 알아볼 수가 없었다. 셋을 한 줄로 세우고, 각 장을 플레이어가 확인해야 다음으로
-/// 넘어가게 한다. 일어나지 않은 보상은 그 장이 통째로 빠진다 — 행복의알로 이미 진화했다면
-/// 진화와 기술 습득을 건너뛰고 유물부터 시작한다.
+/// 얻었는지 알아볼 수가 없었다. 셋을 <b>진화 → 새 기술 → 유물</b> 순으로 한 줄로 세우고,
+/// 각 장을 플레이어가 확인해야 다음으로 넘어가게 한다. 일어나지 않은 보상은 그 장이 통째로
+/// 빠진다 — 행복의알로 이미 진화했다면 진화와 기술 습득을 건너뛰고 유물부터 시작한다.
 ///
 /// <b>일시정지와 조작 잠금은 여기서만 건드린다.</b> 진화 컷씬과 유물 선택 창도 각자
 /// <see cref="Time.timeScale"/>을 0으로 세웠다 되돌리는데, 그것들은 이 흐름 <i>안에서만</i>
@@ -118,7 +118,6 @@ public class BossRewardSequence : MonoBehaviour
             Time.timeScale = 0f;
 
             // 2. 진화. 조건을 못 채웠으면(행복의알로 이미 이 층에서 진화했다면) 통째로 건너뛴다.
-            string evolvedInto = null;
             MoveType? learned = null;
             PlayerEvolution evolution = player != null ? player.GetComponent<PlayerEvolution>() : null;
             if (evolution != null && evolution.CanEvolve)
@@ -126,7 +125,6 @@ public class BossRewardSequence : MonoBehaviour
                 evolution.Evolve();
                 while (evolution.IsEvolving) yield return null;
 
-                evolvedInto = evolution.CurrentStageName;
                 learned = evolution.LastLearnedMove;
                 // 진화 연출은 끝내면서 조작을 되살린다. 보상은 아직 남았으므로 다시 잠근다.
                 SetControl(player, false);
@@ -142,21 +140,18 @@ public class BossRewardSequence : MonoBehaviour
             }
 
             // 4. 유물. 다우징머신이 있으면 둘 중 하나를 고르고, 없으면 하나를 크게 보여준다.
-            RelicData gained = null;
+            //    마지막 장이므로 이걸 확인하면 곧바로 조작이 돌아오고 출구가 열린다.
             List<RelicData> offered = RelicManager.DrawBossReward(fixedRelic);
             if (offered.Count >= 2)
             {
-                yield return ChooseRelic(offered[0], offered[1], picked => gained = picked);
+                yield return ChooseRelic(offered[0], offered[1]);
             }
             else if (offered.Count == 1)
             {
-                gained = offered[0];
+                RelicData gained = offered[0];
                 Grant(gained);
                 yield return ShowPage("유물 획득!", gained.icon, gained.relicName, gained.description);
             }
-
-            // 5. 이번 보스전에서 얻은 것을 한 장에 모아 보여준다.
-            yield return ShowSummary(evolvedInto, learned, gained);
         }
         finally
         {
@@ -170,16 +165,13 @@ public class BossRewardSequence : MonoBehaviour
     }
 
     /// <summary>다우징머신: 두 유물 중 하나를 고르게 하고, 고르지 않은 쪽은 더미로 돌려보낸다.</summary>
-    private IEnumerator ChooseRelic(RelicData first, RelicData second, System.Action<RelicData> picked)
+    private IEnumerator ChooseRelic(RelicData first, RelicData second)
     {
-        RelicData chosen = null;
-
         // 선택 창이 뜨는 동안에는 이 화면을 접는다. 보상 화면은 언제나 하나만 보여야 한다.
         SetVisible(false);
         bool opened = UIManager.Instance != null &&
                       UIManager.Instance.ShowRelicChoice(first, second, relic =>
                       {
-                          chosen = relic;
                           Grant(relic);
                           if (RelicManager.Instance != null)
                               RelicManager.Instance.ReturnToPool(relic == first ? second : first);
@@ -192,28 +184,10 @@ public class BossRewardSequence : MonoBehaviour
         else
         {
             // 창을 띄울 수 없으면 보상을 잃지 않도록 첫 번째를 그냥 준다.
-            chosen = first;
             Grant(first);
             if (RelicManager.Instance != null) RelicManager.Instance.ReturnToPool(second);
             yield return ShowPage("유물 획득!", first.icon, first.relicName, first.description);
         }
-
-        picked(chosen);
-    }
-
-    private IEnumerator ShowSummary(string evolvedInto, MoveType? learned, RelicData gained)
-    {
-        // 셋 다 없으면(더 진화할 곳도, 줄 유물도 없다) 빈 정리 화면을 띄우지 않는다.
-        if (evolvedInto == null && !learned.HasValue && gained == null) yield break;
-
-        string body = "";
-        if (evolvedInto != null) body += "진화 — " + evolvedInto + "\n";
-        if (learned.HasValue)
-            body += "새 기술 — " + MoveInfo.NameOf(learned.Value)
-                  + " (" + MoveInfo.KeyLabelOf(learned.Value) + ")\n";
-        if (gained != null) body += "유물 — " + gained.relicName + "\n";
-
-        yield return ShowPage("보스 격파!", null, "이번 전투에서 얻은 것", body.TrimEnd('\n'));
     }
 
     private static void Grant(RelicData relic)

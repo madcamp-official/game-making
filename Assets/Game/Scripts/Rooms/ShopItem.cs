@@ -85,7 +85,7 @@ public class ShopItem : MonoBehaviour, IInteractable
             int heal = health != null ? GameMath.RoundHalfUp(health.MaxHealth * healFraction) : 0;
             if (health != null) health.Heal(heal);
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage(itemName + "을(를) 마셔 체력을 " + heal + " 회복했다!", 2f);
+                UIManager.Instance.ShowMessage(itemName + "을(를) 먹고 체력을 " + heal + " 회복했다!", 2f);
         }
 
         // 판매된 상품은 화면에서 제거

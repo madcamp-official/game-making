@@ -54,23 +54,24 @@ public static class MoveInfo
     /// <summary>
     /// 기술 한 줄 소개. 새로 배웠을 때 전용 화면(<see cref="BossRewardSequence"/>)이 보여 준다.
     ///
-    /// 수치를 적지 않는다. 기술 수치는 진화 단계·강화·유물로 계속 달라지는데, 여기 적어 두면
-    /// 어느 한쪽만 고쳤을 때 화면이 거짓말을 한다. 대신 <b>무엇에 쓰는 기술인지</b>를 적는다.
+    /// <b>효과만 담백하게 적는다.</b> 어떻게 쓰면 좋은지, 무엇이 관건인지 같은 훈수는 넣지 않는다.
+    /// 수치도 적지 않는다 — 진화 단계·강화·유물로 계속 달라져서, 어느 한쪽만 고치면
+    /// 화면이 거짓말을 하게 된다.
     /// </summary>
     public static string SummaryOf(MoveType move)
     {
         switch (move)
         {
             case MoveType.Tackle:
-                return "겨눈 방향을 후려치는 근접 공격. 쿨타임이 짧아 가장 자주 쓰게 된다.";
+                return "겨눈 방향을 후려치는 근접 공격.";
             case MoveType.VineWhip:
-                return "두어 칸 밖까지 뻗는 견제기. 피해는 낮지만 밀쳐 내며 거리를 만든다.\n" +
+                return "두어 칸 밖까지 채찍을 뻗어 그 선 위의 적을 때리고 밀쳐 낸다.\n" +
                        "휘두른 뒤에는 잠깐 움직일 수 없다.";
             case MoveType.SeedSow:
                 return "발밑에 회복 장판을 깐다. 그 위에 서 있는 동안 체력이 차오른다.\n" +
-                       "전투방마다 한 번뿐이다 — 언제 쓸지가 곧 선택이다.";
+                       "전투방마다 한 번 쓸 수 있다.";
             case MoveType.PetalDance:
-                return "몸을 따라다니는 피해 장판. 적에게 붙어 있는 동안 계속 때린다.";
+                return "몸을 따라다니는 피해 장판을 만든다. 장판 안의 적이 주기적으로 피해를 입는다.";
         }
         return "";
     }

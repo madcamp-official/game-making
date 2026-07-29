@@ -30,11 +30,6 @@ public class PlayerEvolution : MonoBehaviour
     /// <summary>진화 연출이 진행 중인지. 연출 중 재진입을 막는다.</summary>
     public bool IsEvolving { get; private set; }
 
-    /// <summary>지금 단계의 이름. 보상 정리 화면이 "무엇으로 진화했는지"를 여기서 읽는다.</summary>
-    public string CurrentStageName =>
-        stages != null && CurrentStageIndex >= 0 && CurrentStageIndex < stages.Length
-            ? stages[CurrentStageIndex].stageName : null;
-
     /// <summary>가장 최근 진화에서 새로 배운 기술. 배울 것이 없었으면 null.</summary>
     public MoveType? LastLearnedMove { get; private set; }
 
