@@ -17,14 +17,23 @@ public static class Floor3EventSetup
     private const string TilesRoot = "Assets/Game/Art/Environment/Tiles/";
     private const string LaprasArtRoot = "Assets/Game/Art/Characters/Lapras";
 
-    // 계곡: 셀 x=-2..0(월드 -2..1), 방 세로 전체. 타일 앵커가 (0.5, 0.5)라 셀 (x,y)는
-    // 월드 (x+0.5, y+0.5)에 그려진다.
-    private const int TrenchCellMinX = -2, TrenchCellMaxX = 0;
+    // 계곡: 셀 x=-2..1(월드 -2..2) 네 칸 폭, 방 세로 전체. 타일 앵커가 (0.5, 0.5)라
+    // 셀 (x,y)는 월드 (x+0.5, y+0.5)에 그려진다. 벽 띠를 뚫고 맵 밖까지 이어지는 부분은
+    // WallMap에 손으로 그려 두었으므로 여기서는 건드리지 않는다 — 폭만 맞춰 둘 것.
+    private const int TrenchCellMinX = -2, TrenchCellMaxX = 1;
     private const int TrenchCellMinY = -5, TrenchCellMaxY = 4;
 
-    private static readonly Vector3 LaprasHome = new Vector3(-3.4f, 0f, 0f);
-    private static readonly Vector3 LaprasRideTarget = new Vector3(2.4f, 0f, 0f);
-    private static readonly Vector3 PlayerDropoff = new Vector3(3.4f, 0f, 0f);
+    // 라프라스는 왼쪽 기슭(x=-2)에서 1.4칸, 도착 자리는 오른쪽 기슭(x=2)에서 같은 만큼
+    // 떨어뜨린다. 계곡이 넓어지면 오른쪽 두 자리도 함께 밀린다.
+    private static readonly Vector3 LaprasHome = new Vector3(TrenchCellMinX - 1.4f, 0f, 0f);
+    private static readonly Vector3 LaprasRideTarget = new Vector3(TrenchCellMaxX + 1f + 1.4f, 0f, 0f);
+    private static readonly Vector3 PlayerDropoff = new Vector3(TrenchCellMaxX + 1f + 2.4f, 0f, 0f);
+
+    /// <summary>등에 태우고 미끄러지는 속도(칸/초). 계곡이 넓어져도 이 느낌은 그대로여야 한다.</summary>
+    private const float GlideSpeed = 4.46f;
+
+    private static float GlideDuration =>
+        Mathf.Round((LaprasRideTarget.x - LaprasHome.x) / GlideSpeed * 10f) / 10f;
 
     public static string RebuildLaprasRoom()
     {
@@ -134,12 +143,15 @@ public static class Floor3EventSetup
             so.FindProperty("laprasRideTarget").objectReferenceValue = rideTarget;
             so.FindProperty("playerDropoff").objectReferenceValue = dropoff;
             so.FindProperty("trenchCollider").objectReferenceValue = trenchBox;
+            so.FindProperty("glideDuration").floatValue = GlideDuration;
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(room, RoomPath);
-            return "라프라스 방 완성: 연못 " + pondCleared + "칸 메움, 계곡 " + trenchPainted +
-                   "칸, 라프라스 " + LaprasHome + " (portrait " + (portrait != null) +
-                   ", exit " + (exitDoor != null) + ")";
+            return "라프라스 방 완성: 연못 " + pondCleared + "칸 메움, 계곡 " +
+                   (TrenchCellMaxX - TrenchCellMinX + 1) + "칸 폭 " + trenchPainted +
+                   "칸, 라프라스 " + LaprasHome + " → " + LaprasRideTarget +
+                   " (" + GlideDuration + "초), 하차 " + PlayerDropoff +
+                   " (portrait " + (portrait != null) + ", exit " + (exitDoor != null) + ")";
         }
         finally
         {

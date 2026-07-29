@@ -25,7 +25,8 @@ public class LaprasEvent : ChoiceEvent
     [Tooltip("계곡을 막는 콜라이더. 건너는 동안만 끈다.")]
     [SerializeField] private Collider2D trenchCollider;
     [SerializeField, Min(0.05f)] private float boardDuration = 0.35f;
-    [SerializeField, Min(0.1f)] private float glideDuration = 1.3f;
+    [Tooltip("계곡을 건너는 데 걸리는 시간. 계곡 폭에 맞춰 Floor3EventSetup이 다시 계산한다.")]
+    [SerializeField, Min(0.1f)] private float glideDuration = 1.5f;
     [Tooltip("타는 동안 플레이어를 라프라스보다 얼마나 위에 얹을지.")]
     [SerializeField] private float rideOffsetY = 0.45f;
 
