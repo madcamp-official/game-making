@@ -58,6 +58,12 @@
 갸라도스 방의 흐르는 바닥은 새로 그린 그림이 아니다. 방에 깔린 바닥 타일을 그대로 빌려
 수로마다 통째로 밀어 흐르게 한 것이다 (`WaterCurrentField` 참고).
 
+`ForestPath.png`도 파생물이다. 숲 타일셋에 길이 없어서, 풀 타일(F_13_1)의 잔디 결은
+그대로 두고 색만 흙빛으로 낮춰 여섯 장을 구웠다 (`ForestPathSetup` 참고).
+
+`ForestLogGate.png`는 이 프로젝트에서 새로 그린 픽셀 아트다. 전투방 출구를 막는 넘어진
+통나무 두 장(성한 것·부러진 것)이며, 타일셋에서 가져온 픽셀은 없다 (`LogGateSetup` 참고).
+
 ## 아이템 아이콘
 
 - `item.png` — "Ripped by redblueyellow. No credit needed." 표기. 원저작: 게임프리크/닌텐도.

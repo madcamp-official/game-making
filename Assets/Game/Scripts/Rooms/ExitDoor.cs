@@ -13,8 +13,13 @@ using UnityEngine.SceneManagement;
 [RequireComponent(typeof(Collider2D))]
 public class ExitDoor : MonoBehaviour
 {
+    [Tooltip("그림이 없을 때 쓰는 색. 두 스프라이트를 채우면 색 대신 그림이 바뀐다.")]
     [SerializeField] private Color closedColor = new Color(0.35f, 0.2f, 0.2f);
     [SerializeField] private Color openColor = new Color(0.3f, 0.9f, 0.4f);
+    [Tooltip("길을 막은 모습(넘어진 통나무 등). 비우면 색만 바뀐다.")]
+    [SerializeField] private Sprite closedSprite;
+    [Tooltip("길이 열린 모습. 막은 것이 부서져 틈이 보이는 그림.")]
+    [SerializeField] private Sprite openSprite;
     [SerializeField] private bool startOpen;
 
     public bool IsOpen { get; private set; }
@@ -35,8 +40,19 @@ public class ExitDoor : MonoBehaviour
         IsOpen = open;
         // 열려도 트리거로 바꾸지 않는다. 벽에 구멍이 생기면 안 된다.
         doorCollider.isTrigger = false;
-        if (spriteRenderer != null)
+        if (spriteRenderer == null) return;
+
+        // 그림이 준비된 방은 막은 것이 부서지는 모습으로 보여 준다. 충돌체는 그대로 단단하지만
+        // 틈이 보이므로 "들어가도 된다"가 읽힌다. 그림이 없는 방은 예전처럼 색만 바꾼다.
+        if (closedSprite != null && openSprite != null)
+        {
+            spriteRenderer.sprite = open ? openSprite : closedSprite;
+            spriteRenderer.color = Color.white;
+        }
+        else
+        {
             spriteRenderer.color = open ? openColor : closedColor;
+        }
     }
 
     // 열린 뒤에 닿아도(Enter), 열리는 순간 이미 닿아 있었어도(Stay) 모두 처리한다.
