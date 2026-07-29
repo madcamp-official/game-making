@@ -2708,8 +2708,10 @@ MonoBehaviour:
   exitDuration: 0.34
   enterDuration: 0.42
   enterClearance: 1.6
-  exposedDurationPhase1: 6.5
-  exposedDurationPhase2: 5
+  exposedPatternsMinPhase1: 2
+  exposedPatternsMaxPhase1: 3
+  exposedPatternsMinPhase2: 2
+  exposedPatternsMaxPhase2: 3
   innerGapPhase1: 0.22
   innerGapPhase2: 0.14
   outerPatternsPhase1: 1
@@ -2769,15 +2771,17 @@ MonoBehaviour:
     slowDuration: 0.8
     recovery: 0.14
   summonPhase1:
-    count: 3
+    count: 2
+    maxAlive: 5
     telegraph: 0.52
-    magikarpHealth: 70
+    magikarpHealth: 45
     bodyRadius: 0.55
     recovery: 0.2
   summonPhase2:
-    count: 4
+    count: 3
+    maxAlive: 6
     telegraph: 0.45
-    magikarpHealth: 90
+    magikarpHealth: 60
     bodyRadius: 0.55
     recovery: 0.14
   minDistanceFromPlayer: 1.25

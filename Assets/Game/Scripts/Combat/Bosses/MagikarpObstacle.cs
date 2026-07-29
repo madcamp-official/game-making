@@ -67,7 +67,10 @@ public class MagikarpObstacle : MonoBehaviour
         if (circle != null) circle.radius = bodyRadius;
     }
 
-    /// <summary>다음 소환·페이즈 전환·보스 사망에서 한 번에 치운다.</summary>
+    /// <summary>
+    /// 페이즈 전환·보스 사망, 그리고 똬리치기의 탈출로가 막혔을 때 치운다.
+    /// 다음 소환은 이걸 부르지 않는다 — 부수지 않은 잉어킹은 그대로 남아 쌓인다.
+    /// </summary>
     public void Remove()
     {
         if (this != null) Destroy(gameObject);

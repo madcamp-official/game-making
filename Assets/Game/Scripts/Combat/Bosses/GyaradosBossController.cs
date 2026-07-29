@@ -13,8 +13,13 @@ using UnityEngine.Serialization;
 /// * 잠항 — 반사 하이드로펌프, 격류 압착. 보스는 무적이고 바깥 바다에서 공격만 보낸다.
 /// * 노출 — 잉어킹 소환, 똬리치기. 이 시간에만 갸라도스를 때릴 수 있다.
 ///
-/// 노출은 <b>고정된 시간</b>으로 끝나고 잠항은 <b>사용한 패턴 수</b>로 끝난다. 그래서 센 빌드는
-/// 같은 시간에 더 많은 피해를 넣을 수 있고, 약한 빌드라고 노출 시간이 늘어나지도 않는다.
+/// 노출도 잠항도 <b>사용한 패턴 수</b>로 끝난다. 그래서 센 빌드는 같은 시간에 더 많은 피해를
+/// 넣을 수 있고, 약한 빌드라고 노출 시간이 늘어나지도 않는다.
+///
+/// 예전에는 노출이 <b>고정된 시간</b>(6.5초)이었고 그 안에서 똬리치기를 반복하다 이탈 직전에
+/// 잉어킹을 한 번 깔았다. 순서가 늘 같아 두 패턴만 번갈아 보는 전투가 됐고, 물 밖으로 나가는
+/// 하이드로펌프와 범람은 좀처럼 돌아오지 않았다. 지금은 노출마다 쓸 패턴 수를 무작위로 뽑고
+/// 그 안에서 순서도 섞는다. 노출이 짧아진 만큼 때릴 시간은 줄지만, 네 패턴이 고루 돌아온다.
 ///
 /// 체력 절반에서 2페이즈로 넘어가되 새 패턴은 늘리지 않는다. 같은 규칙이 더 빠르고 넓어질 뿐이다.
 ///
@@ -90,10 +95,17 @@ public class GyaradosBossController : MonoBehaviour
     [System.Serializable]
     private class SummonSettings
     {
-        [Min(1)] public int count = 3;
+        [Tooltip("한 번에 불러내는 수. 잉어킹은 다음 소환에서 지워지지 않고 그대로 쌓이므로, " +
+                 "예전(한 번에 3~4마리를 깔고 매번 갈아치움)보다 적게 잡는다.")]
+        [Min(1)] public int count = 2;
+        [Tooltip("살아 있는 잉어킹이 이만큼 차면 소환 패턴 자체를 고르지 않는다. " +
+                 "장애물이 무한정 늘어 전투장이 미로가 되는 것을 막는 상한이다.")]
+        [Min(1)] public int maxAlive = 5;
         [Tooltip("원형 물결이 뜨고 잉어킹이 튀어 오르기까지의 시간")]
         [Min(0.05f)] public float telegraph = 0.75f;
-        [Min(1)] public int magikarpHealth = 70;
+        [Tooltip("쌓이는 장애물이라 한 마리는 예전보다 무르게 잡는다. 부수는 데 드는 시간과 " +
+                 "보스를 때리는 시간을 저울질하게 만드는 것이 이 값이다.")]
+        [Min(1)] public int magikarpHealth = 45;
         [Min(0.05f)] public float bodyRadius = 0.55f;
         [Min(0f)] public float recovery = 0.45f;
     }
@@ -171,8 +183,12 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float enterClearance = 1.6f;
 
     [Header("노출 상태")]
-    [SerializeField, Min(1f)] private float exposedDurationPhase1 = 6.5f;
-    [SerializeField, Min(1f)] private float exposedDurationPhase2 = 5f;
+    [Tooltip("한 번의 노출에서 쓰는 내부 패턴 수의 하한·상한. 매번 이 사이에서 새로 뽑는다. " +
+             "작게 잡을수록 자주 물속으로 사라지고, 그만큼 바깥 패턴이 자주 돌아온다.")]
+    [SerializeField, Min(1)] private int exposedPatternsMinPhase1 = 2;
+    [SerializeField, Min(1)] private int exposedPatternsMaxPhase1 = 3;
+    [SerializeField, Min(1)] private int exposedPatternsMinPhase2 = 2;
+    [SerializeField, Min(1)] private int exposedPatternsMaxPhase2 = 3;
     [SerializeField, Min(0f)] private float innerGapPhase1 = 0.22f;
     [SerializeField, Min(0f)] private float innerGapPhase2 = 0.14f;
 
@@ -230,11 +246,13 @@ public class GyaradosBossController : MonoBehaviour
     [Header("잉어킹 소환")]
     [SerializeField] private SummonSettings summonPhase1 = new SummonSettings
     {
-        count = 3, telegraph = 0.52f, magikarpHealth = 70, bodyRadius = 0.55f, recovery = 0.2f,
+        count = 2, maxAlive = 5, telegraph = 0.52f, magikarpHealth = 45,
+        bodyRadius = 0.55f, recovery = 0.2f,
     };
     [SerializeField] private SummonSettings summonPhase2 = new SummonSettings
     {
-        count = 4, telegraph = 0.45f, magikarpHealth = 90, bodyRadius = 0.55f, recovery = 0.14f,
+        count = 3, maxAlive = 6, telegraph = 0.45f, magikarpHealth = 60,
+        bodyRadius = 0.55f, recovery = 0.14f,
     };
 
     [Header("잉어킹 배치 규칙")]
@@ -328,13 +346,12 @@ public class GyaradosBossController : MonoBehaviour
     /// <summary>상태·페이즈·사망으로 예약된 공격을 무효화하는 세대 번호.</summary>
     private int attackGeneration;
 
-    // 셔플 백. 외부 패턴에만 쓴다 — 내부 패턴은 "이탈 직전 한 번의 소환, 그 밖에는 똬리치기"로
-    // 규칙이 정해져 있어 뽑을 것이 없다.
+    // 셔플 백. 안팎 모두 여기서 뽑는다. 같은 패턴이 세 번 잇달아 나오지 않으면서도
+    // 순서를 읽을 수 없는 정도가 이 방식이다.
     private readonly List<OuterPattern> outerBag = new List<OuterPattern>(2);
-    private bool hasLastOuter;
-    private OuterPattern lastOuter;
-
-    private float exposedEndTime;
+    // 내부는 똬리치기 둘에 소환 하나를 담는다. 소환은 다음 노출까지 남는 장애물을 깔기 때문에
+    // 똬리치기만큼 자주 나오면 전투장이 금세 막힌다.
+    private readonly List<InnerPattern> innerBag = new List<InnerPattern>(3);
 
     // ---------------------------------------------------------------- 기준점
 
@@ -588,8 +605,12 @@ public class GyaradosBossController : MonoBehaviour
     }
 
     /// <summary>
-    /// 노출 상태. 정해진 시간 동안 내부 패턴을 반복한다. 받은 피해량은 이 시간을 바꾸지 않는다.
-    /// 시간이 끝나도 실행 중인 패턴은 끊지 않고, 새 패턴만 시작하지 않는다.
+    /// 노출 상태. 이번 노출에 쓸 <b>패턴 수</b>를 뽑고, 그만큼 쓰면 물속으로 사라진다.
+    /// 받은 피해량은 이 수를 바꾸지 않는다.
+    ///
+    /// 시간이 아니라 수로 끊는 이유는 두 가지다. 하나는 남은 시간을 재며 "이 패턴을 넣을 만한
+    /// 시간이 남았는가"를 따지던 계산이 통째로 사라지는 것이고, 다른 하나는 노출 길이가 매번
+    /// 달라지는 것이다. 전에는 6.5초가 늘 같아서 언제 사라질지 세고 있을 수 있었다.
     /// </summary>
     private IEnumerator ExposedRoutine()
     {
@@ -598,53 +619,29 @@ public class GyaradosBossController : MonoBehaviour
         SetBossVisible(true);
         SetBossCollision(true);
 
-        float duration = inPhase2 ? exposedDurationPhase2 : exposedDurationPhase1;
-        exposedEndTime = Time.time + duration;
-        Trace(string.Format("Exposed 진입 — {0}페이즈, 노출 {1:0.00}초", inPhase2 ? 2 : 1, duration));
+        int budget = DrawExposedPatternCount();
+        float gap = inPhase2 ? innerGapPhase2 : innerGapPhase1;
+        Trace(string.Format("Exposed 진입 — {0}페이즈, 내부 패턴 {1}회", inPhase2 ? 2 : 1, budget));
 
-        while (!health.IsDead)
+        for (int i = 0; i < budget; i++)
         {
-            float remaining = exposedEndTime - Time.time;
-            if (remaining <= 0f)
-            {
-                Trace("Exposed 종료 — 시간 만료");
-                break;
-            }
+            if (health.IsDead) yield break;
             if (phaseTransitionPending && !phaseTransitionDone)
             {
                 Trace("Exposed 종료 — 페이즈 전환 대기");
-                break;
+                yield break;
             }
 
-            // 잉어킹 소환은 이탈 <b>직전</b>에만 쓴다. 잉어킹은 갸라도스가 잠항한 뒤에도 남아
-            // 하이드로펌프와 범람을 피할 길을 좁히는 장애물이므로, 노출이 끝나기 직전에 깔아야
-            // 제 값을 한다. 노출 중간에 깔면 때리는 동안 치워 버리기만 한다.
-            // 그래서 똬리치기를 한 번 더 넣을 자리가 있는 동안에는 똬리치기를 쓰고, 그만한
-            // 시간이 남지 않으면 소환으로 마무리하고 곧바로 이탈한다.
-            float gap = inPhase2 ? innerGapPhase2 : innerGapPhase1;
-            bool closing = remaining < MinInnerDuration(InnerPattern.Coil) + gap
-                                       + MinInnerDuration(InnerPattern.Summon);
-            InnerPattern next = closing ? InnerPattern.Summon : InnerPattern.Coil;
-
-            float minimum = MinInnerDuration(next);
-            if (remaining < minimum)
-            {
-                Trace(string.Format("Exposed 종료 — 남은 {0:0.00}초 < {1} 최소 {2:0.00}초",
-                    remaining, next, minimum));
-                break;
-            }
-
-            Trace(string.Format("  내부 패턴 {0} 시작 (남은 노출 {1:0.00}초{2})",
-                next, remaining, closing ? ", 이탈 직전 마무리" : ""));
+            InnerPattern next = DrawInner();
+            Trace(string.Format("  내부 패턴 {0} 시작 ({1}/{2})", next, i + 1, budget));
 
             if (next == InnerPattern.Summon) yield return SummonRoutine();
             else yield return CoilRoutine();
 
             if (health.IsDead) yield break;
-            // 소환은 이탈 직전의 마지막 한 수다. 쓰고 나면 더 붙잡지 않고 물속으로 사라진다.
-            if (closing) break;
-            yield return new WaitForSeconds(gap);
+            if (i < budget - 1) yield return new WaitForSeconds(gap);
         }
+        Trace("Exposed 종료 — 패턴 소진");
     }
 
     /// <summary>이탈. 큰 물보라를 남기고 바깥쪽 바다로 잠수한다.</summary>
@@ -695,9 +692,6 @@ public class GyaradosBossController : MonoBehaviour
         for (int i = 0; i < order.Count && !health.IsDead; i++)
         {
             OuterPattern pattern = order[i];
-            lastOuter = pattern;
-            hasLastOuter = true;
-
             if (pattern == OuterPattern.HydroPump) yield return HydroPumpRoutine();
             else yield return CrushRoutine();
 
@@ -786,26 +780,38 @@ public class GyaradosBossController : MonoBehaviour
         currentField.ForceChangeNow();
         Trace("2페이즈 해류 " + currentField.SignText());
 
-        // 외부 패턴 셔플 백을 비운다.
+        // 셔플 백을 비운다. 2페이즈는 새로 뽑기 시작한다.
         outerBag.Clear();
-        hasLastOuter = false;
+        innerBag.Clear();
 
         yield return ExitRoutine();
     }
 
     // ---------------------------------------------------------------- 패턴 선택
 
+    /// <summary>이번 노출에서 쓸 내부 패턴 수. 하한과 상한이 뒤집혀 있어도 버티게 한다.</summary>
+    private int DrawExposedPatternCount()
+    {
+        int min = Mathf.Max(1, inPhase2 ? exposedPatternsMinPhase2 : exposedPatternsMinPhase1);
+        int max = Mathf.Max(min, inPhase2 ? exposedPatternsMaxPhase2 : exposedPatternsMaxPhase1);
+        return Random.Range(min, max + 1);
+    }
+
     private List<OuterPattern> DrawOuterOrder(int count)
     {
         List<OuterPattern> order = new List<OuterPattern>(count);
         for (int i = 0; i < count; i++) order.Add(DrawOuter());
-
-        // 직전 잠항의 마지막 패턴과 이번 잠항의 첫 패턴이 같으면 순서를 바꾼다.
-        if (hasLastOuter && order.Count > 1 && order[0] == lastOuter)
-            (order[0], order[1]) = (order[1], order[0]);
         return order;
     }
 
+    /// <summary>
+    /// 셔플 백에서 하나 꺼낸다. 백이 비면 두 패턴을 다시 채워 섞는다.
+    ///
+    /// 예전에는 여기에 "직전 패턴과 같으면 뒤집는다"는 규칙이 더 있었다. 1페이즈는 잠항마다
+    /// 패턴을 하나만 쓰므로, 그 규칙이 순서를 <b>완전히</b> 결정해 버렸다 — 물대포, 범람,
+    /// 물대포, 범람. 규칙을 빼면 백이 같은 패턴을 최대 두 번까지만 허용하는 선에서
+    /// 순서를 읽을 수 없게 된다.
+    /// </summary>
     private OuterPattern DrawOuter()
     {
         if (outerBag.Count == 0)
@@ -813,9 +819,6 @@ public class GyaradosBossController : MonoBehaviour
             outerBag.Add(OuterPattern.HydroPump);
             outerBag.Add(OuterPattern.Crush);
             if (Random.value < 0.5f) (outerBag[0], outerBag[1]) = (outerBag[1], outerBag[0]);
-            // 꺼내는 쪽은 리스트의 끝이다. 같은 패턴이 연달아 나오지 않게 마지막 칸을 살핀다.
-            if (hasLastOuter && outerBag[1] == lastOuter)
-                (outerBag[0], outerBag[1]) = (outerBag[1], outerBag[0]);
         }
 
         int index = outerBag.Count - 1;
@@ -824,18 +827,45 @@ public class GyaradosBossController : MonoBehaviour
         return next;
     }
 
-    /// <summary>패턴이 판정과 후딜까지 끝내는 데 최소로 걸리는 시간. 남은 노출 시간과 견준다.</summary>
-    private float MinInnerDuration(InnerPattern pattern)
+    /// <summary>
+    /// 내부 패턴 하나. 소환이 나올 자리가 아니면 똬리치기로 대신한다.
+    ///
+    /// 소환을 <b>뽑지 않고</b> 미루는 것이 핵심이다. 백에서 꺼내 버리면 자리가 없다는 이유로
+    /// 그 차례가 사라지지만, 그대로 두면 플레이어가 잉어킹을 부수는 순간 다시 나올 수 있다.
+    /// </summary>
+    private InnerPattern DrawInner()
     {
-        if (pattern == InnerPattern.Summon)
+        if (!CanSummonNow()) return InnerPattern.Coil;
+
+        if (innerBag.Count == 0)
         {
-            SummonSettings s = Summon;
-            return s.telegraph + s.recovery;
+            innerBag.Add(InnerPattern.Coil);
+            innerBag.Add(InnerPattern.Coil);
+            innerBag.Add(InnerPattern.Summon);
+            for (int i = innerBag.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                (innerBag[i], innerBag[j]) = (innerBag[j], innerBag[i]);
+            }
         }
 
-        CoilSettings c = Coil;
-        return c.firstTelegraph + Mathf.Max(MinStrikeInterval, c.betweenStrikes + c.secondTelegraph)
-               + c.recovery;
+        int index = innerBag.Count - 1;
+        InnerPattern next = innerBag[index];
+        innerBag.RemoveAt(index);
+        return next;
+    }
+
+    /// <summary>
+    /// 지금 잉어킹을 더 불러도 되는지. 살아 있는 수가 상한에 닿으면 소환 패턴을 쓰지 않는다.
+    ///
+    /// 잉어킹이 쌓이는 구조가 되면서 필요해진 제동이다. 상한이 없으면 노출을 거듭할수록
+    /// 전투장이 통째로 막힌다.
+    /// </summary>
+    private bool CanSummonNow()
+    {
+        if (magikarpPrefab == null) return false;
+        PruneMagikarps();
+        return magikarps.Count < Mathf.Max(1, Summon.maxAlive);
     }
 
     // ---------------------------------------------------------------- 잠항 패턴 1 · 하이드로펌프
@@ -1113,26 +1143,46 @@ public class GyaradosBossController : MonoBehaviour
     /// <summary>
     /// 잉어킹을 불러 고정 장애물로 세운다. 플레이어를 돕거나 공격하지 않고, 이동 경로와
     /// 때릴 자리만 좁힌다. 배치 규칙을 만족하는 자리가 부족하면 억지로 만들지 않고 수를 줄인다.
+    ///
+    /// <b>지난 소환의 잉어킹을 치우지 않는다.</b> 예전에는 소환할 때마다 전부 지우고 새로
+    /// 깔았는데, 그러면 부수든 말든 곧 사라지므로 잉어킹을 신경 쓸 이유가 없었다 —
+    /// 길을 막는다는 존재 이유가 통째로 사라진 셈이다. 이제는 부수지 않으면 그대로 남아
+    /// 다음 하이드로펌프와 범람까지 따라온다. 대신 한 마리는 무르고, 수에는 상한이 있다.
     /// </summary>
     private IEnumerator SummonRoutine()
     {
         SummonSettings settings = Summon;
 
-        // 지난 소환에서 살아남은 잉어킹을 먼저 치운다.
-        ClearMagikarps();
-
-        List<Vector2> candidates = BuildSummonCandidates();
-        List<Vector2> accepted = new List<Vector2>(settings.count);
-        int rejected = 0;
-
-        for (int i = 0; i < candidates.Count && accepted.Count < settings.count; i++)
+        PruneMagikarps();
+        // 상한까지 남은 자리만큼만 부른다.
+        int room = Mathf.Min(settings.count, Mathf.Max(1, settings.maxAlive) - magikarps.Count);
+        if (room <= 0)
         {
-            if (IsValidSummonSpot(candidates[i], accepted, settings.bodyRadius)) accepted.Add(candidates[i]);
-            else rejected++;
+            Trace("  잉어킹 소환 — 이미 상한 " + settings.maxAlive + "마리, 건너뛴다");
+            yield return new WaitForSeconds(settings.recovery);
+            yield break;
         }
 
-        Trace(string.Format("  잉어킹 소환 — 후보 {0}개, 채택 {1}/{2}, 거부 {3}개",
-            candidates.Count, accepted.Count, settings.count, rejected));
+        // 살아 있는 잉어킹도 배치 검사의 장애물로 넣는다. 그러지 않으면 서로 겹쳐 서거나,
+        // 이미 좁아진 수로 경계를 마저 막아 지나갈 틈이 사라진다.
+        List<Vector2> blockers = LiveMagikarpPositions();
+        List<Vector2> candidates = BuildSummonCandidates();
+        List<Vector2> accepted = new List<Vector2>(room);
+        int rejected = 0;
+
+        for (int i = 0; i < candidates.Count && accepted.Count < room; i++)
+        {
+            if (!IsValidSummonSpot(candidates[i], blockers, settings.bodyRadius))
+            {
+                rejected++;
+                continue;
+            }
+            blockers.Add(candidates[i]);
+            accepted.Add(candidates[i]);
+        }
+
+        Trace(string.Format("  잉어킹 소환 — 살아 있음 {0}마리, 후보 {1}개, 채택 {2}/{3}, 거부 {4}개",
+            magikarps.Count, candidates.Count, accepted.Count, room, rejected));
 
         if (accepted.Count == 0)
         {
@@ -1189,8 +1239,11 @@ public class GyaradosBossController : MonoBehaviour
         return candidates;
     }
 
-    /// <summary>배치 규칙 전부를 한 번에 검사한다. 하나라도 어기면 그 자리는 버린다.</summary>
-    private bool IsValidSummonSpot(Vector2 spot, List<Vector2> accepted, float radius)
+    /// <summary>
+    /// 배치 규칙 전부를 한 번에 검사한다. 하나라도 어기면 그 자리는 버린다.
+    /// <paramref name="blockers"/>에는 이번에 고른 자리뿐 아니라 <b>이미 살아 있는 잉어킹</b>도 들어간다.
+    /// </summary>
+    private bool IsValidSummonSpot(Vector2 spot, List<Vector2> blockers, float radius)
     {
         Vector2 center = ArenaCenter;
         Vector2 half = ArenaHalfSize;
@@ -1205,11 +1258,11 @@ public class GyaradosBossController : MonoBehaviour
         if (Vector2.Distance(spot, PlayerPosition) < minDistanceFromPlayer) return false;
         if (Vector2.Distance(spot, ExposedPosition) < minDistanceFromBoss) return false;
 
-        foreach (Vector2 other in accepted)
+        foreach (Vector2 other in blockers)
             if (Vector2.Distance(spot, other) < minDistanceBetweenMagikarp) return false;
 
         // 세 수로 사이를 오가는 경계를 동시에 모두 막으면 안 된다.
-        List<Vector2> withSpot = new List<Vector2>(accepted) { spot };
+        List<Vector2> withSpot = new List<Vector2>(blockers) { spot };
         if (BlocksEveryLaneBoundary(withSpot, radius)) return false;
         // 갸라도스 주변을 완전히 둘러싸도 안 된다.
         if (SurroundsBoss(withSpot, radius)) return false;
@@ -1294,6 +1347,15 @@ public class GyaradosBossController : MonoBehaviour
         for (int i = magikarps.Count - 1; i >= 0; i--)
             if (magikarps[i] != null) magikarps[i].Remove();
         magikarps.Clear();
+    }
+
+    /// <summary>살아 있는 잉어킹이 서 있는 자리. 새 소환의 배치 검사에 장애물로 넣는다.</summary>
+    private List<Vector2> LiveMagikarpPositions()
+    {
+        List<Vector2> spots = new List<Vector2>(magikarps.Count);
+        foreach (MagikarpObstacle karp in magikarps)
+            if (karp != null && karp.IsAlive) spots.Add(karp.transform.position);
+        return spots;
     }
 
     /// <summary>아직 살아 있는 잉어킹만 추린다. 플레이어가 부순 개체는 목록에서 뺀다.</summary>
