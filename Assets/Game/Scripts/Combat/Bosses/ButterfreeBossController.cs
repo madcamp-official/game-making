@@ -117,8 +117,11 @@ public class ButterfreeBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float introDelay = 0.15f;
     [Tooltip("전투 영역의 중심. 비워 두면 부모(방)의 위치를 쓴다.")]
     [SerializeField] private Transform arenaCenter;
-    [Tooltip("전투 영역의 반너비·반높이. 장판과 이동 목표를 이 안으로 제한한다.")]
-    [SerializeField] private Vector2 arenaHalfSize = new Vector2(8.2f, 5.2f);
+    [Tooltip("전투 영역의 반너비·반높이. 장판을 이 안으로 제한한다. " +
+             "벽 안쪽 면(RoomArena.HalfSize = ±7 · ±5)과 같아야 한다 — 좁게 잡으면 벽에 붙은 띠가 안전지대가 된다.")]
+    [SerializeField] private Vector2 arenaHalfSize = new Vector2(7f, 5f);
+    [Tooltip("몸이 벽을 파고들지 않게 두는 여유. 이동에만 쓴다. 공격 배치는 벽까지 꽉 채운다.")]
+    [SerializeField, Min(0f)] private float bodyMargin = RoomArena.BodyMargin;
 
     [Header("거리 유지")]
     [SerializeField, Min(0f)] private float preferredMinDistance = 3.5f;
@@ -181,7 +184,8 @@ public class ButterfreeBossController : MonoBehaviour
     [Tooltip("직전 장판 중심과 최소한 이만큼 떨어뜨린다. 더 가까우면 이동 방향으로 밀거나 생략한다. " +
              "장판 크기와 함께 움직여야 한다 — 반지름만 키우면 장판들이 한 덩어리로 뭉친다.")]
     [SerializeField, Min(0f)] private float poisonMinSeparation = 1.19f;
-    [Tooltip("장판 중심을 방 경계에서 이만큼 안쪽으로 유지한다.")]
+    [Tooltip("장판 '중심'을 방 경계에서 이만큼 안쪽으로 유지한다 (명세 7.3). " +
+             "여기에 반지름을 더하면 안 된다 — 장판이 벽에 조금 걸치더라도 벽에 붙은 자리를 덮어야 한다.")]
     [SerializeField, Min(0f)] private float poisonArenaMargin = 0.55f;
     [Tooltip("예고 중인 것까지 포함한 장판 수 상한.")]
     [SerializeField, Min(1)] private int poisonMaxZones = 8;
@@ -530,13 +534,17 @@ public class ButterfreeBossController : MonoBehaviour
     }
 
     /// <summary>벽에 몰렸으면 전투 영역 안쪽으로 향하는 방향, 아니면 0.</summary>
+    /// <remarks>
+    /// 기준은 전투 영역이 아니라 몸이 놓일 수 있는 범위다. 벽 안쪽 면을 그대로 쓰면
+    /// 몸이 벽에 막혀 그 선을 넘지 못하므로 이 밀어내기가 영영 걸리지 않는다.
+    /// </remarks>
     private Vector2 InwardPush(Vector2 position)
     {
         Vector2 center = ArenaCenter;
         Vector2 offset = position - center;
         Vector2 push = Vector2.zero;
-        if (Mathf.Abs(offset.x) > arenaHalfSize.x) push.x = -Mathf.Sign(offset.x);
-        if (Mathf.Abs(offset.y) > arenaHalfSize.y) push.y = -Mathf.Sign(offset.y);
+        if (Mathf.Abs(offset.x) > arenaHalfSize.x - bodyMargin) push.x = -Mathf.Sign(offset.x);
+        if (Mathf.Abs(offset.y) > arenaHalfSize.y - bodyMargin) push.y = -Mathf.Sign(offset.y);
         return push == Vector2.zero ? Vector2.zero : push.normalized;
     }
 
@@ -736,7 +744,7 @@ public class ButterfreeBossController : MonoBehaviour
     private bool TryPlaceZone(Vector2 raw, bool hasPrevious, Vector2 previous,
                               PoisonSettings settings, out Vector2 placed)
     {
-        placed = ClampToArena(raw, settings.radius + poisonArenaMargin);
+        placed = ClampToArena(raw, poisonArenaMargin);
 
         PruneZones();
         // 명세는 "활성화했거나 예고 중인" 장판을 함께 세라고 한다.
@@ -760,7 +768,7 @@ public class ButterfreeBossController : MonoBehaviour
         if (pushDirection == Vector2.zero) return false;
 
         Vector2 pushed = ClampToArena(previous + pushDirection * poisonMinSeparation,
-                                      settings.radius + poisonArenaMargin);
+                                      poisonArenaMargin);
         // 벽에 막혀 밀어도 여전히 겹치면 그냥 생략한다.
         if ((pushed - previous).magnitude < poisonMinSeparation * 0.9f) return false;
 

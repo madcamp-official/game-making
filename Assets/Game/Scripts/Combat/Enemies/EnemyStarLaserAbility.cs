@@ -15,8 +15,10 @@ using UnityEngine;
 public class EnemyStarLaserAbility : EnemyAbility
 {
     [Header("순간이동")]
-    [Tooltip("전투장 중심(부모 방) 기준 이동 후보 범위의 반너비·반높이. 가장자리 안쪽 링이다.")]
-    [SerializeField] private Vector2 arenaHalf = new Vector2(5.4f, 3.4f);
+    [Tooltip("전투장 중심(부모 방) 기준 이동 후보 범위의 반너비·반높이. 가장자리 안쪽 링이다. " +
+             "몸이 놓일 자리라 벽 안쪽 면(±7 · ±5)에서 RoomArena.BodyMargin만큼 들인 값을 쓴다 — " +
+             "더 좁게 잡으면 레이저 십자가 벽 근처를 지나가지 않아 가장자리가 안전해진다.")]
+    [SerializeField] private Vector2 arenaHalf = new Vector2(6.5f, 4.5f);
     [Tooltip("가장자리에서 이만큼 안쪽의 띠에서 지점을 고른다.")]
     [SerializeField, Min(0f)] private float edgeInset = 1.1f;
     [Tooltip("플레이어와 이 거리 이상 떨어진 지점만 고른다 — 코앞 순간이동은 반칙 같다.")]

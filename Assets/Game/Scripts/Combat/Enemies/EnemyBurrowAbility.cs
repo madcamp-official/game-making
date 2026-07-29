@@ -37,8 +37,9 @@ public class EnemyBurrowAbility : EnemyAbility
     [Tooltip("한 번 달아난 뒤 이 시간 안에는 다시 달아나지 않는다. 연타에 무한 도망을 막는다.")]
     [SerializeField, Min(0f)] private float fleeCooldown = 1.5f;
     [Tooltip("도망 목표점을 가두는 범위 (방 중심 기준 반너비·반높이). 콜라이더가 꺼진 채 달아나므로 " +
-             "벽이 막아 주지 않는다. 벽 콜라이더(±6.6부터)에 겹친 채 솟으면 물리가 밀어내니 여유를 둔다.")]
-    [SerializeField] private Vector2 fleeBounds = new Vector2(5.8f, 3.8f);
+             "벽이 막아 주지 않는다. 벽 안쪽 면(±7 · ±5)에서 RoomArena.BodyMargin만큼 들인 값 — " +
+             "벽에 겹친 채 솟으면 물리가 밀어낸다.")]
+    [SerializeField] private Vector2 fleeBounds = new Vector2(6.5f, 4.5f);
 
     [Header("색")]
     [SerializeField] private Color warningColor = new Color(0.85f, 0.1f, 0.28f, 0.45f);

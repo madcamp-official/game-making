@@ -31,6 +31,11 @@ public class EnemyPoisonAbility : EnemyAbility
              "반지름을 바꾸면 간격도 따라 움직이도록 배수로 둔다.")]
     [SerializeField, Min(0f)] private float separationScale = 1.5f;
 
+    [Header("방 경계")]
+    [Tooltip("장판 중심을 벽 안쪽 면에서 이만큼 들인다. 버터플 명세 7.3과 같은 값. " +
+             "장판이 벽에 조금 걸치더라도 벽에 붙은 자리를 덮어야 한다.")]
+    [SerializeField, Min(0f)] private float arenaMargin = 0.55f;
+
     [Header("색")]
     [SerializeField] private Color warningColor = new Color(0.75f, 0.35f, 0.85f, 0.35f);
     [SerializeField] private Color zoneColor = new Color(0.45f, 0.12f, 0.6f, 0.65f);
@@ -87,15 +92,23 @@ public class EnemyPoisonAbility : EnemyAbility
     /// <summary>
     /// <paramref name="desired"/>를 쓰거나, 막혀 있으면 한 칸 옆으로 밀어 빈 자리를 찾는다.
     /// 찾으면 예약까지 걸고 true. 여덟 방향이 모두 막혔으면 false.
+    ///
+    /// 후보는 반드시 방 안으로 가둔다. 예전에는 가두지 않아, 플레이어가 벽에 붙어 있으면
+    /// 이동 예측(<see cref="predictLead"/>)이 벽 너머를 가리키거나 비켜 볼 방향이 벽 바깥을
+    /// 향해 장판이 방 밖에 깔렸다 — 가장자리에서 콘팡의 공격이 통째로 사라지던 원인이다.
     /// </summary>
     private bool TryClaim(Vector2 desired, out Vector2 target)
     {
+        Vector2 center = RoomArena.CenterOf(transform);
+        desired = RoomArena.Clamp(desired, center, arenaMargin);
+
         float separation = MinSeparation;
         for (int i = 0; i < DodgeAngles.Length; i++)
         {
             Vector2 candidate = i == 0
                 ? desired
-                : desired + Rotate(Vector2.right, DodgeAngles[i]) * separation;
+                : RoomArena.Clamp(desired + Rotate(Vector2.right, DodgeAngles[i]) * separation,
+                                  center, arenaMargin);
 
             if (!IsClaimed(candidate, separation))
             {

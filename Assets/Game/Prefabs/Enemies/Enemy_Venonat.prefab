@@ -285,6 +285,7 @@ MonoBehaviour:
   tickInterval: 1
   predictLead: 0.6
   separationScale: 1.5
+  arenaMargin: 0.55
   warningColor: {r: 0.75, g: 0.35, b: 0.85, a: 0.35}
   zoneColor: {r: 0.45, g: 0.12, b: 0.6, a: 0.65}
 --- !u!114 &879051484065134347

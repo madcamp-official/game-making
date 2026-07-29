@@ -92,8 +92,11 @@ public class RhydonBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float introDelay = 0.15f;
     [Tooltip("전투 영역의 중심. 비워 두면 부모(방)의 위치를 쓴다.")]
     [SerializeField] private Transform arenaCenter;
-    [Tooltip("전투 영역의 반너비·반높이. 돌과 돌진 목표를 이 안으로 제한한다.")]
-    [SerializeField] private Vector2 arenaHalfSize = new Vector2(6.2f, 4.2f);
+    [Tooltip("전투 영역의 반너비·반높이. 돌과 돌진 목표를 이 안으로 제한한다. " +
+             "벽 안쪽 면(RoomArena.HalfSize = ±7 · ±5)과 같아야 한다 — 좁게 잡으면 벽에 붙은 띠가 안전지대가 된다.")]
+    [SerializeField] private Vector2 arenaHalfSize = new Vector2(7f, 5f);
+    [Tooltip("몸이 벽을 파고들지 않게 두는 여유. 이동과 돌진 도착점에만 쓴다. 돌 낙하는 벽까지 꽉 채운다.")]
+    [SerializeField, Min(0f)] private float bodyMargin = RoomArena.BodyMargin;
 
     [Header("접근")]
     [Tooltip("뿔드릴을 쓰기 전에 이만큼까지 붙는다. 뿔 길이보다 짧아야 한다. " +
@@ -488,12 +491,16 @@ public class RhydonBossController : MonoBehaviour
     }
 
     /// <summary>벽에 몰렸으면 전투 영역 안쪽으로 향하는 방향, 아니면 0.</summary>
+    /// <remarks>
+    /// 기준은 전투 영역이 아니라 몸이 놓일 수 있는 범위다. 벽 안쪽 면을 그대로 쓰면
+    /// 몸이 벽에 막혀 그 선을 넘지 못하므로 이 밀어내기가 영영 걸리지 않는다.
+    /// </remarks>
     private Vector2 InwardPush(Vector2 position)
     {
         Vector2 offset = position - ArenaCenter;
         Vector2 push = Vector2.zero;
-        if (Mathf.Abs(offset.x) > arenaHalfSize.x) push.x = -Mathf.Sign(offset.x);
-        if (Mathf.Abs(offset.y) > arenaHalfSize.y) push.y = -Mathf.Sign(offset.y);
+        if (Mathf.Abs(offset.x) > arenaHalfSize.x - bodyMargin) push.x = -Mathf.Sign(offset.x);
+        if (Mathf.Abs(offset.y) > arenaHalfSize.y - bodyMargin) push.y = -Mathf.Sign(offset.y);
         return push == Vector2.zero ? Vector2.zero : push.normalized;
     }
 
@@ -885,21 +892,29 @@ public class RhydonBossController : MonoBehaviour
         playerHealth.TakeDamage(dashDamage);
     }
 
-    /// <summary>주어진 방향으로 전투 영역 경계까지 갔을 때의 지점.</summary>
+    /// <summary>
+    /// 주어진 방향으로 전투 영역 경계까지 갔을 때의 지점. 돌진의 도착점이다.
+    ///
+    /// 몸이 실제로 설 수 있는 자리까지만 잡는다 (<see cref="bodyMargin"/>). 벽 안쪽 면을
+    /// 그대로 목표로 삼으면 몸이 벽에 걸려 영영 도착하지 못하고, 돌진이 매번
+    /// <c>dashMaxDuration</c>을 다 쓰고서야 끝난다.
+    /// </summary>
     private Vector2 ArenaEdgePoint(Vector2 origin, Vector2 direction)
     {
         Vector2 center = ArenaCenter;
         Vector2 offset = origin - center;
+        Vector2 reach = new Vector2(Mathf.Max(0f, arenaHalfSize.x - bodyMargin),
+                                    Mathf.Max(0f, arenaHalfSize.y - bodyMargin));
         // 경계에 닿기까지 갈 수 있는 거리를 축별로 구해 더 짧은 쪽을 쓴다.
-        float distance = Mathf.Max(arenaHalfSize.x, arenaHalfSize.y) * 2f;
+        float distance = Mathf.Max(reach.x, reach.y) * 2f;
         if (Mathf.Abs(direction.x) > 0.0001f)
         {
-            float limit = (Mathf.Sign(direction.x) * arenaHalfSize.x - offset.x) / direction.x;
+            float limit = (Mathf.Sign(direction.x) * reach.x - offset.x) / direction.x;
             if (limit > 0f) distance = Mathf.Min(distance, limit);
         }
         if (Mathf.Abs(direction.y) > 0.0001f)
         {
-            float limit = (Mathf.Sign(direction.y) * arenaHalfSize.y - offset.y) / direction.y;
+            float limit = (Mathf.Sign(direction.y) * reach.y - offset.y) / direction.y;
             if (limit > 0f) distance = Mathf.Min(distance, limit);
         }
         return origin + direction * Mathf.Max(0.5f, distance);

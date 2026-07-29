@@ -289,7 +289,7 @@ MonoBehaviour:
   fleeDistance: 4.5
   fleeRecovery: 0.35
   fleeCooldown: 1.5
-  fleeBounds: {x: 6.2, y: 4.2}
+  fleeBounds: {x: 6.5, y: 4.5}
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.45}
   burstColor: {r: 0.75, g: 0.5, b: 0.25, a: 0.7}
 --- !u!114 &747882862793312293

@@ -355,7 +355,8 @@ MonoBehaviour:
   moveSpeed: 4.2
   introDelay: 0.15
   arenaCenter: {fileID: 0}
-  arenaHalfSize: {x: 6.2, y: 4.2}
+  arenaHalfSize: {x: 7, y: 5}
+  bodyMargin: 0.5
   hornApproachDistance: 2.4
   approachMaxDuration: 1.3
   patternGapPhase1: 0.45
