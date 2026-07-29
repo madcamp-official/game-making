@@ -274,16 +274,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0885ed991c60944349cfed6c38bcf0d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyVortexAbility
-  range: 4.2
+  range: 4.8
   minRange: 0
   cooldown: 6
   initialDelay: 2.2
-  vortexRadius: 3.4
+  vortexRadius: 4
   telegraph: 0.6
   pullDuration: 1.5
   pullSpeed: 2.7
   vortexColor: {r: 0.25, g: 0.55, b: 0.95, a: 0.35}
-  blastRadius: 1.7
+  blastRadius: 2
   blastDamage: 12
   blastKnockback: 13
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.5}

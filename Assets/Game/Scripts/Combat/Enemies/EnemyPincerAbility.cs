@@ -13,7 +13,7 @@ public class EnemyPincerAbility : EnemyAbility
 {
     [Header("가위치기")]
     [Tooltip("부채꼴의 반지름. 예고와 판정이 같은 값을 쓴다.")]
-    [SerializeField, Min(0.1f)] private float reach = 2.3f;
+    [SerializeField, Min(0.1f)] private float reach = 3f;
     [Tooltip("부채꼴의 전체 각도(도).")]
     [SerializeField, Range(10f, 180f)] private float sweepAngle = 110f;
     [SerializeField, Min(0.05f)] private float telegraph = 0.55f;

@@ -14,7 +14,7 @@ public class EnemyVortexAbility : EnemyAbility
 {
     [Header("소용돌이(흡인)")]
     [Tooltip("이 반지름 안의 플레이어를 당긴다. 예고 원과 같은 크기다.")]
-    [SerializeField, Min(0.1f)] private float vortexRadius = 3.4f;
+    [SerializeField, Min(0.1f)] private float vortexRadius = 4f;
     [SerializeField, Min(0.05f)] private float telegraph = 0.6f;
     [Tooltip("당기는 시간.")]
     [SerializeField, Min(0.1f)] private float pullDuration = 1.5f;
@@ -24,7 +24,7 @@ public class EnemyVortexAbility : EnemyAbility
 
     [Header("충격파")]
     [Tooltip("충격파 반지름. 흡인 반지름보다 훨씬 작아야 빠져나갈 보람이 있다.")]
-    [SerializeField, Min(0.1f)] private float blastRadius = 1.7f;
+    [SerializeField, Min(0.1f)] private float blastRadius = 2f;
     [SerializeField, Min(0)] private int blastDamage = 12;
     [Tooltip("충격파가 바깥으로 밀어내는 속도.")]
     [SerializeField, Min(0f)] private float blastKnockback = 13f;

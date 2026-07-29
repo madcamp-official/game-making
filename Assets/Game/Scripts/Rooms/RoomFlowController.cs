@@ -97,6 +97,8 @@ public class RoomFlowController : MonoBehaviour
     private void LoadRoom(int index)
     {
         if (currentRoom != null) Destroy(currentRoom);
+        // 플레이어 장판(씨뿌리기·꽃잎댄스)은 씬 루트에 있어 방을 지워도 남는다. 같이 걷어 낸다.
+        MoveZone.ClearAll();
         FloorData floor = floors[CurrentFloorIndex];
         CurrentRoomIndex = index;
         currentRoom = Instantiate(floor.roomPrefabs[index]);

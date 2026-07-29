@@ -46,6 +46,21 @@ public class MoveZone : MonoBehaviour
         Spawn(Mode.HealPlayer, "SeedZone", center, radius, duration, healPerTick, tickInterval, color, null);
 
     /// <summary>
+    /// 살아 있는 장판을 전부 지운다. 방을 넘어갈 때 <see cref="RoomFlowController"/>가 부른다.
+    ///
+    /// 장판은 방 프리팹이 아니라 씬 루트에 생긴다 — 깔아 둔 자리에 그대로 있어야 하는데
+    /// 방을 부모로 삼으면 방이 사라질 때 좌표까지 딸려 가기 때문이다. 그 대가로 방을
+    /// 교체해도 살아남아서, 지속시간이 남은 장판이 다음 방까지 따라오는 문제가 있었다.
+    /// 씨뿌리기의 "방당 1회"는 <see cref="CombatRoomController.VisitId"/>로 이미 방마다
+    /// 돌아오므로, 남는 것은 이 장판 오브젝트뿐이라 여기서 함께 걷어 낸다.
+    /// </summary>
+    public static void ClearAll()
+    {
+        foreach (MoveZone zone in FindObjectsByType<MoveZone>())
+            if (zone != null) Destroy(zone.gameObject);
+    }
+
+    /// <summary>
     /// 꽃잎댄스: 안에 있는 적을 주기적으로 때린다.
     /// <paramref name="follow"/>를 주면 그 대상을 중심으로 따라다닌다.
     /// </summary>

@@ -14,7 +14,7 @@ using UnityEngine;
 public class EnemyFrostBreathAbility : EnemyAbility
 {
     [Header("냉기 부채꼴")]
-    [SerializeField, Min(0.1f)] private float reach = 3.6f;
+    [SerializeField, Min(0.1f)] private float reach = 5.5f;
     [SerializeField, Range(10f, 180f)] private float sweepAngle = 70f;
     [SerializeField, Min(0.05f)] private float telegraph = 0.6f;
     [Tooltip("냉기를 뿜는 시간. 이 동안 방향은 고정이다.")]

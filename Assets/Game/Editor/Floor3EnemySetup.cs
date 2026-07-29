@@ -38,13 +38,15 @@ public static class Floor3EnemySetup
         // 킹크랩 — 밀치기 전위. 접근해서 부채꼴 가위치기로 플레이어를 밀어낸다.
         new EnemySpec
         {
-            name = "Kingler", health = 130, scale = 1.25f, moveSpeed = 3.2f,
+            name = "Kingler", health = 130, scale = 1.25f, moveSpeed = 3.6f,
             contactDamage = 10, gold = 14, knockbackMultiplier = 0.7f,
             boxSize = new Vector2(0.85f, 0.6f),
             ability = typeof(EnemyPincerAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 2.4f), ("cooldown", 4f), ("initialDelay", 1f),
+                // 시전 거리는 부채꼴 반지름(3.0)보다 조금 넓게 둔다. 같거나 좁으면 가장자리에
+                // 걸린 플레이어에게는 아예 시전하지 않아, 늘린 사거리가 헛돈다.
+                ("range", 3.2f), ("reach", 3f), ("cooldown", 4f), ("initialDelay", 1f),
             },
         },
         // 강챙이 — 흡인형 근접. 소용돌이로 당겼다가 충격파로 되민다.
@@ -55,20 +57,26 @@ public static class Floor3EnemySetup
             ability = typeof(EnemyVortexAbility),
             abilityValues = new (string, object)[]
             {
-                // 흡인 반지름(3.4)보다 약간 넓을 때부터 시작해, 걸어오는 플레이어를 마중한다.
+                // 흡인 반지름(4.0)보다 약간 넓을 때부터 시작해, 걸어오는 플레이어를 마중한다.
+                // 흡인과 충격파는 2:1 비율을 지킨다 — 충격파가 흡인에 비해 커지면
+                // "당겨지는 동안 걸어 나가면 산다"는 규칙이 성립하지 않는다.
                 // 첫 시전 2.2초 — 쥬래곤의 첫 냉기(1.6초)와 겹치지 않게 어긋내는 값.
-                ("range", 4.2f), ("cooldown", 6f), ("initialDelay", 2.2f),
+                ("range", 4.8f), ("vortexRadius", 4f), ("blastRadius", 2f),
+                ("cooldown", 6f), ("initialDelay", 2.2f),
             },
         },
         // 쥬래곤 — 감속 지원. 냉기 부채꼴로 늦추고, 오래 노출되면 잠깐 얼린다.
         new EnemySpec
         {
-            name = "Dewgong", health = 100, scale = 1.25f, moveSpeed = 2.8f,
+            name = "Dewgong", health = 100, scale = 1.25f, moveSpeed = 3.2f,
             contactDamage = 8, gold = 14, keepDistance = 2.6f,
             ability = typeof(EnemyFrostBreathAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 4.4f), ("minRange", 0.8f), ("cooldown", 4.5f), ("initialDelay", 1.6f),
+                // 부채꼴 반지름(5.5)이 시전 거리(4.4)보다 넓다. 일부러 그렇게 뒀다 —
+                // 예고를 보고 뒤로 달아나는 플레이어까지 냉기가 따라붙어야 감속 역할이 산다.
+                ("range", 4.4f), ("reach", 5.5f), ("minRange", 0.8f),
+                ("cooldown", 4.5f), ("initialDelay", 1.6f),
             },
         },
         // 아쿠스타 — 기하학형 원거리 딜러. 외곽으로 순간이동해 +/× 레이저를 쏜다.
@@ -84,10 +92,13 @@ public static class Floor3EnemySetup
             },
         },
         // 신뇽 — 해류 지원 엘리트. 마지막 일반 전투방에 한 마리만 나온다.
+        // 아쿠스타와 같은 원거리 적이다. 붙어서 몸으로 싸우는 적이 아니라 해류를 깔고
+        // 물러나 있어야 하므로, 아쿠스타(3.8)보다 조금 더 떨어진 거리를 유지한다.
         new EnemySpec
         {
             name = "Dragonair", health = 220, scale = 1.3f, moveSpeed = 3.2f,
             contactDamage = 12, gold = 26, knockbackMultiplier = 0.5f,
+            keepDistance = 4.2f,
             boxSize = new Vector2(0.7f, 0.75f),
             ability = typeof(EnemyCurrentBandAbility),
             abilityValues = new (string, object)[]
