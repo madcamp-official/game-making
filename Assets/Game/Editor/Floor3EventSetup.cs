@@ -146,6 +146,27 @@ public static class Floor3EventSetup
                     trenchPainted++;
                 }
 
+            // 2.5. 벽 띠의 물길(WallMap)이 방 안쪽까지 흘러 들어와 있으면 걷어낸다.
+            //      WallMap이 GroundMap 위에 그려지므로, 방 안에 남은 물 타일은 방금 깐
+            //      가장자리 타일을 덮어 직선으로 잘려 보이게 만든다. 벽 띠 구간은 그대로 둔다.
+            Tilemap wallMap = null;
+            foreach (Tilemap map in room.GetComponentsInChildren<Tilemap>())
+                if (map.gameObject.name == "WallMap") wallMap = map;
+            int overlayCleared = 0;
+            if (wallMap != null)
+                foreach (Vector3Int pos in wallMap.cellBounds.allPositionsWithin)
+                {
+                    if (pos.y < TrenchCellMinY || pos.y > TrenchCellMaxY) continue;
+                    TileBase tile = wallMap.GetTile(pos);
+                    if (tile == null) continue;
+                    if (tile.name.StartsWith("S_18_") || tile.name.StartsWith("S_19_") ||
+                        tile.name.StartsWith("S_20_"))
+                    {
+                        wallMap.SetTile(pos, null);
+                        overlayCleared++;
+                    }
+                }
+
             // 3. 계곡을 몸으로는 못 건너게 막는다. 건너는 연출 동안만 이벤트가 끈다.
             Transform trench = FindChildByName(room.transform, "TrenchCollider");
             if (trench == null)
@@ -216,7 +237,7 @@ public static class Floor3EventSetup
             so.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(room, RoomPath);
-            return "라프라스 방 완성: 연못 " + pondCleared + "칸 메움, 계곡 " +
+            return "라프라스 방 완성: 벽띠 겹침 " + overlayCleared + "칸 걷음, 연못 " + pondCleared + "칸 메움, 계곡 " +
                    (TrenchCellMaxX - TrenchCellMinX + 1) + "칸 폭 " + trenchPainted +
                    "칸, 라프라스 " + LaprasHome + " → " + LaprasRideTarget +
                    " (" + GlideDuration + "초), 하차 " + PlayerDropoff +
