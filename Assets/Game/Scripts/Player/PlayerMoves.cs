@@ -74,23 +74,30 @@ public class PlayerMoves : MonoBehaviour
         if (UIManager.Instance != null) UIManager.Instance.ShowMoveUpgrades(this);
     }
 
-    /// <summary>진화할 때 다음 기술을 하나 배운다. 더 배울 게 없으면 아무 일도 없다.</summary>
-    public void LearnNext()
+    /// <summary>
+    /// 진화할 때 다음 기술을 하나 배운다. 실제로 배운 기술을 돌려주고, 더 배울 게 없으면 null.
+    ///
+    /// 돌려주는 이유는 보스 보상 흐름이 "무엇을 배웠는지"를 전용 화면에 적어야 하기 때문이다.
+    /// </summary>
+    public MoveType? LearnNext()
     {
-        if (learned.Count >= MoveInfo.MaxMoves) return;
+        if (learned.Count >= MoveInfo.MaxMoves) return null;
         foreach (MoveType move in MoveInfo.LearnOrder)
         {
             if (learned.Contains(move)) continue;
             learned.Add(move);
             OnMovesChanged?.Invoke();
-            if (UIManager.Instance != null)
+            // 보스 보상 흐름이 도는 중이면 전용 화면이 이름·조작키·효과까지 따로 안내한다.
+            // 여기서 한 줄 알림까지 띄우면 같은 말이 두 번 겹친다.
+            if (!BossRewardSequence.IsRunning && UIManager.Instance != null)
             {
                 string name = MoveInfo.NameOf(move);
                 UIManager.Instance.ShowMessage(
                     "새로운 기술 " + name + KoreanText.ObjectParticle(name) + " 배웠다!", 2.5f);
             }
-            return;
+            return move;
         }
+        return null;
     }
 
     /// <summary>

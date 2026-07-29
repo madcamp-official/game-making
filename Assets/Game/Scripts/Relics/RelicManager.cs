@@ -212,8 +212,8 @@ public class RelicManager : MonoBehaviour
     /// </summary>
     public RelicData DrawNextNonChoice() => Draw(r => r.IsChoiceItem);
 
-    /// <summary>고르지 않은 유물을 더미로 돌려보낸다 (다우징머신).</summary>
-    private void ReturnToPool(RelicData relic)
+    /// <summary>고르지 않은 유물을 더미로 돌려보낸다 (다우징머신). 사라지지 않고 나중에 다시 나온다.</summary>
+    public void ReturnToPool(RelicData relic)
     {
         if (relic == null || relics.Contains(relic) || upcoming.Contains(relic)) return;
         upcoming.Insert(UnityEngine.Random.Range(0, upcoming.Count + 1), relic);
@@ -251,41 +251,22 @@ public class RelicManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 보스방 보상. 다우징머신이 있으면 둘을 뽑아 하나를 고르게 하고, 없으면 그냥 하나 준다.
-    /// 고르지 않은 쪽은 더미로 돌아가므로 사라지지 않는다.
+    /// 보스방 보상으로 <b>내놓을</b> 유물을 뽑는다. 지급하지는 않는다 —
+    /// 다우징머신이 있으면 둘(고르게 한다), 없으면 하나. 줄 것이 없으면 빈 목록이다.
+    ///
+    /// 뽑기와 지급을 나눈 이유: 보스 보상은 <see cref="BossRewardSequence"/>가 순서를 정해
+    /// 한 장씩 보여 주는데, 그러려면 "무엇이 나왔는지"를 화면에 그리기 <i>전에</i> 알아야 한다.
     /// </summary>
-    public static void GrantBossReward(RelicData fixedRelic)
+    public static List<RelicData> DrawBossReward(RelicData fixedRelic)
     {
         RelicManager manager = Instance;
-        if (manager == null) return;
+        if (manager == null) return new List<RelicData>();
 
-        if (fixedRelic != null && !manager.Has(fixedRelic)) { manager.AddRelic(fixedRelic); return; }
-        if (!manager.Has(RelicEffect.DowsingMachine)) { GrantReward(null); return; }
+        // 방이 특정 유물을 못박아 두었으면 더미를 거치지 않는다 (이미 지녔으면 더미에서 뽑는다).
+        if (fixedRelic != null && !manager.Has(fixedRelic))
+            return new List<RelicData> { fixedRelic };
 
-        List<RelicData> offered = manager.DrawNext(2);
-        if (offered.Count == 0) return;
-        if (offered.Count == 1) { manager.AddRelic(offered[0]); return; }
-
-        manager.StartCoroutine(manager.OfferChoiceRoutine(offered[0], offered[1]));
-    }
-
-    private IEnumerator OfferChoiceRoutine(RelicData first, RelicData second)
-    {
-        yield return WaitForQuietScreen();
-
-        bool opened = UIManager.Instance != null &&
-                      UIManager.Instance.ShowRelicChoice(first, second, chosen =>
-                      {
-                          AddRelic(chosen);
-                          ReturnToPool(chosen == first ? second : first);
-                      });
-
-        // 창을 띄울 수 없으면 보상을 잃지 않도록 첫 번째를 그냥 준다.
-        if (!opened)
-        {
-            AddRelic(first);
-            ReturnToPool(second);
-        }
+        return manager.DrawNext(manager.Has(RelicEffect.DowsingMachine) ? 2 : 1);
     }
 
     /// <summary>
@@ -300,7 +281,7 @@ public class RelicManager : MonoBehaviour
     {
         yield return null;
         while (MoveUpgradePanel.IsOpen || EventDialogue.IsOpen || RelicChoicePanel.IsOpen ||
-               IsEvolutionPlaying)
+               BossRewardSequence.IsRunning || IsEvolutionPlaying)
             yield return null;
     }
 
@@ -316,7 +297,14 @@ public class RelicManager : MonoBehaviour
     /// <summary>
     /// 유물을 지급한다. 이미 가진 유물이거나, 구애 시리즈를 이미 하나 지니고 있으면 아무 일도 하지 않는다.
     /// </summary>
-    public void AddRelic(RelicData relic)
+    public void AddRelic(RelicData relic) => AddRelic(relic, true);
+
+    /// <summary>
+    /// <paramref name="announce"/>가 false면 획득 팝업을 띄우지 않는다.
+    /// 보스 보상 흐름처럼 <b>이미 전용 화면으로 보여 준</b> 자리에서 쓴다 — 팝업까지 겹치면
+    /// 같은 유물이 화면 두 곳에 동시에 뜬다.
+    /// </summary>
+    public void AddRelic(RelicData relic, bool announce)
     {
         if (relic == null || relics.Contains(relic)) return;
 
@@ -335,7 +323,7 @@ public class RelicManager : MonoBehaviour
         RecalculateModifiers();
         OnRelicsChanged?.Invoke();
 
-        if (UIManager.Instance != null)
+        if (announce && UIManager.Instance != null)
             UIManager.Instance.ShowRelicAcquired(relic, 3f);
 
         ApplyOnAcquire(relic);

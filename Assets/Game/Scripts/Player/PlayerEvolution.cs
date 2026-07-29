@@ -30,27 +30,51 @@ public class PlayerEvolution : MonoBehaviour
     /// <summary>진화 연출이 진행 중인지. 연출 중 재진입을 막는다.</summary>
     public bool IsEvolving { get; private set; }
 
+    /// <summary>지금 단계의 이름. 보상 정리 화면이 "무엇으로 진화했는지"를 여기서 읽는다.</summary>
+    public string CurrentStageName =>
+        stages != null && CurrentStageIndex >= 0 && CurrentStageIndex < stages.Length
+            ? stages[CurrentStageIndex].stageName : null;
+
+    /// <summary>가장 최근 진화에서 새로 배운 기술. 배울 것이 없었으면 null.</summary>
+    public MoveType? LastLearnedMove { get; private set; }
+
+    /// <summary>
+    /// 지금 <see cref="Evolve"/>를 부르면 실제로 진화하는지.
+    ///
+    /// 보스 보상 흐름이 진화·기술 습득 단계를 통째로 건너뛸지 <b>미리</b> 정해야 해서 따로 뺐다.
+    /// 불러 보고 알아내는 방법은 쓸 수 없다 — 진화는 부르는 순간 시작되기 때문이다.
+    /// </summary>
+    public bool CanEvolve
+    {
+        get
+        {
+            // 연출 중 재진입 차단. 진화를 부르는 곳이 둘이다 — 보스방 클리어와, 행복의알을 지닌 채
+            // 상점방을 나갈 때(RoomFlowController.TryHappyEggEvolve). 아래 "층당 한 단계" 제한이
+            // 둘을 갈라 주지만, 연출이 겹치는 것은 그 전에 여기서 막는다.
+            // 예전에는 두 번째 연출이 겹치면서 Kinematic 상태를 원래 상태로 잘못 기억해
+            // 연출이 끝난 뒤에도 Kinematic으로 남았고(=벽을 통과), 단계도 한 번에 두 칸 올라갔다.
+            if (IsEvolving) return false;
+
+            // 이미 쓰러진 뒤라면 진화하지 않는다. (플레이어가 죽는 것과 동시에 보스가 죽으면
+            // 진화의 완전 회복이 기력의 덩어리 없이 부활시키는 버그가 있었다.)
+            Health health = GetComponent<Health>();
+            if (health != null && health.IsDead) return false;
+
+            if (stages == null || CurrentStageIndex + 1 >= stages.Length) return false;
+
+            // 층당 최대 1단계: N층에서는 N단계까지만 진화할 수 있다.
+            // (행복의알로 조기 진화했다면 같은 층 보스 처치로 또 진화하지 않는다.)
+            if (RoomFlowController.Instance != null &&
+                CurrentStageIndex + 1 > RoomFlowController.Instance.CurrentFloorIndex + 1)
+                return false;
+
+            return true;
+        }
+    }
+
     public void Evolve()
     {
-        // 연출 중 재진입 차단. 진화를 부르는 곳이 둘이다 — 보스방 클리어와, 행복의알을 지닌 채
-        // 상점방을 나갈 때(RoomFlowController.TryHappyEggEvolve). 아래 "층당 한 단계" 제한이
-        // 둘을 갈라 주지만, 연출이 겹치는 것은 그 전에 여기서 막는다.
-        // 예전에는 두 번째 연출이 겹치면서 Kinematic 상태를 원래 상태로 잘못 기억해
-        // 연출이 끝난 뒤에도 Kinematic으로 남았고(=벽을 통과), 단계도 한 번에 두 칸 올라갔다.
-        if (IsEvolving) return;
-
-        // 이미 쓰러진 뒤라면 진화하지 않는다. (플레이어가 죽는 것과 동시에 보스가 죽으면
-        // 진화의 완전 회복이 자뭉열매 없이 부활시키는 버그가 있었다.)
-        Health health = GetComponent<Health>();
-        if (health != null && health.IsDead) return;
-
-        if (stages == null || CurrentStageIndex + 1 >= stages.Length) return;
-
-        // 층당 최대 1단계: N층에서는 N단계까지만 진화할 수 있다.
-        // (행복의알로 조기 진화했다면 같은 층 보스 처치로 또 진화하지 않는다.)
-        if (RoomFlowController.Instance != null &&
-            CurrentStageIndex + 1 > RoomFlowController.Instance.CurrentFloorIndex + 1)
-            return;
+        if (!CanEvolve) return;
 
         IsEvolving = true;
         CurrentStageIndex++; // 연출 시작과 동시에 단계를 확정한다 (중복 진화 방지)
@@ -104,7 +128,9 @@ public class PlayerEvolution : MonoBehaviour
                 if (UIManager.Instance != null)
                     UIManager.Instance.ShowMessage("어라...?! 몸이 빛나기 시작했다!", 1.6f);
 
-                WaitForSeconds step = new WaitForSeconds(flashStepDuration);
+                // 실제 시간으로 센다. 이 연출은 보스 보상 흐름 안에서도 도는데, 그때는
+                // 시간이 멈춰 있어(timeScale 0) 스케일 시간으로 기다리면 영영 깨어나지 않는다.
+                WaitForSecondsRealtime step = new WaitForSecondsRealtime(flashStepDuration);
                 for (int i = 0; i < 6; i++)
                 {
                     if (sr != null) sr.color = i % 2 == 0 ? Color.white * 3f : Color.white;
@@ -156,6 +182,6 @@ public class PlayerEvolution : MonoBehaviour
 
         // 진화할 때마다 기술을 하나 더 배운다 (처음 둘 → 셋 → 넷).
         PlayerMoves moves = GetComponent<PlayerMoves>();
-        if (moves != null) moves.LearnNext();
+        LastLearnedMove = moves != null ? moves.LearnNext() : null;
     }
 }

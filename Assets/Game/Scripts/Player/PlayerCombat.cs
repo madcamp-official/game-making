@@ -222,8 +222,10 @@ public class PlayerCombat : MonoBehaviour
         if (!controller.ControlEnabled || (health != null && health.IsDead)) return;
         // 경직 중에는 공격도 못 한다. 후딜이 없는 것과 같아지면 경직을 넣은 의미가 없다.
         if (controller.IsStunned) return;
-        // 강화 팔레트나 이벤트 대사창이 떠 있는 동안에는 클릭이 공격으로 새면 안 된다.
-        if (MoveUpgradePanel.IsOpen || RelicChoicePanel.IsOpen || EventDialogue.IsOpen) return;
+        // 강화 팔레트·이벤트 대사창·보스 보상 화면이 떠 있는 동안에는 클릭이 공격으로 새면 안 된다.
+        // 특히 보상 화면은 "아무 키나 눌러 계속"이라 넘기는 입력이 그대로 공격이 될 수 있다.
+        if (MoveUpgradePanel.IsOpen || RelicChoicePanel.IsOpen || EventDialogue.IsOpen ||
+            BossRewardSequence.IsRunning) return;
 
         Mouse mouse = Mouse.current;
         Keyboard kb = Keyboard.current;

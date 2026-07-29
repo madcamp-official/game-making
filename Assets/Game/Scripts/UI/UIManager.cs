@@ -101,6 +101,10 @@ public class UIManager : MonoBehaviour
         GameObject eventGo = MakeFullScreenChild(canvasRoot, "EventDialogue");
         eventGo.transform.SetAsLastSibling();
         eventDialogue = eventGo.AddComponent<EventDialogue>();
+
+        // 보스 보상 흐름은 가장 위에 뜬다. 유물 선택 창을 띄우는 동안에는 스스로 접으므로
+        // 둘이 겹쳐 보이지는 않는다.
+        BossRewardSequence.Create(canvasRoot).transform.SetAsLastSibling();
     }
 
     /// <summary>레벨이 올랐을 때 기술 강화 팔레트를 띄운다.</summary>
@@ -167,7 +171,9 @@ public class UIManager : MonoBehaviour
     private IEnumerator MessageRoutine(string message, float duration)
     {
         messageText.text = message;
-        yield return new WaitForSeconds(duration);
+        // 실제 시간으로 센다. 진화 연출과 보상 화면은 시간을 멈춘 채로 도는데,
+        // 스케일 시간으로 기다리면 그동안 띄운 안내가 흐름 내내 화면에 눌어붙는다.
+        yield return new WaitForSecondsRealtime(duration);
         messageText.text = "";
         messageRoutine = null;
     }

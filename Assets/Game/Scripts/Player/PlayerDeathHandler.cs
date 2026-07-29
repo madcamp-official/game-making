@@ -44,7 +44,9 @@ public class PlayerDeathHandler : MonoBehaviour
 
     private IEnumerator ReviveRoutine()
     {
-        yield return new WaitForSeconds(0.8f);
+        // 실제 시간으로 센다. 보스의 마지막 공격과 함께 쓰러지면 곧바로 보스 보상 흐름이
+        // 시간을 멈추는데, 스케일 시간으로 기다리면 부활이 영영 오지 않는다.
+        yield return new WaitForSecondsRealtime(0.8f);
 
         // 방 진입 전 상태로 복원: 입구 위치 + 체력 전부 회복
         transform.position = roomEntrance;

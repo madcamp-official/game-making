@@ -52,6 +52,30 @@ public static class MoveInfo
     }
 
     /// <summary>
+    /// 기술 한 줄 소개. 새로 배웠을 때 전용 화면(<see cref="BossRewardSequence"/>)이 보여 준다.
+    ///
+    /// 수치를 적지 않는다. 기술 수치는 진화 단계·강화·유물로 계속 달라지는데, 여기 적어 두면
+    /// 어느 한쪽만 고쳤을 때 화면이 거짓말을 한다. 대신 <b>무엇에 쓰는 기술인지</b>를 적는다.
+    /// </summary>
+    public static string SummaryOf(MoveType move)
+    {
+        switch (move)
+        {
+            case MoveType.Tackle:
+                return "겨눈 방향을 후려치는 근접 공격. 쿨타임이 짧아 가장 자주 쓰게 된다.";
+            case MoveType.VineWhip:
+                return "두어 칸 밖까지 뻗는 견제기. 피해는 낮지만 밀쳐 내며 거리를 만든다.\n" +
+                       "휘두른 뒤에는 잠깐 움직일 수 없다.";
+            case MoveType.SeedSow:
+                return "발밑에 회복 장판을 깐다. 그 위에 서 있는 동안 체력이 차오른다.\n" +
+                       "전투방마다 한 번뿐이다 — 언제 쓸지가 곧 선택이다.";
+            case MoveType.PetalDance:
+                return "몸을 따라다니는 피해 장판. 적에게 붙어 있는 동안 계속 때린다.";
+        }
+        return "";
+    }
+
+    /// <summary>
     /// 기술의 사거리 속성. 유물·이벤트 배율이 여기서 갈린다 (<see cref="AttackKinds"/>).
     ///
     /// 덩굴채찍은 2칸 밖에서 닿으므로 원거리다 — 구애 시리즈에서 잎날가르기가 있던 자리를

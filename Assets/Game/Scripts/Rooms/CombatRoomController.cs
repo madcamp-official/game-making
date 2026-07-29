@@ -86,14 +86,27 @@ public class CombatRoomController : MonoBehaviour
         if (aliveEnemies.Count > 0) return;
 
         MarkCleared();
-        GiveClearReward();
-        if (exitDoor != null) exitDoor.SetOpen(true);
+        GiveLeftoversHeal();
 
         if (isBossRoom)
         {
+            // 진화·기술 습득·유물을 한꺼번에 터뜨리지 않고 한 장씩 보여 준다.
+            // 출구도 그 흐름이 다 끝난 뒤에 연다.
+            if (BossRewardSequence.Begin(transform, bossRewardRelic, exitDoor)) return;
+
+            // 화면을 띄울 수 없으면 예전 방식으로 즉시 처리한다. 보상을 잃지 않는 것이 먼저다.
+            RelicManager.GrantReward(bossRewardRelic);
             PlayerEvolution evolution = FindAnyObjectByType<PlayerEvolution>();
             if (evolution != null) evolution.Evolve();
         }
+        else
+        {
+            // 보스방은 진화로 기술을 하나 주므로 경험치까지 얹지 않는다.
+            // 일반 전투방 두 개마다 레벨이 올라 강화 팔레트가 뜬다.
+            if (PlayerLevel.Instance != null) PlayerLevel.Instance.AddRoomClear();
+        }
+
+        if (exitDoor != null) exitDoor.SetOpen(true);
     }
 
     /// <summary>
@@ -107,22 +120,6 @@ public class CombatRoomController : MonoBehaviour
     {
         clearedVisitId = VisitId;
         EnemyEffect.ClearUnder(transform);
-    }
-
-    // 일반 전투방은 클리어해도 아무것도 주지 않는다. 보스방만 보상 유물을 준다.
-    // 어느 쪽이든 먹다남은음식이 있으면 방을 정리한 값으로 체력을 조금 회복한다.
-    private void GiveClearReward()
-    {
-        GiveLeftoversHeal();
-        if (isBossRoom)
-        {
-            RelicManager.GrantBossReward(bossRewardRelic);
-            return;
-        }
-
-        // 보스방은 진화로 기술을 하나 주므로 경험치까지 얹지 않는다.
-        // 일반 전투방 두 개마다 레벨이 올라 강화 팔레트가 뜬다.
-        if (PlayerLevel.Instance != null) PlayerLevel.Instance.AddRoomClear();
     }
 
     // 먹다남은음식: 전투방을 정리할 때마다 체력을 조금 회복한다.
