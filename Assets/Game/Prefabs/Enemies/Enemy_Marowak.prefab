@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 100
+  maxHealth: 135
   invincibleDuration: 0.3
 --- !u!114 &448403025675294776
 MonoBehaviour:
@@ -228,8 +228,8 @@ MonoBehaviour:
   attackContactReach: 0.25
   attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 10
-  goldRewardMax: 14
+  goldRewardMin: 15
+  goldRewardMax: 20
   keepDistance: 3.2
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
@@ -277,13 +277,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBoomerangAbility
   range: 6.5
   minRange: 1.2
-  cooldown: 2.5
+  cooldown: 1.2
   initialDelay: 1
-  windup: 0.4
+  windup: 0.25
   releaseDelay: 0.13
   throwDistance: 4.6
-  boneSpeed: 8
-  damage: 13
+  boneSpeed: 13
+  damage: 18
   hitRadius: 0.55
   hitRecovery: 0.7
   missRecovery: 1.3

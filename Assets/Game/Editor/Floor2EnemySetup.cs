@@ -37,40 +37,45 @@ public static class Floor2EnemySetup
 
     private static readonly EnemySpec[] Specs =
     {
-        // 성원숭 — 가장 기본적인 2층 근접. 붙어서 멈추고, 주먹을 들고, 전진하며 2연타.
-        // 한 대라도 맞히면 0.7초, 전부 빗나가면 지쳐서 1.5초 정지. 옆으로 비키는 게 정답이다.
+        // 성원숭 — 2층의 기본 근접. 예고를 보이며 최대 3연속으로 짧게 돌진한다.
+        // 맞히면 거기서 끝(0.7초), 세 번 다 빗나가면 지쳐서 길게 멈춘다(1.6초).
         new EnemySpec
         {
-            name = "Primeape", health = 110, scale = 1.2f, moveSpeed = 3.7f,
-            goldMin = 9, goldMax = 12,
+            name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 3.7f,
+            goldMin = 14, goldMax = 19,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
             {
-                // 발동은 중심 거리 기준(EnemyAbility) — reach(표면 기준)에 두 몸의
-                // 반지름만큼 더해 줘야 몸이 닿을 즈음 발동한다.
-                ("range", 2.4f), ("cooldown", 0.8f), ("initialDelay", 1.0f),
+                // 발동은 중심 거리 기준(EnemyAbility) — 돌진으로 거리를 좁히므로
+                // 조금 멀리서도 시작할 수 있게 넉넉히 둔다.
+                ("range", 5.5f), ("cooldown", 1.1f), ("initialDelay", 1.0f),
                 ("actionState", "MultiStrike"), ("readyState", "Ready"),
-                // swingDuration은 플레이어 피격 무적(0.5초)보다 길어야 두 타가 다 들어간다.
-                ("hits", 2), ("windup", 0.4f), ("swingDuration", 0.62f), ("hitDelay", 0.18f),
-                ("lungeSpeed", 6.5f), ("reach", 1.2f), ("sweepAngle", 150f), ("damage", 8),
-                ("hitPause", 0.7f), ("missPause", 1.5f),
+                ("maxDashes", 3), ("windup", 0.45f), ("telegraph", 0.4f),
+                ("dashDistance", 2.2f), ("dashSpeed", 9f), ("hitDelay", 0.18f),
+                // 돌진 사이 간격은 피격 무적(0.5초)보다 길어야 연타가 먹히지 않는다.
+                ("betweenDashes", 0.55f),
+                ("reach", 1.2f), ("sweepAngle", 150f), ("damage", 14),
+                ("hitPause", 0.7f), ("missPause", 1.6f),
+                // 밝은 모래 위에서 읽히도록 대비를 준다. 옅은 주황은 배경에 묻힌다.
+                ("pathColor", new Color(0.3f, 0.2f, 0.42f, 0.42f)),
+                ("hitColor", new Color(0.88f, 0.12f, 0.2f, 0.52f)),
             },
         },
-        // 고지 — 방어형 전위. 발톱을 들어 예고하고 같은 방향을 2연속 할퀸 뒤, 공처럼 말려
+        // 고지 — 방어형 전위. 발톱을 들어 길게 예고하고 한 번 크게 할퀸 뒤, 공처럼 말려
         // 물러나 30%만 받으며 버티고, 몸을 펴면서 1.2초 무방비로 굳는다.
         new EnemySpec
         {
             // 이속은 3.0(처음)과 3.6(상향) 사이. 붙는 맛은 살리되 플레이어(5)를 따라붙지는 못한다.
-            name = "Sandslash", health = 140, scale = 1.25f, moveSpeed = 3.3f,
-            goldMin = 10, goldMax = 14, knockbackMultiplier = 0.6f,
+            name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.3f,
+            goldMin = 15, goldMax = 20, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyGuardAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 2.3f), ("cooldown", 2.5f), ("initialDelay", 1f),
-                ("readyState", "StrikeReady"), ("readyDuration", 0.45f),
-                // strikeDuration도 피격 무적(0.5초)보다 길게 — 짧으면 둘째 타가 흡수된다.
-                ("strikes", 2), ("strikeDamage", 9), ("strikeHitDelay", 0.18f),
-                ("strikeDuration", 0.6f), ("strikeReach", 1.2f), ("strikeSweepAngle", 180f),
+                ("range", 2.6f), ("cooldown", 2.2f), ("initialDelay", 1f),
+                // 한 방이 무거운 만큼 예고를 길게 준다 — 보고 피하라는 뜻이다.
+                ("readyState", "StrikeReady"), ("readyDuration", 0.6f),
+                ("strikeDamage", 22), ("strikeHitDelay", 0.18f),
+                ("strikeDuration", 0.5f), ("strikeReach", 1.3f), ("strikeSweepAngle", 180f),
                 ("guardDuration", 1f), ("damageReduction", 0.7f),
                 // 몸 펴기(0.14) + 정지(1.05) ≈ 1.2초 — 방어가 풀린 값이다.
                 ("uncurlDuration", 0.14f), ("recovery", 1.05f),
@@ -80,31 +85,36 @@ public static class Floor2EnemySetup
         // 투척 자세로 무방비다. 맞혔으면 0.7초, 왕복이 다 빗나가면 1.3초 정지.
         new EnemySpec
         {
-            name = "Marowak", health = 100, scale = 1.2f, moveSpeed = 3f,
-            goldMin = 10, goldMax = 14, keepDistance = 3.2f,
+            name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3f,
+            goldMin = 15, goldMax = 20, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 6.5f), ("minRange", 1.2f), ("cooldown", 2.5f), ("initialDelay", 1f),
+                ("range", 6.5f), ("minRange", 1.2f), ("cooldown", 1.2f), ("initialDelay", 1f),
+                // 던지는 손이 빨라졌다 — 예고를 짧게, 뼈를 빠르게, 쿨을 절반으로.
+                ("windup", 0.25f), ("boneSpeed", 13f), ("damage", 18),
                 ("hitRecovery", 0.7f), ("missRecovery", 1.3f),
             },
         },
-        // 닥트리오 — 엘리트. 잠복 기습 한 방이 크고 넓은 대신, 공격 후 땅 위에서 1.5초
-        // 스스로 스턴. 여러 마리여도 한 번에 한 마리만 파고든다 (EnemyBurrowAbility.activeDiver).
+        // 닥트리오 — 이 층의 엘리트. 방마다 한 마리만 나오고, 체력·피해가 잡몹의 갑절이다.
+        // 잠복 기습 한 방이 크고 넓은 대신 공격 후 땅 위에서 1.5초 스스로 스턴.
+        // 여러 마리여도 한 번에 한 마리만 파고든다 (EnemyBurrowAbility.activeDiver).
         new EnemySpec
         {
             // 넉백 배율 1.6 — 몸통박치기(힘 6)에 맞으면 9.6으로 밀려난다. 파고들 때의 속도(9.5)와
             // 같게 맞춘 값이다. 맞고 땅속으로 밀려나는 것도 이 적에게는 '이동'이라 느리면 답답하다.
-            name = "Dugtrio", health = 95, scale = 1.2f, moveSpeed = 2.5f,
-            goldMin = 16, goldMax = 22, knockbackMultiplier = 1.6f, basicAI = false,
+            name = "Dugtrio", health = 240, scale = 1.35f, moveSpeed = 2.5f,
+            goldMin = 34, goldMax = 44, knockbackMultiplier = 1.1f, basicAI = false,
             boxSize = new Vector2(0.9f, 0.55f),
             ability = typeof(EnemyBurrowAbility),
             abilityValues = new (string, object)[]
             {
                 // 사거리 = 방 전체. 잠수가 유일한 이동 수단이라, 사거리 밖이면 조각상이 되어
                 // 어그로가 풀린 것처럼 보인다.
-                ("range", 20f), ("cooldown", 2f), ("initialDelay", 1.4f),
-                ("surfaceRadius", 1.5f), ("damage", 22), ("recovery", 1.5f),
+                // 엘리트답게 한 방이 무겁다. 대신 주기를 늘려 "가끔 오는 큰 것"으로 만든다.
+                ("range", 20f), ("cooldown", 3.2f), ("initialDelay", 1.8f),
+                ("surfaceWindup", 0.7f), ("surfaceRadius", 1.9f), ("damage", 34),
+                ("recovery", 1.5f),
                 // 맞고 나서 땅속으로 사라지는 것이 유일한 도피다. 플레이어(5)보다 확실히 빨라야
                 // 쫓아가 잡는 게 아니라 놓치는 느낌이 된다.
                 ("diveSpeed", 9.5f),
@@ -114,14 +124,15 @@ public static class Floor2EnemySetup
         // 잔류 장판 없음, 직접 피해만. 분사가 끝나면 과열로 2초 정지.
         new EnemySpec
         {
-            name = "Ninetales", health = 90, scale = 1.25f, moveSpeed = 3.4f,
-            goldMin = 12, goldMax = 16, keepDistance = 4.2f,
+            name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 3.4f,
+            goldMin = 16, goldMax = 21, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 6.5f), ("minRange", 1f), ("cooldown", 1.8f), ("initialDelay", 1.2f),
-                ("windup", 0.75f), ("coneRange", 5f), ("coneAngle", 70f),
-                ("sprayDuration", 1.1f), ("damage", 10), ("tickInterval", 0.45f),
+                ("range", 8f), ("minRange", 1f), ("cooldown", 1.8f), ("initialDelay", 1.2f),
+                // 넓게 지지는 것이 이 적의 값이다 — 부채꼴을 길고 두툼하게.
+                ("windup", 0.75f), ("coneRange", 6.8f), ("coneAngle", 95f),
+                ("sprayDuration", 1.2f), ("damage", 13), ("tickInterval", 0.45f),
                 ("overheatDuration", 2f),
             },
         },
@@ -149,44 +160,42 @@ public static class Floor2EnemySetup
     };
 
     // 방 구성. 방 이름 → (프리팹 이름, 로컬 좌표). 방 안쪽은 대략 ±6 × ±4다.
+    //
+    // 마릿수를 줄이고 한 마리를 강하게 했다. 다섯이 한꺼번에 달려들면 누구의 예고인지
+    // 읽을 수가 없어, 결국 몸으로 부딪히는 싸움이 된다 — 2층이 피하려던 바로 그것이다.
+    // 셋 안팎이면 "지금 누가 멈출 차례인지"를 눈으로 좇을 수 있다.
+    // 닥트리오는 엘리트라 방마다 한 마리를 넘지 않고, 뒤쪽 두 방에만 나온다.
     private static readonly Dictionary<string, (string enemy, Vector2 at)[]> Rooms =
         new Dictionary<string, (string, Vector2)[]>
     {
-        // 1번방 — 근접 둘의 소개. 전위 고지 뒤에서 성원숭들이 달려든다.
+        // 1번방 — 근접 둘의 소개. 돌진(성원숭)과 단발 강타(고지)를 따로 배운다.
         ["F2Room1_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(2f, 1.5f)),
-            ("Sandslash", new Vector2(2f, -1.5f)),
-            ("Primeape", new Vector2(4.2f, 2.6f)),
-            ("Primeape", new Vector2(4.2f, -2.6f)),
-            ("Primeape", new Vector2(5f, 0f)),
+            ("Sandslash", new Vector2(2.2f, 0f)),
+            ("Primeape", new Vector2(4.6f, 2.4f)),
+            ("Primeape", new Vector2(4.6f, -2.4f)),
         },
-        // 2번방 — 근접(성원숭·고지)을 상대하는 동안 왕복 뼈다귀가 등 뒤를 노린다.
+        // 2번방 — 근접을 상대하는 동안 왕복 뼈다귀가 등 뒤를 노린다.
         ["F2Room2_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(1.8f, 0f)),
-            ("Primeape", new Vector2(3.2f, 2.4f)),
-            ("Primeape", new Vector2(3.2f, -2.4f)),
-            ("Marowak", new Vector2(5.2f, 1.5f)),
-            ("Marowak", new Vector2(5.2f, -1.5f)),
+            ("Primeape", new Vector2(2.4f, 1.8f)),
+            ("Sandslash", new Vector2(2.4f, -1.8f)),
+            ("Marowak", new Vector2(5.4f, 0f)),
         },
-        // 4번방 — 방어형 전위 뒤에서 지중 기습과 화염이 공간을 통제한다.
+        // 4번방 — 엘리트 첫 등장. 전위 뒤에서 화염이 길을 막고, 발밑에서 기습이 온다.
         ["F2Room4_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(2f, 2f)),
-            ("Sandslash", new Vector2(2f, -2f)),
+            ("Sandslash", new Vector2(2.2f, 1.8f)),
+            ("Ninetales", new Vector2(5.4f, -1.6f)),
             ("Dugtrio", new Vector2(4f, 3.2f)),
-            ("Dugtrio", new Vector2(4f, -3.2f)),
-            ("Ninetales", new Vector2(5.5f, 0f)),
         },
         // 5번방 — 혼합 전투. 멈출 적을 골라 때리는 층의 최종 시험.
         ["F2Room5_Combat"] = new (string, Vector2)[]
         {
-            ("Primeape", new Vector2(2.4f, 1.8f)),
+            ("Primeape", new Vector2(2.4f, 2f)),
+            ("Marowak", new Vector2(5.6f, -2.2f)),
+            ("Ninetales", new Vector2(5.6f, 2.2f)),
             ("Dugtrio", new Vector2(3.4f, -3f)),
-            ("Ninetales", new Vector2(5.3f, 2.8f)),
-            ("Ninetales", new Vector2(5.3f, -2.8f)),
-            ("Marowak", new Vector2(5.7f, 0f)),
         },
     };
 

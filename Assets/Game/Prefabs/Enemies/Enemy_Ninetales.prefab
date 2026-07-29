@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 90
+  maxHealth: 125
   invincibleDuration: 0.3
 --- !u!114 &1682792632542599877
 MonoBehaviour:
@@ -228,8 +228,8 @@ MonoBehaviour:
   attackContactReach: 0.25
   attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 12
-  goldRewardMax: 16
+  goldRewardMin: 16
+  goldRewardMax: 21
   keepDistance: 4.2
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
@@ -564,15 +564,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e24790479fb904f7096456e78f2393ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFlameConeAbility
-  range: 6.5
+  range: 8
   minRange: 1
   cooldown: 1.8
   initialDelay: 1.2
   windup: 0.75
-  coneRange: 5
-  coneAngle: 70
-  sprayDuration: 1.1
-  damage: 10
+  coneRange: 6.8
+  coneAngle: 95
+  sprayDuration: 1.2
+  damage: 13
   tickInterval: 0.45
   overheatDuration: 2
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.3}

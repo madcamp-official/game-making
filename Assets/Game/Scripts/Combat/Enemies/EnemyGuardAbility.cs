@@ -2,10 +2,13 @@ using System.Collections;
 using UnityEngine;
 
 /// <summary>
-/// 고지의 공격. 플레이어가 붙으면 발톱을 들어 올린 자세(StrikeReady)로 공격 방향을 예고하고,
-/// 전방을 넓게 할퀴는 <b>2연속</b> 공격(Strike x2)을 한다. 그 뒤 공 모양으로 굳은 채(Guard)
-/// 뒤로 미끄러져 물러나, 그 자세 그대로 받는 피해를 크게 줄이고 버틴 뒤, 몸을 펴며(Uncurl)
-/// 한동안 정지한다 — 방어가 풀리는 이 순간이 반격의 창이다.
+/// 고지의 공격. 플레이어가 붙으면 발톱을 들어 올린 자세(StrikeReady)로 공격 방향을 길게
+/// 예고하고, 전방을 넓게 할퀴는 <b>한 번의 강한</b> 공격(Strike)을 한다. 그 뒤 공 모양으로
+/// 굳은 채(Guard) 뒤로 미끄러져 물러나, 그 자세 그대로 받는 피해를 크게 줄이고 버틴 뒤,
+/// 몸을 펴며(Uncurl) 한동안 정지한다 — 방어가 풀리는 이 순간이 반격의 창이다.
+///
+/// 연타가 아니라 <b>한 방</b>인 이유: 예고가 길고 피해가 큰 단발이라야 "보고 피한다"가
+/// 성립한다. 두 번 긁으면 첫 타를 피해도 둘째 타에 걸려, 읽어낸 값이 돌아오지 않는다.
 ///
 /// Guard는 Attack 구르기가 가장 멀리 나아가 잠깐 멈춰 보이는 프레임 하나고,
 /// Uncurl은 그 뒤의 남은 프레임들이다 — 물러날 때부터 버티는 내내 같은 공 모양이라
@@ -21,17 +24,16 @@ public class EnemyGuardAbility : EnemyAbility
     [Header("예고")]
     [Tooltip("발톱을 들어 올린 정지 자세. 비우면 예고 자세 없이 바로 할퀸다.")]
     [SerializeField] private string readyState = "StrikeReady";
-    [Tooltip("예고 자세로 서 있는 시간. 이 시간 뒤에는 방향이 바뀌지 않는다.")]
-    [SerializeField, Min(0f)] private float readyDuration = 0.45f;
+    [Tooltip("예고 자세로 서 있는 시간. 이 시간 뒤에는 방향이 바뀌지 않는다. " +
+             "한 방이 무거운 만큼 예고도 길게 준다.")]
+    [SerializeField, Min(0f)] private float readyDuration = 0.6f;
 
-    [Header("할퀴기 x2")]
-    [SerializeField, Min(1)] private int strikes = 2;
-    [SerializeField, Min(0)] private int strikeDamage = 9;
+    [Header("할퀴기 (단발)")]
+    [SerializeField, Min(0)] private int strikeDamage = 22;
     [Tooltip("Strike 동작이 시작되고 실제로 때리기까지의 시간. 타격 프레임에 맞춘 값이다.")]
     [SerializeField, Min(0f)] private float strikeHitDelay = 0.18f;
-    [Tooltip("한 타의 전체 길이. 시트(0.47초)보다 조금 길다 — 플레이어 피격 무적이 0.5초라, " +
-             "타 사이가 그보다 짧으면 두 번째 타가 무적에 흡수되어 절대 안 맞는다.")]
-    [SerializeField, Min(0.1f)] private float strikeDuration = 0.6f;
+    [Tooltip("할퀴기 동작의 전체 길이. 때린 뒤 자세를 끝까지 보여 주고 다음 단계로 넘어간다.")]
+    [SerializeField, Min(0.1f)] private float strikeDuration = 0.5f;
     [Tooltip("몸 표면에서 더 뻗는 사거리.")]
     [SerializeField, Min(0f)] private float strikeReach = 1.2f;
     [Tooltip("할퀴기 판정 부채꼴의 전체 각도. '전방을 넓게'가 이 값이다.")]
@@ -63,12 +65,10 @@ public class EnemyGuardAbility : EnemyAbility
         }
         if (Health.IsDead) yield break;
 
-        // 2. 같은 방향으로 2연속 할퀴기. 타격 프레임에만 판정이 있다.
+        // 2. 예고한 방향을 한 번 크게 할퀸다. 타격 프레임에만 판정이 있다.
         Vector2 aim = DirectionToPlayer;
-        for (int i = 0; i < strikes; i++)
+        ReplayAction("Strike", aim);
         {
-            ReplayAction("Strike", aim);
-
             bool resolved = false;
             float elapsed = 0f;
             while (elapsed < strikeDuration && !Health.IsDead)
@@ -84,8 +84,8 @@ public class EnemyGuardAbility : EnemyAbility
                 elapsed += Time.deltaTime;
                 yield return null;
             }
-            if (Health.IsDead) yield break;
         }
+        if (Health.IsDead) yield break;
 
         // 3. 공 모양으로 굳은 채 뒤로 미끄러져 물러난다. 물러날 때부터 이미 방어 자세라
         //    구르는 동작이 흐르지 않는다 — 흐르면 어느 순간부터 단단한지 읽히지 않는다.

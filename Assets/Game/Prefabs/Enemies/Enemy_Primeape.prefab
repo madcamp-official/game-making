@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 110
+  maxHealth: 150
   invincibleDuration: 0.3
 --- !u!114 &3178872024906520883
 MonoBehaviour:
@@ -228,8 +228,8 @@ MonoBehaviour:
   attackContactReach: 0.25
   attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 9
-  goldRewardMax: 12
+  goldRewardMin: 14
+  goldRewardMax: 19
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
@@ -580,20 +580,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3699d2f9b069e4ceb98cd63ec50730dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyComboMeleeAbility
-  range: 2.4
+  range: 5.5
   minRange: 0
-  cooldown: 0.8
+  cooldown: 1.1
   initialDelay: 1
   actionState: MultiStrike
   readyState: Ready
-  hits: 2
-  windup: 0.4
-  swingDuration: 0.62
+  maxDashes: 3
+  windup: 0.45
+  telegraph: 0.4
+  dashDistance: 2.2
+  dashSpeed: 9
   hitDelay: 0.18
-  lungeWindow: {x: 0.07, y: 0.23}
-  lungeSpeed: 6.5
+  betweenDashes: 0.55
   reach: 1.2
   sweepAngle: 150
-  damage: 8
+  damage: 14
   hitPause: 0.7
-  missPause: 1.5
+  missPause: 1.6
+  pathColor: {r: 0.3, g: 0.2, b: 0.42, a: 0.42}
+  hitColor: {r: 0.88, g: 0.12, b: 0.2, a: 0.52}
