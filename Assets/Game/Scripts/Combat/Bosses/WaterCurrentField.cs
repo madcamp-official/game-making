@@ -1,10 +1,16 @@
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 /// <summary>
 /// 갸라도스 전투장의 상시 기믹 — 삼중 해류.
 ///
 /// 위·가운데·아래 세 수로가 각각 독립적으로 왼쪽 또는 오른쪽으로 흐른다. 해류 자체는 피해가 없고
 /// 플레이어의 X축 이동에만 힘을 더한다. 갸라도스·잉어킹·예고 표시는 영향을 받지 않는다.
+///
+/// 수로마다 바닥 물결도 같이 흐른다 — 화살표는 "어느 쪽으로 밀리는지"를 알려 주지만 얼마나 세게
+/// 밀리는지는 말해 주지 않는다. 바닥이 플레이어가 밀리는 속도와 <b>똑같이</b> 흐르면 그 세기가
+/// 눈에 보인다. 그래서 흐르는 속도는 <see cref="speed"/>를 그대로 쓰고, 방향도 화살표처럼
+/// 예고 동안 서서히 돌리지 않고 실제 밀림이 뒤집히는 순간 함께 뒤집는다.
 ///
 /// 힘을 더하는 방식이 중요하다. <see cref="PlayerController"/>는 매 <c>FixedUpdate</c>마다
 /// 입력으로 속도를 통째로 다시 쓰므로, 여기서 속도를 먼저 바꿔 봐야 그대로 덮어써진다.
@@ -27,6 +33,9 @@ public class WaterCurrentField : MonoBehaviour
 
     /// <summary>지형(-10, -5)보다 위, 예고(0)보다 아래. 화살표는 모든 예고 밑에 깔린다.</summary>
     private const int ArrowSortingOrder = -1;
+
+    /// <summary>흐르는 바닥은 GroundMap(-10) 위, WallMap(-5) 아래. 벽이 넘치는 부분을 덮는다.</summary>
+    private const int FloorSortingOrder = -8;
 
     private Vector2 center;
     private Vector2 halfSize;
@@ -59,6 +68,11 @@ public class WaterCurrentField : MonoBehaviour
     private Color boundaryColor;
     /// <summary>수로마다 쌓인 화살표 흐름 거리. 방향이 도는 동안에도 튀지 않게 누적으로 관리한다.</summary>
     private readonly float[] scrollOffset = new float[LaneCount];
+
+    /// <summary>수로마다 흐르는 바닥 물결. 한 칸(1유닛)마다 무늬가 반복되므로 그만큼만 밀면 된다.</summary>
+    private Sprite floorSprite;
+    private SpriteRenderer[] laneFloors;
+    private readonly float[] floorOffset = new float[LaneCount];
 
     /// <summary>방향 변경을 예고하는 중인지. 화살표 점멸 연출이 이 값을 본다.</summary>
     public bool IsChanging { get; private set; }
@@ -94,16 +108,39 @@ public class WaterCurrentField : MonoBehaviour
         return LaneMiddle;
     }
 
-    /// <summary>전투장 크기와 연출 값을 받는다. 보스 컨트롤러가 한 번만 호출한다.</summary>
+    /// <summary>
+    /// 전투장 크기와 연출 값을 받는다. 보스 컨트롤러가 한 번만 호출한다.
+    ///
+    /// <paramref name="floorTile"/>은 흐르는 바닥에 깔 그림이다. 이 컴포넌트는 방 밖에 홀로
+    /// 만들어지므로 스스로 방 바닥을 찾을 수 없다 — 씬을 훑으면 이전 방의 타일맵을 집어 온다.
+    /// 그래서 방 안에 사는 보스가 찾아 건네준다.
+    /// </summary>
     public void Configure(Vector2 arenaCenter, Vector2 arenaHalfSize, int arrowsPerLane,
-                          float scrollSpeed, Color arrowTint, Color boundaryTint)
+                          float scrollSpeed, Color arrowTint, Color boundaryTint, Sprite floorTile)
     {
         center = arenaCenter;
         halfSize = arenaHalfSize;
         arrowScrollSpeed = scrollSpeed;
         arrowColor = arrowTint;
         boundaryColor = boundaryTint;
+        floorSprite = floorTile;
         BuildVisuals(Mathf.Max(2, arrowsPerLane));
+    }
+
+    /// <summary>
+    /// 이 자리의 방 바닥 타일 그림. 자기 위치에서 위로 올라가며 <c>GroundMap</c>을 찾는다 —
+    /// 씬 전체를 훑으면 아직 정리되지 않은 다른 방의 바닥을 집을 수 있다.
+    /// </summary>
+    public static Sprite FloorSpriteAt(Transform inRoom, Vector2 worldPoint)
+    {
+        for (Transform t = inRoom; t != null; t = t.parent)
+            foreach (Tilemap map in t.GetComponentsInChildren<Tilemap>(true))
+            {
+                if (map.name != "GroundMap") continue;
+                Sprite sprite = map.GetSprite(map.WorldToCell(worldPoint));
+                if (sprite != null) return sprite;
+            }
+        return null;
     }
 
     /// <summary>페이즈별 수치. 전환할 때 다시 호출한다.</summary>
@@ -187,6 +224,7 @@ public class WaterCurrentField : MonoBehaviour
         }
 
         AnimateArrows();
+        AnimateFloor();
     }
 
     /// <summary>방향이 확정된 순간. 보스 컨트롤러가 로그를 남길 때 쓴다.</summary>
@@ -280,6 +318,8 @@ public class WaterCurrentField : MonoBehaviour
         float usableWidth = halfSize.x * 2f - laneHeight * 0.5f;
         arrowSpacing = usableWidth / arrowsPerLane;
 
+        BuildFlowingFloor(laneHeight);
+
         arrows = new SpriteRenderer[LaneCount][];
         for (int lane = 0; lane < LaneCount; lane++)
         {
@@ -311,6 +351,53 @@ public class WaterCurrentField : MonoBehaviour
         }
 
         SetVisualsVisible(false);
+    }
+
+    /// <summary>
+    /// 수로마다 흐르는 바닥을 깐다. 방 바닥 타일을 그대로 빌려 와 타일 드로우로 수로를 채우고,
+    /// 통째로 밀어 흐르게 한다 — 물결 무늬는 한 칸(1유닛)마다 반복되므로 한 칸을 넘어가면
+    /// 제자리로 되돌려도 티가 나지 않는다.
+    ///
+    /// 그림은 방 바닥 타일 그대로다 — 어떤 바닥을 깔아 두든 같은 그림이어야 이어져 보인다.
+    /// </summary>
+    private void BuildFlowingFloor(float laneHeight)
+    {
+        if (floorSprite == null) return;
+
+        laneFloors = new SpriteRenderer[LaneCount];
+        for (int lane = 0; lane < LaneCount; lane++)
+        {
+            GameObject go = new GameObject("CurrentFloor");
+            go.transform.SetParent(arrowRoot, false);
+            SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+            sr.sprite = floorSprite;
+            sr.drawMode = SpriteDrawMode.Tiled;
+            sr.tileMode = SpriteTileMode.Continuous;   // 남는 자리는 잘라 낸다 (늘리지 않는다)
+            // 좌우로 한 칸씩 넉넉히 — 흐르는 동안 가장자리가 비지 않는다. 넘치는 만큼은 벽이 덮는다.
+            sr.size = new Vector2(halfSize.x * 2f + 2f, laneHeight);
+            sr.sortingOrder = FloorSortingOrder;
+            go.transform.position = new Vector3(center.x, LaneCenterY(lane), 0f);
+            laneFloors[lane] = sr;
+            floorOffset[lane] = 0f;
+        }
+    }
+
+    /// <summary>
+    /// 바닥을 흘려보낸다. 화살표와 달리 예고 동안 서서히 돌지 않는다 — 밀림이 실제로 뒤집히는
+    /// 순간(<see cref="signs"/>가 바뀌는 그 프레임)에 같이 뒤집혀야, 발밑이 흐르는 속도가 곧
+    /// 몸이 밀리는 속도라는 약속이 지켜진다.
+    /// </summary>
+    private void AnimateFloor()
+    {
+        if (laneFloors == null) return;
+        for (int lane = 0; lane < LaneCount; lane++)
+        {
+            if (laneFloors[lane] == null) continue;
+            floorOffset[lane] = Mathf.Repeat(
+                floorOffset[lane] + Time.deltaTime * speed * signs[lane], 1f);
+            laneFloors[lane].transform.position =
+                new Vector3(center.x + floorOffset[lane], LaneCenterY(lane), 0f);
+        }
     }
 
     private void SetVisualsVisible(bool visible)

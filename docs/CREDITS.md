@@ -55,9 +55,8 @@
 `Assets/Game/Art/Environment/{Forest,Desert,Sea}.png` — 원본은
 `Assets/ThirdParty/Tilesets_original/`에 그대로 보관한다.
 
-`SeaWaves.png`는 파생물이다. Sea 타일셋에 물 애니메이션 프레임이 없어서, 얕은 물과
-깊은 물 타일을 한 칸 폭(24픽셀)만큼 가로로 흘려 24프레임을 구워 낸 것이다. 새로 그린
-그림이 아니라 원본 타일을 픽셀 단위로 옮긴 것뿐이다 (`SeaWaveSetup` 참고).
+갸라도스 방의 흐르는 바닥은 새로 그린 그림이 아니다. 방에 깔린 바닥 타일을 그대로 빌려
+수로마다 통째로 밀어 흐르게 한 것이다 (`WaterCurrentField` 참고).
 
 ## 아이템 아이콘
 

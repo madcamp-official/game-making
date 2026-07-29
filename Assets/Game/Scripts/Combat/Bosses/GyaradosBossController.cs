@@ -449,8 +449,11 @@ public class GyaradosBossController : MonoBehaviour
         summonRoot = new GameObject("Gyarados_Summons").transform;
 
         currentField = new GameObject("Gyarados_Currents").AddComponent<WaterCurrentField>();
+        // 흐르는 바닥에 깔 그림은 이 방의 바닥 타일이다. 해류는 씬 루트에 만들어져 스스로
+        // 방을 찾을 수 없으므로, 방 안에 사는 보스가 자기 자리에서 찾아 건네준다.
         currentField.Configure(ArenaCenter, ArenaHalfSize, arrowsPerLane, arrowScrollSpeed,
-                               currentArrowColor, laneBoundaryColor);
+                               currentArrowColor, laneBoundaryColor,
+                               WaterCurrentField.FloorSpriteAt(transform, ArenaCenter));
         currentField.SetTuning(Currents.speed, Currents.minHold, Currents.maxHold, Currents.telegraph);
         currentField.ChangeTelegraphStarted += HandleCurrentTelegraph;
         currentField.Changed += HandleCurrentChanged;
