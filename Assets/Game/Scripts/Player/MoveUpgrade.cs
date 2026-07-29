@@ -3,18 +3,18 @@
 /// </summary>
 public enum MoveUpgradeId
 {
-    TackleDamage = 0,    // 피해량 +20%
-    TackleSlow = 1,      // 공격 중 이속 감소량 -20%
+    TackleDamage = 0,    // 피해량 20% 증가
+    TackleSlow = 1,      // 공격 중 이동 감속 20% 감소
     TackleSpeed = 2,     // 재사용 대기시간 10% 감소
-    VineRange = 3,       // 사거리 +20%
-    VineStun = 4,        // 공격 후 경직 -20%
+    VineRange = 3,       // 길이 20% 증가
+    VineStun = 4,        // 공격 후 경직 20% 감소
     VineCooldown = 5,    // 재사용 대기시간 20% 감소
-    SeedHeal = 6,        // 회복량 +2 (6 → 8)
-    SeedDuration = 7,    // 지속시간 +2초
-    SeedRadius = 8,      // 장판 크기 +30%
-    PetalRadius = 9,     // 장판 크기 +20%
-    PetalDamage = 10,    // 피해량 +20%
-    PetalDuration = 11,  // 지속시간 +1초
+    SeedHeal = 6,        // 회복량 33% 증가 (6 → 8)
+    SeedDuration = 7,    // 장판 지속시간 2초 증가
+    SeedRadius = 8,      // 장판 크기 30% 증가
+    PetalRadius = 9,     // 장판 크기 20% 증가
+    PetalDamage = 10,    // 피해량 20% 증가
+    PetalDuration = 11,  // 장판 지속시간 1초 증가
 }
 
 /// <summary>강화 선택지 하나의 표시 정보와 소속 기술.</summary>
@@ -37,11 +37,11 @@ public struct MoveUpgradeOption
 public static class MoveUpgrades
 {
     /// <summary>강화 한 번당 곱해지는 값. 여러 번 걸면 곱으로 쌓인다.</summary>
-    public const float DamageStep = 1.2f;      // 피해량 +20%
-    public const float SlowStep = 0.8f;        // 이속 "감소량"을 20% 줄인다
+    public const float DamageStep = 1.2f;      // 피해량 20% 증가
+    public const float SlowStep = 0.8f;        // 공격 중 이동 "감속"을 20% 줄인다
     public const float SpeedStep = 0.9f;       // 재사용 대기시간 10% 감소
-    public const float RangeStep = 1.2f;       // 사거리 +20%
-    public const float StunStep = 0.8f;        // 경직 -20%
+    public const float RangeStep = 1.2f;       // 길이 20% 증가
+    public const float StunStep = 0.8f;        // 공격 후 경직 20% 감소
     public const float CooldownStep = 0.8f;    // 재사용 대기시간 20% 감소
 
     // 장판 계열. 회복량과 지속시간은 비율이 아니라 고정값으로 더한다 —
@@ -53,37 +53,40 @@ public static class MoveUpgrades
     public const float PetalDamageStep = 1.2f; // 피해 +20%
     public const float PetalDurationStep = 1f; // 2.5초 → 3.5초
 
-    // 증감폭은 앞에 부호를 붙여 적는다. "20% 감소"는 20%가 되는 것인지 20%만큼 깎이는 것인지
-    // 읽는 사람마다 갈리는데, "-20%"는 갈리지 않는다. 유물 설명도 같은 규칙을 쓴다.
+    // 표기는 "무엇이 얼마만큼 늘거나 준다"로 통일한다 — 부호를 붙이지 않고 방향은 낱말로 적는다.
     //
-    // 쿨타임 두 줄만 예외로 부호 없이 "재사용 대기시간 N% 감소"로 적는다. 예전에는 같은 값을
-    // 몸통박치기는 "공격 속도 +10% 증가", 덩굴채찍은 "쿨타임 -20% 감소"라 불러서, 한 화면에
-    // 나란히 떴을 때 서로 다른 것을 올리고 내리는 것처럼 읽혔다. 낱말부터 하나로 맞춘다.
+    // 예전에는 부호와 낱말을 함께 썼는데("+20% 증가", "-20% 감소"), 한 화면에 나란히 놓으니
+    // 같은 말을 두 번 하는 데다 "-20% 감소"는 깎이는 것인지 되돌아가는 것인지 오히려 헷갈렸다.
+    // 낱말 자체도 갈렸다 — 같은 값을 몸통박치기는 "공격 속도 증가", 덩굴채찍은 "쿨타임 감소"라
+    // 불러서 서로 다른 것을 건드리는 것처럼 읽혔다. 둘 다 "재사용 대기시간 감소"다.
+    //
+    // 유물 설명(RelicData.description)은 이 규칙을 따르지 않는다. 그쪽 문구는 따로 정해진 것이라
+    // "+30%"처럼 부호를 붙여 적는다.
     public static readonly MoveUpgradeOption[] All =
     {
         new MoveUpgradeOption(MoveUpgradeId.TackleDamage, MoveType.Tackle,
-            "몸통박치기", "피해량 +20% 증가"),
+            "몸통박치기", "피해량 20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.TackleSlow, MoveType.Tackle,
-            "몸통박치기", "공격 중 이속 감소량 -20% 감소"),
+            "몸통박치기", "공격 중 이동 감속 20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.TackleSpeed, MoveType.Tackle,
             "몸통박치기", "재사용 대기시간 10% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.VineRange, MoveType.VineWhip,
-            "덩굴채찍", "길이 +20% 증가"),
+            "덩굴채찍", "길이 20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.VineStun, MoveType.VineWhip,
-            "덩굴채찍", "공격 후 경직 -20% 감소"),
+            "덩굴채찍", "공격 후 경직 20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.VineCooldown, MoveType.VineWhip,
             "덩굴채찍", "재사용 대기시간 20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.SeedHeal, MoveType.SeedSow,
-            "씨뿌리기", "회복량 +33% 증가"),
+            "씨뿌리기", "회복량 33% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.SeedDuration, MoveType.SeedSow,
-            "씨뿌리기", "장판 지속시간 +2초 증가"),
+            "씨뿌리기", "장판 지속시간 2초 증가"),
         new MoveUpgradeOption(MoveUpgradeId.SeedRadius, MoveType.SeedSow,
-            "씨뿌리기", "장판 크기 +30% 증가"),
+            "씨뿌리기", "장판 크기 30% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.PetalRadius, MoveType.PetalDance,
-            "꽃잎댄스", "장판 크기 +20% 증가"),
+            "꽃잎댄스", "장판 크기 20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.PetalDamage, MoveType.PetalDance,
-            "꽃잎댄스", "피해량 +20% 증가"),
+            "꽃잎댄스", "피해량 20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.PetalDuration, MoveType.PetalDance,
-            "꽃잎댄스", "장판 지속시간 +1초 증가"),
+            "꽃잎댄스", "장판 지속시간 1초 증가"),
     };
 }
