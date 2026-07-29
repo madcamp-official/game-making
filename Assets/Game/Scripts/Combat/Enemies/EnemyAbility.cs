@@ -15,7 +15,9 @@ using UnityEngine;
 public abstract class EnemyAbility : MonoBehaviour
 {
     [Header("발동 조건")]
-    [Tooltip("이 거리 안에 플레이어가 있어야 시전한다.")]
+    [Tooltip("이 거리 안에 플레이어가 있어야 시전한다. 몸 중심 사이 거리다. " +
+             "근접기(EnemyMeleeAbility)에서는 굵은 예비 검사일 뿐이고, 실제로 " +
+             "휘두를지는 몸 표면 사이 거리(reach)가 정한다.")]
     [SerializeField, Min(0f)] protected float range = 6f;
     [Tooltip("이 거리보다 가까우면 시전하지 않는다. 돌진처럼 달려갈 공간이 있어야 " +
              "성립하는 공격에서, 코앞에서 쓰면 아무 일도 안 일어나는 것을 막는다.")]
@@ -102,9 +104,19 @@ public abstract class EnemyAbility : MonoBehaviour
 
         float distance = Vector2.Distance(transform.position, Player.position);
         if (distance > range || distance < minRange) return;
+        if (!ReadyToCast()) return;
 
         StartCoroutine(Cast());
     }
+
+    /// <summary>
+    /// <see cref="range"/> 안에 든 뒤 한 번 더 묻는다. 기본은 항상 참.
+    ///
+    /// 거리를 다른 방식으로 재는 파생형이 자기 기준으로 시전을 막는 자리다.
+    /// <see cref="EnemyMeleeAbility"/>는 중심이 아니라 몸 표면 사이로 재기 때문에,
+    /// 여기서 다시 묻지 않으면 닿지도 않는 거리에서 휘두르는 동작만 나온다.
+    /// </summary>
+    protected virtual bool ReadyToCast() => true;
 
     private IEnumerator Cast()
     {
