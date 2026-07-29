@@ -44,6 +44,26 @@ public class EnemyAnimator : MonoBehaviour
 
     public void ClearActionState() => actionState = null;
 
+    /// <summary>
+    /// 같은 시전 동작을 <b>처음부터 다시</b> 재생한다. <see cref="SetActionState"/>는 상태
+    /// 이름이 그대로면 재생을 건드리지 않으므로, 성원숭의 2연타처럼 같은 동작을 연달아
+    /// 쓸 때는 이걸로 명시적으로 되감아야 두 번째 타가 그림으로 보인다.
+    /// </summary>
+    public void RestartActionState(string stateName, Vector2 lookDirection)
+    {
+        SetActionState(stateName, lookDirection);
+        if (actionState == null) return;
+        string state = actionState + "_" + RowFor(facing);
+        currentState = state;
+        if (animator.HasState(0, Animator.StringToHash(state))) animator.Play(state, 0, 0f);
+    }
+
+    private static int RowFor(Vector2 direction)
+    {
+        int octant = Mathf.RoundToInt(Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg / 45f);
+        return RowForOctant[(octant + 8) % 8];
+    }
+
     private void Update()
     {
         Vector2 velocity = body.linearVelocity;
@@ -60,8 +80,7 @@ public class EnemyAnimator : MonoBehaviour
             else if (engaged) facing = controller.FacingDirection;
         }
 
-        int octant = Mathf.RoundToInt(Mathf.Atan2(facing.y, facing.x) * Mathf.Rad2Deg / 45f);
-        int row = RowForOctant[(octant + 8) % 8];
+        int row = RowFor(facing);
 
         string prefix = actionState ?? (moving || engaged ? "Walk" : "Idle");
         string state = prefix + "_" + row;

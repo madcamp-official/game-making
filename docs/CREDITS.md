@@ -18,6 +18,7 @@
 | 버터플 | 0012 | CHUNSOFT (공식 PMD 유래) |
 | 콘팡 | 0048 | CHUNSOFT (공식 PMD 유래) |
 | 닥트리오 | 0051 | CHUNSOFT (공식 PMD 유래) |
+| 성원숭 | 0057 | CHUNSOFT (공식 PMD 유래) |
 | 강챙이 | 0062 | CHUNSOFT (공식 PMD 유래) |
 | 모다피 | 0069 | CHUNSOFT (공식 PMD 유래) |
 | 쥬래곤 | 0087 | CHUNSOFT (공식 PMD 유래) |

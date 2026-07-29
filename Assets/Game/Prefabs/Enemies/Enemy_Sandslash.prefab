@@ -226,10 +226,10 @@ MonoBehaviour:
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
-  attackDamage: 12
+  attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 3
-  goldRewardMax: 7
+  goldRewardMin: 10
+  goldRewardMax: 14
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 0.6
@@ -277,19 +277,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyGuardAbility
   range: 2.3
   minRange: 0
-  cooldown: 4
+  cooldown: 2.5
   initialDelay: 1
-  strikeDamage: 14
+  readyState: StrikeReady
+  readyDuration: 0.45
+  strikes: 2
+  strikeDamage: 9
   strikeHitDelay: 0.18
-  strikeFollowThrough: 0.28
-  strikeReach: 1
-  strikeRadius: 0.95
+  strikeDuration: 0.6
+  strikeReach: 1.2
+  strikeSweepAngle: 180
   retreatSpeed: 4.5
   retreatDuration: 0.32
   guardDuration: 1
   damageReduction: 0.7
   uncurlDuration: 0.14
-  recovery: 0.5
+  recovery: 1.05
 --- !u!114 &4856274462519182183
 MonoBehaviour:
   m_ObjectHideFlags: 0

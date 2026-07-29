@@ -226,10 +226,10 @@ MonoBehaviour:
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
-  attackDamage: 10
+  attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 3
-  goldRewardMax: 7
+  goldRewardMin: 16
+  goldRewardMax: 22
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1.6
@@ -284,9 +284,9 @@ MonoBehaviour:
   arriveDistance: 0.3
   submergedAlpha: 0.45
   surfaceWindup: 0.55
-  surfaceRadius: 1.25
-  damage: 16
-  recovery: 0.7
+  surfaceRadius: 1.5
+  damage: 22
+  recovery: 1.5
   fleeDistance: 4.5
   fleeRecovery: 0.35
   fleeCooldown: 1.5

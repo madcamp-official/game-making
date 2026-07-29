@@ -26,25 +26,35 @@ public static class ShadowSetup
     {
         var log = new System.Text.StringBuilder();
         foreach ((string species, string thirdParty) in AllSpecies())
-        {
-            string spriteDir = "Assets/Game/Art/Characters/" + species + "/Sprites";
-            var animData = PmdCharacterPipeline.LoadAnimData(
-                "Assets/ThirdParty/PMDCollab/" + thirdParty + "/Source/AnimData.xml");
-
-            int sliced = 0;
-            foreach (string shadowPath in ShadowSheets(spriteDir))
-            {
-                string target = Path.GetFileNameWithoutExtension(shadowPath); // 예: WalkShadow
-                string anim = target.Substring(0, target.Length - "Shadow".Length);
-                string source = SourceOverrides.TryGetValue((species, anim), out string s) ? s : anim;
-                if (!animData.TryGetValue(source, out PmdCharacterPipeline.AnimEntry entry))
-                { log.AppendLine(species + " " + anim + ": AnimData 없음"); continue; }
-                SliceGrid(shadowPath, target, entry.frameWidth, entry.frameHeight);
-                sliced++;
-            }
-            log.AppendLine(species + ": 그림자 시트 " + sliced + "장");
-        }
+            log.AppendLine(SliceOne(species, thirdParty));
         AssetDatabase.SaveAssets();
+        return log.ToString();
+    }
+
+    /// <summary>
+    /// 한 종의 그림자 시트만 슬라이스한다. 나중에 추가된 종(성원숭)에 쓴다 —
+    /// <see cref="SliceAll"/>을 다시 돌리면 기존 종의 스프라이트 ID가 전부 새로 나서
+    /// 이미 맺어 둔 본체·그림자 짝이 끊어진다.
+    /// </summary>
+    public static string SliceOne(string species, string thirdParty)
+    {
+        string spriteDir = "Assets/Game/Art/Characters/" + species + "/Sprites";
+        var animData = PmdCharacterPipeline.LoadAnimData(
+            "Assets/ThirdParty/PMDCollab/" + thirdParty + "/Source/AnimData.xml");
+
+        var log = new System.Text.StringBuilder();
+        int sliced = 0;
+        foreach (string shadowPath in ShadowSheets(spriteDir))
+        {
+            string target = Path.GetFileNameWithoutExtension(shadowPath); // 예: WalkShadow
+            string anim = target.Substring(0, target.Length - "Shadow".Length);
+            string source = SourceOverrides.TryGetValue((species, anim), out string s) ? s : anim;
+            if (!animData.TryGetValue(source, out PmdCharacterPipeline.AnimEntry entry))
+            { log.AppendLine(species + " " + anim + ": AnimData 없음"); continue; }
+            SliceGrid(shadowPath, target, entry.frameWidth, entry.frameHeight);
+            sliced++;
+        }
+        log.Append(species + ": 그림자 시트 " + sliced + "장");
         return log.ToString();
     }
 
@@ -102,7 +112,8 @@ public static class ShadowSetup
         foreach (string species in new[]
         {
             "Bellsprout", "Caterpie", "Dewgong", "Dragonair", "Dugtrio", "Graveler", "Kingler",
-            "Marowak", "Metapod", "Ninetales", "Poliwrath", "Sandslash", "Scyther", "Starmie", "Venonat",
+            "Marowak", "Metapod", "Ninetales", "Poliwrath", "Primeape", "Sandslash", "Scyther",
+            "Starmie", "Venonat",
         })
             log.AppendLine(AttachToPrefab(
                 "Assets/Game/Prefabs/Enemies/Enemy_" + species + ".prefab", null, new[] { species }));
@@ -126,6 +137,15 @@ public static class ShadowSetup
 
         AssetDatabase.SaveAssets();
         return log.ToString();
+    }
+
+    /// <summary>적 프리팹 하나에만 그림자를 단다. 나중에 추가된 종(성원숭)에 쓴다.</summary>
+    public static string AttachOne(string species)
+    {
+        string result = AttachToPrefab(
+            "Assets/Game/Prefabs/Enemies/Enemy_" + species + ".prefab", null, new[] { species });
+        AssetDatabase.SaveAssets();
+        return result;
     }
 
     private static string AttachToPrefab(string prefabPath, string childName, string[] speciesList)

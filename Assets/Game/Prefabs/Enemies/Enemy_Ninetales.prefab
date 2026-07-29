@@ -17,8 +17,8 @@ GameObject:
   - component: {fileID: 1682792632542599877}
   - component: {fileID: 2883021173869554282}
   - component: {fileID: 5811217740000309725}
-  - component: {fileID: 7887947919099774697}
   - component: {fileID: 751401526040224052}
+  - component: {fileID: 6835226370107858758}
   m_Layer: 0
   m_Name: Enemy_Ninetales
   m_TagString: Untagged
@@ -226,10 +226,10 @@ MonoBehaviour:
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
-  attackDamage: 10
+  attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 4
-  goldRewardMax: 10
+  goldRewardMin: 12
+  goldRewardMax: 16
   keepDistance: 4.2
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
@@ -263,33 +263,6 @@ MonoBehaviour:
   width: 0.9
   height: 0.12
   showValue: 0
---- !u!114 &7887947919099774697
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8229133075109571602}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 56bcec55a828140bc947c3d2bd09c03e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyFlameLineAbility
-  range: 7.5
-  minRange: 1
-  cooldown: 4.5
-  initialDelay: 1.2
-  windup: 0.55
-  flameLength: 6.5
-  flameRadius: 0.5
-  flameSpacing: 0.7
-  flameDuration: 5
-  damage: 12
-  tickInterval: 0.45
-  spreadTime: 0.35
-  recovery: 0.8
-  warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.35}
-  flameColor: {r: 1, g: 0.45, b: 0.1, a: 0.65}
 --- !u!114 &751401526040224052
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -579,3 +552,29 @@ MonoBehaviour:
   - {fileID: -1605672585, guid: f7e746df164764305b2b27d665b4d0b1, type: 3}
   shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
   sortingOffset: -1
+--- !u!114 &6835226370107858758
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8229133075109571602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e24790479fb904f7096456e78f2393ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyFlameConeAbility
+  range: 6.5
+  minRange: 1
+  cooldown: 1.8
+  initialDelay: 1.2
+  windup: 0.75
+  coneRange: 5
+  coneAngle: 70
+  sprayDuration: 1.1
+  damage: 10
+  tickInterval: 0.45
+  overheatDuration: 2
+  warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.3}
+  flameInner: {r: 1, g: 0.85, b: 0.3, a: 0.85}
+  flameOuter: {r: 1, g: 0.45, b: 0.1, a: 0.7}

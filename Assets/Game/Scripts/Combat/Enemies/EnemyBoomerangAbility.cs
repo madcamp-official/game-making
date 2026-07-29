@@ -20,7 +20,10 @@ public class EnemyBoomerangAbility : EnemyAbility
     [SerializeField, Min(0)] private int damage = 13;
     [Tooltip("뼈 중심에서 이 거리 안이면 맞는다.")]
     [SerializeField, Min(0f)] private float hitRadius = 0.55f;
-    [SerializeField, Min(0f)] private float recovery = 0.5f;
+    [Tooltip("뼈를 맞히고 회수했을 때 멈추는 시간.")]
+    [SerializeField, Min(0f)] private float hitRecovery = 0.7f;
+    [Tooltip("나가는 뼈와 돌아오는 뼈가 모두 빗나갔을 때 멈추는 시간.")]
+    [SerializeField, Min(0f)] private float missRecovery = 1.3f;
 
     [Header("색")]
     [SerializeField] private Color warningColor = new Color(0.85f, 0.1f, 0.28f, 0.35f);
@@ -28,6 +31,9 @@ public class EnemyBoomerangAbility : EnemyAbility
 
     private const float BoneSpinSpeed = 720f;   // 초당 회전 각도
     private const float CatchDistance = 0.35f;
+
+    /// <summary>이번 왕복에서 한 번이라도 맞혔는지. 회수 후 후딜의 길이를 가른다.</summary>
+    private bool boneConnected;
 
     protected override IEnumerator Perform()
     {
@@ -47,8 +53,15 @@ public class EnemyBoomerangAbility : EnemyAbility
 
         yield return BoneFlight(aim);
 
+        // 회수 자세로 정지한다. 맞혔으면 짧게, 왕복이 전부 빗나갔으면 지쳐서 길게 —
+        // 빗나가게 만든 쪽에게 접근할 시간을 확실히 준다.
         StopAction();
-        yield return new WaitForSeconds(recovery);
+        float pauseEnd = Time.time + (boneConnected ? hitRecovery : missRecovery);
+        while (Time.time < pauseEnd && !Health.IsDead)
+        {
+            Body.linearVelocity = Vector2.zero;
+            yield return null;
+        }
     }
 
     /// <summary>뼈 하나의 왕복. 텅구리는 이 코루틴이 끝날 때까지 던진 자세로 서 있는다.</summary>
@@ -68,6 +81,7 @@ public class EnemyBoomerangAbility : EnemyAbility
         bool hitOutbound = false;
         bool hitReturn = false;
         bool returning = false;
+        boneConnected = false;
         // 던진 쪽이 죽으면 돌아갈 곳이 없다. 그때는 나가던 방향으로 소멸까지 계속 간다.
         float lifetime = Time.time + 6f;
 
@@ -97,6 +111,7 @@ public class EnemyBoomerangAbility : EnemyAbility
             {
                 PlayerHealth.TakeDamage(damage);
                 if (returning) hitReturn = true; else hitOutbound = true;
+                boneConnected = true;
             }
 
             yield return null;

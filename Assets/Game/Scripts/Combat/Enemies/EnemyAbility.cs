@@ -47,6 +47,8 @@ public abstract class EnemyAbility : MonoBehaviour
     }
 
     private EnemyAnimator enemyAnimator;
+    private Collider2D ownCollider;
+    private Collider2D playerCollider;
     private float nextReadyTime;
     private bool casting;
     /// <summary>같은 적에게 붙은 기술 전부(자기 자신 포함). 서로 겹쳐 나가지 않게 확인한다.</summary>
@@ -68,6 +70,31 @@ public abstract class EnemyAbility : MonoBehaviour
         Body = GetComponent<Rigidbody2D>();
         enemyAnimator = GetComponent<EnemyAnimator>();
         siblings = GetComponents<EnemyAbility>();
+        ownCollider = GetComponent<Collider2D>();
+    }
+
+    /// <summary>
+    /// 조준 방향 부채꼴 안에, 사거리 안에 플레이어가 있는가. 2층 근접기(성원숭 2연타,
+    /// 고지 할퀴기)가 타격 프레임마다 이걸로 판정한다.
+    ///
+    /// 거리는 중심이 아니라 <b>몸 표면 사이</b>로 잰다 — 중심으로 재면 덩치가 그대로
+    /// 사거리를 깎아먹는다 (EnemyMeleeAbility.SurfaceDistanceToPlayer와 같은 이유).
+    /// </summary>
+    protected bool PlayerWithinSector(Vector2 aim, float reach, float sweepAngle)
+    {
+        if (Player == null) return false;
+        Vector2 offset = PlayerPosition - (Vector2)transform.position;
+        if (Vector2.Angle(aim, offset) > sweepAngle * 0.5f) return false;
+
+        if (playerCollider == null && PlayerHealth != null)
+            playerCollider = PlayerHealth.GetComponent<Collider2D>();
+        if (ownCollider != null && playerCollider != null &&
+            ownCollider.enabled && playerCollider.enabled)
+        {
+            ColliderDistance2D gap = ownCollider.Distance(playerCollider);
+            if (gap.isValid) return gap.distance <= reach;   // 겹쳐 있으면 음수
+        }
+        return offset.magnitude <= reach;
     }
 
     /// <summary>
@@ -98,6 +125,12 @@ public abstract class EnemyAbility : MonoBehaviour
     protected void PlayAction(string stateName, Vector2 lookDirection)
     {
         if (enemyAnimator != null) enemyAnimator.SetActionState(stateName, lookDirection);
+    }
+
+    /// <summary>같은 동작을 처음부터 다시 재생한다 (성원숭 2연타처럼 같은 상태를 연달아 쓸 때).</summary>
+    protected void ReplayAction(string stateName, Vector2 lookDirection)
+    {
+        if (enemyAnimator != null) enemyAnimator.RestartActionState(stateName, lookDirection);
     }
 
     protected void StopAction()
@@ -139,6 +172,7 @@ public abstract class EnemyAbility : MonoBehaviour
     /// 거리를 다른 방식으로 재는 파생형이 자기 기준으로 시전을 막는 자리다.
     /// <see cref="EnemyMeleeAbility"/>는 중심이 아니라 몸 표면 사이로 재기 때문에,
     /// 여기서 다시 묻지 않으면 닿지도 않는 거리에서 휘두르는 동작만 나온다.
+    /// 닥트리오는 "한 마리씩만 잠복 공격"을 여기서 건다.
     /// </summary>
     protected virtual bool ReadyToCast() => true;
 

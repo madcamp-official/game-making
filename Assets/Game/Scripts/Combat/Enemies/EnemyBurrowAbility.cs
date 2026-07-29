@@ -25,9 +25,12 @@ public class EnemyBurrowAbility : EnemyAbility
     [Header("솟아오르기")]
     [Tooltip("도착해서 솟아오르기까지의 예고 시간. 이 시간이 곧 피할 시간이다.")]
     [SerializeField, Min(0.1f)] private float surfaceWindup = 0.55f;
-    [SerializeField, Min(0f)] private float surfaceRadius = 1.25f;
-    [SerializeField, Min(0)] private int damage = 16;
-    [SerializeField, Min(0f)] private float recovery = 0.9f;
+    [Tooltip("솟아오르는 공격의 반지름. 일반 잡몹보다 넓다 — 피해도 그만큼 크다.")]
+    [SerializeField, Min(0f)] private float surfaceRadius = 1.5f;
+    [SerializeField, Min(0)] private int damage = 22;
+    [Tooltip("공격 뒤 땅 위에 완전히 나온 채 스스로 굳는 시간. 맞혔든 빗나갔든 반드시 " +
+             "이만큼 무방비다 — 높은 한 방의 값이다. 이동·잠복·공격 전부 불가.")]
+    [SerializeField, Min(0f)] private float recovery = 1.5f;
 
     [Header("도망")]
     [Tooltip("땅 위에서 맞으면 플레이어 반대쪽으로 이만큼 파고들어 달아난다.")]
@@ -53,6 +56,14 @@ public class EnemyBurrowAbility : EnemyAbility
     private int surfaceSortingOrder;
     private float nextFleeTime;
 
+    /// <summary>
+    /// 지금 공격 잠수(잠수~솟아오르기)를 진행 중인 닥트리오. 한 방에 여러 마리가 있어도
+    /// 이 자리가 비어야만 다음 마리가 파고들 수 있다 — 잠복 기습이 동시에 터지지 않고,
+    /// 예고 원도 한 번에 하나뿐이라 같은 자리에 겹칠 일이 없다(공격 위치 예약을 겸한다).
+    /// 스턴(recovery)은 토큰을 놓은 뒤라, 첫 마리가 굳어 있는 동안 다음 마리가 파고든다.
+    /// </summary>
+    private static EnemyBurrowAbility activeDiver;
+
     protected override void Awake()
     {
         base.Awake();
@@ -60,10 +71,14 @@ public class EnemyBurrowAbility : EnemyAbility
         if (spriteRenderer != null) surfaceSortingOrder = spriteRenderer.sortingOrder;
     }
 
+    /// <summary>다른 마리가 공격 잠수 중이면 순서를 기다린다.</summary>
+    protected override bool ReadyToCast() => activeDiver == null;
+
     protected override IEnumerator Perform()
     {
         // 잠수. 파고드는 동안에는 살아 있는 플레이어 위치를 계속 쫓는다 —
         // 솟는 자리는 어차피 도착한 뒤의 예고가 알려 준다.
+        activeDiver = this;
         PlayAction("Walk", DirectionToPlayer);
         SetSubmerged(true);
 
@@ -78,7 +93,7 @@ public class EnemyBurrowAbility : EnemyAbility
         }
 
         Body.linearVelocity = Vector2.zero;
-        if (Health.IsDead) { SetSubmerged(false); yield break; }
+        if (Health.IsDead) { SetSubmerged(false); ReleaseDive(); yield break; }
 
         // 예고. 잠수한 채 그 자리에서 차오른다.
         AttackTelegraph warning = AttackTelegraph.CreateCircle(
@@ -98,7 +113,21 @@ public class EnemyBurrowAbility : EnemyAbility
             Vector2.Distance(transform.position, PlayerPosition) <= surfaceRadius + 0.3f)
             PlayerHealth.TakeDamage(damage);
 
-        yield return new WaitForSeconds(recovery);
+        // 공격이 끝났으니 다음 마리는 파고들어도 된다 — 스턴은 이 마리 혼자 치른다.
+        ReleaseDive();
+
+        // 맞혔든 빗나갔든 반드시 굳는다. 이동·잠복·공격 전부 불가 — 확실한 반격 창이다.
+        float stunEnd = Time.time + recovery;
+        while (Time.time < stunEnd && !Health.IsDead)
+        {
+            Body.linearVelocity = Vector2.zero;
+            yield return null;
+        }
+    }
+
+    private void ReleaseDive()
+    {
+        if (activeDiver == this) activeDiver = null;
     }
 
     protected override void Start()
@@ -110,6 +139,9 @@ public class EnemyBurrowAbility : EnemyAbility
     private void OnDestroy()
     {
         if (Health != null) Health.OnDamaged -= HandleDamaged;
+        // 잠수 도중에 죽어 코루틴째 사라져도 자리는 반드시 비워 준다.
+        // 안 그러면 남은 마리들이 영영 파고들지 못한다.
+        ReleaseDive();
     }
 
     /// <summary>땅 위에서 맞으면 도망친다. 땅속(시전 중)은 어차피 맞을 수 없다.</summary>
@@ -176,9 +208,11 @@ public class EnemyBurrowAbility : EnemyAbility
     {
         if (spriteRenderer != null)
         {
-            Color c = spriteRenderer.color;
-            c.a = submerged ? submergedAlpha : 1f;
-            spriteRenderer.color = c;
+            // 잠수 중에는 모래빛으로 물들인 반투명 몸이 곧 "모래 흔적"이다 —
+            // 지금 어디를 파고 있는지는 이걸로 계속 읽을 수 있다.
+            spriteRenderer.color = submerged
+                ? new Color(1f, 0.87f, 0.66f, submergedAlpha)
+                : Color.white;
             spriteRenderer.sortingOrder = submerged ? SubmergedSortingOrder : surfaceSortingOrder;
         }
         foreach (Collider2D col in GetComponents<Collider2D>())

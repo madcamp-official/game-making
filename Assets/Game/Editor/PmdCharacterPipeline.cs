@@ -238,6 +238,57 @@ public static class PmdCharacterPipeline
         return log.ToString();
     }
 
+    /// <summary>
+    /// 2층 개편(사막의 맹공)에서 추가된 성원숭. 이동은 Walk, 공격은 MultiStrike 2연타.
+    /// 새 종이라 참조하는 곳이 없어 <see cref="Import"/>를 그대로 써도 안전하다.
+    /// </summary>
+    public static string ImportPrimeape()
+    {
+        return Import(new CharacterSpec("Primeape", "0057_Primeape",
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("MultiStrike", "MultiStrike", false))
+        {
+            // 주먹을 들어 올린 채 멈춘 프레임 — 연타 직전의 준비 자세로 쓴다.
+            frameClips = new[] { new FrameClipSpec("Ready", "MultiStrike", 2) },
+        });
+    }
+
+    /// <summary>
+    /// 이미 구워 둔 캐릭터의 시트에서 프레임 하나를 골라 정지 자세 상태로 덧붙인다
+    /// (고지의 StrikeReady — 발톱을 들어 올린 예고 자세). <see cref="AddAnim"/>과 같은
+    /// 이유로 다시 슬라이스하지 않는다 — 이미 잘린 스프라이트를 그대로 집는다.
+    /// </summary>
+    public static string AddHoldAnim(string species, string clipName, string sourceSheet, int frame)
+    {
+        string charRoot = "Assets/Game/Art/Characters/" + species;
+        var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(
+            charRoot + "/" + species + ".controller");
+        if (controller == null) return species + ": 컨트롤러가 없다 — Import를 먼저";
+
+        var byName = AssetDatabase.LoadAllAssetsAtPath(charRoot + "/Sprites/" + sourceSheet + ".png")
+            .OfType<Sprite>().ToDictionary(s => s.name);
+        AnimatorStateMachine machine = controller.layers[0].stateMachine;
+        for (int row = 0; row < 8; row++)
+        {
+            if (!byName.TryGetValue(sourceSheet + "_" + row + "_" + frame, out Sprite sprite))
+                return species + ": " + sourceSheet + "_" + row + "_" + frame + " 스프라이트 없음";
+            AnimationClip clip = MakeHoldClip(charRoot, clipName + "_" + row, sprite);
+            AnimatorState existing = machine.states
+                .Select(s => s.state).FirstOrDefault(s => s.name == clip.name);
+            if (existing != null)
+            {
+                existing.motion = clip;
+                continue;
+            }
+            AnimatorState state = machine.AddState(clip.name);
+            state.motion = clip;
+            state.writeDefaultValues = true;
+        }
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+        return species + ": " + clipName + " 정지 자세 8방향 (" + sourceSheet + " " + frame + "번 프레임)";
+    }
+
     public static string Import(CharacterSpec spec)
     {
         string charRoot = "Assets/Game/Art/Characters/" + spec.name;
