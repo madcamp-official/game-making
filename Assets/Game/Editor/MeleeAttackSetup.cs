@@ -24,6 +24,7 @@ public static class MeleeAttackSetup
         public string anim;         // 쓸 시트 이름 (게임 쪽 = 원본과 같다)
         public float hitDelay;      // AnimData의 HitFrame 시간
         public float reach;
+        public float range;         // 중심 거리 기준 예비 검사 (reach와 재는 자가 다르다)
         public float sweepAngle;
         public int damage;
         public float cooldown;
@@ -34,14 +35,21 @@ public static class MeleeAttackSetup
     /// <summary>
     /// 때리는 넷.
     ///
-    /// <c>reach</c>는 <b>몸 표면에서 더 뻗는 거리</b>다(중심 거리가 아니다). 기준은
-    /// "휘두르는 동안 플레이어가 걸어 나가는 거리" — 플레이어 속도가 5칸/초이므로
-    /// 5 x hitDelay다. 그만큼은 줘야 움직이는 상대에게 닿는다. 캐터피는 0.27초를
-    /// 휘두르니 1.35칸, 나머지는 0.65~0.75칸이 최소선이고 거기에 여유를 조금 얹었다.
+    /// <c>reach</c>는 <b>몸 표면에서 더 뻗는 거리</b>다(중심 거리가 아니다). 맞는 거리이자
+    /// <b>휘두르기 시작하는 거리</b>이기도 하다 — <see cref="EnemyMeleeAbility.ReadyToCast"/>가
+    /// 같은 값으로 판단해서, 닿지 않는 자리에서는 아예 팔을 뻗지 않는다.
+    ///
+    /// 상한은 플레이어 몸통박치기가 닿는 거리다. 중심에서 0.9 앞에 반지름 0.85 원이라
+    /// 중심 기준 1.75, 플레이어 콜라이더 반너비 0.3을 빼면 <b>표면 사이 1.45</b>다.
+    /// 잡몹 근접기가 이보다 길면 근접전에서 플레이어가 먼저 손을 댈 방법이 없어진다.
     ///
     /// 각도도 넓다. 잡몹은 플레이어(5칸/초)보다 훨씬 느려서 — 캐터피 1.5, 강챙이 2.9,
     /// 스라크 3.8 — 좁은 부채꼴이면 옆으로 한 걸음만 돌아도 공짜로 빠져나간다. 대신
     /// 조준은 여전히 동작 시작에 고정하므로, <b>뒤로 빠지는</b> 회피는 그대로 통한다.
+    ///
+    /// <c>range</c>는 <b>중심 거리</b>로 재는 굵은 예비 검사라 <c>reach</c>에서 유도하지
+    /// 않는다. 넉넉히 두어 적이 걸어오는 동안 미리 통과시켜 두고, 실제로 팔을 뻗을지는
+    /// <c>reach</c>가 정한다. 좁히면 두 자로 두 번 거르는 셈이라 발동이 늦어진다.
     ///
     /// 다음 공격까지의 실제 간격은 recovery + cooldown이다 (쿨은 동작이 끝난 뒤부터 잰다).
     /// </summary>
@@ -49,18 +57,18 @@ public static class MeleeAttackSetup
     {
         // 1층 — 첫 층이라 한 대가 아프면 안 된다. 짧게, 자주, 약하게.
         new MeleeSpec { species = "Caterpie", thirdParty = "0010_Caterpie", anim = "Attack",
-                        hitDelay = 0.27f, reach = 1.4f, sweepAngle = 210f,
+                        hitDelay = 0.27f, reach = 0.9f, range = 2.6f, sweepAngle = 210f,
                         damage = 5, cooldown = 1.0f, initialDelay = 1.0f, recovery = 0.25f },
         new MeleeSpec { species = "Metapod", thirdParty = "0011_Metapod", anim = "Attack",
-                        hitDelay = 0.13f, reach = 0.9f, sweepAngle = 220f,
+                        hitDelay = 0.13f, reach = 0.8f, range = 2.1f, sweepAngle = 220f,
                         damage = 6, cooldown = 1.2f, initialDelay = 1.4f, recovery = 0.25f },
         // 스라크는 1층의 정예다. 낫이 길고 아프며, 발도 빨라 붙으면 쉽게 못 뗀다.
         new MeleeSpec { species = "Scyther", thirdParty = "0123_Scyther", anim = "Slice",
-                        hitDelay = 0.15f, reach = 1.5f, sweepAngle = 200f,
+                        hitDelay = 0.15f, reach = 1.1f, range = 2.7f, sweepAngle = 200f,
                         damage = 11, cooldown = 1.1f, initialDelay = 1.2f, recovery = 0.3f },
         // 3층 강챙이 — 흡인으로 끌어당긴 뒤 이걸로 때린다.
         new MeleeSpec { species = "Poliwrath", thirdParty = "0062_Poliwrath", anim = "Attack",
-                        hitDelay = 0.15f, reach = 1.2f, sweepAngle = 200f,
+                        hitDelay = 0.15f, reach = 1.0f, range = 2.4f, sweepAngle = 200f,
                         damage = 12, cooldown = 1.3f, initialDelay = 2.6f, recovery = 0.3f },
     };
 
@@ -127,9 +135,7 @@ public static class MeleeAttackSetup
         if (melee == null) melee = root.AddComponent<EnemyMeleeAbility>();
 
         var so = new SerializedObject(melee);
-        // 발동 조건만은 중심 거리로 잰다(EnemyAbility가 그렇게 판정한다). reach는 표면
-        // 기준이므로 두 몸의 반지름만큼(대략 1.2칸) 더해 줘야 몸이 닿은 순간에 발동한다.
-        so.FindProperty("range").floatValue = spec.reach + 1.2f;
+        so.FindProperty("range").floatValue = spec.range;
         so.FindProperty("cooldown").floatValue = spec.cooldown;
         so.FindProperty("initialDelay").floatValue = spec.initialDelay;
         so.FindProperty("actionState").stringValue = spec.anim;

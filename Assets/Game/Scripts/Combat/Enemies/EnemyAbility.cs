@@ -74,17 +74,19 @@ public abstract class EnemyAbility : MonoBehaviour
     }
 
     /// <summary>
-    /// 조준 방향 부채꼴 안에, 사거리 안에 플레이어가 있는가. 2층 근접기(성원숭 2연타,
-    /// 고지 할퀴기)가 타격 프레임마다 이걸로 판정한다.
+    /// 두 몸 표면 사이의 거리. 겹쳐 있으면 음수다.
     ///
-    /// 거리는 중심이 아니라 <b>몸 표면 사이</b>로 잰다 — 중심으로 재면 덩치가 그대로
-    /// 사거리를 깎아먹는다 (EnemyMeleeAbility.SurfaceDistanceToPlayer와 같은 이유).
+    /// 중심으로 재지 않는 이유: 중심 거리는 덩치를 그대로 사거리에서 깎아먹는다.
+    /// 캐터피는 콜라이더가 1칸이라 몸이 맞닿은 순간에도 중심 거리가 이미 0.8이다.
+    /// 표면으로 재면 덩치가 달라도 "코앞"이 늘 같은 값이 된다.
+    ///
+    /// 시전을 시작할지(<see cref="EnemyMeleeAbility.ReadyToCast"/>)와 맞았는지
+    /// (<see cref="PlayerWithinSector"/>)를 <b>같은 자로</b> 재야 한다 — 둘이 어긋나면
+    /// 닿지도 않는 거리에서 팔만 뻗는다.
     /// </summary>
-    protected bool PlayerWithinSector(Vector2 aim, float reach, float sweepAngle)
+    protected float SurfaceDistanceToPlayer()
     {
-        if (Player == null) return false;
         Vector2 offset = PlayerPosition - (Vector2)transform.position;
-        if (Vector2.Angle(aim, offset) > sweepAngle * 0.5f) return false;
 
         if (playerCollider == null && PlayerHealth != null)
             playerCollider = PlayerHealth.GetComponent<Collider2D>();
@@ -92,9 +94,23 @@ public abstract class EnemyAbility : MonoBehaviour
             ownCollider.enabled && playerCollider.enabled)
         {
             ColliderDistance2D gap = ownCollider.Distance(playerCollider);
-            if (gap.isValid) return gap.distance <= reach;   // 겹쳐 있으면 음수
+            if (gap.isValid) return gap.distance;
         }
-        return offset.magnitude <= reach;
+        return offset.magnitude;
+    }
+
+    /// <summary>
+    /// 조준 방향 부채꼴 안에, 사거리 안에 플레이어가 있는가. 근접기(캐터피·스라크의 휘두르기,
+    /// 성원숭 2연타, 고지 할퀴기)가 타격 프레임마다 이걸로 판정한다.
+    ///
+    /// 거리는 <see cref="SurfaceDistanceToPlayer"/> — 몸 표면 기준이다.
+    /// </summary>
+    protected bool PlayerWithinSector(Vector2 aim, float reach, float sweepAngle)
+    {
+        if (Player == null) return false;
+        Vector2 offset = PlayerPosition - (Vector2)transform.position;
+        if (Vector2.Angle(aim, offset) > sweepAngle * 0.5f) return false;
+        return SurfaceDistanceToPlayer() <= reach;
     }
 
     /// <summary>
