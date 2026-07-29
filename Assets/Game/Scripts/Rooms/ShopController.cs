@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// 상점 구성 (gameplay-spec 12절): 상품 3개 — 체력 회복 1개 + 유물 2개.
+/// 상점 구성: 상품 4개 — 포션 1개 + 유물 3개.
 ///
 /// 유물은 <see cref="RelicManager"/>의 등장 순서에서 앞에서부터 꺼낸다. 꺼낸 유물은 사지 않고
 /// 지나가더라도 더미가 마를 때까지는 다시 등장하지 않고, 더미가 마르면 아직 손에 넣지 않은
@@ -12,16 +12,36 @@ using UnityEngine;
 public class ShopController : MonoBehaviour
 {
     [SerializeField] private ShopItem healSlot;
-    [SerializeField] private ShopItem[] relicSlots; // 2개
+    [SerializeField] private ShopItem[] relicSlots; // 3개
 
-    [SerializeField, Min(0)] private int potionPrice = 10;
-    [SerializeField, Min(0)] private int potionHeal = 30;
+    [Header("포션")]
+    [Tooltip("층별 가격. 1·2·3층 순서다. 층이 더 늘면 마지막 값을 쓴다.")]
+    [SerializeField] private int[] potionPrices = { 10, 20, 30 };
+    [Tooltip("최대 체력의 몇 할을 회복할지. 유물에서 빠진 자뭉열매의 효과를 그대로 물려받았다.")]
+    [SerializeField, Range(0f, 1f)] private float potionHealFraction = 0.33f;
+    [Tooltip("포션 그림. 자뭉열매 아이콘을 쓴다.")]
+    [SerializeField] private Sprite potionIcon;
     // 유물 가격은 여기 없다. 희귀도마다 다르고, 그 표는 RelicManager가 들고 있다.
+
+    /// <summary>
+    /// 지금 층의 포션 가격. 회복량이 최대 체력 비례라 층이 올라가도 값이 줄지 않는데,
+    /// 골드 수입은 층마다 늘어난다. 가격도 함께 올리지 않으면 후반에는 공짜나 다름없어진다.
+    /// </summary>
+    private int PotionPrice
+    {
+        get
+        {
+            if (potionPrices == null || potionPrices.Length == 0) return 0;
+            int floor = RoomFlowController.Instance != null
+                ? RoomFlowController.Instance.CurrentFloorIndex : 0;
+            return Mathf.Max(0, potionPrices[Mathf.Clamp(floor, 0, potionPrices.Length - 1)]);
+        }
+    }
 
     private void Start()
     {
         if (healSlot != null)
-            healSlot.ConfigureHeal("포션", potionHeal, potionPrice);
+            healSlot.ConfigureHeal("포션", potionHealFraction, PotionPrice, potionIcon);
 
         if (relicSlots == null || relicSlots.Length == 0) return;
 

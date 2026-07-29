@@ -7,7 +7,9 @@ public class ShopItem : MonoBehaviour, IInteractable
 {
     [SerializeField] private string itemName = "포션";
     [SerializeField, Min(0)] private int price = 10;
-    [SerializeField, Min(0)] private int healAmount = 5;
+    [Tooltip("회복량은 최대 체력에 비례한다. 고정 수치가 아니라 비율인 이유는, 층마다 " +
+             "최대 체력이 유물로 달라져도 포션 한 병의 값어치가 같아야 하기 때문이다.")]
+    [SerializeField, Range(0f, 1f)] private float healFraction = 0.33f;
     [SerializeField] private RelicData relicData; // 지정하면 회복 대신 유물을 판매
 
     private bool sold;
@@ -16,13 +18,18 @@ public class ShopItem : MonoBehaviour, IInteractable
     public bool CanInteract => !sold;
 
     /// <summary>회복 상품으로 설정한다 (ShopController가 호출).</summary>
-    public void ConfigureHeal(string displayName, int heal, int cost)
+    public void ConfigureHeal(string displayName, float fraction, int cost, Sprite icon)
     {
         itemName = displayName;
-        healAmount = heal;
+        healFraction = fraction;
         price = cost;
         relicData = null;
         cachedPrompt = null;
+        if (icon != null)
+        {
+            SpriteRenderer sr = GetComponentInChildren<SpriteRenderer>();
+            if (sr != null) sr.sprite = icon;
+        }
     }
 
     /// <summary>유물 상품으로 설정하고 아이콘을 표시한다 (ShopController가 호출).</summary>
@@ -43,7 +50,8 @@ public class ShopItem : MonoBehaviour, IInteractable
             {
                 cachedPrompt = relicData != null
                     ? "E : " + relicData.relicName + " 구매 (" + price + "G) — " + relicData.description
-                    : "E : " + itemName + " 구매 (" + price + "G, 체력 +" + healAmount + ")";
+                    : "E : " + itemName + " 구매 (" + price + "G, 최대 체력의 +"
+                      + Mathf.RoundToInt(healFraction * 100f) + "% 회복)";
             }
             return cachedPrompt;
         }
@@ -69,9 +77,12 @@ public class ShopItem : MonoBehaviour, IInteractable
         else
         {
             Health health = interactor.GetComponent<Health>();
-            if (health != null) health.Heal(healAmount);
+            // 회복량은 살 때 계산한다. 진열한 뒤에 최대 체력이 바뀌어도(맥스업·생명의구슬)
+            // 지금 몸 기준으로 채워야 표시한 비율과 어긋나지 않는다.
+            int heal = health != null ? GameMath.RoundHalfUp(health.MaxHealth * healFraction) : 0;
+            if (health != null) health.Heal(heal);
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage(itemName + "을(를) 마셔 체력을 " + healAmount + " 회복했다!", 2f);
+                UIManager.Instance.ShowMessage(itemName + "을(를) 마셔 체력을 " + heal + " 회복했다!", 2f);
         }
 
         // 판매된 상품은 화면에서 제거

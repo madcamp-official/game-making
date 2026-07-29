@@ -46,7 +46,7 @@ public class RelicManager : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float choiceScarfDamage = 0.8f;   // 스카프가 양쪽 피해에 곱하는 값
 
     [Header("효과 수치 — 그 밖")]
-    [SerializeField, Range(0f, 1f)] private float sitrusBerryHealRatio = 0.33f;
+    // 자뭉열매의 회복 비율은 여기 없다. 유물에서 빠지고 상점 포션이 됐다 (ShopController).
     [SerializeField, Min(0)] private int leftoversHealPerRoom = 8;
     [SerializeField, Min(1)] private int shellBellDamagePerHeal = 40;
     [SerializeField, Min(0)] private int shellBellHealAmount = 3;
@@ -433,14 +433,6 @@ public class RelicManager : MonoBehaviour
     {
         switch (relic.effect)
         {
-            // 자뭉열매: 획득 즉시 최대 체력의 일정 비율을 회복한다.
-            // 생명의구슬로 줄어든 최대 체력이 이미 반영된 값을 기준으로 삼는다.
-            case RelicEffect.SitrusBerry:
-                Health health = FindPlayerHealth();
-                if (health != null)
-                    health.Heal(GameMath.RoundHalfUp(health.MaxHealth * sitrusBerryHealRatio));
-                break;
-
             // 금구슬: 획득 즉시 골드. 부적금화의 획득량 배율도 함께 탄다.
             case RelicEffect.Nugget:
                 if (RunManager.Instance != null) RunManager.Instance.AddGold(nuggetGold);
@@ -470,9 +462,4 @@ public class RelicManager : MonoBehaviour
             UIManager.Instance.ShowMessage("이상한사탕을 삼켰지만 더 강해질 기술이 없었다...", 2.5f);
     }
 
-    private static Health FindPlayerHealth()
-    {
-        PlayerController player = FindAnyObjectByType<PlayerController>();
-        return player != null ? player.GetComponent<Health>() : null;
-    }
 }
