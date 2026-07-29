@@ -32,29 +32,30 @@ public class RelicManager : MonoBehaviour
     [SerializeField, Min(0f)] private float wideLensSizeBonus = 0.15f;
     [SerializeField, Min(0f)] private float lifeOrbDamageBonus = 0.3f;
     [SerializeField, Range(0f, 0.9f)] private float lifeOrbMaxHealthPenalty = 0.3f;
-    [SerializeField, Min(0f)] private float hpUpMaxHealthBonus = 0.2f;
-    [SerializeField, Min(0f)] private float proteinMeleeBonus = 0.2f;
-    [SerializeField, Min(0f)] private float calciumRangedBonus = 0.2f;
-    [SerializeField, Min(0f)] private float carbosMoveSpeedBonus = 0.15f;
+    [SerializeField, Min(0f)] private float hpUpMaxHealthBonus = 0.15f;
+    [SerializeField, Min(0f)] private float proteinMeleeBonus = 0.15f;
+    [SerializeField, Min(0f)] private float calciumRangedBonus = 0.15f;
+    [SerializeField, Min(0f)] private float carbosMoveSpeedBonus = 0.1f;
     [SerializeField, Range(0f, 0.9f)] private float quickClawCooldownReduction = 0.15f;
     [SerializeField, Min(0f)] private float lightClayZoneDurationBonus = 0.3f;
 
     [Header("효과 수치 — 구애 시리즈 (맨 마지막에 곱해진다)")]
-    [SerializeField, Min(0f)] private float choiceBonus = 0.5f;               // 머리띠·안경이 올려 주는 폭
+    [SerializeField, Min(0f)] private float choiceBonus = 0.3f;               // 머리띠·안경이 올려 주는 폭
     [SerializeField, Range(0f, 1f)] private float choicePenalty = 0.5f;       // 머리띠·안경이 깎는 쪽에 곱하는 값
-    [SerializeField, Min(0f)] private float choiceScarfSpeedBonus = 0.5f;
+    [SerializeField, Min(0f)] private float choiceScarfSpeedBonus = 0.2f;
     [SerializeField, Range(0f, 1f)] private float choiceScarfDamage = 0.8f;   // 스카프가 양쪽 피해에 곱하는 값
 
     [Header("효과 수치 — 그 밖")]
     // 자뭉열매의 회복 비율은 여기 없다. 유물에서 빠지고 상점 포션이 됐다 (ShopController).
-    [SerializeField, Min(0)] private int leftoversHealPerRoom = 8;
+    [SerializeField, Min(0)] private int leftoversHealPerRoom = 12;
     [SerializeField, Min(1)] private int shellBellDamagePerHeal = 40;
-    [SerializeField, Min(0)] private int shellBellHealAmount = 3;
-    [SerializeField, Min(0)] private int nuggetGold = 90;
+    [SerializeField, Min(0)] private int shellBellHealAmount = 6;
+    [SerializeField, Min(0)] private int nuggetGold = 100;
     [SerializeField, Min(0)] private int rockyHelmetDamage = 10;
     [Tooltip("울퉁불퉁멧이 반사 피해를 주는 범위. 타일 한 칸이 1이다.")]
     [SerializeField, Min(0f)] private float rockyHelmetRadius = 2.2f;
-    [SerializeField, Min(0f)] private float rockyHelmetCooldown = 1f;
+    // 울퉁불퉁멧에는 따로 쿨타임이 없다. 전투 피해를 입으면 플레이어 쪽 피격 무적(0.5초)이
+    // 함께 걸리므로, 반사가 나가는 간격은 그 무적이 이미 정해 준다.
     [Tooltip("기술머신을 지녔을 때 강화 화면에 뜨는 선택지 수.")]
     [SerializeField, Min(1)] private int techMachineUpgradeOptions = 4;
 
@@ -98,7 +99,6 @@ public class RelicManager : MonoBehaviour
     public int ShellBellHealAmount => shellBellHealAmount;
     public int RockyHelmetDamage => rockyHelmetDamage;
     public float RockyHelmetRadius => rockyHelmetRadius;
-    public float RockyHelmetCooldown => rockyHelmetCooldown;
 
     /// <summary>
     /// 이 유물의 상점 가격. 희귀도별 기준 가격에서 <c>priceJitter</c>만큼 위아래로 흔든다.

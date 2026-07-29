@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: LifeOrb
   m_EditorClassIdentifier: Assembly-CSharp::RelicData
   relicName: "\uC0DD\uBA85\uC758\uAD6C\uC2AC"
-  description: "\uCD5C\uB300 \uCCB4\uB825 -30% \uAC10\uC18C, \uADFC\uC811\xB7\uC6D0\uAC70\uB9AC
-    \uACF5\uACA9 \uD53C\uD574 +30% \uC99D\uAC00"
+  description: "\uADFC\uC811\xB7\uC6D0\uAC70\uB9AC \uACF5\uACA9\uC758 \uD53C\uD574\uAC00
+    +30% \uC99D\uAC00\uD558\uB294 \uB300\uC2E0, \uCD5C\uB300 \uCCB4\uB825\uC774 -30%
+    \uAC10\uC18C\uD55C\uB2E4"
   icon: {fileID: -608441634412139001, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
   effect: 10
   rarity: 2

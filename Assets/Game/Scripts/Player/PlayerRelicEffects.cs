@@ -21,9 +21,6 @@ public class PlayerRelicEffects : MonoBehaviour
     /// <summary>조개껍질방울용 누적 피해량. 기준치를 넘을 때마다 회복하고 그만큼 뺀다.</summary>
     private int damageAccumulated;
 
-    /// <summary>울퉁불퉁멧이 다시 터질 수 있는 시각. 연타로 맞을 때 반사가 도배되지 않게 한다.</summary>
-    private float nextHelmetTime;
-
     private void Awake()
     {
         health = GetComponent<Health>();
@@ -85,13 +82,16 @@ public class PlayerRelicEffects : MonoBehaviour
     /// 적의 피격 무적을 쓰지 않는다(<see cref="Health.TakeToll"/>). 반사는 내가 맞은 순간에
     /// 일어나는데, 그 순간은 대개 적이 방금 나를 때린 직후라 적 쪽 무적이 살아 있을 때가 많다.
     /// 무적에 걸리면 반사가 통째로 사라져 "맞으면 되돌려 준다"는 규칙이 무너진다.
+    ///
+    /// 따로 쿨타임을 두지 않는다. <see cref="Health.OnCombatDamaged"/>는 전투로 실제로
+    /// 얻어맞았을 때만 불리고, 그때 플레이어 피격 무적(0.5초)이 함께 걸리므로
+    /// 반사가 나가는 간격은 그 무적이 이미 정해 준다.
     /// </summary>
     private void HandleCombatDamaged()
     {
         RelicManager relics = RelicManager.Instance;
         if (relics == null || !relics.Has(RelicEffect.RockyHelmet)) return;
-        if (relics.RockyHelmetDamage <= 0 || Time.time < nextHelmetTime) return;
-        nextHelmetTime = Time.time + relics.RockyHelmetCooldown;
+        if (relics.RockyHelmetDamage <= 0) return;
 
         int damage = relics.RockyHelmetDamage;
         struck.Clear();

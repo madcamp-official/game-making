@@ -364,27 +364,36 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 | 행복의알 | **상점방을 나갈 때** 한 단계 진화 (보스방 입장 전) | `RoomFlowController.TryHappyEggEvolve` |
 | 기력의 덩어리 | 쓰러졌을 때 한 번 부활 (1회 소비) | `PlayerDeathHandler.HandleDeath` |
 | 부적금화 | 획득 골드 +25% | `RunManager.AddGold` |
-| 구애머리띠 | 근접 +50%, 원거리 절반 (마지막에 곱함) | `AttackKinds.DamageMultiplier` |
-| 구애안경 | 원거리 +50%, 근접 절반 (마지막에 곱함) | 〃 |
-| 구애스카프 | 이동 +50%, 근접·원거리 ×0.8 (마지막에 곱함) | `PlayerController.RelicSpeedMultiplier` |
+| 구애머리띠 | 근접 +30%, 원거리 절반 (마지막에 곱함) | `AttackKinds.DamageMultiplier` |
+| 구애안경 | 원거리 +30%, 근접 절반 (마지막에 곱함) | 〃 |
+| 구애스카프 | 이동 +20%, 근접·원거리 ×0.8 (마지막에 곱함) | `PlayerController.RelicSpeedMultiplier` |
 | 큰뿌리 | 모든 회복량 +50% | `Health.HealMultiplier` |
-| 먹다남은음식 | 전투방 클리어마다 체력 8 회복 | `CombatRoomController.GiveLeftoversHeal` |
+| 먹다남은음식 | 전투방 클리어마다 체력 12 회복 | `CombatRoomController.GiveLeftoversHeal` |
 | 광각렌즈 | **모든 공격의 크기 +15%** | `PlayerCombat.RelicAttackSizeMultiplier` |
-| 조개껍질방울 | 누적 40 피해마다 체력 3 회복 | `PlayerRelicEffects.ReportDamageDealt` |
+| 조개껍질방울 | 누적 40 피해마다 체력 6 회복 | `PlayerRelicEffects.ReportDamageDealt` |
 | 생명의구슬 | 최대 체력 -30%, 근접·원거리 +30% | `Health.MaxHealthMultiplier` |
 | 선제공격손톱 | 쿨타임 -15% (씨뿌리기 제외) | `PlayerCombat.RelicCooldownMultiplier` |
 | 빛의점토 | 장판 지속시간 +30% | `PlayerCombat.RelicZoneDurationMultiplier` |
 | 이상한사탕 | 획득 즉시 기술 강화 1회 | `RelicManager.RareCandyRoutine` |
-| ~~울퉁불퉁멧~~ | 전투 피해를 받으면 주변 적에게 10 피해 (쿨 1초) | `PlayerRelicEffects.HandleCombatDamaged` — **더미에서 제외 중** |
-| 금구슬 | 획득 즉시 90G | `RelicManager.ApplyOnAcquire` |
+| ~~울퉁불퉁멧~~ | 전투 피해를 받으면 주변 적에게 10 피해 (쿨타임 없음 — 피격 무적이 간격을 정한다) | `PlayerRelicEffects.HandleCombatDamaged` — **더미에서 제외 중** |
+| 금구슬 | 획득 즉시 100G | `RelicManager.ApplyOnAcquire` |
 | 기술머신 | 기술 강화 선택지 3개 → 4개 | `MoveUpgradePanel.Open` |
 | 다우징머신 | 보스 보상을 둘 중 하나 고른다 | `RelicManager.GrantBossReward` · `RelicChoicePanel` |
-| 맥스업 | 최대 체력 +20% | `Health.MaxHealthMultiplier` |
-| 타우린 | 근접 피해 +20% | `AttackKinds.DamageMultiplier` |
-| 리보플라빈 | 원거리 피해 +20% | 〃 |
-| 알칼로이드 | 이동 속도 +15% | `PlayerController.RelicSpeedMultiplier` |
+| 맥스업 | 최대 체력 +15% | `Health.MaxHealthMultiplier` |
+| 타우린 | 근접 피해 +15% | `AttackKinds.DamageMultiplier` |
+| 리보플라빈 | 원거리 피해 +15% | 〃 |
+| 알칼로이드 | 이동 속도 +10% | `PlayerController.RelicSpeedMultiplier` |
 
 수치는 전부 `RelicManager`의 "효과 수치" 항목에서 조절한다.
+
+**유물에 적히는 설명문은 에셋(`Assets/Game/Data/Relics/*.asset`)의 `description`이고,
+실제로 도는 수치는 `RelicManager`의 필드다.** 둘은 자동으로 이어져 있지 않으므로 한쪽만
+고치면 화면에 적힌 값과 실제가 어긋난다. 수치를 만질 때는 항상 짝을 함께 본다
+(2026-07-29에 스물두 줄을 한 번에 맞췄다).
+
+구애 시리즈의 설명은 두 줄이다 — 둘째 줄이 "한 번에 하나만"이라는 배타 규칙이다.
+툴팁·획득 팝업·선택 창은 줄바꿈을 그대로 그리지만, 상점의 한 줄짜리 상호작용 안내만은
+`ShopItem.Prompt`가 줄바꿈을 ` · `로 바꿔 편다.
 
 **울퉁불퉁멧은 당분간 더미에서 뺐다.** 에셋도 구현도 그대로 있고, `RelicManager.relicPool`
 배열에서만 빠져 있다 — 되돌리려면 씬에서 그 에셋을 다시 끌어다 놓으면 된다. 고정
@@ -543,7 +552,7 @@ x = ∓3.75 · ∓1.25로 다시 벌렸다 (간격 2.5 유지, 방 반너비 7 �
 주의할 점:
 
 - **구애 시리즈는 획득 시점에 배타가 된다.** 하나를 얻으면 나머지 둘이 더미에서 빠지고, 더미를 거치지 않는 경로로 들어와도 `AddRelic`이 막는다. 진열만 되고 안 산 경우에는 그 하나만 사라진다
-- **배율은 곱해진다.** 생명의구슬(+30%)과 구애머리띠(+50%)를 같이 들면 근접은 ×1.95다
+- **구애 시리즈만 마지막에 곱해진다.** 나머지는 합연산이다 — 생명의구슬(+30%)과 타우린(+15%)이면 근접은 ×1.45, 여기에 구애머리띠(×1.3)를 더하면 ×1.885다
 - **"유물 → 플레이어 능력치"는 `PlayerRelicEffects` 하나가 맡는다.** 이 컴포넌트는 `OnEnable`이 아니라 `Start`에서 구독한다. 오브젝트 초기화 순서는 정해져 있지 않아서 `OnEnable` 시점엔 `RelicManager.Instance`가 아직 없을 수 있고, 그러면 조용히 구독을 놓쳐 모든 배율이 먹통이 된다
 - **반올림은 `GameMath.RoundHalfUp`을 쓴다.** `Mathf.RoundToInt`는 0.5에서 짝수로 내려가서 `RoundToInt(4.5) == 4`다. 배율 계산은 .5가 자주 나오므로 차이가 그대로 체감된다
 - **기력의 덩어리는 유일한 소비형 유물이다.** 쓰러지는 순간 `RelicManager.TryConsume`으로 사라지고 입구에서 체력을 모두 채운 채 부활한다. 다 쓴 유물은 더미로 돌아가지 않는다

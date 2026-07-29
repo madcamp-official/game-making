@@ -1112,23 +1112,22 @@ MonoBehaviour:
   wideLensSizeBonus: 0.15
   lifeOrbDamageBonus: 0.3
   lifeOrbMaxHealthPenalty: 0.3
-  hpUpMaxHealthBonus: 0.2
-  proteinMeleeBonus: 0.2
-  calciumRangedBonus: 0.2
-  carbosMoveSpeedBonus: 0.15
+  hpUpMaxHealthBonus: 0.15
+  proteinMeleeBonus: 0.15
+  calciumRangedBonus: 0.15
+  carbosMoveSpeedBonus: 0.1
   quickClawCooldownReduction: 0.15
   lightClayZoneDurationBonus: 0.3
-  choiceBonus: 0.5
+  choiceBonus: 0.3
   choicePenalty: 0.5
-  choiceScarfSpeedBonus: 0.5
+  choiceScarfSpeedBonus: 0.2
   choiceScarfDamage: 0.8
-  leftoversHealPerRoom: 8
+  leftoversHealPerRoom: 12
   shellBellDamagePerHeal: 40
-  shellBellHealAmount: 3
-  nuggetGold: 90
+  shellBellHealAmount: 6
+  nuggetGold: 100
   rockyHelmetDamage: 10
   rockyHelmetRadius: 2.2
-  rockyHelmetCooldown: 1
   techMachineUpgradeOptions: 4
   rarityPrices: 5a0000007800000096000000
   priceJitter: 5

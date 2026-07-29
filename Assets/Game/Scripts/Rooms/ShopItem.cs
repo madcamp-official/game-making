@@ -48,8 +48,11 @@ public class ShopItem : MonoBehaviour, IInteractable
         {
             if (cachedPrompt == null)
             {
+                // 설명이 여러 줄인 유물(구애 시리즈)이 있다. 상호작용 안내는 한 줄짜리라
+                // 줄바꿈을 그대로 넣으면 화면 아래가 두 줄로 벌어진다.
                 cachedPrompt = relicData != null
-                    ? "E : " + relicData.relicName + " 구매 (" + price + "G) — " + relicData.description
+                    ? "E : " + relicData.relicName + " 구매 (" + price + "G) — "
+                      + relicData.description.Replace("\n", " · ")
                     : "E : " + itemName + " 구매 (" + price + "G, 최대 체력의 +"
                       + Mathf.RoundToInt(healFraction * 100f) + "% 회복)";
             }
