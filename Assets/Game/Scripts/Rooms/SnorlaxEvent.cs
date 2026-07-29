@@ -16,7 +16,7 @@ public class SnorlaxEvent : ChoiceEvent
     };
 
     [Header("잠만보를 공격한다")]
-    [SerializeField, Min(0)] private int attackSelfDamage = 15;
+    [SerializeField, Min(0)] private int attackSelfDamage = 20;
     [SerializeField, Min(0)] private int attackGoldReward = 50;
 
     [Header("연출")]

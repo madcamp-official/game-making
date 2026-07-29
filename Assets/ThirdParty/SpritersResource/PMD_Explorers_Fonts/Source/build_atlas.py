@@ -118,7 +118,30 @@ def load_korean():
                 if src[y][x]:
                     put(x, y, (255, 255, 255))
         glyphs[ch] = (gw, gh, BASELINE + 1, bmp)   # 한글 블록은 베이스라인 1px 아래까지
+    fix_eum(glyphs)
     return glyphs
+
+
+def fix_eum(glyphs):
+    """시트에 빠진 '음'을 직접 그려 넣는다.
+
+    시트에서 실제로 비어 있는 글자는 '읍'이 아니라 '음'이다. 위쪽 del이 '읍'을 지워
+    뒤쪽 인덱스를 맞춰 주므로 다른 글자는 전부 제자리를 찾지만, 라벨이 '음'인 칸에는
+    시트의 '읍' 그림이 들어온다 (먹다남은음식 → 먹다남은읍식). 실제로 못 쓰게 되는
+    글자는 '읍' 하나뿐이라 라벨은 그대로 두고 그림만 고친다.
+
+    '음'과 '금'은 받침 있는 ㅡ 모음 글자라 배치가 같다 (초성 0~3행 / ㅡ 4행 / 빈 5행 /
+    받침 6~9행). 그래서 '금'의 받침 ㅁ 네 줄을 그대로 옮겨 붙이면 '음'이 된다.
+    """
+    if '음' not in glyphs or '금' not in glyphs:
+        return
+    gw, gh, top, dst = glyphs['음']
+    _, _, _, src = glyphs['금']
+    first, count = 6, 4                              # 받침이 놓이는 줄
+    for y in range(first, first + count):
+        a = y * gw * 4
+        dst[a:a + gw * 4] = src[a:a + gw * 4]
+    glyphs['음'] = (gw, gh, top, dst)
 
 
 def main():

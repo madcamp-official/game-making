@@ -157,7 +157,7 @@ MonoBehaviour:
   prompt: "E : \uC7A0\uB9CC\uBCF4\uB97C \uC0B4\uD3B4\uBCF8\uB2E4"
   exitDoor: {fileID: 7400304123308564998}
   portrait: {fileID: 21300000, guid: 1f4a6338cb4fb49cf960ba547db55a85, type: 3}
-  attackSelfDamage: 15
+  attackSelfDamage: 20
   attackGoldReward: 50
   leaveAfterEvent: 1
 --- !u!95 &8617542859854920208

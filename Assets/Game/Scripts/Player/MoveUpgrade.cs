@@ -5,10 +5,10 @@ public enum MoveUpgradeId
 {
     TackleDamage = 0,    // 피해량 +20%
     TackleSlow = 1,      // 공격 중 이속 감소량 -20%
-    TackleSpeed = 2,     // 공격 속도 +10% (쿨타임 감소)
+    TackleSpeed = 2,     // 재사용 대기시간 10% 감소
     VineRange = 3,       // 사거리 +20%
     VineStun = 4,        // 공격 후 경직 -20%
-    VineCooldown = 5,    // 쿨타임 -20%
+    VineCooldown = 5,    // 재사용 대기시간 20% 감소
     SeedHeal = 6,        // 회복량 +2 (6 → 8)
     SeedDuration = 7,    // 지속시간 +2초
     SeedRadius = 8,      // 장판 크기 +30%
@@ -39,10 +39,10 @@ public static class MoveUpgrades
     /// <summary>강화 한 번당 곱해지는 값. 여러 번 걸면 곱으로 쌓인다.</summary>
     public const float DamageStep = 1.2f;      // 피해량 +20%
     public const float SlowStep = 0.8f;        // 이속 "감소량"을 20% 줄인다
-    public const float SpeedStep = 0.9f;       // 공격 쿨타임 -10% = 공격 속도 +10%
+    public const float SpeedStep = 0.9f;       // 재사용 대기시간 10% 감소
     public const float RangeStep = 1.2f;       // 사거리 +20%
     public const float StunStep = 0.8f;        // 경직 -20%
-    public const float CooldownStep = 0.8f;    // 쿨타임 -20%
+    public const float CooldownStep = 0.8f;    // 재사용 대기시간 20% 감소
 
     // 장판 계열. 회복량과 지속시간은 비율이 아니라 고정값으로 더한다 —
     // 명세가 "33% 증가(실제로는 2 증가)"처럼 실제 더할 값을 못박아 두었다.
@@ -55,6 +55,10 @@ public static class MoveUpgrades
 
     // 증감폭은 앞에 부호를 붙여 적는다. "20% 감소"는 20%가 되는 것인지 20%만큼 깎이는 것인지
     // 읽는 사람마다 갈리는데, "-20%"는 갈리지 않는다. 유물 설명도 같은 규칙을 쓴다.
+    //
+    // 쿨타임 두 줄만 예외로 부호 없이 "재사용 대기시간 N% 감소"로 적는다. 예전에는 같은 값을
+    // 몸통박치기는 "공격 속도 +10% 증가", 덩굴채찍은 "쿨타임 -20% 감소"라 불러서, 한 화면에
+    // 나란히 떴을 때 서로 다른 것을 올리고 내리는 것처럼 읽혔다. 낱말부터 하나로 맞춘다.
     public static readonly MoveUpgradeOption[] All =
     {
         new MoveUpgradeOption(MoveUpgradeId.TackleDamage, MoveType.Tackle,
@@ -62,13 +66,13 @@ public static class MoveUpgrades
         new MoveUpgradeOption(MoveUpgradeId.TackleSlow, MoveType.Tackle,
             "몸통박치기", "공격 중 이속 감소량 -20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.TackleSpeed, MoveType.Tackle,
-            "몸통박치기", "공격 속도 +10% 증가"),
+            "몸통박치기", "재사용 대기시간 10% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.VineRange, MoveType.VineWhip,
             "덩굴채찍", "길이 +20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.VineStun, MoveType.VineWhip,
             "덩굴채찍", "공격 후 경직 -20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.VineCooldown, MoveType.VineWhip,
-            "덩굴채찍", "쿨타임 -20% 감소"),
+            "덩굴채찍", "재사용 대기시간 20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.SeedHeal, MoveType.SeedSow,
             "씨뿌리기", "회복량 +33% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.SeedDuration, MoveType.SeedSow,

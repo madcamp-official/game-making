@@ -250,10 +250,12 @@ public class EvolutionCutscene : MonoBehaviour
         panelRoot = new GameObject("EvolutionCutsceneUI");
         panelRoot.transform.SetParent(transform, false);
 
+        // 오버레이로 그린다. 예전에는 ScreenSpaceCamera + planeDistance 1이었는데, 그 방식은
+        // 캔버스를 카메라 앞 월드 공간에 놓고 화면 크기로 되돌리는 과정을 거쳐서, 화면 크기가
+        // 딱 떨어지지 않으면 가장자리에 실낱 같은 틈이 생기고 그리로 뒤 화면이 비쳤다.
+        // 전체 화면을 덮는 것이 전부인 연출이라 카메라를 거칠 이유가 없다.
         Canvas canvas = panelRoot.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceCamera;
-        canvas.worldCamera = Camera.main;
-        canvas.planeDistance = 1f;
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
         canvas.sortingOrder = 32000;
 
         // 비트맵 폰트가 뭉개지지 않도록 캔버스 배율을 정수로 고정한다.
@@ -266,6 +268,7 @@ public class EvolutionCutscene : MonoBehaviour
 
         // 배경 (원본 evolutionbg를 화면에 꽉 채운다)
         Image bg = MakeStretched<Image>(panelRoot.transform, "Background");
+        Bleed(bg.rectTransform);
         if (backgroundSprite != null) bg.sprite = backgroundSprite;
         else bg.color = new Color(0.05f, 0.35f, 0.3f);
 
@@ -301,8 +304,18 @@ public class EvolutionCutscene : MonoBehaviour
 
         // 백색 섬광 (맨 위)
         flashImage = MakeStretched<Image>(panelRoot.transform, "Flash");
+        Bleed(flashImage.rectTransform);
         flashImage.color = new Color(1f, 1f, 1f, 0f);
         flashImage.raycastTarget = false;
+    }
+
+    /// <summary>화면을 덮는 것이 목적인 판을 가장자리 밖까지 조금 더 키운다.</summary>
+    private const float BleedPixels = 4f;
+
+    private static void Bleed(RectTransform rt)
+    {
+        rt.offsetMin = new Vector2(-BleedPixels, -BleedPixels);
+        rt.offsetMax = new Vector2(BleedPixels, BleedPixels);
     }
 
     private RectTransform MakePokemon(string name, Sprite sprite, out Image silhouette)
