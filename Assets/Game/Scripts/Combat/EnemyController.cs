@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 /// <summary>
 /// 적 AI. 플레이어가 감지 범위에 들어오거나 한 번이라도 피해를 입으면 추적을 시작하고,
@@ -17,7 +18,11 @@ public class EnemyController : MonoBehaviour
     [SerializeField, Min(0f)] private float attackContactReach = 0.25f;
     [SerializeField, Min(0)] private int attackDamage = 1;
     [SerializeField, Min(0f)] private float attackCooldown = 1.0f;
-    [SerializeField, Min(0)] private int goldReward = 2;
+    [Tooltip("처치 보상 골드의 하한. 최댓값과 같게 두면 고정 보상이 된다 (보스가 그렇다).")]
+    [FormerlySerializedAs("goldReward")]
+    [SerializeField, Min(0)] private int goldRewardMin = 2;
+    [Tooltip("처치 보상 골드의 상한. 하한보다 작으면 하한만 쓴다.")]
+    [SerializeField, Min(0)] private int goldRewardMax = 3;
     [Tooltip("이 거리를 유지하려 한다. 0이면 그냥 플레이어에게 붙는다. " +
              "원거리 적이 근접전에 말려들지 않게 하는 값이다.")]
     [SerializeField, Min(0f)] private float keepDistance;
@@ -209,13 +214,27 @@ public class EnemyController : MonoBehaviour
         return gap.isValid && gap.distance <= attackContactReach; // 겹쳐 있으면 음수
     }
 
+    /// <summary>
+    /// 처치할 때마다 새로 뽑는 보상 골드. 하한~상한 균등이라 <b>기댓값은 정확히 한가운데</b>다 —
+    /// 층별 예산은 이 한가운데 값을 마릿수만큼 더해 맞춘다.
+    ///
+    /// 마리마다 흔들려도 한 층에 스무 마리쯤 잡으므로 총합의 흔들림은 √20만큼 작아진다.
+    /// 한 마리가 ±50%로 흔들려도 층 수입은 대략 ±7%(1σ)에 머문다.
+    /// 보스는 한 번뿐이라 그 완충이 없으므로 상·하한을 같게 두어 고정한다.
+    /// </summary>
+    private int RollGold()
+    {
+        int high = Mathf.Max(goldRewardMin, goldRewardMax);
+        return high > goldRewardMin ? Random.Range(goldRewardMin, high + 1) : goldRewardMin;
+    }
+
     private void HandleDeath()
     {
         body.linearVelocity = Vector2.zero;
         foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
             col.enabled = false;
         if (RunManager.Instance != null)
-            RunManager.Instance.AddGold(goldReward);
+            RunManager.Instance.AddGold(RollGold());
         Destroy(gameObject, 0.4f);
     }
 }

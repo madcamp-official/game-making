@@ -133,7 +133,8 @@ MonoBehaviour:
   attackContactReach: 0
   attackDamage: 0
   attackCooldown: 1
-  goldReward: 0
+  goldRewardMin: 0
+  goldRewardMax: 0
   keepDistance: 0
   knockbackStunDuration: 0
   knockbackMultiplier: 0

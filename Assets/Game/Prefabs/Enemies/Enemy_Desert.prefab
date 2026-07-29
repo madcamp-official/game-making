@@ -57,7 +57,7 @@ PrefabInstance:
       value: 2.8
       objectReference: {fileID: 0}
     - target: {fileID: 3030848718822414418, guid: c5873431807344684ba40b8cb35fdb7a, type: 3}
-      propertyPath: goldReward
+      propertyPath: goldRewardMin
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 3030848718822414418, guid: c5873431807344684ba40b8cb35fdb7a, type: 3}

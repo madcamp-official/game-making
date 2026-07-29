@@ -228,7 +228,8 @@ MonoBehaviour:
   attackContactReach: 0.25
   attackDamage: 14
   attackCooldown: 1
-  goldReward: 10
+  goldRewardMin: 7
+  goldRewardMax: 17
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 0.3

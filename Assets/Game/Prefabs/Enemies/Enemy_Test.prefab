@@ -201,7 +201,8 @@ MonoBehaviour:
   attackRange: 1
   attackDamage: 10
   attackCooldown: 1
-  goldReward: 2
+  goldRewardMin: 2
+  goldRewardMax: 4
   knockbackStunDuration: 0.15
 --- !u!114 &1456054312652267571
 MonoBehaviour:
