@@ -1096,11 +1096,9 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 48d1850bb1cd0503046fe81230fe6281, type: 2}
   - {fileID: 11400000, guid: 6e04cd43ddcb8da990bdf2302e87fd18, type: 2}
   - {fileID: 11400000, guid: f24b2b41e20a60fde0fd017fc76141be, type: 2}
-  - {fileID: 11400000, guid: 917c6fca72f76c8dff879e0e4c35d624, type: 2}
   - {fileID: 11400000, guid: a174e0f425831054bb97ec0aaa0134a4, type: 2}
   - {fileID: 11400000, guid: 90ab996ce8b831045a6bc6e180acbc40, type: 2}
   - {fileID: 11400000, guid: 4cfc4e9f4ec0f31449dd5ffab139ea77, type: 2}
-  - {fileID: 11400000, guid: f8c048fc1617d3d4ca949c77e0702f8f, type: 2}
   - {fileID: 11400000, guid: 83629a3e39543e543a810d2628a85eb3, type: 2}
   - {fileID: 11400000, guid: ebed76d0147be7b449778bcd3158f8e7, type: 2}
   - {fileID: 11400000, guid: 825bc1aa99a38c744bd7c45a4f4d84d2, type: 2}
@@ -1133,6 +1131,8 @@ MonoBehaviour:
   rockyHelmetRadius: 2.2
   rockyHelmetCooldown: 1
   techMachineUpgradeOptions: 4
+  rarityPrices: 5a0000007800000096000000
+  priceJitter: 5
 --- !u!1 &1906208093
 GameObject:
   m_ObjectHideFlags: 0

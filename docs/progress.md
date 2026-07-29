@@ -312,7 +312,22 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 증감폭 앞에 부호를 붙인다. "20% 감소"는 20%가 되는 것인지 20%만큼 깎이는 것인지 갈리지만
 "-20%"는 갈리지 않는다. 유물 설명과 기술 강화 선택지(`MoveUpgrades.All`) 양쪽에 적용했다.
 
-### 유물 목록 (23종)
+### 4. 희귀도와 상점 가격
+
+유물마다 `RelicRarity`(1·2·3단계)를 두고, 상점 가격이 여기서 갈린다. 기준 가격은 90/120/150이고
+진열할 때 ±5만큼 흔든다 — 1단계는 85~95, 2단계는 115~125, 3단계는 145~155다.
+
+`RelicManager.PriceOf`는 **부를 때마다 값이 달라진다.** `ShopController`가 진열할 때 한 번만 부르고
+그 값을 `ShopItem`에 넘긴다. 매 프레임 다시 물으면 가격표가 춤춘다.
+`ShopController.relicPrice`(모든 유물 15G 고정)는 없앴다.
+
+| 단계 | 기준가 | 유물 |
+|---|---|---|
+| 1단계 | 90 (85~95) | 맥스업 · 타우린 · 리보플라빈 · 알칼로이드 · 금구슬 · 선제공격손톱 · 울퉁불퉁멧 · 자뭉열매 |
+| 2단계 | 120 (115~125) | 큰뿌리 · 먹다남은음식 · 다우징머신 · 기술머신 · 조개껍질방울 · 빛의점토 · 광각렌즈 · 부적금화 |
+| 3단계 | 150 (145~155) | 행복의알 · 기력의 덩어리 · 구애머리띠 · 구애안경 · 구애스카프 · 이상한사탕 · 생명의구슬 |
+
+### 유물 목록 (23종, 더미에는 21종)
 
 | 유물 | 효과 | 구현 위치 |
 |---|---|---|
@@ -327,11 +342,11 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 | 광각렌즈 | **모든 공격의 크기 +15%** | `PlayerCombat.RelicAttackSizeMultiplier` |
 | 조개껍질방울 | 누적 40 피해마다 체력 3 회복 | `PlayerRelicEffects.ReportDamageDealt` |
 | 생명의구슬 | 최대 체력 -30%, 근접·원거리 +30% | `Health.MaxHealthMultiplier` |
-| 자뭉열매 | 획득 즉시 최대 체력의 33% 회복 | `RelicManager.ApplyOnAcquire` |
+| ~~자뭉열매~~ | 획득 즉시 최대 체력의 33% 회복 | `RelicManager.ApplyOnAcquire` — **더미에서 제외 중** |
 | 선제공격손톱 | 쿨타임 -15% (씨뿌리기 제외) | `PlayerCombat.RelicCooldownMultiplier` |
 | 빛의점토 | 장판 지속시간 +30% | `PlayerCombat.RelicZoneDurationMultiplier` |
 | 이상한사탕 | 획득 즉시 기술 강화 1회 | `RelicManager.RareCandyRoutine` |
-| 울퉁불퉁멧 | 전투 피해를 받으면 주변 적에게 10 피해 (쿨 1초) | `PlayerRelicEffects.HandleCombatDamaged` |
+| ~~울퉁불퉁멧~~ | 전투 피해를 받으면 주변 적에게 10 피해 (쿨 1초) | `PlayerRelicEffects.HandleCombatDamaged` — **더미에서 제외 중** |
 | 금구슬 | 획득 즉시 90G | `RelicManager.ApplyOnAcquire` |
 | 기술머신 | 기술 강화 선택지 3개 → 4개 | `MoveUpgradePanel.Open` |
 | 다우징머신 | 보스 보상을 둘 중 하나 고른다 | `RelicManager.GrantBossReward` · `RelicChoicePanel` |
@@ -341,6 +356,10 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 | 알칼로이드 | 이동 속도 +15% | `PlayerController.RelicSpeedMultiplier` |
 
 수치는 전부 `RelicManager`의 "효과 수치" 항목에서 조절한다.
+
+**자뭉열매와 울퉁불퉁멧은 당분간 더미에서 뺐다.** 에셋도 구현도 그대로 있고,
+`RelicManager.relicPool` 배열에서만 빠져 있다 — 되돌리려면 씬에서 두 에셋을 다시 끌어다 놓으면 된다.
+고정 보상(`bossRewardRelic` 등)으로 지정하면 지금도 정상적으로 지급된다.
 
 ### 걸려 넘어질 자리
 

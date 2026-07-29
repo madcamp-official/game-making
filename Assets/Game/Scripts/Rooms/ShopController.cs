@@ -16,7 +16,7 @@ public class ShopController : MonoBehaviour
 
     [SerializeField, Min(0)] private int potionPrice = 10;
     [SerializeField, Min(0)] private int potionHeal = 30;
-    [SerializeField, Min(0)] private int relicPrice = 15;
+    // 유물 가격은 여기 없다. 희귀도마다 다르고, 그 표는 RelicManager가 들고 있다.
 
     private void Start()
     {
@@ -33,7 +33,8 @@ public class ShopController : MonoBehaviour
         for (int i = 0; i < relicSlots.Length; i++)
         {
             if (relicSlots[i] == null) continue;
-            if (i < drawn.Count) relicSlots[i].ConfigureRelic(drawn[i], relicPrice);
+            // 가격은 진열할 때 한 번만 뽑는다. PriceOf는 부를 때마다 값이 흔들린다.
+            if (i < drawn.Count) relicSlots[i].ConfigureRelic(drawn[i], relics.PriceOf(drawn[i]));
             else relicSlots[i].gameObject.SetActive(false);   // 더 나올 유물이 없다
         }
     }

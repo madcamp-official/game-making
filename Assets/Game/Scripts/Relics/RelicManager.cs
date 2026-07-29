@@ -58,6 +58,12 @@ public class RelicManager : MonoBehaviour
     [Tooltip("기술머신을 지녔을 때 강화 화면에 뜨는 선택지 수.")]
     [SerializeField, Min(1)] private int techMachineUpgradeOptions = 4;
 
+    [Header("상점 가격")]
+    [Tooltip("희귀도 1·2·3단계의 기준 가격. RelicRarity 순서와 같아야 한다.")]
+    [SerializeField] private int[] rarityPrices = { 90, 120, 150 };
+    [Tooltip("기준 가격에서 위아래로 흔들리는 폭. 5면 90짜리가 85~95로 나온다.")]
+    [SerializeField, Min(0)] private int priceJitter = 5;
+
     private readonly List<RelicData> relics = new List<RelicData>();
     private readonly List<RelicData> upcoming = new List<RelicData>();
 
@@ -93,6 +99,20 @@ public class RelicManager : MonoBehaviour
     public int RockyHelmetDamage => rockyHelmetDamage;
     public float RockyHelmetRadius => rockyHelmetRadius;
     public float RockyHelmetCooldown => rockyHelmetCooldown;
+
+    /// <summary>
+    /// 이 유물의 상점 가격. 희귀도별 기준 가격에서 <c>priceJitter</c>만큼 위아래로 흔든다.
+    ///
+    /// 부를 때마다 값이 달라지므로 <b>진열할 때 한 번만 부르고 그 값을 들고 있어야 한다</b>
+    /// (<see cref="ShopController"/>). 매 프레임 다시 물으면 가격표가 춤춘다.
+    /// </summary>
+    public int PriceOf(RelicData relic)
+    {
+        if (relic == null || rarityPrices == null || rarityPrices.Length == 0) return 0;
+        int index = Mathf.Clamp((int)relic.rarity, 0, rarityPrices.Length - 1);
+        return Mathf.Max(0, rarityPrices[index] +
+                            UnityEngine.Random.Range(-priceJitter, priceJitter + 1));
+    }
 
     /// <summary>강화 화면에 띄울 선택지 수. 기술머신이 있으면 하나 늘어난다.</summary>
     public int UpgradeOptionCount(int defaultCount) =>

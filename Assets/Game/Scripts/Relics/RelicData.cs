@@ -33,7 +33,18 @@ public enum RelicEffect
 }
 
 /// <summary>
-/// 유물 데이터. 이름, 설명, 아이콘, 효과 식별자를 담는다.
+/// 유물 희귀도. 상점 가격이 여기서 갈린다 (<see cref="RelicManager.PriceOf"/>).
+/// 값은 에셋에 숫자로 저장되므로 순서를 바꾸면 안 된다.
+/// </summary>
+public enum RelicRarity
+{
+    Common = 0,   // 1단계 — 능력치를 한 칸 올려 주는 정도
+    Uncommon = 1, // 2단계 — 판을 굴리는 방식을 조금 바꾼다
+    Rare = 2,     // 3단계 — 그 판의 성격을 정한다
+}
+
+/// <summary>
+/// 유물 데이터. 이름, 설명, 아이콘, 효과 식별자, 희귀도를 담는다.
 /// </summary>
 [CreateAssetMenu(menuName = "Game/Relic", fileName = "NewRelic")]
 public class RelicData : ScriptableObject
@@ -42,6 +53,8 @@ public class RelicData : ScriptableObject
     [TextArea] public string description;
     public Sprite icon;
     public RelicEffect effect;
+    [Tooltip("상점 가격을 가르는 등급. 등장 확률과는 무관하다.")]
+    public RelicRarity rarity = RelicRarity.Common;
 
     /// <summary>구애 시리즈는 서로 배타적이다. 하나를 얻으면 나머지는 등장 목록에서 빠진다.</summary>
     public bool IsChoiceItem =>
