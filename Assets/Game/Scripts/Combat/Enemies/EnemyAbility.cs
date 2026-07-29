@@ -49,6 +49,8 @@ public abstract class EnemyAbility : MonoBehaviour
     private EnemyAnimator enemyAnimator;
     private float nextReadyTime;
     private bool casting;
+    /// <summary>같은 적에게 붙은 기술 전부(자기 자신 포함). 서로 겹쳐 나가지 않게 확인한다.</summary>
+    private EnemyAbility[] siblings;
 
     /// <summary>지금 Perform이 도는 중인지. 파생형이 시전 밖 행동(도망 등)과 겹치지 않게 확인한다.</summary>
     protected bool IsCasting => casting;
@@ -65,6 +67,28 @@ public abstract class EnemyAbility : MonoBehaviour
         Health = GetComponent<Health>();
         Body = GetComponent<Rigidbody2D>();
         enemyAnimator = GetComponent<EnemyAnimator>();
+        siblings = GetComponents<EnemyAbility>();
+    }
+
+    /// <summary>
+    /// 같은 적의 기술 중 하나라도 시전(또는 그에 준하는 몸놀림) 중인지.
+    ///
+    /// 기술을 둘 이상 지닌 적이 있다 — 스라크(돌진＋휘두르기), 강챙이(소용돌이＋휘두르기).
+    /// 이걸 막지 않으면 두 기술이 같은 Rigidbody를 서로 덮어쓰는 것은 물론이고,
+    /// <see cref="Cast"/>가 저장해 둔 <c>hadBasicAI</c>가 어긋나 <b>기본 추적이 영영 꺼진다</b>:
+    /// A가 시전을 시작하며 추적을 끄고, 그 사이에 B가 시작하면서 "원래 꺼져 있었다"고 기억한다.
+    /// A가 끝나며 켜 주지만 B가 끝나며 다시 꺼 버린다. 되돌릴 주체가 없어 그대로 굳는다.
+    /// (스라크가 돌진만 하고 걸어다니지 않던 것이 이 때문이다.)
+    /// </summary>
+    private bool AnyAbilityBusy()
+    {
+        if (siblings == null) return casting || ExternallyBusy;
+        for (int i = 0; i < siblings.Length; i++)
+        {
+            EnemyAbility other = siblings[i];
+            if (other != null && (other.casting || other.ExternallyBusy)) return true;
+        }
+        return false;
     }
 
     /// <summary>
@@ -94,7 +118,7 @@ public abstract class EnemyAbility : MonoBehaviour
 
     private void Update()
     {
-        if (casting || ExternallyBusy || Health.IsDead || Player == null) return;
+        if (AnyAbilityBusy() || Health.IsDead || Player == null) return;
         if (PlayerHealth != null && PlayerHealth.IsDead) return;
         if (!Controller.IsAggro) return;
         // 밀려나는 도중에 시전을 시작하면 Cast가 속도를 0으로 눌러 넉백이 한 프레임 만에 끊긴다.
