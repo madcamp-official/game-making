@@ -37,6 +37,11 @@
 
 각 포켓몬의 원본 `credits.txt`는 `Assets/ThirdParty/PMDCollab/<도감번호_이름>/`에 보관되어 있다.
 
+발밑 그림자도 같은 저장소의 애니메이션별 `*-Shadow.png` 시트에서 가져왔다. 시트의
+빨강/초록/파랑은 그림자 크기 등급(소/중/대)별 영역이고, 종의 등급은 `AnimData.xml`의
+`ShadowSize`를 따른다. 게임에서는 등급에 맞는 영역만 남긴 흰색 마스크
+(`{애니}Shadow.png`)로 구워 `PmdFootShadow`가 본체 프레임과 짝지어 그린다.
+
 ## 대사창 얼굴
 
 `Assets/Game/Art/Portraits/` — 같은 저장소의 `portrait/<도감번호>/Normal.png` (40×40).

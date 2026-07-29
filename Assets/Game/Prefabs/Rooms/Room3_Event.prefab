@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 5099443800127144056}
   - component: {fileID: 823639664227276565}
   - component: {fileID: 8617542859854920208}
+  - component: {fileID: 5100503108002641122}
   m_Layer: 0
   m_Name: Snorlax
   m_TagString: Untagged
@@ -181,6 +182,27 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &5100503108002641122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 603513165951288919}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b206d09a7f32c454f83c9d49cb6c71ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PmdFootShadow
+  owner: {fileID: 462161467799829772}
+  bodySprites:
+  - {fileID: 1837148951641307728, guid: 3eb25a0d72d1a48c1ae2825e8b156776, type: 3}
+  - {fileID: 2147048755763538394, guid: 3eb25a0d72d1a48c1ae2825e8b156776, type: 3}
+  shadowSprites:
+  - {fileID: -1155104730, guid: a5ab354756abb4a978a975f779b6ccd9, type: 3}
+  - {fileID: 1128281355, guid: a5ab354756abb4a978a975f779b6ccd9, type: 3}
+  shadowColor: {r: 0.04, g: 0.09, b: 0.2, a: 0.42}
+  sortingOffset: -1
 --- !u!1 &805184565454400973
 GameObject:
   m_ObjectHideFlags: 0
