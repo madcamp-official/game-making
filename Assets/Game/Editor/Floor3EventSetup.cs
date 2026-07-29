@@ -48,9 +48,12 @@ public static class Floor3EventSetup
             }
 
             // 2. 옛 연못(어두운 물 타일)을 바닥으로 되돌리고, 한가운데에 계곡을 판다.
-            TileBase floorTile = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_13_1.asset");
-            TileBase waterTile = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_19_1.asset");
-            if (floorTile == null || waterTile == null) return "S_13_1/S_19_1 타일 에셋을 찾지 못했다";
+            // 파도치는 애니메이션 타일을 쓴다 (SeaWaveSetup이 굽는다). 정지 타일로 깔면
+            // 이 방만 물이 멈춘 채로 남는다.
+            TileBase floorTile = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_Water_Shallow.asset");
+            TileBase waterTile = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_Water_Deep.asset");
+            if (floorTile == null || waterTile == null)
+                return "S_Water_Shallow/S_Water_Deep 타일이 없다 — SeaWaveSetup을 먼저 실행할 것";
 
             Tilemap ground = null;
             foreach (Tilemap map in room.GetComponentsInChildren<Tilemap>())
@@ -63,7 +66,7 @@ public static class Floor3EventSetup
                 TileBase tile = ground.GetTile(pos);
                 if (tile == null) continue;
                 if (tile.name.StartsWith("S_18_") || tile.name.StartsWith("S_19_") ||
-                    tile.name.StartsWith("S_20_"))
+                    tile.name.StartsWith("S_20_") || tile.name == "S_Water_Deep")
                 {
                     ground.SetTile(pos, floorTile);
                     pondCleared++;

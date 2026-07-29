@@ -28,8 +28,8 @@ public static class RoomWaterFlatten
             return tileName.StartsWith("F_24_") || tileName.StartsWith("F_25_") ||
                    tileName.StartsWith("F_26_") || tileName.StartsWith("D_24_") ||
                    tileName.StartsWith("D_25_") || tileName.StartsWith("D_26_");
-        // 바다 타일셋은 기본 바닥(S_13_*)이 이미 얕은 물빛이다. 진한 물(=호수)은 19_1뿐.
-        return tileName == "S_19_1";
+        // 바다 타일셋은 기본 바닥이 이미 얕은 물빛이다. 진한 물(=호수)만 메운다.
+        return tileName == "S_19_1" || tileName == "S_Water_Deep";
     }
 
     private static readonly string[] Rooms =
@@ -65,7 +65,8 @@ public static class RoomWaterFlatten
                     TileBase tile = map.GetTile(pos);
                     if (tile == null) continue;
                     if (ground == null && (tile.name == "F_13_1" || tile.name == "D_13_1" ||
-                                           tile.name == "S_13_1")) ground = tile;
+                                           tile.name == "S_13_1" || tile.name == "S_Water_Shallow"))
+                        ground = tile;
                     if (IsWater(tile.name)) water.Add(pos);
                 }
                 if (ground == null) continue;   // 벽 타일맵에는 바닥 타일이 없다

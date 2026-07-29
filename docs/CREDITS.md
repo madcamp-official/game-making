@@ -50,6 +50,15 @@
 사라져 지금은 쓰는 곳이 없지만 보스전 소환물과 함께 보관한다). 원본 `credits.txt`는
 스프라이트와 같은 폴더에 `portrait_credits.txt`로 함께 보관한다.
 
+## 환경 타일
+
+`Assets/Game/Art/Environment/{Forest,Desert,Sea}.png` — 원본은
+`Assets/ThirdParty/Tilesets_original/`에 그대로 보관한다.
+
+`SeaWaves.png`는 파생물이다. Sea 타일셋에 물 애니메이션 프레임이 없어서, 얕은 물과
+깊은 물 타일을 한 칸 폭(24픽셀)만큼 가로로 흘려 24프레임을 구워 낸 것이다. 새로 그린
+그림이 아니라 원본 타일을 픽셀 단위로 옮긴 것뿐이다 (`SeaWaveSetup` 참고).
+
 ## 아이템 아이콘
 
 - `item.png` — "Ripped by redblueyellow. No credit needed." 표기. 원저작: 게임프리크/닌텐도.
