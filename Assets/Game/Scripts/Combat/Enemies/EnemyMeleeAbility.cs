@@ -18,15 +18,26 @@ public class EnemyMeleeAbility : EnemyAbility
     [Header("휘두르기")]
     [Tooltip("이 동작 이름으로 애니메이터 상태를 재생한다 (Attack·Slice 등).")]
     [SerializeField] private string actionState = "Attack";
-    [Tooltip("판정 부채꼴의 반지름.")]
+    [Tooltip("몸 표면에서 얼마나 더 뻗는지. 중심이 아니라 표면 기준이라, 덩치가 커도 " +
+             "체감 사거리가 줄지 않는다. 대략 (플레이어 속도 x hitDelay)만큼은 줘야 " +
+             "휘두르는 동안 걸어 나간 플레이어에게 닿는다.")]
     [SerializeField, Min(0.1f)] private float reach = 1.3f;
-    [Tooltip("판정 부채꼴의 전체 각도(도). 넓을수록 옆으로 피하기 어렵다.")]
+    [Tooltip("판정 부채꼴의 전체 각도(도). 넓을수록 옆으로 돌아 피하기 어렵다.")]
     [SerializeField, Range(20f, 360f)] private float sweepAngle = 120f;
     [Tooltip("동작이 시작되고 실제로 맞기까지의 시간. 원본 시트의 HitFrame에 맞춘다.")]
     [SerializeField, Min(0f)] private float hitDelay = 0.2f;
     [Tooltip("동작을 끝까지 보여 주고 다음 행동으로 넘어가기까지의 시간.")]
     [SerializeField, Min(0f)] private float recovery = 0.35f;
     [SerializeField, Min(0)] private int damage = 8;
+
+    private Collider2D ownCollider;
+    private Collider2D playerCollider;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        ownCollider = GetComponent<Collider2D>();
+    }
 
     protected override IEnumerator Perform()
     {
@@ -49,11 +60,28 @@ public class EnemyMeleeAbility : EnemyAbility
         StopAction();
     }
 
+    /// <summary>
+    /// 조준 방향 부채꼴 안에, 사거리 안에 있는가.
+    ///
+    /// 거리는 중심이 아니라 <b>몸 표면 사이</b>로 잰다. 중심으로 재면 덩치가 그대로 사거리를
+    /// 깎아먹는다 — 캐터피는 콜라이더가 1.2칸이라 몸이 맞닿은 순간에도 중심 거리가 이미
+    /// 0.9다. 여기에 사거리 1.1을 주면 실질 여유가 0.2칸뿐인데, 휘두르는 0.27초 동안
+    /// 플레이어는 1.35칸을 걸어 나간다. 움직이기만 하면 절대 안 맞았던 이유가 이것이다.
+    /// </summary>
     private bool PlayerInSector(Vector2 aim)
     {
         if (Player == null) return false;
         Vector2 offset = PlayerPosition - (Vector2)transform.position;
-        if (offset.magnitude > reach) return false;
-        return Vector2.Angle(aim, offset) <= sweepAngle * 0.5f;
+        if (Vector2.Angle(aim, offset) > sweepAngle * 0.5f) return false;
+
+        if (playerCollider == null && PlayerHealth != null)
+            playerCollider = PlayerHealth.GetComponent<Collider2D>();
+        if (ownCollider != null && playerCollider != null &&
+            ownCollider.enabled && playerCollider.enabled)
+        {
+            ColliderDistance2D gap = ownCollider.Distance(playerCollider);
+            if (gap.isValid) return gap.distance <= reach;   // 겹쳐 있으면 음수
+        }
+        return offset.magnitude <= reach;
     }
 }

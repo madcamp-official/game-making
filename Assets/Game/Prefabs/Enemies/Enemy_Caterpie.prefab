@@ -340,13 +340,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 304beb39aec6344b180ad731905521a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAbility
-  range: 1.5
+  range: 2.6
   minRange: 0
-  cooldown: 2
+  cooldown: 1
   initialDelay: 1
   actionState: Attack
-  reach: 1.1
-  sweepAngle: 120
+  reach: 1.4
+  sweepAngle: 210
   hitDelay: 0.27
-  recovery: 0.3
+  recovery: 0.25
   damage: 5
