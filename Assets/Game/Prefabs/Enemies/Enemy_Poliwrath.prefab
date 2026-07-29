@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 1493716465717770820}
   - component: {fileID: 7868639461592386524}
   - component: {fileID: 7879367202282387568}
+  - component: {fileID: 2065154937584399055}
   m_Layer: 0
   m_Name: Enemy_Poliwrath
   m_TagString: Untagged
@@ -226,7 +227,7 @@ MonoBehaviour:
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
-  attackDamage: 10
+  attackDamage: 0
   attackCooldown: 1
   goldRewardMin: 4
   goldRewardMax: 10
@@ -594,3 +595,25 @@ MonoBehaviour:
   - {fileID: 1434245229, guid: 669538721848f42b89022ae16cfc8dd0, type: 3}
   shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
   sortingOffset: -1
+--- !u!114 &2065154937584399055
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5968698635666423605}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 304beb39aec6344b180ad731905521a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAbility
+  range: 1.8
+  minRange: 0
+  cooldown: 2.6
+  initialDelay: 2.6
+  actionState: Attack
+  reach: 1.4
+  sweepAngle: 120
+  hitDelay: 0.15
+  recovery: 0.35
+  damage: 12

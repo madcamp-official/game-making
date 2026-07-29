@@ -299,6 +299,56 @@ public static class PmdCharacterPipeline
         return spec.name + ": 시트 " + spec.anims.Length + "개, 클립 " + clips.Count + "개";
     }
 
+    /// <summary>
+    /// 이미 구워 둔 캐릭터에 동작 하나만 더 얹는다.
+    ///
+    /// <see cref="Import"/>는 컨트롤러를 지우고 새로 만들기 때문에 GUID가 바뀌고, 그 캐릭터의
+    /// 스프라이트도 전부 다시 잘라 파일 ID가 바뀐다 — 프리팹의 기본 스프라이트, 애니메이션
+    /// 클립, <c>PmdFootShadow</c>가 맺어 둔 본체·그림자 짝이 한꺼번에 끊어진다. 동작 하나를
+    /// 추가하려고 그 값을 치를 이유가 없다.
+    ///
+    /// 그래서 여기서는 <b>새 시트만</b> 자르고(참조하는 곳이 아직 없으니 안전하다), 클립을
+    /// 만들어, 있는 컨트롤러에 상태만 덧붙인다. 같은 이름의 상태가 이미 있으면 모션만 갈아
+    /// 끼우므로 다시 실행해도 상태가 늘어나지 않는다.
+    /// </summary>
+    public static string AddAnim(string species, string thirdParty, AnimSpec anim)
+    {
+        string charRoot = "Assets/Game/Art/Characters/" + species;
+        string controllerPath = charRoot + "/" + species + ".controller";
+        var controller = AssetDatabase.LoadAssetAtPath<AnimatorController>(controllerPath);
+        if (controller == null) return species + ": 컨트롤러가 없다 — Import를 먼저";
+
+        var animData = LoadAnimData("Assets/ThirdParty/PMDCollab/" + thirdParty + "/Source/AnimData.xml");
+        if (!animData.TryGetValue(anim.source, out AnimEntry entry))
+            return species + ": AnimData에 " + anim.source + " 없음";
+
+        string sheetPath = charRoot + "/Sprites/" + anim.target + ".png";
+        if (AssetDatabase.LoadAssetAtPath<Texture2D>(sheetPath) == null)
+            return species + ": " + sheetPath + "가 없다";
+        Slice(sheetPath, anim.target, entry);
+
+        var byName = AssetDatabase.LoadAllAssetsAtPath(sheetPath).OfType<Sprite>()
+                                  .ToDictionary(s => s.name);
+        AnimatorStateMachine machine = controller.layers[0].stateMachine;
+        for (int row = 0; row < 8; row++)
+        {
+            AnimationClip clip = MakeClip(charRoot, anim.target, row, entry, byName, anim.loop);
+            AnimatorState existing = machine.states
+                .Select(s => s.state).FirstOrDefault(s => s.name == clip.name);
+            if (existing != null)
+            {
+                existing.motion = clip;
+                continue;
+            }
+            AnimatorState state = machine.AddState(clip.name);
+            state.motion = clip;
+            state.writeDefaultValues = true;
+        }
+        EditorUtility.SetDirty(controller);
+        AssetDatabase.SaveAssets();
+        return species + ": " + anim.target + " 8방향 추가 (타격 " + entry.HitTime.ToString("0.00") + "초)";
+    }
+
     // ---------------------------------------------------------------- AnimData
 
     public class AnimEntry

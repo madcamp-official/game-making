@@ -16,6 +16,8 @@ public class EnemyController : MonoBehaviour
     [SerializeField, Min(0f)] private float attackRange = 1.0f;
     [Tooltip("콜라이더 표면 사이 거리 기준 공격 범위. 중심 거리가 멀어도 몸이 이만큼 붙으면 공격한다.")]
     [SerializeField, Min(0f)] private float attackContactReach = 0.25f;
+    [Tooltip("몸이 닿는 거리에서 자동으로 주는 피해. 0이면 접촉 피해가 없다 — 1·3층 잡몹은 " +
+             "피할 수 있는 전용 근접기로만 때리므로 일부러 0으로 둔다 (MeleeAttackSetup).")]
     [SerializeField, Min(0)] private int attackDamage = 1;
     [SerializeField, Min(0f)] private float attackCooldown = 1.0f;
     [Tooltip("처치 보상 골드의 하한. 최댓값과 같게 두면 고정 보상이 된다 (보스가 그렇다).")]
