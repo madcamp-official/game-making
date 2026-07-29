@@ -62,7 +62,8 @@
 ## 아이템 아이콘
 
 - `item.png` — "Ripped by redblueyellow. No credit needed." 표기. 원저작: 게임프리크/닌텐도.
-- 자뭉열매·행복의알 아이콘을 잘라 배경 투명화(`relic_icons.png`)하여 사용.
+- 유물 23종의 아이콘을 한 칸(40×40)씩 잘라 배경을 투명화하고 한 줄로 이어 붙여
+  `relic_icons.png`(920×40)로 쓴다.
 
 ## 저작권 고지
 

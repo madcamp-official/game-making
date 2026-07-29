@@ -10,10 +10,9 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b91b3799f87bf4d2eb41794c54a827dd, type: 3}
-  m_Name: ShellBell
+  m_Name: Protein
   m_EditorClassIdentifier: Assembly-CSharp::RelicData
-  relicName: "\uC870\uAC1C\uAECD\uC9C8\uBC29\uC6B8"
-  description: "\uB204\uC801 40\uC758 \uD53C\uD574\uB97C \uC904 \uB54C\uB9C8\uB2E4
-    \uCCB4\uB825\uC744 3 \uD68C\uBCF5\uD55C\uB2E4"
-  icon: {fileID: -309770242307367625, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
-  effect: 9
+  relicName: "\uD0C0\uC6B0\uB9B0"
+  description: "\uADFC\uC811 \uACF5\uACA9 \uD53C\uD574 +20% \uC99D\uAC00"
+  icon: {fileID: -7967004622660320682, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
+  effect: 21

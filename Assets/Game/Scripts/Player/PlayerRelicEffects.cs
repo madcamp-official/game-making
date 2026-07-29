@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
@@ -10,16 +11,24 @@ using UnityEngine;
 [RequireComponent(typeof(PlayerController))]
 public class PlayerRelicEffects : MonoBehaviour
 {
+    private static readonly Collider2D[] hitBuffer = new Collider2D[32];
+    private static readonly ContactFilter2D noFilter = ContactFilter2D.noFilter;
+    private static readonly List<Health> struck = new List<Health>(16);
+
     private Health health;
     private PlayerController controller;
 
     /// <summary>조개껍질방울용 누적 피해량. 기준치를 넘을 때마다 회복하고 그만큼 뺀다.</summary>
     private int damageAccumulated;
 
+    /// <summary>울퉁불퉁멧이 다시 터질 수 있는 시각. 연타로 맞을 때 반사가 도배되지 않게 한다.</summary>
+    private float nextHelmetTime;
+
     private void Awake()
     {
         health = GetComponent<Health>();
         controller = GetComponent<PlayerController>();
+        health.OnCombatDamaged += HandleCombatDamaged;
     }
 
     // OnEnable이 아니라 Start에서 붙는다. 오브젝트 초기화 순서는 정해져 있지 않아서
@@ -36,6 +45,7 @@ public class PlayerRelicEffects : MonoBehaviour
     {
         if (RelicManager.Instance != null)
             RelicManager.Instance.OnRelicsChanged -= Apply;
+        if (health != null) health.OnCombatDamaged -= HandleCombatDamaged;
     }
 
     private void Apply()
@@ -67,6 +77,40 @@ public class PlayerRelicEffects : MonoBehaviour
 
         PlayerRelicEffects effects = FindAnyObjectByType<PlayerRelicEffects>();
         if (effects != null) effects.AccumulateDamage(amount, relics);
+    }
+
+    /// <summary>
+    /// 울퉁불퉁멧: 얻어맞으면 주변 적에게 그대로 되돌려 준다.
+    ///
+    /// 적의 피격 무적을 쓰지 않는다(<see cref="Health.TakeToll"/>). 반사는 내가 맞은 순간에
+    /// 일어나는데, 그 순간은 대개 적이 방금 나를 때린 직후라 적 쪽 무적이 살아 있을 때가 많다.
+    /// 무적에 걸리면 반사가 통째로 사라져 "맞으면 되돌려 준다"는 규칙이 무너진다.
+    /// </summary>
+    private void HandleCombatDamaged()
+    {
+        RelicManager relics = RelicManager.Instance;
+        if (relics == null || !relics.Has(RelicEffect.RockyHelmet)) return;
+        if (relics.RockyHelmetDamage <= 0 || Time.time < nextHelmetTime) return;
+        nextHelmetTime = Time.time + relics.RockyHelmetCooldown;
+
+        int damage = relics.RockyHelmetDamage;
+        struck.Clear();
+        int count = Physics2D.OverlapCircle(transform.position, relics.RockyHelmetRadius,
+                                            noFilter, hitBuffer);
+        for (int i = 0; i < count; i++)
+        {
+            EnemyController enemy = hitBuffer[i].GetComponentInParent<EnemyController>();
+            if (enemy == null) continue;
+
+            Health enemyHealth = enemy.GetComponent<Health>();
+            if (enemyHealth == null || enemyHealth.IsDead) continue;
+            if (struck.Contains(enemyHealth)) continue;
+            struck.Add(enemyHealth);
+
+            enemyHealth.TakeToll(damage);
+            // 조개껍질방울도 반사 피해를 센다. 여기서는 자기 자신이므로 정적 진입점을 거치지 않는다.
+            if (relics.Has(RelicEffect.ShellBell)) AccumulateDamage(damage, relics);
+        }
     }
 
     private void AccumulateDamage(int amount, RelicManager relics)

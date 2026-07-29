@@ -1085,32 +1085,54 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RelicManager
   relicPool:
-  - {fileID: 11400000, guid: 917c6fca72f76c8dff879e0e4c35d624, type: 2}
-  - {fileID: 11400000, guid: 35ad3b7363cc6fc601cef72939d032b5, type: 2}
-  - {fileID: 11400000, guid: 4a4b1890d8a7b9d187487e8b8dc677dc, type: 2}
-  - {fileID: 11400000, guid: d10d8a6d4c98e5a6f5830a1f040c3597, type: 2}
-  - {fileID: 11400000, guid: 447dd8990b96dd68f92e96d85c4377d3, type: 2}
-  - {fileID: 11400000, guid: 48d1850bb1cd0503046fe81230fe6281, type: 2}
-  - {fileID: 11400000, guid: 6e04cd43ddcb8da990bdf2302e87fd18, type: 2}
-  - {fileID: 11400000, guid: 4088378ee270e9637bc4c61e51759242, type: 2}
   - {fileID: 11400000, guid: 8015ae477201f4fdfba7ebc100ef4bec, type: 2}
   - {fileID: 11400000, guid: 5a9dd3a529fc94b05a56b5ea1b99e1d1, type: 2}
+  - {fileID: 11400000, guid: 35ad3b7363cc6fc601cef72939d032b5, type: 2}
+  - {fileID: 11400000, guid: 447dd8990b96dd68f92e96d85c4377d3, type: 2}
+  - {fileID: 11400000, guid: 4088378ee270e9637bc4c61e51759242, type: 2}
   - {fileID: 11400000, guid: c25899696b3be8d16d5bacbe585a154f, type: 2}
+  - {fileID: 11400000, guid: d10d8a6d4c98e5a6f5830a1f040c3597, type: 2}
+  - {fileID: 11400000, guid: 4a4b1890d8a7b9d187487e8b8dc677dc, type: 2}
+  - {fileID: 11400000, guid: 48d1850bb1cd0503046fe81230fe6281, type: 2}
+  - {fileID: 11400000, guid: 6e04cd43ddcb8da990bdf2302e87fd18, type: 2}
   - {fileID: 11400000, guid: f24b2b41e20a60fde0fd017fc76141be, type: 2}
+  - {fileID: 11400000, guid: 917c6fca72f76c8dff879e0e4c35d624, type: 2}
+  - {fileID: 11400000, guid: a174e0f425831054bb97ec0aaa0134a4, type: 2}
+  - {fileID: 11400000, guid: 90ab996ce8b831045a6bc6e180acbc40, type: 2}
+  - {fileID: 11400000, guid: 4cfc4e9f4ec0f31449dd5ffab139ea77, type: 2}
+  - {fileID: 11400000, guid: f8c048fc1617d3d4ca949c77e0702f8f, type: 2}
+  - {fileID: 11400000, guid: 83629a3e39543e543a810d2628a85eb3, type: 2}
+  - {fileID: 11400000, guid: ebed76d0147be7b449778bcd3158f8e7, type: 2}
+  - {fileID: 11400000, guid: 825bc1aa99a38c744bd7c45a4f4d84d2, type: 2}
+  - {fileID: 11400000, guid: e531326dfa54ff141a523e624a96642e, type: 2}
+  - {fileID: 11400000, guid: 0faecfc7ba3f7e84aa6432d6462be297, type: 2}
+  - {fileID: 11400000, guid: f315bde9fe675cc428db629ffa996696, type: 2}
+  - {fileID: 11400000, guid: 8a925e626eb807a4b8a4fa7d38bdf4f3, type: 2}
   shuffleOrder: 1
   amuletCoinGoldBonus: 0.25
-  choiceBonus: 0.5
-  choiceScarfSpeedBonus: 0.5
-  choiceScarfDamagePenalty: 0.2
   bigRootHealBonus: 0.5
-  wideLensScaleBonus: 0.15
+  wideLensSizeBonus: 0.15
   lifeOrbDamageBonus: 0.3
   lifeOrbMaxHealthPenalty: 0.3
+  hpUpMaxHealthBonus: 0.2
+  proteinMeleeBonus: 0.2
+  calciumRangedBonus: 0.2
+  carbosMoveSpeedBonus: 0.15
+  quickClawCooldownReduction: 0.15
+  lightClayZoneDurationBonus: 0.3
+  choiceBonus: 0.5
+  choicePenalty: 0.5
+  choiceScarfSpeedBonus: 0.5
+  choiceScarfDamage: 0.8
   sitrusBerryHealRatio: 0.33
   leftoversHealPerRoom: 8
   shellBellDamagePerHeal: 40
   shellBellHealAmount: 3
-  magikarpScaleMaxHealthBonus: 0.2
+  nuggetGold: 90
+  rockyHelmetDamage: 10
+  rockyHelmetRadius: 2.2
+  rockyHelmetCooldown: 1
+  techMachineUpgradeOptions: 4
 --- !u!1 &1906208093
 GameObject:
   m_ObjectHideFlags: 0

@@ -97,8 +97,20 @@ public class PlayerCombat : MonoBehaviour
 
     // ---------------------------------------------------------------- 강화가 반영된 수치
 
+    // 유물이 거는 배율. 유물이 아직 없으면 1이다.
+    // 시간으로 도는 쿨타임에만 걸린다 — 씨뿌리기는 방을 넘어가야 돌아오므로 선제공격손톱이 닿지 않는다.
+    private static float RelicCooldownMultiplier =>
+        RelicManager.Instance != null ? RelicManager.Instance.CooldownMultiplier : 1f;
+    private static float RelicAttackSizeMultiplier =>
+        RelicManager.Instance != null ? RelicManager.Instance.AttackSizeMultiplier : 1f;
+    private static float RelicZoneDurationMultiplier =>
+        RelicManager.Instance != null ? RelicManager.Instance.ZoneDurationMultiplier : 1f;
+
     private float EffectiveMeleeCooldown =>
-        meleeCooldown * (moves != null ? moves.TackleCooldownMultiplier : 1f);
+        meleeCooldown * (moves != null ? moves.TackleCooldownMultiplier : 1f) * RelicCooldownMultiplier;
+
+    /// <summary>몸통박치기 판정 원의 반지름. 광각렌즈가 키운다.</summary>
+    private float EffectiveMeleeRadius => meleeRadius * RelicAttackSizeMultiplier;
 
     /// <summary>공격 중 이동 배율. 강화는 "느려지는 정도"를 깎는 것이라 1에서 뺀 값에 곱한다.</summary>
     private float EffectiveAttackMoveSpeedMultiplier
@@ -112,23 +124,27 @@ public class PlayerCombat : MonoBehaviour
     }
 
     private float EffectiveVineCooldown =>
-        vineCooldown * (moves != null ? moves.VineCooldownMultiplier : 1f);
+        vineCooldown * (moves != null ? moves.VineCooldownMultiplier : 1f) * RelicCooldownMultiplier;
     private float EffectiveVineRange =>
-        vineRange * (moves != null ? moves.VineRangeMultiplier : 1f);
+        vineRange * (moves != null ? moves.VineRangeMultiplier : 1f) * RelicAttackSizeMultiplier;
+    /// <summary>채찍 판정의 굵기. 길이와 함께 광각렌즈를 탄다.</summary>
+    private float EffectiveVineWidth => vineWidth * RelicAttackSizeMultiplier;
     private float EffectiveVineStun =>
         vineStunDuration * (moves != null ? moves.VineStunMultiplier : 1f);
 
+    // 씨뿌리기는 공격이 아니라 회복 장판이라 광각렌즈가 닿지 않는다. 지속시간만 빛의점토를 탄다.
     private float EffectiveSeedRadius =>
         seedRadius * (moves != null ? moves.SeedRadiusMultiplier : 1f);
     private float EffectiveSeedDuration =>
-        seedDuration + (moves != null ? moves.SeedDurationBonus : 0f);
+        (seedDuration + (moves != null ? moves.SeedDurationBonus : 0f)) * RelicZoneDurationMultiplier;
     private int EffectiveSeedHeal =>
         seedHealPerTick + (moves != null ? moves.SeedHealBonus : 0);
 
+    private float EffectivePetalCooldown => petalCooldown * RelicCooldownMultiplier;
     private float EffectivePetalRadius =>
-        petalRadius * (moves != null ? moves.PetalRadiusMultiplier : 1f);
+        petalRadius * (moves != null ? moves.PetalRadiusMultiplier : 1f) * RelicAttackSizeMultiplier;
     private float EffectivePetalDuration =>
-        petalDuration + (moves != null ? moves.PetalDurationBonus : 0f);
+        (petalDuration + (moves != null ? moves.PetalDurationBonus : 0f)) * RelicZoneDurationMultiplier;
 
     /// <summary>
     /// 꽃잎댄스 한 틱의 피해. 몸통박치기의 <b>기본</b> 피해가 기준이라, 몸통박치기를 강화해도
@@ -160,7 +176,7 @@ public class PlayerCombat : MonoBehaviour
         {
             case MoveType.Tackle: last = lastMeleeTime; cooldown = EffectiveMeleeCooldown; break;
             case MoveType.VineWhip: last = lastVineTime; cooldown = EffectiveVineCooldown; break;
-            case MoveType.PetalDance: last = lastPetalTime; cooldown = petalCooldown; break;
+            case MoveType.PetalDance: last = lastPetalTime; cooldown = EffectivePetalCooldown; break;
             default: return 1f;
         }
         if (cooldown <= 0f) return 1f;
@@ -197,7 +213,7 @@ public class PlayerCombat : MonoBehaviour
         // 경직 중에는 공격도 못 한다. 후딜이 없는 것과 같아지면 경직을 넣은 의미가 없다.
         if (controller.IsStunned) return;
         // 강화 팔레트나 이벤트 대사창이 떠 있는 동안에는 클릭이 공격으로 새면 안 된다.
-        if (MoveUpgradePanel.IsOpen || EventDialogue.IsOpen) return;
+        if (MoveUpgradePanel.IsOpen || RelicChoicePanel.IsOpen || EventDialogue.IsOpen) return;
 
         Mouse mouse = Mouse.current;
         Keyboard kb = Keyboard.current;
@@ -273,7 +289,7 @@ public class PlayerCombat : MonoBehaviour
 
         int damage = EffectiveMeleeDamage;
         struckTargets.Clear();
-        int count = Physics2D.OverlapCircle(origin, meleeRadius, noFilter, hitBuffer);
+        int count = Physics2D.OverlapCircle(origin, EffectiveMeleeRadius, noFilter, hitBuffer);
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
@@ -304,15 +320,16 @@ public class PlayerCombat : MonoBehaviour
 
         // 판정은 플레이어 앞으로 뻗은 직사각형이다. 그린 채찍과 같은 범위여야 한다.
         float range = EffectiveVineRange;
+        float width = EffectiveVineWidth;
         Vector2 origin = transform.position;
         Vector2 center = origin + direction * (range * 0.5f);
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        StartCoroutine(VineWhipFlash(origin, direction, range));
+        StartCoroutine(VineWhipFlash(origin, direction, range, width));
 
         int damage = EffectiveVineDamage;
         struckTargets.Clear();
-        int count = Physics2D.OverlapBox(center, new Vector2(range, vineWidth), angle,
+        int count = Physics2D.OverlapBox(center, new Vector2(range, width), angle,
                                          noFilter, hitBuffer);
         for (int i = 0; i < count; i++)
         {
@@ -353,7 +370,7 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>채찍이 뻗었다가 사라지는 연출. 마커 하나를 계속 재사용한다.</summary>
-    private IEnumerator VineWhipFlash(Vector2 origin, Vector2 direction, float range)
+    private IEnumerator VineWhipFlash(Vector2 origin, Vector2 direction, float range, float width)
     {
         if (vineMarker == null)
         {
@@ -379,12 +396,12 @@ public class PlayerCombat : MonoBehaviour
             elapsed += Time.deltaTime;
             float length = range * Mathf.Clamp01(elapsed / ExtendTime);
             t.position = origin + direction * (length * 0.5f);
-            t.localScale = new Vector3(length, vineWidth, 1f);
+            t.localScale = new Vector3(length, width, 1f);
             yield return null;
         }
 
         t.position = origin + direction * (range * 0.5f);
-        t.localScale = new Vector3(range, vineWidth, 1f);
+        t.localScale = new Vector3(range, width, 1f);
         yield return new WaitForSeconds(HoldTime);
         if (vineMarker != null) vineMarker.enabled = false;
     }
@@ -415,7 +432,7 @@ public class PlayerCombat : MonoBehaviour
         }
 
         flashMarker.transform.position = origin;
-        flashMarker.transform.localScale = Vector3.one * meleeRadius * 2f;
+        flashMarker.transform.localScale = Vector3.one * EffectiveMeleeRadius * 2f;
         flashMarker.enabled = true;
         yield return flashDuration;
         if (flashMarker != null) flashMarker.enabled = false;

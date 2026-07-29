@@ -53,31 +53,33 @@ public static class MoveUpgrades
     public const float PetalDamageStep = 1.2f; // 피해 +20%
     public const float PetalDurationStep = 1f; // 2.5초 → 3.5초
 
+    // 증감폭은 앞에 부호를 붙여 적는다. "20% 감소"는 20%가 되는 것인지 20%만큼 깎이는 것인지
+    // 읽는 사람마다 갈리는데, "-20%"는 갈리지 않는다. 유물 설명도 같은 규칙을 쓴다.
     public static readonly MoveUpgradeOption[] All =
     {
         new MoveUpgradeOption(MoveUpgradeId.TackleDamage, MoveType.Tackle,
-            "몸통박치기", "피해량 20% 증가"),
+            "몸통박치기", "피해량 +20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.TackleSlow, MoveType.Tackle,
-            "몸통박치기", "공격 중 이속 감소량 20% 감소"),
+            "몸통박치기", "공격 중 이속 감소량 -20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.TackleSpeed, MoveType.Tackle,
-            "몸통박치기", "공격 속도 10% 증가"),
+            "몸통박치기", "공격 속도 +10% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.VineRange, MoveType.VineWhip,
-            "덩굴채찍", "길이 20% 증가"),
+            "덩굴채찍", "길이 +20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.VineStun, MoveType.VineWhip,
-            "덩굴채찍", "공격 후 경직 20% 감소"),
+            "덩굴채찍", "공격 후 경직 -20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.VineCooldown, MoveType.VineWhip,
-            "덩굴채찍", "쿨타임 20% 감소"),
+            "덩굴채찍", "쿨타임 -20% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.SeedHeal, MoveType.SeedSow,
-            "씨뿌리기", "회복량 33% 증가"),
+            "씨뿌리기", "회복량 +33% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.SeedDuration, MoveType.SeedSow,
-            "씨뿌리기", "장판 지속시간 2초 증가"),
+            "씨뿌리기", "장판 지속시간 +2초 증가"),
         new MoveUpgradeOption(MoveUpgradeId.SeedRadius, MoveType.SeedSow,
-            "씨뿌리기", "장판 크기 30% 증가"),
+            "씨뿌리기", "장판 크기 +30% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.PetalRadius, MoveType.PetalDance,
-            "꽃잎댄스", "장판 크기 20% 증가"),
+            "꽃잎댄스", "장판 크기 +20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.PetalDamage, MoveType.PetalDance,
-            "꽃잎댄스", "피해량 20% 증가"),
+            "꽃잎댄스", "피해량 +20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.PetalDuration, MoveType.PetalDance,
-            "꽃잎댄스", "장판 지속시간 1초 증가"),
+            "꽃잎댄스", "장판 지속시간 +1초 증가"),
     };
 }

@@ -32,9 +32,10 @@ public class PlayerEvolution : MonoBehaviour
 
     public void Evolve()
     {
-        // 연출 중 재진입 차단. 보스방 클리어는 "보상 유물 지급 → 진화" 순서로 일어나는데,
-        // 보상 유물이 행복의알이면 유물 효과가 먼저 Evolve()를 호출한다.
-        // 예전에는 이때 두 번째 연출이 겹치면서 Kinematic 상태를 원래 상태로 잘못 기억해
+        // 연출 중 재진입 차단. 진화를 부르는 곳이 둘이다 — 보스방 클리어와, 행복의알을 지닌 채
+        // 상점방을 나갈 때(RoomFlowController.TryHappyEggEvolve). 아래 "층당 한 단계" 제한이
+        // 둘을 갈라 주지만, 연출이 겹치는 것은 그 전에 여기서 막는다.
+        // 예전에는 두 번째 연출이 겹치면서 Kinematic 상태를 원래 상태로 잘못 기억해
         // 연출이 끝난 뒤에도 Kinematic으로 남았고(=벽을 통과), 단계도 한 번에 두 칸 올라갔다.
         if (IsEvolving) return;
 

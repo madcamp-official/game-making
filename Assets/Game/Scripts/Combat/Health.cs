@@ -50,6 +50,13 @@ public class Health : MonoBehaviour
     public event Action OnDamaged;
     public event Action OnDied;
 
+    /// <summary>
+    /// 전투로 얻어맞았을 때만 불린다 (울퉁불퉁멧의 반사 피해).
+    /// <see cref="OnDamaged"/>와 달리 이벤트에서 치르는 대가(<see cref="TakeToll"/>)는 세지 않는다 —
+    /// 잠만보를 흔들어 깎인 체력으로 반사 피해가 나가면 앞뒤가 맞지 않는다.
+    /// </summary>
+    public event Action OnCombatDamaged;
+
     // 코루틴 대기 객체 재사용 (루프마다 할당 방지)
     private static readonly WaitForSeconds flashInterval = new WaitForSeconds(0.06f);
 
@@ -108,6 +115,7 @@ public class Health : MonoBehaviour
         }
         else if (grantInvincibility)
         {
+            OnCombatDamaged?.Invoke();
             if (flashRoutine != null) StopCoroutine(flashRoutine);
             flashRoutine = StartCoroutine(InvincibleFlash());
         }

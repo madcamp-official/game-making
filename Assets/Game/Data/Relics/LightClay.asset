@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b91b3799f87bf4d2eb41794c54a827dd, type: 3}
-  m_Name: ShellBell
+  m_Name: LightClay
   m_EditorClassIdentifier: Assembly-CSharp::RelicData
-  relicName: "\uC870\uAC1C\uAECD\uC9C8\uBC29\uC6B8"
-  description: "\uB204\uC801 40\uC758 \uD53C\uD574\uB97C \uC904 \uB54C\uB9C8\uB2E4
-    \uCCB4\uB825\uC744 3 \uD68C\uBCF5\uD55C\uB2E4"
-  icon: {fileID: -309770242307367625, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
-  effect: 9
+  relicName: "\uBE5B\uC758\uC810\uD1A0"
+  description: "\uC7A5\uD310\uC758 \uC9C0\uC18D\uC2DC\uAC04 +30% \uC99D\uAC00\n\uC528\uBFCC\uB9AC\uAE30\uC640
+    \uAF43\uC78E\uB304\uC2A4\uC5D0 \uAC78\uB9B0\uB2E4"
+  icon: {fileID: 4973961114679030071, guid: fef94fc7aa63e4a4ba18939190621f04, type: 3}
+  effect: 14

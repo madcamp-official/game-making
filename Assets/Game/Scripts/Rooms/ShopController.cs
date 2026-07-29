@@ -4,8 +4,10 @@ using UnityEngine;
 /// <summary>
 /// 상점 구성 (gameplay-spec 12절): 상품 3개 — 체력 회복 1개 + 유물 2개.
 ///
-/// 유물은 <see cref="RelicManager"/>의 등장 순서에서 앞에서부터 꺼낸다. 꺼낸 유물은
-/// 사지 않고 지나가더라도 다시 등장하지 않는다. 남은 유물이 없으면 그 칸은 비운다.
+/// 유물은 <see cref="RelicManager"/>의 등장 순서에서 앞에서부터 꺼낸다. 꺼낸 유물은 사지 않고
+/// 지나가더라도 더미가 마를 때까지는 다시 등장하지 않고, 더미가 마르면 아직 손에 넣지 않은
+/// 유물로 다시 채워진다. 그래서 <b>얻을 수 있는 유물이 남아 있는 한 이 칸은 비지 않는다</b>.
+/// 정말 다 모았을 때만 남는 칸을 끈다.
 /// </summary>
 public class ShopController : MonoBehaviour
 {

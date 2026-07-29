@@ -4,7 +4,8 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 /// <summary>
-/// 레벨이 오를 때 뜨는 기술 강화 선택지 팔레트. 세 개 중 하나를 고른다.
+/// 레벨이 오를 때 뜨는 기술 강화 선택지 팔레트. 세 개 중 하나를 고른다
+/// (기술머신을 지니고 있으면 네 개).
 ///
 /// 씬에 EventSystem이 없어서 uGUI 버튼을 쓸 수 없다. <see cref="RelicTooltip"/>과 같은 방식으로
 /// 마우스 좌표를 직접 카드 사각형에 대 보고, 숫자키 1·2·3으로도 고를 수 있게 뒀다.
@@ -28,7 +29,9 @@ public class MoveUpgradePanel : MonoBehaviour
     private const int CardHeight = 76;
     private const int CardGap = 10;
     private const int Padding = 16;
-    private const int OptionCount = 3;
+    private const int DefaultOptionCount = 3;
+    /// <summary>기술머신까지 감안한 최대 칸 수. 카드는 이 수만큼 미리 만들어 두고 필요한 만큼만 켠다.</summary>
+    private const int MaxOptionCount = 4;
 
     private static readonly Color CardColor = new Color(0.16f, 0.2f, 0.3f, 0.72f);
     private static readonly Color CardHoverColor = new Color(0.28f, 0.42f, 0.62f, 0.85f);
@@ -40,6 +43,7 @@ public class MoveUpgradePanel : MonoBehaviour
     private readonly List<Text> cardTexts = new List<Text>();
     private readonly List<MoveUpgradeOption> shown = new List<MoveUpgradeOption>();
 
+    private Text hintText;
     private PlayerMoves moves;
     private float savedTimeScale = 1f;
     private int openedFrame = -1;
@@ -72,7 +76,7 @@ public class MoveUpgradePanel : MonoBehaviour
         dimRt.offsetMin = Vector2.zero;
         dimRt.offsetMax = Vector2.zero;
 
-        int height = Padding * 2 + 56 + OptionCount * (CardHeight + CardGap) + 28;
+        int height = PanelHeight(DefaultOptionCount);
         panel = PixelUi.MakePanel(transform, "Panel");
         panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0.5f);
         panel.pivot = new Vector2(0.5f, 0.5f);
@@ -93,7 +97,7 @@ public class MoveUpgradePanel : MonoBehaviour
         headerRt.sizeDelta = new Vector2(-Padding * 2, 44f);
         headerRt.anchoredPosition = new Vector2(0f, -Padding);
 
-        for (int i = 0; i < OptionCount; i++)
+        for (int i = 0; i < MaxOptionCount; i++)
         {
             GameObject cardGo = new GameObject("Card" + i);
             cardGo.transform.SetParent(panel, false);
@@ -122,10 +126,9 @@ public class MoveUpgradePanel : MonoBehaviour
             cardTexts.Add(text);
         }
 
-        Text hint = PixelUi.MakeText(panel, "Hint", 12, new Color(0.8f, 0.8f, 0.85f, 0.8f),
-                                     TextAnchor.LowerCenter);
-        hint.text = "클릭 또는 1 · 2 · 3 키로 선택";
-        RectTransform hintRt = hint.rectTransform;
+        hintText = PixelUi.MakeText(panel, "Hint", 12, new Color(0.8f, 0.8f, 0.85f, 0.8f),
+                                    TextAnchor.LowerCenter);
+        RectTransform hintRt = hintText.rectTransform;
         hintRt.anchorMin = new Vector2(0f, 0f);
         hintRt.anchorMax = new Vector2(1f, 0f);
         hintRt.pivot = new Vector2(0.5f, 0f);
@@ -133,17 +136,29 @@ public class MoveUpgradePanel : MonoBehaviour
         hintRt.anchoredPosition = new Vector2(0f, 8f);
     }
 
+    private static int PanelHeight(int optionCount) =>
+        Padding * 2 + 56 + optionCount * (CardHeight + CardGap) + 28;
+
     /// <summary>선택지를 뽑아 팔레트를 연다. 남은 강화가 하나도 없으면 열지 않고 false.</summary>
     public bool Open(PlayerMoves playerMoves)
     {
         if (IsOpen || playerMoves == null) return false;
 
-        List<MoveUpgradeOption> rolled = playerMoves.RollUpgrades(OptionCount);
+        // 기술머신은 고를 수 있는 폭을 넓힌다. 남은 강화가 그보다 적으면 있는 만큼만 뜬다.
+        int wanted = RelicManager.Instance != null
+            ? RelicManager.Instance.UpgradeOptionCount(DefaultOptionCount)
+            : DefaultOptionCount;
+        wanted = Mathf.Clamp(wanted, 1, MaxOptionCount);
+
+        List<MoveUpgradeOption> rolled = playerMoves.RollUpgrades(wanted);
         if (rolled.Count == 0) return false;
 
         moves = playerMoves;
         shown.Clear();
         shown.AddRange(rolled);
+
+        // 실제로 뜬 칸 수에 맞춰 패널을 줄인다. 빈 칸이 남으면 아래가 휑하게 벌어진다.
+        panel.sizeDelta = new Vector2(PanelWidth, PanelHeight(shown.Count));
 
         for (int i = 0; i < cards.Count; i++)
         {
@@ -152,6 +167,13 @@ public class MoveUpgradePanel : MonoBehaviour
             if (!used) continue;
             cardTexts[i].text = (i + 1) + ".  " + shown[i].title + " — " + shown[i].detail;
             cardImages[i].color = CardColor;
+        }
+
+        if (hintText != null)
+        {
+            string keys = "1";
+            for (int i = 1; i < shown.Count; i++) keys += " · " + (i + 1);
+            hintText.text = "클릭 또는 " + keys + " 키로 선택";
         }
 
         SetVisible(true);
@@ -196,6 +218,7 @@ public class MoveUpgradePanel : MonoBehaviour
         if (kb.digit1Key.wasPressedThisFrame && shown.Count > 0) Choose(0);
         else if (kb.digit2Key.wasPressedThisFrame && shown.Count > 1) Choose(1);
         else if (kb.digit3Key.wasPressedThisFrame && shown.Count > 2) Choose(2);
+        else if (kb.digit4Key.wasPressedThisFrame && shown.Count > 3) Choose(3);
     }
 
     private void Choose(int index)

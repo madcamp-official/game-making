@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
     private RelicTooltip relicTooltip;
     private RelicPopup relicPopup;
     private MoveUpgradePanel upgradePanel;
+    private RelicChoicePanel relicChoicePanel;
     private EventDialogue eventDialogue;
 
     private void Awake()
@@ -93,6 +94,10 @@ public class UIManager : MonoBehaviour
         upgradeGo.transform.SetAsLastSibling();
         upgradePanel = upgradeGo.AddComponent<MoveUpgradePanel>();
 
+        GameObject choiceGo = MakeFullScreenChild(canvasRoot, "RelicChoicePanel");
+        choiceGo.transform.SetAsLastSibling();
+        relicChoicePanel = choiceGo.AddComponent<RelicChoicePanel>();
+
         GameObject eventGo = MakeFullScreenChild(canvasRoot, "EventDialogue");
         eventGo.transform.SetAsLastSibling();
         eventDialogue = eventGo.AddComponent<EventDialogue>();
@@ -101,6 +106,10 @@ public class UIManager : MonoBehaviour
     /// <summary>레벨이 올랐을 때 기술 강화 팔레트를 띄운다.</summary>
     public bool ShowMoveUpgrades(PlayerMoves moves) =>
         upgradePanel != null && upgradePanel.Open(moves);
+
+    /// <summary>보스 보상 유물 둘 중 하나를 고르게 한다 (다우징머신).</summary>
+    public bool ShowRelicChoice(RelicData first, RelicData second, System.Action<RelicData> chosen) =>
+        relicChoicePanel != null && relicChoicePanel.Open(first, second, chosen);
 
     /// <summary>이벤트 대사창과 선택지를 띄운다. 다 끝나면 <paramref name="onClosed"/>가 불린다.</summary>
     public bool ShowEvent(EventPrompt prompt, System.Action onClosed) =>

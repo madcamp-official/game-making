@@ -88,7 +88,7 @@ public class CombatRoomController : MonoBehaviour
         GiveLeftoversHeal();
         if (isBossRoom)
         {
-            RelicManager.GrantReward(bossRewardRelic);
+            RelicManager.GrantBossReward(bossRewardRelic);
             return;
         }
 

@@ -275,29 +275,90 @@ PMD: Explorers of Time/Darkness의 게임 내 폰트 스프라이트 2장을 합
 슬레이 더 스파이어 방식의 **뽑기 더미**다. 한 판이 시작될 때 `RelicManager`가 등장 순서를 정하고,
 상점·이벤트·보스 보상이 전부 이 하나의 더미에서 앞에서부터 꺼내 쓴다.
 
-- **같은 유물은 한 번만 나온다.** 꺼낸 유물은 더미로 돌아가지 않는다
-- **상점에 나왔지만 사지 않은 유물도 남은 판 동안 다시 안 나온다.** 진열하는 순간 이미 더미에서 빠졌기 때문이다
+- **같은 유물은 한 판에 한 번만 나온다.** 꺼낸 유물은 더미로 돌아가지 않는다
+- **상점에 나왔지만 사지 않은 유물도 더미가 마를 때까지는 다시 안 나온다.** 진열하는 순간 이미 더미에서 빠졌기 때문이다
 - 등장 순서는 `RelicManager`의 `relicPool` 배열이다. `shuffleOrder`를 켜면(기본) 판마다 섞고, 끄면 배열 순서 그대로 나온다
 - 보상 쪽 `RelicData` 칸을 비워 두면 더미에서 뽑고, 채우면 그 유물을 고정으로 준다 (`RelicManager.GrantReward`)
 
-### 유물 목록
+목록과 계산 방식은 아래 "유물 개편"에서 한 번 갈아엎었다.
+
+## 유물 개편 — 23종·합연산 (2026-07-29)
+
+### 1. 증감은 전부 합연산
+
+예전에는 `RecalculateModifiers`가 배율을 `*=`로 쌓았다. 유물을 모을수록 증가폭이 스스로
+부풀어(+30%와 +20%가 1.56배) 후반이 무너진다. 이제 **보너스를 더한 뒤 한 번만 곱한다**
+(1 + 0.3 + 0.2 = 1.5배).
+
+예외는 **구애 시리즈뿐**이다. 다른 증감을 모두 더한 결과에 **맨 마지막으로 곱해진다** —
+"다른 모든 것을 계산한 뒤에 반이 된다"가 그 유물의 무게이고, 더하기로 섞으면 그게 사라진다.
+설명문에도 그 순서를 적어 두었다.
+
+```
+근접 피해 = 기본 × (1 + 생명의구슬 0.3 + 타우린 0.2) × 구애머리띠 1.5
+```
+
+### 2. 더미가 마르면 다시 채운다
+
+`Refill()`이 **아직 손에 넣지 않은 유물**로 더미를 새로 만든다. 한 번 지나친 유물이 돌아오므로,
+얻을 수 있는 유물이 하나라도 남아 있는 한 **상점의 유물 자리가 비지 않는다**. 예전에는 더미가
+마르면 칸이 통째로 꺼져서, 골드를 모을 이유 자체가 사라졌다.
+
+`DrawNext(count)`는 한 번에 꺼낸 것끼리 겹치지 않게 막는다 — 리필이 상점 한 곳의 두 칸
+사이에서 일어나면 같은 유물이 양쪽에 놓일 수 있다.
+
+### 3. 표기 형식
+
+증감폭 앞에 부호를 붙인다. "20% 감소"는 20%가 되는 것인지 20%만큼 깎이는 것인지 갈리지만
+"-20%"는 갈리지 않는다. 유물 설명과 기술 강화 선택지(`MoveUpgrades.All`) 양쪽에 적용했다.
+
+### 유물 목록 (23종)
 
 | 유물 | 효과 | 구현 위치 |
 |---|---|---|
-| 행복의알 | 획득 즉시 한 단계 진화 | `RelicManager.ApplyOnAcquire` |
-| 자뭉열매 | 획득 즉시 최대 체력의 33% 회복 | `RelicManager.ApplyOnAcquire` |
+| 행복의알 | **상점방을 나갈 때** 한 단계 진화 (보스방 입장 전) | `RoomFlowController.TryHappyEggEvolve` |
 | 기력의 덩어리 | 쓰러졌을 때 한 번 부활 (1회 소비) | `PlayerDeathHandler.HandleDeath` |
-| 부적금화 | 골드 획득 +25% | `RunManager.AddGold` |
-| 구애머리띠 | 근접 +50%, 원거리 -50% | `PlayerCombat.EffectiveMeleeDamage` |
-| 구애안경 | 원거리 +50%, 근접 -50% | 〃 |
-| 구애스카프 | 이동 +50%, 근접·원거리 -20% | `PlayerController.RelicSpeedMultiplier` |
+| 부적금화 | 획득 골드 +25% | `RunManager.AddGold` |
+| 구애머리띠 | 근접 +50%, 원거리 절반 (마지막에 곱함) | `AttackKinds.DamageMultiplier` |
+| 구애안경 | 원거리 +50%, 근접 절반 (마지막에 곱함) | 〃 |
+| 구애스카프 | 이동 +50%, 근접·원거리 ×0.8 (마지막에 곱함) | `PlayerController.RelicSpeedMultiplier` |
 | 큰뿌리 | 모든 회복량 +50% | `Health.HealMultiplier` |
 | 먹다남은음식 | 전투방 클리어마다 체력 8 회복 | `CombatRoomController.GiveLeftoversHeal` |
-| 광각렌즈 | 투사체 크기 +15% | **효과 없음** — 잎날가르기가 덩굴채찍으로 바뀌며 플레이어 투사체가 사라졌다 |
+| 광각렌즈 | **모든 공격의 크기 +15%** | `PlayerCombat.RelicAttackSizeMultiplier` |
 | 조개껍질방울 | 누적 40 피해마다 체력 3 회복 | `PlayerRelicEffects.ReportDamageDealt` |
 | 생명의구슬 | 최대 체력 -30%, 근접·원거리 +30% | `Health.MaxHealthMultiplier` |
+| 자뭉열매 | 획득 즉시 최대 체력의 33% 회복 | `RelicManager.ApplyOnAcquire` |
+| 선제공격손톱 | 쿨타임 -15% (씨뿌리기 제외) | `PlayerCombat.RelicCooldownMultiplier` |
+| 빛의점토 | 장판 지속시간 +30% | `PlayerCombat.RelicZoneDurationMultiplier` |
+| 이상한사탕 | 획득 즉시 기술 강화 1회 | `RelicManager.RareCandyRoutine` |
+| 울퉁불퉁멧 | 전투 피해를 받으면 주변 적에게 10 피해 (쿨 1초) | `PlayerRelicEffects.HandleCombatDamaged` |
+| 금구슬 | 획득 즉시 90G | `RelicManager.ApplyOnAcquire` |
+| 기술머신 | 기술 강화 선택지 3개 → 4개 | `MoveUpgradePanel.Open` |
+| 다우징머신 | 보스 보상을 둘 중 하나 고른다 | `RelicManager.GrantBossReward` · `RelicChoicePanel` |
+| 맥스업 | 최대 체력 +20% | `Health.MaxHealthMultiplier` |
+| 타우린 | 근접 피해 +20% | `AttackKinds.DamageMultiplier` |
+| 리보플라빈 | 원거리 피해 +20% | 〃 |
+| 알칼로이드 | 이동 속도 +15% | `PlayerController.RelicSpeedMultiplier` |
 
 수치는 전부 `RelicManager`의 "효과 수치" 항목에서 조절한다.
+
+### 걸려 넘어질 자리
+
+- **울퉁불퉁멧은 `Health.OnCombatDamaged`를 쓴다.** 기존 `OnDamaged`는 `TakeToll`(이벤트에서
+  치르는 대가)에도 불려서, 잠만보를 흔들다 깎인 체력으로 반사 피해가 나갔다
+- **반사 피해는 `TakeToll`로 넣는다.** 내가 맞는 순간은 대개 적이 방금 나를 때린 직후라
+  적 쪽 피격 무적이 살아 있고, `TakeDamage`로 넣으면 반사가 통째로 사라진다
+- **이상한사탕·다우징머신은 창을 한 프레임 늦게 띄운다** (`WaitForQuietScreen`). 보스방은
+  "보상 지급 → 진화 연출" 순서라 같은 프레임에 겹치는데, 둘 다 `Time.timeScale`을 건드려서
+  겹치면 시간이 0으로 굳는다. 진화는 그 프레임의 *뒤에* 시작되므로 `IsEvolving`을 바로 보면 안 된다
+- **행복의알은 단계가 아니라 순서를 준다.** `PlayerEvolution.Evolve`의 "층당 한 단계" 제한이
+  남아 있어, 상점에서 미리 진화했으면 같은 층 보스를 잡아도 두 번 진화하지 않는다
+
+### 아이콘
+
+`Assets/Game/Art/Items/item.png`(redblueyellow 립)에서 11칸을 더 잘라 `relic_icons.png`를
+12칸 → 23칸(920×40)으로 늘렸다. 기존 12칸은 **한 픽셀도 건드리지 않았고**, 스프라이트
+`internalID` 12개가 그대로 유지되는 것을 확인했다 — 바뀌면 기존 에셋의 아이콘 참조가 끊긴다.
 
 ## 보스 클리어 회복 (2026-07-27)
 
@@ -657,7 +718,7 @@ Specs에 한 줄 추가하면 된다. 3층 적을 만들 때 그대로 쓰면 �
 
 ### ⚠️ 이 교체로 유물 두 개가 영향을 받는다
 
-- **광각렌즈(투사체 크기 +15%)는 이제 아무 일도 하지 않는다.** 플레이어 투사체가 사라져서 `RelicManager.ProjectileScale`을 읽는 곳이 없다. 채찍의 사거리나 굵기에 걸어 주거나, 유물 자체를 다른 효과로 바꿔야 한다
+- ~~**광각렌즈(투사체 크기 +15%)는 이제 아무 일도 하지 않는다.**~~ → 2026-07-29 "유물 개편"에서 **모든 공격의 크기 +15%**로 바꿔 살렸다. 몸통박치기 반지름, 채찍 길이·굵기, 꽃잎댄스 반지름에 걸린다 (씨뿌리기는 공격이 아니라 제외)
 - **구애안경(원거리 +50%)은 덩굴채찍에만 걸린다.** 덩굴채찍이 잎날가르기가 있던 "원거리" 자리를 그대로 이어받았기 때문이다(`EffectiveVineDamage`). 2칸짜리 공격을 근접으로 볼지 원거리로 볼지는 밸런스 판단이라 그대로 뒀다 — 근접으로 옮기려면 `RelicMultiplier(false)`를 `true`로 바꾸면 되고, 그러면 구애안경이 죽는다
 
 `RazorLeaf.prefab`과 `Projectile.cs`는 지우지 않았다. `Projectile`은 적 탄에서 쓰지 않지만 되돌릴 여지를 남겨 뒀다.

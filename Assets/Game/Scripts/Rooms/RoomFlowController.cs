@@ -34,7 +34,24 @@ public class RoomFlowController : MonoBehaviour
         LoadRoom(0);
     }
 
+    /// <summary>
+    /// 다음 방으로 넘어간다. 상점방을 나가는 길이면 행복의알이 진화를 앞당긴다 —
+    /// 상점 다음은 보스방이므로, 보스를 <b>만나기 전에</b> 한 단계 올라간 몸으로 들어가게 된다.
+    /// </summary>
     public void NextRoom()
+    {
+        // 방 종류를 들고 있는 데이터가 없어서, 상점 관리자가 붙어 있느냐로 판별한다
+        // (전투방 판별이 CombatRoomController의 유무를 보는 것과 같은 방식이다).
+        // 방이 지워지기 전에 미리 봐 둬야 한다.
+        bool leavingShop = currentRoom != null &&
+                           currentRoom.GetComponentInChildren<ShopController>(true) != null;
+
+        AdvanceRoom();
+
+        if (leavingShop) TryHappyEggEvolve();
+    }
+
+    private void AdvanceRoom()
     {
         FloorData floor = floors[CurrentFloorIndex];
         if (CurrentRoomIndex + 1 >= floor.roomPrefabs.Length)
@@ -60,6 +77,22 @@ public class RoomFlowController : MonoBehaviour
             return;
         }
         LoadRoom(CurrentRoomIndex + 1);
+    }
+
+    /// <summary>
+    /// 행복의알: 상점방을 나갈 때 미리 진화한다.
+    ///
+    /// 보스 처치 후 진화는 그대로 남겨 둔다. <see cref="PlayerEvolution.Evolve"/>에 "층당 한 단계"
+    /// 제한이 있어서, 여기서 이미 올라갔다면 같은 층 보스를 잡아도 두 번 진화하지 않는다.
+    /// 즉 이 유물이 주는 것은 단계가 아니라 <b>순서</b>다.
+    /// </summary>
+    private void TryHappyEggEvolve()
+    {
+        if (gameCleared) return;
+        if (RelicManager.Instance == null || !RelicManager.Instance.Has(RelicEffect.HappyEgg)) return;
+
+        PlayerEvolution evolution = FindAnyObjectByType<PlayerEvolution>();
+        if (evolution != null) evolution.Evolve();
     }
 
     /// <summary>개발용: 층 수. <see cref="DevHackPanel"/>에서만 쓰며, 개발이 끝나면 같이 지운다.</summary>

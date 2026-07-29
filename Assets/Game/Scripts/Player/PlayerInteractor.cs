@@ -32,7 +32,10 @@ public class PlayerInteractor : MonoBehaviour
     private void Update()
     {
         // 이벤트 대사창이 떠 있는 동안에는 E가 대사창 넘기기로 쓰이므로 여기서 또 받으면 안 된다.
-        if ((health != null && health.IsDead) || EventDialogue.IsOpen)
+        // 선택 창들도 마찬가지다 — 시간이 멈춰 있을 뿐 Update는 계속 돌아서, 막지 않으면
+        // 창 뒤의 출구나 상품이 그대로 눌린다.
+        if ((health != null && health.IsDead) ||
+            EventDialogue.IsOpen || MoveUpgradePanel.IsOpen || RelicChoicePanel.IsOpen)
         {
             if (UIManager.Instance != null) UIManager.Instance.SetHint("");
             return;
