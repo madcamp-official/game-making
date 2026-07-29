@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
+using UnityEditor.U2D.Sprites;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
@@ -35,6 +38,65 @@ public static class Floor3EventSetup
     private static float GlideDuration =>
         Mathf.Round((LaprasRideTarget.x - LaprasHome.x) / GlideSpeed * 10f) / 10f;
 
+    // ---------------------------------------------------------------- 계곡 가장자리 타일
+
+    /// <summary>
+    /// 계곡 좌·우 가장자리 타일을 굽는다. Sea 타일셋의 전환 블록(S_15~S_17)은 깊은 물이
+    /// 이웃 지형과 만나는 자리를 물거품 경계로 그려 두었는데, 이웃이 비쳐 보일 자리가
+    /// 핑크(마젠타) 플레이스홀더로 뚫려 있다. 핑크를 깊은 물 무늬(S_19_1)로 메워 구운 것이
+    /// <c>TrenchEdges.png</c>다 — 세로 계곡에는 서(S_15_1)·동(S_17_1) 두 장이면 된다.
+    /// 여기서는 그 시트를 슬라이스해 타일 에셋 두 개로 만든다.
+    /// </summary>
+    public static string SliceTrenchEdges()
+    {
+        const string sheetPath = "Assets/Game/Art/Environment/TrenchEdges.png";
+        var importer = (TextureImporter)AssetImporter.GetAtPath(sheetPath);
+        if (importer == null) return sheetPath + "가 없다";
+        importer.textureType = TextureImporterType.Sprite;
+        importer.spriteImportMode = SpriteImportMode.Multiple;
+        importer.spritePixelsPerUnit = 24;
+        importer.filterMode = FilterMode.Point;
+        importer.textureCompression = TextureImporterCompression.Uncompressed;
+        importer.mipmapEnabled = false;
+
+        var factory = new SpriteDataProviderFactories();
+        factory.Init();
+        ISpriteEditorDataProvider provider = factory.GetSpriteEditorDataProviderFromObject(importer);
+        provider.InitSpriteEditorDataProvider();
+        string[] names = { "S_19_EdgeW", "S_19_EdgeE" };
+        var rects = new List<SpriteRect>();
+        for (int i = 0; i < names.Length; i++)
+            rects.Add(new SpriteRect
+            {
+                name = names[i],
+                spriteID = GUID.Generate(),
+                rect = new Rect(i * 24, 0, 24, 24),
+                alignment = SpriteAlignment.Center,
+                pivot = new Vector2(0.5f, 0.5f),
+            });
+        provider.SetSpriteRects(rects.ToArray());
+        provider.GetDataProvider<ISpriteNameFileIdDataProvider>()
+                .SetNameFileIdPairs(rects.Select(r => new SpriteNameFileIdPair(r.name, r.spriteID)));
+        provider.Apply();
+        importer.SaveAndReimport();
+
+        // 스프라이트와 같은 이름의 타일 에셋. RebuildLaprasRoom이 이 이름으로 집어 쓴다.
+        Sprite[] sprites = AssetDatabase.LoadAllAssetsAtPath(sheetPath).OfType<Sprite>().ToArray();
+        foreach (string name in names)
+        {
+            string tilePath = TilesRoot + name + ".asset";
+            Tile tileAsset = AssetDatabase.LoadAssetAtPath<Tile>(tilePath);
+            bool fresh = tileAsset == null;
+            if (fresh) tileAsset = ScriptableObject.CreateInstance<Tile>();
+            tileAsset.sprite = sprites.First(s => s.name == name);
+            tileAsset.colliderType = Tile.ColliderType.None;
+            if (fresh) AssetDatabase.CreateAsset(tileAsset, tilePath);
+            else EditorUtility.SetDirty(tileAsset);
+        }
+        AssetDatabase.SaveAssets();
+        return "계곡 가장자리 타일 2장 준비";
+    }
+
     public static string RebuildLaprasRoom()
     {
         GameObject room = PrefabUtility.LoadPrefabContents(RoomPath);
@@ -48,9 +110,14 @@ public static class Floor3EventSetup
             }
 
             // 2. 옛 연못(어두운 물 타일)을 바닥으로 되돌리고, 한가운데에 계곡을 판다.
+            //    좌우 끝 열은 직선으로 잘리지 않게 물거품 가장자리 타일을 쓴다.
             TileBase floorTile = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_13_1.asset");
             TileBase waterTile = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_19_1.asset");
+            TileBase edgeWest = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_19_EdgeW.asset");
+            TileBase edgeEast = AssetDatabase.LoadAssetAtPath<TileBase>(TilesRoot + "S_19_EdgeE.asset");
             if (floorTile == null || waterTile == null) return "S_13_1/S_19_1 타일 에셋을 찾지 못했다";
+            if (edgeWest == null || edgeEast == null)
+                return "가장자리 타일이 없다 — SliceTrenchEdges를 먼저 실행할 것";
 
             Tilemap ground = null;
             foreach (Tilemap map in room.GetComponentsInChildren<Tilemap>())
@@ -73,7 +140,9 @@ public static class Floor3EventSetup
             for (int x = TrenchCellMinX; x <= TrenchCellMaxX; x++)
                 for (int y = TrenchCellMinY; y <= TrenchCellMaxY; y++)
                 {
-                    ground.SetTile(new Vector3Int(x, y, 0), waterTile);
+                    TileBase pick = x == TrenchCellMinX ? edgeWest
+                                  : x == TrenchCellMaxX ? edgeEast : waterTile;
+                    ground.SetTile(new Vector3Int(x, y, 0), pick);
                     trenchPainted++;
                 }
 
