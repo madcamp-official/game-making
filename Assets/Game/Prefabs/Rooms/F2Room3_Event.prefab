@@ -527,7 +527,7 @@ MonoBehaviour:
   - {fileID: 1021426295, guid: 1077c6fbbb2fd4259ab5da9db7188700, type: 3}
   - {fileID: -429998805, guid: 1077c6fbbb2fd4259ab5da9db7188700, type: 3}
   - {fileID: -381242455, guid: 1077c6fbbb2fd4259ab5da9db7188700, type: 3}
-  shadowColor: {r: 0.04, g: 0.09, b: 0.2, a: 0.42}
+  shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
   sortingOffset: -1
 --- !u!1 &2179579388004919707
 GameObject:
@@ -5500,7 +5500,7 @@ MonoBehaviour:
   - {fileID: 1945942655, guid: 9196fca80c4d24a158f38344895ba770, type: 3}
   - {fileID: 695886333, guid: 9196fca80c4d24a158f38344895ba770, type: 3}
   - {fileID: 989711386, guid: 9196fca80c4d24a158f38344895ba770, type: 3}
-  shadowColor: {r: 0.04, g: 0.09, b: 0.2, a: 0.42}
+  shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
   sortingOffset: -1
 --- !u!1 &8765202127521417573
 GameObject:

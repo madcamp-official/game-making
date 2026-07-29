@@ -21,7 +21,8 @@ public class PmdFootShadow : MonoBehaviour
     [SerializeField] private Sprite[] bodySprites;
     [Tooltip("그림자 프레임(흰색 마스크). 색은 shadowColor로 입힌다.")]
     [SerializeField] private Sprite[] shadowSprites;
-    [SerializeField] private Color shadowColor = new Color(0.04f, 0.09f, 0.2f, 0.42f);
+    // 옅은 남색은 풀밭에서 보이지 않았다. 원작처럼 진한 검정으로 깔아야 어느 바닥에서도 읽힌다.
+    [SerializeField] private Color shadowColor = new Color(0f, 0f, 0f, 0.5f);
     [Tooltip("본체 정렬 순서에 더하는 값. 음수라 본체 바로 아래에 깔린다.")]
     [SerializeField] private int sortingOffset = -1;
 

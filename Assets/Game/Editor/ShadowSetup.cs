@@ -150,6 +150,7 @@ public static class ShadowSetup
 
             var so = new SerializedObject(shadow);
             so.FindProperty("owner").objectReferenceValue = owner;
+            so.FindProperty("shadowColor").colorValue = new Color(0f, 0f, 0f, 0.5f);
             FillArray(so.FindProperty("bodySprites"), bodies);
             FillArray(so.FindProperty("shadowSprites"), shadows);
             so.ApplyModifiedPropertiesWithoutUndo();

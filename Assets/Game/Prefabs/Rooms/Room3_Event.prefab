@@ -201,7 +201,7 @@ MonoBehaviour:
   shadowSprites:
   - {fileID: -1155104730, guid: a5ab354756abb4a978a975f779b6ccd9, type: 3}
   - {fileID: 1128281355, guid: a5ab354756abb4a978a975f779b6ccd9, type: 3}
-  shadowColor: {r: 0.04, g: 0.09, b: 0.2, a: 0.42}
+  shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
   sortingOffset: -1
 --- !u!1 &805184565454400973
 GameObject:
