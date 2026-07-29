@@ -5,19 +5,21 @@ using UnityEngine;
 using UnityEngine.Tilemaps;
 
 /// <summary>
-/// 일반 전투방(각 층 1·2·4·5번)의 물 지형을 전부 메워 평탄하게 만드는 일회성 도구.
+/// 방의 물 지형을 메워 평탄하게 만드는 도구.
 ///
-/// 전투방마다 호수가 하나씩 박혀 있어서 싸울 수 있는 면적이 갈리고, 밀치기·흡인·해류
-/// 같은 강제 이동이 물가에 걸려 어정쩡하게 멈추곤 했다. 물 타일을 그 층의 기본 바닥
-/// 타일로 갈고, 물을 막던 PondCollider도 지운다.
+/// 방마다 호수가 하나씩 박혀 있어서 쓸 수 있는 면적이 갈리고, 밀치기·흡인·해류 같은
+/// 강제 이동이 물가에 걸려 어정쩡하게 멈추곤 했다. 물 타일을 그 층의 기본 바닥 타일로
+/// 갈고, 물을 막던 PondCollider도 지운다.
 ///
 /// 층마다 타일셋이 달라서 "물"의 번호도 다르다 — 숲(F_)·사막(D_)은 24~26열이 물이고,
 /// 바다(S_)는 기본 바닥 자체가 얕은 물빛이라 진한 물은 19_1 한 장뿐이다. 나머지
 /// (꽃·조약돌·뼈 같은 장식)는 지형을 막지 않으므로 그대로 둔다.
 ///
-/// 이벤트 방(3층 라프라스의 해구)과 보스 방은 건드리지 않는다. 에디트 모드에서 실행할 것.
+/// 3층 라프라스 이벤트의 해구는 이벤트 연출이 그 위에서 벌어지므로 <see cref="Rooms"/>에
+/// 넣지 않았다. 이미 평탄한 방에 다시 돌려도 아무 일도 일어나지 않는다.
+/// 에디트 모드에서 실행할 것.
 /// </summary>
-public static class CombatRoomFlatten
+public static class RoomWaterFlatten
 {
     /// <summary>타일셋 접두사별 (기본 바닥 타일, 물 타일 이름 판정).</summary>
     private static bool IsWater(string tileName)
@@ -32,7 +34,7 @@ public static class CombatRoomFlatten
 
     private static readonly string[] Rooms =
     {
-        "Room1_Combat", "Room2_Combat", "Room4_Combat", "Room5_Combat",
+        "Room1_Combat", "Room2_Combat", "Room3_Event", "Room4_Combat", "Room5_Combat",
         "F2Room1_Combat", "F2Room2_Combat", "F2Room4_Combat", "F2Room5_Combat",
         "F3Room1_Combat", "F3Room2_Combat", "F3Room4_Combat", "F3Room5_Combat",
     };
