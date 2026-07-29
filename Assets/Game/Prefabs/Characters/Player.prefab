@@ -218,13 +218,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b249a72eab64b4430b60a8146a2e2a03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
-  meleeDamage: 12
+  meleeDamage: 11
   meleeRange: 0.9
   meleeRadius: 0.85
   meleeCooldown: 0.5
   meleeKnockbackForce: 6
   attackEffectPrefab: {fileID: 0}
-  vineDamage: 5
+  vineDamage: 4
   vineCooldown: 2.2
   vineRange: 2.8
   vineWidth: 0.9
@@ -308,20 +308,20 @@ MonoBehaviour:
     animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
     portrait: {fileID: 0}
     maxHealth: 100
-    attackDamage: 12
-    vineDamage: 5
+    attackDamage: 11
+    vineDamage: 4
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
     portrait: {fileID: 0}
     maxHealth: 130
-    attackDamage: 18
-    vineDamage: 7
+    attackDamage: 16
+    vineDamage: 6
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
     portrait: {fileID: 0}
     maxHealth: 170
-    attackDamage: 25
-    vineDamage: 10
+    attackDamage: 22
+    vineDamage: 9
   flashStepDuration: 0.15
   healMissingFraction: 0.6
 --- !u!114 &510344029345414639

@@ -24,7 +24,7 @@ public class DamageZone : MonoBehaviour
     public static DamageZone Spawn(Transform parent, Vector2 center, float radius, float duration,
                                    int damage, float tickInterval, Color color)
     {
-        GameObject go = new GameObject("DamageZone");
+        GameObject go = EnemyEffect.Mark(new GameObject("DamageZone"));
         go.transform.SetParent(parent, false);
         go.transform.position = center;
         go.transform.localScale = Vector3.one * (radius * 2f);

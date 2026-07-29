@@ -94,13 +94,13 @@ public class EvolutionCutscene : MonoBehaviour
         skipRequested = false;
 
         float previousTimeScale = Time.timeScale;
-        Canvas hudCanvas = UIManager.Instance != null ? UIManager.Instance.GetComponent<Canvas>() : null;
-        bool hudWasEnabled = hudCanvas != null && hudCanvas.enabled;
+        CanvasGroup hud = HudGroup();
+        float hudAlpha = hud != null ? hud.alpha : 1f;
 
         try
         {
             Time.timeScale = 0f;
-            if (hudCanvas != null) hudCanvas.enabled = false;
+            if (hud != null) hud.alpha = 0f;
 
             BuildUi(oldSprite, newSprite);
             SetZoom(oldRoot, 1f); SetZoom(newRoot, 0f);
@@ -139,10 +139,30 @@ public class EvolutionCutscene : MonoBehaviour
         finally
         {
             if (panelRoot != null) Destroy(panelRoot);
-            if (hudCanvas != null) hudCanvas.enabled = hudWasEnabled;
+            if (hud != null) hud.alpha = hudAlpha;
             Time.timeScale = previousTimeScale;
             IsPlaying = false;
         }
+    }
+
+    /// <summary>
+    /// 컷씬 동안 HUD를 가리는 손잡이. <b>Canvas를 끄지 않고</b> 투명도만 0으로 내린다.
+    ///
+    /// 예전에는 <c>Canvas.enabled = false</c>로 껐는데, 그동안 글자가 다시 그려지면
+    /// 아주 작게 굳어 버렸다. uGUI의 <c>Text</c>는 비트맵 폰트를 그릴 때
+    /// <c>폰트 기준 크기(12) / 요청 크기(24)</c>로 확대율을 잡는데, 그 계산이 자기 위에 있는
+    /// <b>켜져 있는</b> Canvas를 못 찾으면 확대율을 1로 떨어뜨린다. 그러면 24픽셀로 그릴
+    /// 글자가 12픽셀로 그려진다.
+    ///
+    /// 하필 이 컷씬 한가운데(백색 섬광)에서 최대 체력이 오르고 기술을 하나 배운다. 그 두 값이
+    /// 바로 왼쪽 아래 체력 HUD와 기술 칸 HUD의 글자다 — 마침 그때 다시 그려지고, 다시 그릴
+    /// 일이 없어 작아진 채로 남았다. Canvas를 켜 둔 채로 숨기면 확대율이 흔들리지 않는다.
+    /// </summary>
+    private static CanvasGroup HudGroup()
+    {
+        if (UIManager.Instance == null) return null;
+        CanvasGroup group = UIManager.Instance.GetComponent<CanvasGroup>();
+        return group != null ? group : UIManager.Instance.gameObject.AddComponent<CanvasGroup>();
     }
 
     // ---- 연출 단계 ----

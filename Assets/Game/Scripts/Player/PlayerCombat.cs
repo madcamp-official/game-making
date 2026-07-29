@@ -15,14 +15,17 @@ using UnityEngine.Serialization;
 /// 피해를 주는 기술에는 사거리 속성이 붙어 있다 (<see cref="MoveInfo.KindOf"/>).
 /// 유물과 이벤트 강화는 그 속성만 보고 배율을 매긴다.
 ///
-/// 기술은 전투방과 보스방에서만 쓸 수 있다 (<see cref="MovesUsable"/>).
+/// 기술은 전투방과 보스방에서, 적이 남아 있는 동안에만 쓸 수 있다 (<see cref="MovesUsable"/>).
 /// 수치는 모두 Inspector에서 조정한다.
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
 {
     [Header("기본 공격 1 — 근거리")]
-    [SerializeField, Min(0)] private int meleeDamage = 12;
+    // 피해량은 진화 단계가 덮어쓴다(PlayerEvolution.stages). 여기 값은 1단계와 같게 맞춰 둔다.
+    // 전 기술 일괄 10% 하향의 몫이 들어가 있다(12 → 11). 정수라 딱 10%로 떨어지지 않을 때는
+    // 내림 쪽으로 붙였다 — 반올림으로 제자리에 남으면 하향이 아니게 된다.
+    [SerializeField, Min(0)] private int meleeDamage = 11;
     [SerializeField, Min(0f)] private float meleeRange = 0.9f;
     [Tooltip("휘두르는 원의 반지름. 0.6에서 넓이가 두 배가 되도록 √2를 곱했다 — " +
              "몰려드는 잡몹을 한 번에 쓸어야 근접이 근접다워진다.")]
@@ -38,7 +41,7 @@ public class PlayerCombat : MonoBehaviour
     // 4할쯤에 묶어 둔다. 예전에는 한 대가 몸통박치기와 맞먹어(14 대 12) 붙지 않고 채찍만
     // 휘두르는 편이 이득인 구간이 있었다 — 근접 포켓몬이 근접할 이유가 없어졌다.
     [FormerlySerializedAs("razorDamage")]
-    [SerializeField, Min(0)] private int vineDamage = 5;
+    [SerializeField, Min(0)] private int vineDamage = 4;
     [FormerlySerializedAs("razorCooldown")]
     [SerializeField, Min(0f)] private float vineCooldown = 2.2f;
     [Tooltip("채찍이 닿는 거리. 타일 한 칸이 1이다.")]
@@ -167,7 +170,7 @@ public class PlayerCombat : MonoBehaviour
     /// 방을 넘어가야 돌아오므로, "이 방에서 언제 쓸 것인가"가 곧 선택이 된다.
     /// </summary>
     private bool SeedReady =>
-        CombatRoomController.InCombatRoom && seedUsedInRoom != CombatRoomController.VisitId;
+        CombatRoomController.CombatActive && seedUsedInRoom != CombatRoomController.VisitId;
 
     /// <summary>
     /// 기술 칸 HUD가 쓰는 쿨타임 진행도. 1이면 바로 쓸 수 있고, 0이면 방금 썼다.
@@ -248,9 +251,13 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>
-    /// 기술은 전투방과 보스방에서만 쓸 수 있다. 상점·이벤트방에서는 때릴 대상도, 회복할 이유도 없다.
+    /// 기술은 전투방과 보스방에서, 그것도 <b>적이 남아 있는 동안에만</b> 쓸 수 있다.
+    /// 상점·이벤트방에서는 때릴 대상도, 회복할 이유도 없다.
+    ///
+    /// 싸움이 끝난 뒤를 막는 이유는 씨뿌리기다. 마지막 적을 잡고 빈 방에서 장판을 깔면
+    /// 방마다 한 번뿐인 기술이 위험 없는 회복이 되어, 언제 쓸지 고르는 재미가 사라진다.
     /// </summary>
-    public static bool MovesUsable => CombatRoomController.InCombatRoom;
+    public static bool MovesUsable => CombatRoomController.CombatActive;
 
     /// <summary>전투방이고, 배운 기술이고, 쿨타임도 끝났는지.</summary>
     private bool CanUse(MoveType move)

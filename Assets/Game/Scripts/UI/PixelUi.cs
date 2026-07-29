@@ -118,7 +118,15 @@ public static class PixelUi
     /// 줄마다 25%씩 모자라서 아래 요소와 글자가 겹친다.
     /// 그래서 줄 수만 생성기에서 얻고 높이는 폰트의 줄 간격으로 직접 계산한다.
     /// </summary>
-    public static float LineBoxHeight(Text text)
+    public static float LineBoxHeight(Text text) =>
+        text == null ? 0f : LineBoxHeight(text, text.rectTransform.rect.width);
+
+    /// <summary>
+    /// 줄바꿈 폭을 직접 주는 판. 아직 배치되지 않은 Text는 <c>rect.width</c>가 0이라
+    /// 한 글자에 한 줄씩 세어 버린다. 칸 크기를 글자에 맞춰 <b>정하는</b> 쪽에서는
+    /// 폭을 먼저 알고 있으므로 그 값을 넘긴다.
+    /// </summary>
+    public static float LineBoxHeight(Text text, float width)
     {
         if (text == null || string.IsNullOrEmpty(text.text)) return 0f;
 
@@ -127,7 +135,7 @@ public static class PixelUi
         if (f == null || f.dynamic || f.fontSize <= 0) return text.preferredHeight;
 
         TextGenerator gen = text.cachedTextGeneratorForLayout;
-        gen.Populate(text.text, text.GetGenerationSettings(new Vector2(text.rectTransform.rect.width, 0f)));
+        gen.Populate(text.text, text.GetGenerationSettings(new Vector2(width, 0f)));
 
         float scale = text.fontSize / (float)f.fontSize;
         return Mathf.Max(1, gen.lineCount) * f.lineHeight * scale;

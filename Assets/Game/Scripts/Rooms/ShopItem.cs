@@ -5,7 +5,7 @@ using UnityEngine;
 /// </summary>
 public class ShopItem : MonoBehaviour, IInteractable
 {
-    [SerializeField] private string itemName = "포션";
+    [SerializeField] private string itemName = "자뭉열매";
     [SerializeField, Min(0)] private int price = 10;
     [Tooltip("회복량은 최대 체력에 비례한다. 고정 수치가 아니라 비율인 이유는, 층마다 " +
              "최대 체력이 유물로 달라져도 포션 한 병의 값어치가 같아야 하기 때문이다.")]

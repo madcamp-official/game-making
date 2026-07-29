@@ -123,8 +123,8 @@ public class MoveSlotsHud : MonoBehaviour
     {
         if (combat == null || moves == null) Bind();
 
-        // 전투방 밖에서는 기술을 쓸 수 없다. 눌러도 아무 일이 없으면 고장으로 보이므로
-        // 칸 전체를 흐리게 해서 지금은 쓸 수 없다는 걸 알린다.
+        // 전투방 밖에서도, 방을 다 정리한 뒤에도 기술을 쓸 수 없다. 눌러도 아무 일이 없으면
+        // 고장으로 보이므로 칸 전체를 흐리게 해서 지금은 쓸 수 없다는 걸 알린다.
         bool usable = PlayerCombat.MovesUsable;
 
         for (int i = 0; i < slots.Length; i++)

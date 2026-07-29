@@ -39,7 +39,7 @@ public class GyaradosFloodZone : MonoBehaviour
     public static GyaradosFloodZone Spawn(Transform parent, Rect area, Vector2 inwardEdge,
                                           Color warningColor, Color floodColor, Color foamColor)
     {
-        GameObject go = new GameObject("FloodZone");
+        GameObject go = EnemyEffect.Mark(new GameObject("FloodZone"));
         go.transform.SetParent(parent, false);
         go.transform.position = area.center;
 

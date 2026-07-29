@@ -31,7 +31,19 @@ public class CombatRoomController : MonoBehaviour
     /// </summary>
     public static int VisitId { get; private set; }
 
+    /// <summary>
+    /// 지금 방에 아직 싸움이 남아 있는지. 전투방 안이면서 적이 살아 있을 때만 참이다.
+    ///
+    /// "전투방인가"와 나눠 둔 이유: 마지막 적을 잡고 나서도 방은 그대로라, 빈 방에서
+    /// 느긋하게 씨뿌리기를 깔아 두고 나갈 수 있었다. 방마다 한 번뿐인 기술이 아무 대가 없는
+    /// 회복이 되면 "이 방에서 언제 쓸 것인가"라는 선택이 사라진다.
+    /// </summary>
+    public static bool CombatActive => InCombatRoom && clearedVisitId != VisitId;
+
     private static int activeRooms;
+
+    /// <summary>마지막으로 정리가 끝난 방의 번호. 방을 옮기면 <see cref="VisitId"/>가 달라져 저절로 풀린다.</summary>
+    private static int clearedVisitId = -1;
 
     /// <summary>정적 값이라 판이 바뀌어도 살아남는다. 판마다 0에서 시작해야 한다.</summary>
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -39,6 +51,7 @@ public class CombatRoomController : MonoBehaviour
     {
         activeRooms = 0;
         VisitId = 0;
+        clearedVisitId = -1;
     }
 
     // 방을 옮길 때 옛 방은 프레임 끝에 지워지고 새 방은 곧바로 생긴다. 그래서 잠깐 둘이 겹치는데,
@@ -62,6 +75,7 @@ public class CombatRoomController : MonoBehaviour
             enemyHealth.OnDied += () => HandleEnemyDied(enemyHealth);
         }
 
+        if (aliveEnemies.Count == 0) MarkCleared();   // 적을 배치하지 않은 방
         if (exitDoor != null)
             exitDoor.SetOpen(aliveEnemies.Count == 0);
     }
@@ -71,6 +85,7 @@ public class CombatRoomController : MonoBehaviour
         aliveEnemies.Remove(enemyHealth);
         if (aliveEnemies.Count > 0) return;
 
+        MarkCleared();
         GiveClearReward();
         if (exitDoor != null) exitDoor.SetOpen(true);
 
@@ -79,6 +94,19 @@ public class CombatRoomController : MonoBehaviour
             PlayerEvolution evolution = FindAnyObjectByType<PlayerEvolution>();
             if (evolution != null) evolution.Evolve();
         }
+    }
+
+    /// <summary>
+    /// 싸움이 끝났다고 표시하고, 적이 남긴 흔적을 걷어 낸다.
+    ///
+    /// 마지막 적이 죽어도 이미 깔린 독장판이나 날아가던 뼈다귀는 그대로 남아, 아무도 없는
+    /// 방을 가로지르다 얻어맞는 일이 있었다. 때린 주인이 없어진 공격은 더 배울 것이 없으므로
+    /// 함께 치운다.
+    /// </summary>
+    private void MarkCleared()
+    {
+        clearedVisitId = VisitId;
+        EnemyEffect.ClearUnder(transform);
     }
 
     // 일반 전투방은 클리어해도 아무것도 주지 않는다. 보스방만 보상 유물을 준다.

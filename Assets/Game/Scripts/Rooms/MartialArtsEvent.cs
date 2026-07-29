@@ -21,9 +21,9 @@ public class MartialArtsEvent : ChoiceEvent
     [SerializeField] private EventNpcPose hitmonchanNpc;
 
     [Header("강화 폭")]
-    [SerializeField, Range(0f, 1f)] private float meleeBonus = 0.2f;
-    [SerializeField, Range(0f, 1f)] private float rangedBonus = 0.2f;
-    [SerializeField, Range(0f, 1f)] private float speedBonus = 0.15f;
+    [SerializeField, Range(0f, 1f)] private float meleeBonus = 0.15f;
+    [SerializeField, Range(0f, 1f)] private float rangedBonus = 0.15f;
+    [SerializeField, Range(0f, 1f)] private float speedBonus = 0.1f;
 
     private static int Percent(float fraction) => Mathf.RoundToInt(fraction * 100f);
 

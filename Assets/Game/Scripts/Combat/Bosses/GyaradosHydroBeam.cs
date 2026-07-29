@@ -217,7 +217,7 @@ public class GyaradosHydroBeam : MonoBehaviour
     public static GyaradosHydroBeam Launch(Transform parent, List<Segment> path, float width,
                                            float trailDuration, int damage, Color color, Color splashColor)
     {
-        GameObject go = new GameObject("HydroBeam");
+        GameObject go = EnemyEffect.Mark(new GameObject("HydroBeam"));
         go.transform.SetParent(parent, false);
 
         GyaradosHydroBeam beam = go.AddComponent<GyaradosHydroBeam>();

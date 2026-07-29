@@ -54,7 +54,7 @@ public class EnemyBoomerangAbility : EnemyAbility
     /// <summary>뼈 하나의 왕복. 텅구리는 이 코루틴이 끝날 때까지 던진 자세로 서 있는다.</summary>
     private IEnumerator BoneFlight(Vector2 direction)
     {
-        GameObject bone = new GameObject("MarowakBone");
+        GameObject bone = EnemyEffect.Mark(new GameObject("MarowakBone"));
         // 적이 죽어도 날아가던 뼈가 공중에서 사라지지 않도록 방에 붙인다.
         bone.transform.SetParent(EffectRoot, false);
         bone.transform.position = (Vector2)transform.position + direction * 0.4f;

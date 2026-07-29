@@ -14,11 +14,13 @@ public class ShopController : MonoBehaviour
     [SerializeField] private ShopItem healSlot;
     [SerializeField] private ShopItem[] relicSlots; // 3개
 
-    [Header("포션")]
+    [Header("포션 — 자뭉열매")]
     [Tooltip("층별 가격. 1·2·3층 순서다. 층이 더 늘면 마지막 값을 쓴다.")]
     [SerializeField] private int[] potionPrices = { 10, 20, 30 };
     [Tooltip("최대 체력의 몇 할을 회복할지. 유물에서 빠진 자뭉열매의 효과를 그대로 물려받았다.")]
     [SerializeField, Range(0f, 1f)] private float potionHealFraction = 0.33f;
+    [Tooltip("진열대에 놓는 이름. 그림도 이름도 자뭉열매라 안내문만 '포션'이면 딴것으로 읽힌다.")]
+    [SerializeField] private string potionName = "자뭉열매";
     [Tooltip("포션 그림. 자뭉열매 아이콘을 쓴다.")]
     [SerializeField] private Sprite potionIcon;
     // 유물 가격은 여기 없다. 희귀도마다 다르고, 그 표는 RelicManager가 들고 있다.
@@ -41,7 +43,7 @@ public class ShopController : MonoBehaviour
     private void Start()
     {
         if (healSlot != null)
-            healSlot.ConfigureHeal("포션", potionHealFraction, PotionPrice, potionIcon);
+            healSlot.ConfigureHeal(potionName, potionHealFraction, PotionPrice, potionIcon);
 
         if (relicSlots == null || relicSlots.Length == 0) return;
 

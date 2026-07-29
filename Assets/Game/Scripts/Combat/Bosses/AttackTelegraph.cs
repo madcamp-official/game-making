@@ -72,7 +72,8 @@ public class AttackTelegraph : MonoBehaviour
 
     private static AttackTelegraph Create(Transform parent, Vector2 position, Sprite sprite, Color color)
     {
-        GameObject go = new GameObject("AttackTelegraph");
+        // 방에 붙는 것이라 싸움이 끝나면 걷어 낼 수 있도록 표식을 단다.
+        GameObject go = EnemyEffect.Mark(new GameObject("AttackTelegraph"));
         go.transform.SetParent(parent, false);
         go.transform.position = position;
 

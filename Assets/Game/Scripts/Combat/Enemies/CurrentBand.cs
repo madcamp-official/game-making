@@ -48,7 +48,7 @@ public class CurrentBand : MonoBehaviour
                                     float pushSpeed, float duration, Health owner,
                                     Color bandColor, Color arrowColor)
     {
-        GameObject go = new GameObject("CurrentBand");
+        GameObject go = EnemyEffect.Mark(new GameObject("CurrentBand"));
         go.transform.SetParent(parent, false);
         go.transform.position = area.center;
 

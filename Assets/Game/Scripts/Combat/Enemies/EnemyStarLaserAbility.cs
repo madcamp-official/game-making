@@ -156,7 +156,7 @@ public class EnemyStarLaserAbility : EnemyAbility
 
     private SpriteRenderer CreateBeam(Vector2 origin, Vector2 direction)
     {
-        GameObject go = new GameObject("StarLaser");
+        GameObject go = EnemyEffect.Mark(new GameObject("StarLaser"));
         go.transform.SetParent(EffectRoot, false);
         go.transform.position = origin + direction * (laserLength * 0.5f);
         go.transform.rotation = Quaternion.FromToRotation(Vector3.right, direction);

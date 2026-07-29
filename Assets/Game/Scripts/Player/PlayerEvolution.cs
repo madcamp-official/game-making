@@ -14,9 +14,9 @@ public class PlayerEvolution : MonoBehaviour
         [Tooltip("진화 컷씬에 표시할 정면 스프라이트 (남쪽 대기 1프레임)")]
         public Sprite portrait;
         [Min(1)] public int maxHealth = 100;
-        [Min(0)] public int attackDamage = 12;   // 기본 공격 1 (근거리)
+        [Min(0)] public int attackDamage = 11;   // 기본 공격 1 (근거리)
         [UnityEngine.Serialization.FormerlySerializedAs("razorDamage")]
-        [Min(0)] public int vineDamage = 8;      // 기본 공격 2 (덩굴채찍)
+        [Min(0)] public int vineDamage = 4;      // 기본 공격 2 (덩굴채찍)
     }
 
     [SerializeField] private Stage[] stages;
