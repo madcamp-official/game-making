@@ -79,8 +79,8 @@ public static class Floor2EnemySetup
                 // 스라크 돌진(5.5)의 절반쯤. 붙는 수단이지 가로지르는 거리가 아니다.
                 ("windup", 0.5f), ("dashDistance", 2.8f), ("dashSpeed", 10f),
                 ("dashDamage", 12), ("dashHitRadius", 0.6f),
-                // 열 갈래면 거리 3에서 갈래 사이가 1.9칸 — 플레이어(폭 0.7)가 설 만하다.
-                ("spikeWindup", 0.55f), ("spikeCount", 10), ("spikeSpeed", 8f),
+                // 여섯 갈래면 거리 3에서 갈래 사이가 약 3.1칸이라 두 고지가 겹쳐 쏴도 길이 남는다.
+                ("spikeWindup", 0.55f), ("spikeCount", 6), ("spikeSpeed", 8f),
                 ("spikeDamage", 12), ("spikeRadius", 0.17f), ("spikeLifetime", 1.6f),
                 ("spikeTelegraphLength", 5f),
                 // 몸 펴기(0.14) + 정지(0.9) ≈ 1초 — 다 뿌리고 나면 치르는 값이다.
