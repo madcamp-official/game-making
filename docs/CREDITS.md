@@ -2,6 +2,10 @@
 
 **이상해씨의 던전 탐험** — 비상업 팬 프로젝트 (포켓몬 로그라이트 프로토타입)
 
+> 이 문서는 **만드는 쪽의 장부**다. 파일 경로와 굽는 방법, 아직 출처를 못 찾은 것까지 적는다.
+> 게임 안에 흐르는 크레딧 두루마리는 [FINALCREDITS.md](FINALCREDITS.md)이며, 여기에 무엇을
+> 새로 적었으면 그쪽에도 올릴 것인지 함께 판단한다.
+
 ## 캐릭터 스프라이트
 
 출처: [PMD Sprite Repository](https://sprites.pmdcollab.org/) (PMDCollab/SpriteCollab)

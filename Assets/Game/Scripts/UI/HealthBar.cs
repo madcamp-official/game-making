@@ -45,23 +45,29 @@ public class HealthBar : MonoBehaviour
     private const float ShadeMultiplier = 0.62f;
 
     /// <summary>
-    /// <b>왼쪽 끝</b>을 축으로 삼는 흰 사각형. 바의 네 조각이 모두 이것을 쓴다.
+    /// <b>왼쪽 아래 모서리</b>를 축으로 삼는 흰 사각형. 바의 네 조각이 모두 이것을 쓴다.
     ///
-    /// 왜 전부 왼쪽 축인가: 이 씬의 카메라는 Pixel Perfect이고 Pixel Snapping이 켜져 있어
+    /// 왜 모서리 축인가: 이 씬의 카메라는 Pixel Perfect이고 Pixel Snapping이 켜져 있어
     /// (<c>m_GridSnapping: 1</c>, PPU 24) <b>렌더러마다 월드 자리를 픽셀 격자로 반올림한다</b>.
     /// 반올림이 조각마다 다른 쪽으로 떨어지면 조각들이 서로 한 픽셀씩 어긋난다.
     ///
     /// 어긋나지 않으려면 두 가지가 필요하다.
     /// <list type="number">
-    /// <item>네 조각의 <b>왼쪽 끝이 같은 한 점</b>이어야 한다. 축이 가운데면 그 점이
-    ///   중심 − 폭/2이라 폭에 따라 달라진다 — 트랙만 가운데 축으로 뒀을 때 여전히 밀린
-    ///   이유가 이것이었다.</item>
-    /// <item>조각들의 로컬 x 차이가 <b>픽셀의 정수배</b>여야 한다. 그러면 캐릭터가 어디에
+    /// <item>네 조각이 <b>같은 한 점에서 시작</b>해야 한다. 축이 가운데면 그 점이
+    ///   중심 − 크기/2이라 조각 크기에 따라 달라진다 — 트랙만 가운데 축으로 뒀을 때
+    ///   여전히 밀린 이유가 이것이었다.</item>
+    /// <item>조각들의 로컬 좌표 차이가 <b>픽셀의 정수배</b>여야 한다. 그러면 캐릭터가 어디에
     ///   서 있든 네 조각의 소수부가 같아서 반올림이 같은 방향으로 떨어진다.</item>
     /// </list>
     /// 그래서 크기와 자리를 모두 <see cref="SnapToPixel"/>로 픽셀에 맞춘다.
+    ///
+    /// ⚠️ 축이 세로 <b>가운데</b>(0.5)였을 때 회색 테두리가 깜빡였다. 바 높이가 3픽셀
+    /// (홀수)이라 위아래 끝이 ±1.5픽셀 — 반 픽셀에 걸리고, 짙은 줄은 <c>높이/2</c>를
+    /// 따로 반올림한 자리에 놓여 채움보다 반 픽셀 위로 삐져나왔다. 그 반 픽셀이 프레임마다
+    /// 다른 쪽으로 반올림되면서 초록이 테두리를 먹었다 뱉었다 했다. 아래 모서리를 축으로 삼으면
+    /// 조각의 끝이 <b>시작점 + 정수 픽셀</b>이라 반 픽셀이 아예 생기지 않는다.
     /// </summary>
-    private static Sprite whiteLeftSprite;
+    private static Sprite whiteCornerSprite;
 
     /// <summary>
     /// PixelPerfectCamera의 Assets Pixels Per Unit(24)에 대응하는 한 픽셀의 월드 크기.
@@ -92,8 +98,9 @@ public class HealthBar : MonoBehaviour
         barWidth = SnapToPixel(width);
         barHeight = SnapToPixel(height);
         shadeHeight = SnapToPixel(barHeight * ShadeFraction);
-        // 왼쪽 끝도 픽셀에 맞춘다. 네 조각이 여기서 함께 시작한다.
+        // 왼쪽 아래 모서리도 픽셀에 맞춘다. 네 조각이 여기서 함께 시작한다.
         float left = -SnapToPixel(barWidth * 0.5f);
+        float bottom = -SnapToPixel(barHeight * 0.5f);
 
         barRoot = new GameObject("HealthBar").transform;
         // worldPositionStays를 그대로 둔다(참). 적마다 몸 크기가 달라서(닥트리오 1.35배 등)
@@ -102,15 +109,16 @@ public class HealthBar : MonoBehaviour
         barRoot.SetParent(transform);
         barRoot.localPosition = new Vector3(0f, SnapToPixel(offsetY), 0f);
 
-        // 네 조각 모두 왼쪽 끝을 축으로 삼고 같은 x에서 시작한다. 윤곽만 한 픽셀 더 왼쪽이다.
-        SpriteRenderer outline = CreatePart("Outline", barRoot, whiteLeftSprite, OutlineColor, 39);
-        outline.transform.localPosition = new Vector3(left - PixelSize, 0f, 0f);
+        // 네 조각 모두 왼쪽 아래 모서리를 축으로 삼고 같은 자리에서 시작한다.
+        // 윤곽만 가로세로로 한 픽셀씩 더 바깥에서 시작해 사방을 한 픽셀 두른다.
+        SpriteRenderer outline = CreatePart("Outline", barRoot, whiteCornerSprite, OutlineColor, 39);
+        outline.transform.localPosition = new Vector3(left - PixelSize, bottom - PixelSize, 0f);
         outline.transform.localScale =
             new Vector3(barWidth + PixelSize * 2f, barHeight + PixelSize * 2f, 1f);
 
         // 흰 트랙 — 아직 차지 않은 자리다. 검정으로 두면 남은 양이 얼마인지 눈에 덜 띈다.
-        SpriteRenderer track = CreatePart("Track", barRoot, whiteLeftSprite, TrackColor, 40);
-        track.transform.localPosition = new Vector3(left, 0f, 0f);
+        SpriteRenderer track = CreatePart("Track", barRoot, whiteCornerSprite, TrackColor, 40);
+        track.transform.localPosition = new Vector3(left, bottom, 0f);
         track.transform.localScale = new Vector3(barWidth, barHeight, 1f);
 
         // 프리팹마다 색을 따로 넣게 하면 적을 하나 추가할 때마다 빠뜨릴 자리가 생긴다.
@@ -118,22 +126,24 @@ public class HealthBar : MonoBehaviour
         Color fillColor = GetComponent<PlayerController>() != null ? PlayerFill : EnemyFill;
 
         // 채움과 짙은 줄은 왼쪽 끝에 못박아 두고 폭만 줄인다. 자리는 앞으로 바뀌지 않는다.
-        fillRenderer = CreatePart("Fill", barRoot, whiteLeftSprite, fillColor, 41);
-        fillRenderer.transform.localPosition = new Vector3(left, 0f, 0f);
+        fillRenderer = CreatePart("Fill", barRoot, whiteCornerSprite, fillColor, 41);
+        fillRenderer.transform.localPosition = new Vector3(left, bottom, 0f);
 
         // 위쪽 짙은 줄 — 좌하단 바와 같은 두 톤이다. 이게 없으면 바가 납작해 보인다.
-        shadeRenderer = CreatePart("Shade", barRoot, whiteLeftSprite,
+        // 자리는 채움의 위쪽 끝에서 줄 두께만큼 내려온 곳이다. 높이의 절반을 따로 반올림하면
+        // 그 반 픽셀만큼 채움 밖으로 올라타 윤곽을 덮는다.
+        shadeRenderer = CreatePart("Shade", barRoot, whiteCornerSprite,
             new Color(fillColor.r * ShadeMultiplier, fillColor.g * ShadeMultiplier,
                       fillColor.b * ShadeMultiplier, fillColor.a), 42);
-        shadeRenderer.transform.localPosition =
-            new Vector3(left, SnapToPixel(barHeight * 0.5f) - shadeHeight * 0.5f, 0f);
+        shadeRenderer.transform.localPosition = new Vector3(left, bottom + barHeight - shadeHeight, 0f);
 
         // 바 오른쪽에 "현재/최대" 수치 표시 (기본은 그리지 않는다)
         if (showValue)
         {
             GameObject textGo = new GameObject("Value");
             textGo.transform.SetParent(barRoot);
-            textGo.transform.localPosition = new Vector3(width * 0.5f + 0.08f, 0f, 0f);
+            textGo.transform.localPosition =
+                new Vector3(width * 0.5f + 0.08f, bottom + barHeight * 0.5f, 0f);
             valueText = textGo.AddComponent<TextMesh>();
             valueText.font = PixelUi.Font;
             // 비트맵 폰트에서 TextMesh는 fontSize를 무시하고 글리프 크기를 그대로 쓴다.
@@ -161,12 +171,12 @@ public class HealthBar : MonoBehaviour
     private static void EnsureSprites()
     {
         // 플레이 모드를 다시 들어오면 텍스처가 파괴되므로 널 검사로 다시 만든다.
-        if (whiteLeftSprite != null) return;
+        if (whiteCornerSprite != null) return;
 
         var tex = new Texture2D(1, 1);
         tex.SetPixel(0, 0, Color.white);
         tex.Apply();
-        whiteLeftSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0f, 0.5f), 1f);
+        whiteCornerSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0f, 0f), 1f);
     }
 
     private static SpriteRenderer CreatePart(string name, Transform parent, Sprite sprite,

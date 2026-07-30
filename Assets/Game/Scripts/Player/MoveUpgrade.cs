@@ -132,9 +132,9 @@ public static class MoveUpgrades
         new MoveUpgradeOption(MoveUpgradeId.FireSpitCooldown, MoveType.FireSpit,
             "불꽃세례", "재사용 대기시간 15% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.DancePower, MoveType.DragonDance,
-            "용의춤", "공격력 증가량 10%p 증가"),
+            "용의춤", "공격력 증가량 10% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.DanceSpeed, MoveType.DragonDance,
-            "용의춤", "이동 속도 증가량 10%p 증가"),
+            "용의춤", "이동 속도 증가량 10% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.DanceDuration, MoveType.DragonDance,
             "용의춤", "지속시간 1.5초 증가"),
         new MoveUpgradeOption(MoveUpgradeId.ClawDamage, MoveType.DragonClaw,
@@ -174,7 +174,7 @@ public static class MoveUpgrades
         new MoveUpgradeOption(MoveUpgradeId.HydroWidth, MoveType.HydroPump,
             "하이드로펌프", "공격 폭 20% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.HydroGuard, MoveType.HydroPump,
-            "하이드로펌프", "피해 감소량 15%p 증가"),
+            "하이드로펌프", "피해 감소량 15% 증가"),
     };
 
     /// <summary>

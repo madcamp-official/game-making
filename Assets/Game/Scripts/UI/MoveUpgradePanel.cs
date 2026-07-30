@@ -159,7 +159,7 @@ public class MoveUpgradePanel : MonoBehaviour
             bool used = i < shown.Count;
             cards[i].gameObject.SetActive(used);
             if (!used) continue;
-            cardTexts[i].text = (i + 1) + ".  " + shown[i].title + " — " + shown[i].detail;
+            cardTexts[i].text = (i + 1) + ".  " + shown[i].title + " : " + shown[i].detail;
             Highlight(cardImages[i], cardTexts[i], false);
         }
 

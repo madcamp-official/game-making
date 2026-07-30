@@ -24,8 +24,6 @@ public class TitleScreen : FlowScreen
     private readonly System.Collections.Generic.List<Command> commands =
         new System.Collections.Generic.List<Command>();
 
-    private Text notice;
-
     /// <summary>로고가 머무는 높이. 떠다니는 움직임은 이 자리를 기준으로 오간다.</summary>
     private const float LogoY = 246f;
 
@@ -126,10 +124,6 @@ public class TitleScreen : FlowScreen
             y -= MenuSize.y + MenuGap;
         }
         cursor = 0;
-
-        notice = PmdUi.MakeText(Root, "Notice", "", 22);
-        notice.color = PmdUi.DisabledColor;
-        Place(notice.rectTransform, new Vector2(0f, y - 30f), new Vector2(900f, 60f));
     }
 
     private string LabelOf(Command command)
@@ -163,14 +157,9 @@ public class TitleScreen : FlowScreen
                 Flow.GoGuide(fromTitle: true);
                 break;
             case Command.Credits:
-                Tell("크레딧은 docs/CREDITS.md에 정리해 두었다.");
+                Flow.GoCredits();
                 break;
         }
-    }
-
-    private void Tell(string message)
-    {
-        if (notice != null) notice.text = message;
     }
 
     private static void Place(RectTransform rt, Vector2 position, Vector2 size)

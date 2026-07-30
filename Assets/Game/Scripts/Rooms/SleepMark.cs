@@ -39,8 +39,15 @@ public class SleepMark : MonoBehaviour
     /// 키가 커져서, 자는 표시가 아니라 머리 위에 세운 간판처럼 보였다.
     /// </param>
     /// <param name="gapFraction">몸 위쪽 끝에서 얼마나 띄울지 (몸 높이에 대한 비율).</param>
+    /// <param name="sideFraction">
+    /// 좌우로 얼마나 비켜 놓을지 (몸 <b>폭</b>에 대한 비율, 양수가 오른쪽).
+    ///
+    /// 그림의 가운데가 곧 머리는 아니다. 잠만보는 몸통이 넓게 퍼져 있고 머리가 한쪽에
+    /// 치우쳐 있어서, 폭 한가운데에 두면 배 위에 떠 있는 것처럼 보인다.
+    /// </param>
     public static SleepMark Create(SpriteRenderer target, Sprite mark,
-                                   float heightFraction = 0.7f, float gapFraction = 0.06f)
+                                   float heightFraction = 0.7f, float gapFraction = 0.06f,
+                                   float sideFraction = 0f)
     {
         if (target == null || mark == null) return null;
 
@@ -55,7 +62,7 @@ public class SleepMark : MonoBehaviour
 
         var self = go.AddComponent<SleepMark>();
         self.sprite = sr;
-        self.Fit(target, mark, heightFraction, gapFraction);
+        self.Fit(target, mark, heightFraction, gapFraction, sideFraction);
         return self;
     }
 
@@ -66,7 +73,8 @@ public class SleepMark : MonoBehaviour
     /// 커진다. 원하는 <b>월드</b> 크기를 부모 배율로 나눠 되돌려야 한다. 자리도 마찬가지라
     /// 부모의 로컬 좌표로 환산해서 올린다.
     /// </summary>
-    private void Fit(SpriteRenderer target, Sprite mark, float heightFraction, float gapFraction)
+    private void Fit(SpriteRenderer target, Sprite mark, float heightFraction, float gapFraction,
+                     float sideFraction)
     {
         Bounds body = target.bounds;                  // 월드 기준 몸 크기
         Vector3 parentScale = target.transform.lossyScale;
@@ -85,7 +93,13 @@ public class SleepMark : MonoBehaviour
         float markWorldHeight = mark.bounds.size.y * worldScale;
         float topWorld = body.max.y + body.size.y * gapFraction + markWorldHeight * 0.5f;
         float upFromCenter = (topWorld - target.transform.position.y) / sy;
-        restPosition = new Vector3(0f, upFromCenter, 0f);
+
+        // 좌우는 그려진 몸의 가운데를 기준으로 잡고 거기서 비켜난다. 축(피벗)이 아니라 몸을
+        // 기준으로 삼아야, 축이 발밑에 있든 가운데에 있든 같은 자리에 뜬다.
+        float sideWorld = body.center.x + body.size.x * sideFraction;
+        float sideFromCenter = (sideWorld - target.transform.position.x) / sx;
+
+        restPosition = new Vector3(sideFromCenter, upFromCenter, 0f);
         transform.localPosition = restPosition;
 
         floatHeight = body.size.y * FloatFraction / sy;

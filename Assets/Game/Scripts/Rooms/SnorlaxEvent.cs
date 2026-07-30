@@ -33,6 +33,9 @@ public class SnorlaxEvent : ChoiceEvent
     [Tooltip("몸 위쪽 끝에서 얼마나 띄울지 (몸 높이에 대한 비율).")]
     [SerializeField, Range(0f, 0.5f)] private float sleepMarkGapFraction = 0.06f;
 
+    [Tooltip("좌우로 비켜 놓을 정도 (몸 폭에 대한 비율, 양수가 오른쪽). 웅크려 자는 그림이라 머리가 오른쪽 끝에 있다.")]
+    [SerializeField, Range(-0.5f, 0.5f)] private float sleepMarkSideFraction = 0.2f;
+
     private SleepMark sleepMark;
 
     private int attempt;
@@ -42,7 +45,8 @@ public class SnorlaxEvent : ChoiceEvent
         // 자고 있다는 것을 그림만으로 알 수 있게 한다. 말을 걸어 봐야 아는 것은 늦다.
         if (sleepSprite == null) return;
         SpriteRenderer body = GetComponentInChildren<SpriteRenderer>();
-        sleepMark = SleepMark.Create(body, sleepSprite, sleepMarkHeightFraction, sleepMarkGapFraction);
+        sleepMark = SleepMark.Create(body, sleepSprite, sleepMarkHeightFraction, sleepMarkGapFraction,
+                                     sleepMarkSideFraction);
     }
 
     /// <summary>더 이상 자고 있지 않다. 표시를 거둔다.</summary>

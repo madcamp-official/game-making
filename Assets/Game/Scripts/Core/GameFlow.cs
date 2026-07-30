@@ -16,7 +16,7 @@ using UnityEngine;
 /// </summary>
 public class GameFlow : MonoBehaviour
 {
-    public enum State { Title, CharacterSelect, Guide, Playing, Result }
+    public enum State { Title, CharacterSelect, Guide, Credits, Playing, Result }
 
     public static GameFlow Instance { get; private set; }
 
@@ -68,6 +68,7 @@ public class GameFlow : MonoBehaviour
     private TitleScreen title;
     private CharacterSelectScreen select;
     private ControlsGuideScreen guide;
+    private CreditsScreen credits;
     private ResultScreen result;
 
     private void Awake()
@@ -138,6 +139,21 @@ public class GameFlow : MonoBehaviour
         Time.timeScale = 0f;
         GameAudio.PlayMenuBgm();
         guide = ControlsGuideScreen.Open(this, fromTitle ? null : Selected);
+    }
+
+    /// <summary>
+    /// 크레딧 두루마리를 연다. 다 흐르거나 B를 누르면 스스로 타이틀로 돌아온다.
+    ///
+    /// 곡은 타이틀 것을 그대로 이어 간다 — 크레딧은 타이틀에서 잠깐 들르는 곳이지 다른 장면이
+    /// 아니고, <see cref="GameAudio.PlayMenuBgm"/>이 같은 곡 요청을 걸러 주므로 끊기지 않는다.
+    /// </summary>
+    public void GoCredits()
+    {
+        CloseAll();
+        Current = State.Credits;
+        Time.timeScale = 0f;
+        GameAudio.PlayMenuBgm();
+        credits = CreditsScreen.Open(this);
     }
 
     /// <summary>고른 캐릭터로 판을 시작한다.</summary>
@@ -262,6 +278,7 @@ public class GameFlow : MonoBehaviour
         if (title != null) { title.Close(); title = null; }
         if (select != null) { select.Close(); select = null; }
         if (guide != null) { guide.Close(); guide = null; }
+        if (credits != null) { credits.Close(); credits = null; }
         if (result != null) { result.Close(); result = null; }
     }
 }
