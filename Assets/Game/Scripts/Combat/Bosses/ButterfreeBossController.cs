@@ -78,10 +78,24 @@ public class ButterfreeBossController : MonoBehaviour
         public float duration = 2.7f;
         [Tooltip("마지막 장판이 사라진 뒤 후딜레이")]
         public float recovery = 1f;
-        [Tooltip("이 번째 장판만 이동 방향 앞을 노린다. 음수면 사용하지 않는다.")]
-        public int predictIndex = -1;
-        [Tooltip("앞을 노릴 때의 거리")]
-        public float predictLead = 1.2f;
+        [Tooltip("지나온 자리에 찍는 장판을 진행선에서 좌우로 번갈아 이만큼 민다. " +
+                 "0이면 한 줄로 쌓인다. 벌릴수록 남는 장판이 넓은 지형이 된다.")]
+        public float trailSpread;
+
+        [Header("앞을 가로막는 문")]
+        [Tooltip("이 번째에 장판 하나 대신 문을 세운다. 음수면 문을 쓰지 않는다.")]
+        public int gateIndex = -1;
+        [Tooltip("문을 이루는 기둥 수. 0이면 문을 세우지 않는다.")]
+        public int gatePillars;
+        [Tooltip("문이 플레이어보다 앞서는 거리. 예고가 끝날 때까지 플레이어가 나아가는 " +
+                 "거리(5 x 0.62 = 3.1)보다 길어야 한다 — 짧으면 문이 켜지기도 전에 " +
+                 "그냥 지나쳐 버려 아무것도 강제하지 못한다.")]
+        public float gateLead = 3.8f;
+        [Tooltip("기둥 사이 틈의 폭. 플레이어(폭 약 0.6)가 지나갈 수 있어야 한다.")]
+        public float gateOpening = 1.6f;
+        [Tooltip("틈이 진행선에서 옆으로 비켜난 거리. 0이면 정면이라 꺾을 필요가 없다. " +
+                 "예고 시간 안에 옆으로 달려 닿을 수 있는 거리로 자동 제한된다.")]
+        public float gateOffset = 1.8f;
     }
 
     [System.Serializable]
@@ -109,8 +123,8 @@ public class ButterfreeBossController : MonoBehaviour
     private const float MinSilverFirstWindup = 0.55f;
     private const float MinSilverLaterWindup = 0.40f;
     private const float MinPhase2Recovery = 0.55f;
-    /// <summary>앞을 노린 장판을 그대로 달려 빠져나갈 때 남겨 두는 여유 거리. 딱 맞으면 운이 된다.</summary>
-    private const float PredictClearance = 0.4f;
+    /// <summary>문의 틈까지 옆으로 달려갈 때 남겨 두는 여유 거리. 딱 맞으면 운이 된다.</summary>
+    private const float GateClearance = 0.5f;
 
     // 최대 체력은 Health 컴포넌트의 값을 그대로 쓴다 (프리팹에서 240).
     [Header("기본")]
@@ -169,20 +183,23 @@ public class ButterfreeBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float windRadius = 0.18f;
 
     [Header("독가루 — 1페이즈")]
+    // 1페이즈는 규칙을 가르치는 층이라 문을 세우지 않는다. 지나온 자리가 막힌다는 것만 배운다.
     [SerializeField] private PoisonSettings poisonPhase1 = new PoisonSettings
     {
         count = 4, recordInterval = 0.28f, activationDelay = 0.6f,
-        radius = 1.26f, duration = 6f, recovery = 0.7f, predictIndex = -1,
+        radius = 1.26f, duration = 6f, recovery = 0.7f,
+        trailSpread = 0.5f, gateIndex = -1,
     };
 
     [Header("독가루 — 2페이즈")]
-    // activationDelay는 앞을 노린 장판(predictIndex)이 성립하는 하한이기도 하다. 예고가 끝나기
-    // 전에 그 장판을 달려서 통과할 수 있어야 하므로 predictLead + radius + 여유(0.4)를
-    // 달리기 속도(5)로 나눈 값, 곧 0.586초보다 길어야 한다. 0.5로는 모자랐다.
+    // activationDelay는 문이 성립하는 하한이기도 하다. 예고가 끝나기 전에 틈 앞에 설 수
+    // 있어야 하므로 gateOffset + 여유(0.5)를 달리기 속도(5)로 나눈 값, 곧 0.46초보다 길어야
+    // 한다. 넉넉히 잡아 둔 0.62초는 틈이 2.6까지 비켜나도 견딘다.
     [SerializeField] private PoisonSettings poisonPhase2 = new PoisonSettings
     {
         count = 6, recordInterval = 0.2f, activationDelay = 0.62f,
-        radius = 1.33f, duration = 7.5f, recovery = 0.6f, predictIndex = 3, predictLead = 1.2f,
+        radius = 1.33f, duration = 7.5f, recovery = 0.6f, trailSpread = 0.75f,
+        gateIndex = 3, gatePillars = 4, gateLead = 3.8f, gateOpening = 1.6f, gateOffset = 1.8f,
     };
 
     [Header("독가루 — 공통")]
@@ -197,8 +214,10 @@ public class ButterfreeBossController : MonoBehaviour
     [Tooltip("장판 '중심'을 방 경계에서 이만큼 안쪽으로 유지한다 (명세 7.3). " +
              "여기에 반지름을 더하면 안 된다 — 장판이 벽에 조금 걸치더라도 벽에 붙은 자리를 덮어야 한다.")]
     [SerializeField, Min(0f)] private float poisonArenaMargin = 0.55f;
-    [Tooltip("예고 중인 것까지 포함한 장판 수 상한.")]
-    [SerializeField, Min(1)] private int poisonMaxZones = 8;
+    [Tooltip("예고 중인 것까지 포함한 장판 수 상한. 한 번에 꼬리 5 + 문 기둥 4가 나가고 " +
+             "직전 독가루의 장판이 아직 남아 있을 수 있어 넉넉히 잡는다. 실제 제동은 아래 " +
+             "면적 비율이 건다 — 개수보다 '방이 얼마나 잠겼는가'가 중요하다.")]
+    [SerializeField, Min(1)] private int poisonMaxZones = 14;
     [Tooltip("장판이 전투 영역에서 차지할 수 있는 최대 면적 비율.")]
     [SerializeField, Range(0.1f, 1f)] private float poisonMaxAreaRatio = 0.55f;
 
@@ -706,28 +725,25 @@ public class ButterfreeBossController : MonoBehaviour
         {
             if (health.IsDead) yield break;
 
-            // 4번째만 이동 방향 앞을 노려 진행 방향을 한 번 끊는다.
-            Vector2 raw = PlayerPosition;
             Vector2 moveDir = PlayerMoveDirection;
-            bool predicting = i == settings.predictIndex && moveDir != Vector2.zero;
-            if (predicting) raw += moveDir * PredictLead(settings, windup);
 
-            if (TryPlaceZone(raw, moveDir, predicting, hasPrevious, previous,
+            // 정해진 차례 한 번만 진행 방향을 가로막는 문을 세운다.
+            if (i == settings.gateIndex && settings.gatePillars > 0 && moveDir != Vector2.zero)
+            {
+                placedCount += PlaceGate(PlayerPosition, moveDir, settings, windup);
+                if (i < settings.count - 1) yield return new WaitForSeconds(settings.recordInterval);
+                continue;
+            }
+
+            // 지나온 자리. 좌우로 번갈아 조금씩 벌려 한 줄이 아니라 띠로 깔리게 한다.
+            Vector2 raw = PlayerPosition + TrailSpread(moveDir, settings, i);
+
+            if (TryPlaceZone(raw, moveDir, false, hasPrevious, previous,
                              settings, out Vector2 placed))
             {
-                // 앞을 노린 장판은 줄에서 벗어난 한 수라 줄의 기준점으로 삼지 않는다.
-                // 삼으면 뒤따르는 장판들이 "직전 것과 너무 가깝다"로 줄줄이 생략된다.
-                if (!predicting)
-                {
-                    previous = placed;
-                    hasPrevious = true;
-                }
-
-                AttackTelegraph warning = AttackTelegraph.CreateCircle(
-                    attackRoot, placed, settings.radius, poisonWarningColor);
-                warning.Pulse(windup);
-                pendingZones++;
-                StartCoroutine(ActivateZoneAfter(placed, windup, settings, attackGeneration));
+                previous = placed;
+                hasPrevious = true;
+                SpawnZone(placed, windup, settings);
                 placedCount++;
             }
 
@@ -757,37 +773,118 @@ public class ButterfreeBossController : MonoBehaviour
         activeZones.Add(zone);
     }
 
+    /// <summary>예고 원을 띄우고, 예고가 끝나면 장판이 되도록 예약한다.</summary>
+    private void SpawnZone(Vector2 placed, float windup, PoisonSettings settings)
+    {
+        AttackTelegraph warning = AttackTelegraph.CreateCircle(
+            attackRoot, placed, settings.radius, poisonWarningColor);
+        warning.Pulse(windup);
+        pendingZones++;
+        StartCoroutine(ActivateZoneAfter(placed, windup, settings, attackGeneration));
+    }
+
     /// <summary>
-    /// 앞을 노리는 장판이 실제로 앞설 거리. <b>그대로 달리면 활성화 전에 빠져나갈 수 있는</b>
-    /// 만큼으로 제한한다.
+    /// 지나온 자리에 찍는 장판을 진행선에서 좌우로 번갈아 밀어 둔다.
     ///
-    /// 조건은 간단하다 — 예고가 끝날 때까지 플레이어가 나아가는 거리가 장판의 <b>먼 쪽 끝</b>을
-    /// 넘어야 한다. 즉 <c>앞선 거리 + 반지름 + 여유 ≤ 달리는 속도 × 예고 시간</c>.
-    /// 이걸 넘기면 앞을 노린 장판이 "지금 서 있는 자리"까지 덮은 채 활성화되어, 옆으로 꺾지
-    /// 않는 한 맞을 수밖에 없다.
+    /// 정확히 밟고 온 선 위에만 쌓으면 폭이 장판 지름 하나(2.66)로 고정된 가느다란 줄이 된다.
+    /// 되돌아가는 길만 막을 뿐, 남아 있어도 다음 패턴에서 피할 자리를 별로 뺏지 못한다.
+    /// 좌우로 벌리면 같은 개수로 훨씬 넓은 띠가 되어 <b>남는 장판이 다음 패턴의 지형</b>이 된다.
+    ///
+    /// 진행 방향 성분은 건드리지 않으므로 <see cref="PullBackBehindPlayer"/>의 보장은 그대로다 —
+    /// 꼬리는 여전히 플레이어를 앞지르지 못한다.
+    /// </summary>
+    private static Vector2 TrailSpread(Vector2 moveDirection, PoisonSettings settings, int index)
+    {
+        if (settings.trailSpread <= 0f || moveDirection == Vector2.zero) return Vector2.zero;
+        Vector2 side = new Vector2(-moveDirection.y, moveDirection.x);
+        return side * (index % 2 == 0 ? settings.trailSpread : -settings.trailSpread);
+    }
+
+    /// <summary>
+    /// 진행 방향을 가로막는 짧은 벽을 세우되 <b>틈을 한 곳만</b> 남긴다.
+    ///
+    /// 틈은 진행선에서 옆으로 비켜나 있다. 그대로 직진하면 기둥에 걸리므로 <b>꺾어야 한다</b> —
+    /// 이 패턴이 이동 경로를 강제하는 지점이 여기다. 예전에는 앞을 노리는 장판이 하나뿐이라
+    /// 옆으로 한 걸음 비키면 끝이었다.
+    ///
+    /// 기둥은 틈에서 가까운 쪽부터 좌우 번갈아 놓는다. 장판 수·면적 상한에 걸려 잘리더라도
+    /// 바깥쪽이 떨어져 나가고 <b>틈은 언제나 남는다</b>.
+    /// </summary>
+    private int PlaceGate(Vector2 playerAt, Vector2 forward, PoisonSettings settings, float windup)
+    {
+        Vector2 side = new Vector2(-forward.y, forward.x);
+        Vector2 gateCenter = playerAt + forward * settings.gateLead;
+        float offset = GateOffset(settings, windup) * OpeningSide(gateCenter, side);
+        Vector2 opening = gateCenter + side * offset;
+
+        // 기둥 사이가 뚫리지 않도록 지름보다 좁게 잇는다.
+        float step = settings.radius * 1.7f;
+        float inner = settings.gateOpening * 0.5f + settings.radius;
+        // 이 안쪽으로 들어온 기둥은 틈을 막는 것이므로 놓지 않는다.
+        float keepClear = settings.gateOpening * 0.5f + settings.radius * 0.9f;
+
+        int placed = 0;
+        for (int rank = 0; rank < settings.gatePillars; rank++)
+        {
+            float distance = inner + rank / 2 * step;
+            Vector2 spot = opening + side * (rank % 2 == 0 ? distance : -distance);
+
+            // 벽에 걸려 안쪽으로 당겨진 기둥이 틈을 메우면 그 기둥은 버린다.
+            Vector2 clamped = ClampToArena(spot, poisonArenaMargin);
+            if (Mathf.Abs(Vector2.Dot(clamped - opening, side)) < keepClear) continue;
+
+            if (!TryPlaceZone(clamped, forward, true, false, Vector2.zero,
+                              settings, out Vector2 pillar)) continue;
+            SpawnZone(pillar, windup, settings);
+            placed++;
+        }
+
+        Trace(string.Format("  독가루 문: 기둥 {0}/{1}, 틈이 옆으로 {2:0.00}",
+            placed, settings.gatePillars, offset));
+        return placed;
+    }
+
+    /// <summary>
+    /// 틈을 어느 쪽으로 낼지. <b>전투장 안쪽</b>으로 낸다. 가운데가 어느 쪽인지 분명하지 않으면
+    /// (문이 이미 한가운데면) 무작위로 정한다.
+    ///
+    /// 벽 쪽으로 열면 그 너머의 기둥들이 벽에 걸려 통째로 잘려 나가고, 그 자리가 그대로
+    /// 뚫린 길이 되어 <b>꺾을 이유가 없어진다</b>. 안쪽으로 열면 벽 쪽으로 긴 벽이 서므로
+    /// 문이 온전하게 만들어지고, 플레이어도 구석이 아니라 전투장 가운데로 몰린다.
+    /// </summary>
+    private float OpeningSide(Vector2 gateCenter, Vector2 side)
+    {
+        float inward = Vector2.Dot(ArenaCenter - gateCenter, side);
+        if (Mathf.Abs(inward) < 0.5f) return Random.value < 0.5f ? 1f : -1f;
+        return Mathf.Sign(inward);
+    }
+
+    /// <summary>
+    /// 틈이 진행선에서 옆으로 비켜날 거리. <b>예고가 끝나기 전에 틈 앞에 설 수 있는</b>
+    /// 만큼으로 제한한다 — 옆으로만 달렸을 때 닿는 거리에서 여유를 뺀 값이다.
     ///
     /// 속도를 5로 못박지 않고 <see cref="PlayerController.RunSpeed"/>를 읽는 이유는
     /// 구애스카프 때문이다. 유물 하나에 회피 가능 여부가 뒤집히면 안 된다.
     /// </summary>
-    private float PredictLead(PoisonSettings settings, float windup)
+    private float GateOffset(PoisonSettings settings, float windup)
     {
         float speed = playerController != null ? playerController.RunSpeed : 0f;
-        if (speed <= 0f) return settings.predictLead;
+        if (speed <= 0f) return settings.gateOffset;
 
-        float reachable = speed * windup - settings.radius - PredictClearance;
-        return Mathf.Clamp(settings.predictLead, 0f, Mathf.Max(0f, reachable));
+        float reachable = speed * windup - GateClearance;
+        return Mathf.Clamp(settings.gateOffset, 0f, Mathf.Max(0f, reachable));
     }
 
     /// <summary>
     /// 명세 7.3의 배치 규칙을 적용한다. 둘 수 없으면 그 장판을 생략한다.
     /// 장판은 기본적으로 플레이어가 이미 지나온 자리라서, 규칙만 지키면 가둘 일이 없다.
     /// </summary>
-    /// <param name="predicting">
-    /// 앞을 노리는 장판(<see cref="PoisonSettings.predictIndex"/>)인지. 이 하나는 간격 규칙에서
-    /// 빠진다 — 밀어내면 <see cref="PredictLead"/>가 맞춰 둔 "달려서 빠져나갈 수 있는 거리"가
-    /// 깨진다. 자리 수·면적 상한은 그대로 지킨다.
+    /// <param name="offTrail">
+    /// 지나온 자리를 따라가는 장판이 아니라 문의 기둥인지. 기둥은 간격 규칙과 앞지르기 금지에서
+    /// 빠진다 — 그쪽은 <see cref="PlaceGate"/>가 스스로 기하로 보장한다. 밀어내면 오히려
+    /// 틈이 맞지 않는다. 자리 수·면적 상한은 그대로 지킨다.
     /// </param>
-    private bool TryPlaceZone(Vector2 raw, Vector2 moveDirection, bool predicting,
+    private bool TryPlaceZone(Vector2 raw, Vector2 moveDirection, bool offTrail,
                               bool hasPrevious, Vector2 previous,
                               PoisonSettings settings, out Vector2 placed)
     {
@@ -803,7 +900,7 @@ public class ButterfreeBossController : MonoBehaviour
         float zoneArea = Mathf.PI * settings.radius * settings.radius * (occupied + 1);
         if (arenaArea > 0f && zoneArea / arenaArea > poisonMaxAreaRatio) return false;
 
-        if (predicting || !hasPrevious) return true;
+        if (offTrail || !hasPrevious) return true;
 
         Vector2 delta = placed - previous;
         if (delta.magnitude >= poisonMinSeparation) return true;
