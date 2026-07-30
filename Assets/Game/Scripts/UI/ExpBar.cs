@@ -10,9 +10,10 @@ using UnityEngine.UI;
 public class ExpBar : MonoBehaviour
 {
     private const float MarginX = 30f;
-    private const float MarginY = 50f;   // 체력바(88) 바로 아래
+    /// <summary>둘 중 아래 칸. 높이와 여백은 <see cref="BarFill"/>이 한 곳에서 정한다.</summary>
+    private const float MarginY = BarFill.BottomMargin;
     private const float BarWidth = 300f;
-    private const float BarHeight = 32f;   // "EXP" 표가 들어갈 높이 (체력바와 같다)
+    private const float BarHeight = BarFill.BarHeight;
 
     /// <summary>
     /// 경험치는 푸른색이다 — <c>bars.png</c>의 "Exp. Point bar colors"에서 그대로 잰 값.

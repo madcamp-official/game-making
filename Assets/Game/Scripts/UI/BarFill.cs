@@ -44,6 +44,26 @@ public class BarFill : MonoBehaviour
     /// <summary>꼬리표 글자 크기. PMD 폰트라 12의 배수여야 한다.</summary>
     public const int ChipFontSize = 24;
 
+    /// <summary>
+    /// 바와 꼬리표의 높이. 둘이 나란히 놓이므로 한 값으로 묶는다.
+    ///
+    /// ⚠️ <b>글자칸(24) + 윤곽(위아래 4씩) + 여유</b>보다 커야 한다. 딱 맞추면 글리프에 구워진
+    /// 검은 윤곽이 표 테두리에 닿아 글자가 잘린 것처럼 보인다. 테두리를 2px(화면 4px)로
+    /// 키우면서 32로는 모자라게 됐다.
+    /// </summary>
+    public const float BarHeight = 36f;
+
+    /// <summary>두 바 사이 간격.</summary>
+    public const float RowGap = 6f;
+
+    /// <summary>
+    /// 아래쪽 바(경험치)의 바닥 여백. 오른쪽 아래 기술 칸과 같은 값이라 두 HUD의 밑선이 맞는다.
+    ///
+    /// 예전에는 이 아래에 조작법 한 줄이 깔려 있어서 두 바가 그만큼 떠 있었다. 그 줄을 없앤
+    /// 뒤로는 바닥에 붙는 편이 화면 아래가 비지 않는다.
+    /// </summary>
+    public const float BottomMargin = 24f;
+
     public RectTransform Root { get; private set; }
 
     private Image body;
