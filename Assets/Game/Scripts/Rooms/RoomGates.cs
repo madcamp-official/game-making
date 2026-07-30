@@ -15,10 +15,10 @@ public class RoomGates : MonoBehaviour
     /// <summary>지금 방의 구름. 방이 바뀌면 새 것으로 갈린다.</summary>
     public static RoomGates Current { get; private set; }
 
-    /// <summary>안개 둑의 중심 x. 방 벽(±7.5)에서 살짝 떨어뜨려 두는 이유: 벽에 붙이면
-    /// 둥근 얼굴이 벽 모서리에 걸려 잘린 것처럼 보인다. 통로 안쪽에서 온전한 윤곽으로
-    /// 끝나야 "안개가 길을 메웠다"로 읽힌다.</summary>
-    private const float BankX = 13.7f;
+    /// <summary>안개 둑의 중심 x. 맨 앞 덩이의 옅은 앞자락이 방 문턱(±7.5) 바로 앞에서
+    /// 시작해, 들어서는 순간부터 길이 끝까지 막힌 것으로 보인다. 덩이 자체는 둥글게
+    /// 사그라드는 윤곽이라 벽에 닿아도 잘린 것처럼 보이지 않는다.</summary>
+    private const float BankX = 13.3f;
 
     /// <summary>안개 둑 크기 — 그림(288×56px, PPU 24) 원본 그대로. 폭 12칸은 카메라
     /// 반폭(10칸)보다 길어 문 앞에 바짝 서도 끝이 보이지 않고, 높이 2.33칸은 통로

@@ -58,8 +58,15 @@ public class CorridorCloud : MonoBehaviour
         }
 
         var box = go.AddComponent<BoxCollider2D>();
-        // 콜라이더는 늘어난 스케일을 타므로 원본 크기 기준으로 1을 준다.
-        box.size = Vector2.one;
+        // ⚠️ 콜라이더는 안개 전체 크기로 준다. 예전에 1x1(원본 2x2칸을 스케일로 늘리던
+        // 시절의 값)을 뒀다가, 원본이 통로 크기가 되면서 한가운데 한 칸짜리 점이 됐고 —
+        // 통로 높이가 2칸이라 위아래로 비켜 돌아갈 수 있는 구멍이 났다.
+        // 방 쪽으로 반 칸 더 내밀어, 안개의 옅은 앞자락에도 발을 들일 수 없게 한다.
+        const float reach = 0.6f;
+        Vector2 world = new Vector2(size.x + reach, size.y);
+        Vector3 s = go.transform.localScale;
+        box.size = new Vector2(world.x / s.x, world.y / s.y);
+        box.offset = new Vector2((faceRight ? reach : -reach) * 0.5f / s.x, 0f);
 
         return go.AddComponent<CorridorCloud>();
     }
