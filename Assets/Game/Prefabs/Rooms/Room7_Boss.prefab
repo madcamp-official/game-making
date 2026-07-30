@@ -4571,7 +4571,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 1000
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
@@ -4623,6 +4623,7 @@ MonoBehaviour:
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 0
+  immovable: 1
   basicAIEnabled: 0
   aggroOnSpawn: 1
 --- !u!95 &8959849977286451428
@@ -4687,7 +4688,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac0dd14af3f2466bbd19c68b9881bed0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ButterfreeBossController
-  moveSpeed: 4.6
+  moveSpeed: 7.5
   introDelay: 0.15
   arenaCenter: {fileID: 5874861080203317405}
   arenaHalfSize: {x: 7, y: 5}

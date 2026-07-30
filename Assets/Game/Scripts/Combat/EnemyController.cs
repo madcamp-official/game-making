@@ -31,6 +31,10 @@ public class EnemyController : MonoBehaviour
     [SerializeField, Min(0f)] private float knockbackStunDuration = 0.15f;
     [Tooltip("넉백 배율. 0이면 넉백 면역. 보스는 패턴 위치가 무너지지 않도록 0을 쓴다.")]
     [SerializeField, Min(0f)] private float knockbackMultiplier = 1f;
+    [Tooltip("몸으로 밀 수 없게 한다. 보스만 켠다 — 잡몹은 밀어내며 헤집는 맛이 있어야 한다. " +
+             "넉백 면역과는 다른 이야기다. 넉백은 공격이 넣는 속도라 knockbackMultiplier가 막지만, " +
+             "이건 두 몸이 겹쳤을 때 물리 엔진이 밀어내는 것이라 따로 막아야 한다.")]
+    [SerializeField] private bool immovable;
     [Tooltip("기본 추적 AI. 전용 보스 컨트롤러가 이동을 맡을 때만 끈다.")]
     [SerializeField] private bool basicAIEnabled = true;
     [Tooltip("방에 들어온 순간부터 추적을 시작한다. 끄면 감지 범위에 들어와야 움직인다.")]
@@ -94,11 +98,25 @@ public class EnemyController : MonoBehaviour
         body.linearVelocity = Vector2.zero;
     }
 
+    /// <summary>
+    /// <see cref="immovable"/>일 때 쓰는 질량. 물리 엔진은 겹친 두 몸을 밀어낼 때 각자의
+    /// <b>질량에 반비례해서</b> 나눠 옮기므로, 플레이어(질량 1)의 1000배면 밀리는 양이
+    /// 0.1%가 되어 사실상 붙박이다.
+    ///
+    /// Kinematic으로 바꾸지 않는 이유: Kinematic은 벽(Static)과도 충돌하지 않아 전투장을
+    /// 그대로 빠져나간다. 버터플의 <c>InwardPush</c>는 "벽에 막혀 더 못 나간다"를 전제로
+    /// 짜여 있다. 질량만 올리면 벽에는 그대로 막히면서 플레이어에게만 안 밀린다.
+    /// </summary>
+    private const float ImmovableMass = 1000f;
+
     private void Awake()
     {
         body = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
         ownCollider = GetComponent<Collider2D>();
+        // 프리팹 값에 기대지 않고 여기서 못박는다. 눈에 띄지 않는 수치라 한 번 어긋나면
+        // "이 보스만 밀린다"가 되고, 원인을 프리팹에서 찾기 어렵다.
+        if (immovable) body.mass = ImmovableMass;
         health.OnDied += HandleDeath;
         health.OnDamaged += HandleDamaged;
     }
