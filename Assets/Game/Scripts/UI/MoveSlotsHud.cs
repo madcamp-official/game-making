@@ -143,10 +143,13 @@ public class MoveSlotsHud : MonoBehaviour
             RectTransform chipRt = slot.tagChip.rectTransform;
             chipRt.anchorMin = chipRt.anchorMax = new Vector2(0f, 0.5f);
             chipRt.pivot = new Vector2(0f, 0.5f);
-            // 가장 긴 꼬리표("방당 1회" 40px)에 좌우 여백을 더한 폭. 높이는 표 테두리(4+4)
+            // 가장 긴 꼬리표("방당 1회" 40px)에 좌우 여백을 더한 폭. 높이는 표 테두리(2+2)
             // 안에 글자칸 12가 여유를 두고 들어가야 한다 — 딱 맞추면 글리프에 구워진 검은
-            // 윤곽이 테두리에 닿아 글자가 잘린 것처럼 보인다. 테두리를 두껍게 하면서 함께 키웠다.
-            chipRt.sizeDelta = new Vector2(60f, 24f);
+            // 윤곽이 테두리에 닿아 글자가 잘린 것처럼 보인다.
+            //
+            // 이 표는 얇은 꼬리표(PmdUi.ChipSprite)를 쓴다. 좌하단 바의 표처럼 굵게 둘러 봤는데,
+            // 기술 칸 안에 들어앉는 작은 조각이라 테두리가 글자보다 먼저 눈에 들어와 답답했다.
+            chipRt.sizeDelta = new Vector2(60f, 22f);
             chipRt.anchoredPosition = new Vector2(5f, 0f);
 
             // 조작키는 반대쪽(오른쪽)에 적는다. 원작의 PP가 있던 자리다.

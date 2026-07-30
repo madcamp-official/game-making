@@ -43,7 +43,8 @@ public static class PmdUi
 
     // ---------------------------------------------------------------- 스프라이트
 
-    private static Sprite panel, button, buttonOn, buttonOff, moveFrame, moveFrameOff, barFrame, chip, logo;
+    private static Sprite panel, button, buttonOn, buttonOff, moveFrame, moveFrameOff,
+                          barFrame, chip, chipBold, logo;
 
     private static Sprite Load(ref Sprite cache, string name)
     {
@@ -59,8 +60,13 @@ public static class PmdUi
     public static Sprite MoveFrameSprite => Load(ref moveFrame, "PmdMoveFrame");
     public static Sprite MoveFrameOffSprite => Load(ref moveFrameOff, "PmdMoveFrameOff");
     public static Sprite BarFrameSprite => Load(ref barFrame, "PmdBarFrame");
-    /// <summary>작은 꼬리표 — 체력바의 "HP" 표와 기술 칸의 속성 표. 흰 속을 물들여 쓴다.</summary>
+    /// <summary>작은 꼬리표 — 기술 칸의 속성 표. 흰 속을 물들여 쓴다.</summary>
     public static Sprite ChipSprite => Load(ref chip, "PmdChip");
+    /// <summary>
+    /// 굵은 꼬리표 — 좌하단 두 바의 "HP"·"EXP" 표. 바로 옆 바 틀과 윤곽 두께가 같다.
+    /// 얇은 쪽을 쓰면 표가 바에 눌려 보인다.
+    /// </summary>
+    public static Sprite ChipBoldSprite => Load(ref chipBold, "PmdChipBold");
     /// <summary>타이틀 로고. 늘리지 않고 원본 크기로 놓는다 (<see cref="MakeLogo"/>).</summary>
     public static Sprite LogoSprite => Load(ref logo, "PmdLogo");
 
@@ -267,10 +273,14 @@ public static class PmdUi
     /// 작은 색 꼬리표 — 체력바의 "HP" 표, 기술 칸의 속성 표. 흰 속을 가진 스프라이트를
     /// 물들여 쓰므로 어두운 윤곽도 그 색의 어두운 판이 되어 저절로 어울린다.
     /// </summary>
+    /// <param name="bold">
+    /// 굵은 윤곽을 쓸지. 바 옆에 붙는 표(<see cref="BarFill.MakeChip"/>)만 참이다 —
+    /// 그쪽은 바 틀과 두께가 같아야 하고, 대신 칸도 그만큼 높아야 글자가 안 잘린다.
+    /// </param>
     public static Text MakeChip(Transform parent, string name, string body, int size,
-                                Color color, Color textColor)
+                                Color color, Color textColor, bool bold = false)
     {
-        Image box = MakeSliced(parent, name, ChipSprite);
+        Image box = MakeSliced(parent, name, bold ? ChipBoldSprite : ChipSprite);
         box.color = color;
         Text text = MakeText(box.rectTransform, name + "Label", body, size);
         text.horizontalOverflow = HorizontalWrapMode.Overflow;

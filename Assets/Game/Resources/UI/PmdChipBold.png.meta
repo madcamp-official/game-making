@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: e48fe42d5155f48c7b89ea3084752b31
+guid: ce9931e7dcad9498c866e1fb3279b50a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 5485228087701480810
-    second: PmdChip_0
+      213: 8320730210673235036
+    second: PmdChipBold_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -52,7 +52,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 2, y: 2, z: 2, w: 2}
+  spriteBorder: {x: 4, y: 4, z: 4, w: 4}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PmdChip_0
+      name: PmdChipBold_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 6
-        height: 6
+        width: 10
+        height: 10
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: a65217f32e17f1c40800000000000000
-      internalID: 5485228087701480810
+      spriteID: c541a0f9a0c297370800000000000000
+      internalID: 8320730210673235036
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PmdChip_0: 5485228087701480810
+      PmdChipBold_0: 8320730210673235036
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

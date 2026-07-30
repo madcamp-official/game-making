@@ -117,7 +117,7 @@ public class BarFill : MonoBehaviour
     public static Text MakeChip(Transform parent, string name, string label,
                                 Color box, Color ink, float height)
     {
-        Text text = PmdUi.MakeChip(parent, name, label, ChipFontSize, box, ink);
+        Text text = PmdUi.MakeChip(parent, name, label, ChipFontSize, box, ink, bold: true);
         RectTransform rt = (RectTransform)text.transform.parent;
         rt.anchorMin = rt.anchorMax = new Vector2(0f, 0.5f);
         rt.pivot = new Vector2(0f, 0.5f);
