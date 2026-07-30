@@ -155,46 +155,52 @@ public static class Floor3EnemySetup
     };
 
     // 방 구성. 방 이름 → (프리팹 이름, 로컬 좌표). 방 안쪽은 대략 ±6 × ±4다.
+    //
+    // 2 → 4 → 5 → 6마리로 늘린다. 예전에는 4 → 5 → 7 → 6이라 4번방이 층에서 가장 붐볐는데,
+    // 정작 엘리트가 나오는 마지막 방보다 앞이라 봉우리가 두 번 왔다.
+    //
+    // <b>쥬래곤은 방마다 한 마리씩만.</b> 사거리 10.5의 조준이 쫓아오는 적이라 둘이 서로 다른
+    // 방향에서 겨누면 22° 두 줄이 교차해 설 자리가 없어진다. 한 마리면 "느려진 채로 다른 적을
+    // 상대한다"이고, 둘이면 "느려진 채로 가만히 있는다"가 된다.
+    //
+    // 아쿠스타는 2번방부터 항상 둘이다. 이 층에서 직접 피해를 내는 것이 사실상 이 적뿐이라,
+    // 나머지가 자리를 흔드는 동안 실제로 체력을 깎는 쪽이 꾸준히 있어야 한다.
     private static readonly Dictionary<string, (string enemy, Vector2 at)[]> Rooms =
         new Dictionary<string, (string, Vector2)[]>
     {
-        // 1번방 — 밀치기와 감속 소개. 밀리는 방향과 느려지는 발을 따로따로 배운다.
+        // 1번방 — 흡인과 감속만. 당겨지는 몸과 느려지는 발을 하나씩 따로 배운다.
         ["F3Room1_Combat"] = new (string, Vector2)[]
         {
-            ("Kingler", new Vector2(2f, 1.5f)),
-            ("Kingler", new Vector2(2f, -1.5f)),
-            ("Dewgong", new Vector2(4.5f, 2.5f)),
-            ("Dewgong", new Vector2(4.5f, -2.5f)),
+            ("Poliwrath", new Vector2(2.8f, -1.2f)),
+            ("Dewgong", new Vector2(5.8f, 1.8f)),
         },
-        // 2번방 — 아쿠스타 합류. 밀치기·감속에 밀린 자리로 레이저가 지나간다.
+        // 2번방 — 아쿠스타 합류. 당겨지고 느려진 자리로 레이저가 지나간다.
         ["F3Room2_Combat"] = new (string, Vector2)[]
+        {
+            ("Poliwrath", new Vector2(2.8f, 0f)),
+            ("Dewgong", new Vector2(5.9f, -2.4f)),
+            ("Starmie", new Vector2(5.4f, 2.6f)),
+            ("Starmie", new Vector2(3.4f, 3.4f)),
+        },
+        // 4번방 — 흡인이 빠지고 킹크랩이 들어온다. 당기는 대신 밀어내는 방이다.
+        // 미는 방향과 레이저가 지나갈 자리를 함께 읽는 것이 여기서 배울 것이다.
+        ["F3Room4_Combat"] = new (string, Vector2)[]
         {
             ("Kingler", new Vector2(1.8f, 1.8f)),
             ("Kingler", new Vector2(1.8f, -1.8f)),
-            ("Dewgong", new Vector2(4.2f, 2.6f)),
-            ("Dewgong", new Vector2(4.2f, -2.6f)),
-            ("Starmie", new Vector2(5.5f, 0f)),
+            ("Dewgong", new Vector2(5.9f, 0f)),
+            ("Starmie", new Vector2(5.2f, 3f)),
+            ("Starmie", new Vector2(5.2f, -3f)),
         },
-        // 4번방 — 흡인 합류. 강챙이가 가운데서 당기고 바깥에서 레이저가 조인다.
-        ["F3Room4_Combat"] = new (string, Vector2)[]
-        {
-            ("Poliwrath", new Vector2(3f, 0f)),
-            ("Kingler", new Vector2(1.8f, 2f)),
-            ("Kingler", new Vector2(1.8f, -2f)),
-            ("Dewgong", new Vector2(4.5f, 2.8f)),
-            ("Dewgong", new Vector2(4.5f, -2.8f)),
-            ("Starmie", new Vector2(5.6f, 1.5f)),
-            ("Starmie", new Vector2(5.6f, -1.5f)),
-        },
-        // 5번방 — 엘리트 종합. 신뇽 해류 위에서 전 종류의 CC가 얽힌다.
+        // 5번방 — 엘리트 종합. 신뇽 해류 위에서 흡인 둘과 레이저 둘이 겹친다.
         ["F3Room5_Combat"] = new (string, Vector2)[]
         {
-            ("Dragonair", new Vector2(4.5f, 0f)),
-            ("Kingler", new Vector2(2f, 0f)),
-            ("Poliwrath", new Vector2(3f, 2.5f)),
-            ("Dewgong", new Vector2(3f, -2.5f)),
-            ("Starmie", new Vector2(5.5f, 2.8f)),
-            ("Starmie", new Vector2(5.5f, -2.8f)),
+            ("Dragonair", new Vector2(4.4f, 0f)),
+            ("Poliwrath", new Vector2(2.6f, 2.4f)),
+            ("Poliwrath", new Vector2(2.6f, -2.4f)),
+            ("Dewgong", new Vector2(6f, 3.2f)),
+            ("Starmie", new Vector2(5.6f, 1.2f)),
+            ("Starmie", new Vector2(5.6f, -3.2f)),
         },
     };
 
