@@ -39,58 +39,63 @@ public class HealthBar : MonoBehaviour
     private const float ShadeFraction = 0.34f;
     private const float ShadeMultiplier = 0.62f;
 
+    /// <summary>가운데를 축으로 삼는 흰 사각형. 윤곽과 트랙처럼 자리가 변하지 않는 것이 쓴다.</summary>
     private static Sprite whiteSprite;
+
+    /// <summary>
+    /// <b>왼쪽 끝</b>을 축으로 삼는 흰 사각형. 채움이 이것을 쓴다.
+    ///
+    /// 축이 왜 중요한가: 이 씬의 카메라는 Pixel Perfect(Pixel Snapping)라 스프라이트마다
+    /// 자리를 픽셀 격자에 맞춰 반올림한다. 축이 가운데면 채움의 <b>자리</b>가 남은 비율에 따라
+    /// 움직여서(왼쪽 끝 = 중심 − 폭/2), 트랙과 서로 다른 픽셀로 반올림된다. 캐릭터가 걸을
+    /// 때마다 둘이 각각 다른 쪽으로 튀면서 바 왼쪽에 흰 틈이 벌어지던 것이 이 때문이다.
+    ///
+    /// 축을 왼쪽 끝에 두면 채움의 자리는 트랙의 왼쪽 끝과 <b>늘 같은 한 점</b>이고 비율이
+    /// 바뀌어도 움직이지 않는다. 같은 자리는 같은 픽셀로 반올림되므로 왼쪽 끝이 붙어 있다.
+    /// 폭만 변하니 오른쪽 끝은 한 픽셀 흔들릴 수 있지만, 그쪽은 채움과 트랙의 경계라 보이지 않는다.
+    /// </summary>
+    private static Sprite whiteLeftSprite;
 
     private Health health;
     private Transform barRoot;
-    private Transform fill;
     private SpriteRenderer fillRenderer;
+    private SpriteRenderer shadeRenderer;
     private TextMesh valueText;
 
     private void Awake()
     {
         health = GetComponent<Health>();
-
-        if (whiteSprite == null)
-        {
-            Texture2D tex = new Texture2D(1, 1);
-            tex.SetPixel(0, 0, Color.white);
-            tex.Apply();
-            whiteSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f), 1f);
-        }
+        EnsureSprites();
 
         barRoot = new GameObject("HealthBar").transform;
+        // worldPositionStays를 그대로 둔다(참). 적마다 몸 크기가 달라서(닥트리오 1.35배 등)
+        // 그 배율이 바에 전해지면 바 크기가 적마다 달라진다. 이 값이 참이면 Unity가
+        // 부모 배율을 상쇄하는 localScale을 넣어 주므로 바는 누구에게 붙어도 같은 크기다.
         barRoot.SetParent(transform);
         barRoot.localPosition = new Vector3(0f, offsetY, 0f);
 
         // 어두운 윤곽 — 트랙보다 사방으로 조금 크게 깔아 테두리처럼 보이게 한다.
-        SpriteRenderer outline = CreatePart("Outline", barRoot, OutlineColor, 39);
+        SpriteRenderer outline = CreatePart("Outline", barRoot, whiteSprite, OutlineColor, 39);
         outline.transform.localScale = new Vector3(width + Outline * 2f, height + Outline * 2f, 1f);
 
         // 흰 트랙 — 아직 차지 않은 자리다. 검정으로 두면 남은 양이 얼마인지 눈에 덜 띈다.
-        SpriteRenderer track = CreatePart("Track", barRoot, TrackColor, 40);
+        SpriteRenderer track = CreatePart("Track", barRoot, whiteSprite, TrackColor, 40);
         track.transform.localScale = new Vector3(width, height, 1f);
-
-        // 채움은 왼쪽 기준으로 줄어들도록 부모를 왼쪽 끝에 둔다.
-        Transform fillPivot = new GameObject("FillPivot").transform;
-        fillPivot.SetParent(barRoot);
-        fillPivot.localPosition = new Vector3(-width * 0.5f, 0f, 0f);
-        fill = fillPivot;
 
         // 프리팹마다 색을 따로 넣게 하면 적을 하나 추가할 때마다 빠뜨릴 자리가 생긴다.
         // 누구 몸에 붙었는지 보고 정한다.
         Color fillColor = GetComponent<PlayerController>() != null ? PlayerFill : EnemyFill;
-        fillRenderer = CreatePart("Fill", fillPivot, fillColor, 41);
-        fillRenderer.transform.localPosition = new Vector3(width * 0.5f, 0f, 0f);
-        fillRenderer.transform.localScale = new Vector3(width, height, 1f);
+
+        // 채움과 짙은 줄은 왼쪽 끝에 못박아 두고 폭만 줄인다. 자리는 앞으로 바뀌지 않는다.
+        fillRenderer = CreatePart("Fill", barRoot, whiteLeftSprite, fillColor, 41);
+        fillRenderer.transform.localPosition = new Vector3(-width * 0.5f, 0f, 0f);
 
         // 위쪽 짙은 줄 — 좌하단 바와 같은 두 톤이다. 이게 없으면 바가 납작해 보인다.
-        SpriteRenderer shade = CreatePart("Shade", fillPivot,
+        shadeRenderer = CreatePart("Shade", barRoot, whiteLeftSprite,
             new Color(fillColor.r * ShadeMultiplier, fillColor.g * ShadeMultiplier,
                       fillColor.b * ShadeMultiplier, fillColor.a), 42);
-        shade.transform.localPosition =
-            new Vector3(width * 0.5f, height * 0.5f * (1f - ShadeFraction), 0f);
-        shade.transform.localScale = new Vector3(width, height * ShadeFraction, 1f);
+        shadeRenderer.transform.localPosition =
+            new Vector3(-width * 0.5f, height * 0.5f * (1f - ShadeFraction), 0f);
 
         // 바 오른쪽에 "현재/최대" 수치 표시 (기본은 그리지 않는다)
         if (showValue)
@@ -122,13 +127,28 @@ public class HealthBar : MonoBehaviour
         UpdateBar(health.CurrentHealth, health.MaxHealth);
     }
 
-    private SpriteRenderer CreatePart(string name, Transform parent, Color color, int order)
+    private static void EnsureSprites()
+    {
+        // 플레이 모드를 다시 들어오면 텍스처가 파괴되므로 널 검사로 다시 만든다.
+        if (whiteSprite != null && whiteLeftSprite != null) return;
+
+        var tex = new Texture2D(1, 1);
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        var rect = new Rect(0, 0, 1, 1);
+        whiteSprite = Sprite.Create(tex, rect, new Vector2(0.5f, 0.5f), 1f);
+        whiteLeftSprite = Sprite.Create(tex, rect, new Vector2(0f, 0.5f), 1f);
+    }
+
+    private static SpriteRenderer CreatePart(string name, Transform parent, Sprite sprite,
+                                            Color color, int order)
     {
         GameObject go = new GameObject(name);
-        go.transform.SetParent(parent);
+        // localPosition·localScale을 곧바로 정하므로 월드 자리를 지킬 필요가 없다.
+        go.transform.SetParent(parent, false);
         go.transform.localPosition = Vector3.zero;
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = whiteSprite;
+        sr.sprite = sprite;
         sr.color = color;
         sr.sortingOrder = order;
         return sr;
@@ -136,9 +156,11 @@ public class HealthBar : MonoBehaviour
 
     private void UpdateBar(int current, int max)
     {
-        // 색은 건드리지 않는다. 길이만 줄어든다.
-        float ratio = max > 0 ? (float)current / max : 0f;
-        fill.localScale = new Vector3(ratio, 1f, 1f);
+        // 색은 건드리지 않는다. 길이만 줄어든다 — 자리는 왼쪽 끝에 못박혀 있다.
+        float ratio = max > 0 ? Mathf.Clamp01((float)current / max) : 0f;
+        fillRenderer.transform.localScale = new Vector3(width * ratio, height, 1f);
+        shadeRenderer.transform.localScale =
+            new Vector3(width * ratio, height * ShadeFraction, 1f);
         if (valueText != null) valueText.text = current + "/" + max;
     }
 

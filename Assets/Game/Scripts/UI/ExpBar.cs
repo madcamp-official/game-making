@@ -10,11 +10,9 @@ using UnityEngine.UI;
 public class ExpBar : MonoBehaviour
 {
     private const float MarginX = 30f;
-    private const float MarginY = 50f;   // 체력바(72) 바로 아래
+    private const float MarginY = 52f;   // 체력바(82) 바로 아래
     private const float BarWidth = 300f;
-    private const float BarHeight = 14f;
-    /// <summary>체력바의 "HP" 꼬리표 폭 + 사이 간격. 두 바의 왼쪽 끝을 맞춘다.</summary>
-    private const float ChipOffset = 50f;
+    private const float BarHeight = 24f;
 
     /// <summary>
     /// 경험치는 푸른색이다 — <c>bars.png</c>의 "Exp. Point bar colors"에서 그대로 잰 값.
@@ -22,20 +20,34 @@ public class ExpBar : MonoBehaviour
     /// </summary>
     private static readonly Color FillColor = new Color32(73, 146, 251, 255);
 
+    /// <summary>"EXP" 꼬리표. 체력의 호박색 표와 같은 형식이고, 색만 바의 푸른색을 따른다.</summary>
+    private static readonly Color ChipColor = new Color32(73, 146, 251, 255);
+    private static readonly Color ChipInk = new Color32(14, 34, 71, 255);
+
     private PlayerLevel level;
     private BarFill bar;
 
     public static ExpBar Create(Transform canvasRoot)
     {
-        BarFill fill = BarFill.Create(canvasRoot, "ExpBar", FillColor);
-        RectTransform rt = fill.Root;
-        rt.anchorMin = rt.anchorMax = Vector2.zero;
-        rt.pivot = Vector2.zero;
-        rt.anchoredPosition = new Vector2(MarginX + ChipOffset, MarginY);
-        rt.sizeDelta = new Vector2(BarWidth, BarHeight);
+        var go = new GameObject("ExpBar", typeof(RectTransform));
+        RectTransform root = (RectTransform)go.transform;
+        root.SetParent(canvasRoot, false);
+        root.anchorMin = root.anchorMax = Vector2.zero;
+        root.pivot = Vector2.zero;
+        root.anchoredPosition = new Vector2(MarginX, MarginY);
+        root.sizeDelta = new Vector2(BarFill.BarOffsetX + BarWidth, BarHeight);
 
-        ExpBar bar = fill.gameObject.AddComponent<ExpBar>();
-        bar.bar = fill;
+        ExpBar bar = go.AddComponent<ExpBar>();
+
+        BarFill.MakeChip(root, "Chip", "EXP", ChipColor, ChipInk, BarHeight);
+
+        bar.bar = BarFill.Create(root, "Bar", FillColor);
+        RectTransform barRt = bar.bar.Root;
+        barRt.anchorMin = barRt.anchorMax = new Vector2(0f, 0.5f);
+        barRt.pivot = new Vector2(0f, 0.5f);
+        barRt.sizeDelta = new Vector2(BarWidth, BarHeight);
+        barRt.anchoredPosition = new Vector2(BarFill.BarOffsetX, 0f);
+
         return bar;
     }
 

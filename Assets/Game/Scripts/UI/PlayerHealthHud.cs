@@ -16,14 +16,11 @@ using UnityEngine.UI;
 /// </summary>
 public class PlayerHealthHud : MonoBehaviour
 {
-    // 아래에서부터 조작 안내(y 15) → 경험치 바(y 56) → 체력바 순으로 쌓는다.
+    // 아래에서부터 조작 안내(y 25) → 경험치 바(y 52) → 체력바 순으로 쌓는다.
     private const float MarginX = 30f;
-    private const float MarginY = 72f;
+    private const float MarginY = 82f;
     private const float BarWidth = 300f;
     private const float BarHeight = 26f;
-    private const float ChipWidth = 46f;
-    private const float ChipGap = 4f;
-    private const int FontSize = 12;   // PMD 폰트라 12의 배수여야 한다
 
     /// <summary>
     /// 내 체력은 남은 양과 상관없이 늘 초록이다. 예전에는 줄어들수록 빨강으로 물들었는데,
@@ -49,24 +46,19 @@ public class PlayerHealthHud : MonoBehaviour
         root.anchorMin = root.anchorMax = Vector2.zero;
         root.pivot = Vector2.zero;
         root.anchoredPosition = new Vector2(MarginX, MarginY);
-        root.sizeDelta = new Vector2(ChipWidth + ChipGap + BarWidth, BarHeight);
+        root.sizeDelta = new Vector2(BarFill.BarOffsetX + BarWidth, BarHeight);
 
         PlayerHealthHud hud = go.AddComponent<PlayerHealthHud>();
 
-        // "HP" 꼬리표 — 바 왼쪽에 붙는다.
-        Text chip = PmdUi.MakeChip(root, "Chip", "HP", FontSize, ChipColor, ChipInk);
-        RectTransform chipRt = ((RectTransform)chip.transform.parent);
-        chipRt.anchorMin = chipRt.anchorMax = new Vector2(0f, 0.5f);
-        chipRt.pivot = new Vector2(0f, 0.5f);
-        chipRt.sizeDelta = new Vector2(ChipWidth, BarHeight);
-        chipRt.anchoredPosition = Vector2.zero;
+        // "HP" 꼬리표 — 바 왼쪽에 붙고, 글자가 칸을 채운다.
+        BarFill.MakeChip(root, "Chip", "HP", ChipColor, ChipInk, BarHeight);
 
         hud.bar = BarFill.Create(root, "Bar", FillColor);
         RectTransform barRt = hud.bar.Root;
         barRt.anchorMin = barRt.anchorMax = new Vector2(0f, 0.5f);
         barRt.pivot = new Vector2(0f, 0.5f);
         barRt.sizeDelta = new Vector2(BarWidth, BarHeight);
-        barRt.anchoredPosition = new Vector2(ChipWidth + ChipGap, 0f);
+        barRt.anchoredPosition = new Vector2(BarFill.BarOffsetX, 0f);
 
         // 수치는 바 위에 겹쳐 얹는다. 흰 트랙과 초록 채움을 오가므로 윤곽을 둘러 둔다.
         hud.valueText = PmdUi.MakeOutlinedText(barRt, "Value", "", 24);
