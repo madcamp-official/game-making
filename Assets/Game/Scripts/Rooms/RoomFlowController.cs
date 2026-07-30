@@ -25,6 +25,8 @@ public class RoomFlowController : MonoBehaviour
 
     private GameObject currentRoom;
     private bool gameCleared;
+    /// <summary>구름 그림이 비었다는 경고는 방마다 되풀이하지 않고 한 번만 남긴다.</summary>
+    private bool warnedMissingCloud;
 
     private void Awake()
     {
@@ -154,8 +156,21 @@ public class RoomFlowController : MonoBehaviour
 
         // 양쪽 통로를 막는 구름. 방마다 프리팹에 심지 않고 여기서 세운다 —
         // 스물한 방의 통로 자리를 전부 같게 맞춰 두었으므로 자리를 계산하는 편이 안전하다.
+        //
+        // ⚠️ 그림이 비어 있으면 구름이 <b>한 방에도 서지 않는다</b>. 통로가 통째로 뚫려
+        // 싸움 도중에도 다음 방으로 걸어 나갈 수 있게 되는데, 조용히 넘어가면 왜 그런지
+        // 알아낼 실마리가 없다. 실제로 한 번 겪었다 — 참조가 끊긴 줄 모르고 구름 코드를
+        // 뒤졌다. 없으면 없다고 말하게 한다.
         if (corridorCloudSprite != null)
+        {
             RoomGates.Create(currentRoom.transform, corridorCloudSprite);
+        }
+        else if (!warnedMissingCloud)
+        {
+            warnedMissingCloud = true;
+            Debug.LogWarning("[방] corridorCloudSprite가 비어 있다 — 통로를 막는 구름이 서지 않는다. " +
+                             "Gameplay 씬의 RoomFlowController에 CorridorCloud.png를 연결할 것.", this);
+        }
 
         RunStats.ReachedRoom(CurrentFloorIndex, index);
 
