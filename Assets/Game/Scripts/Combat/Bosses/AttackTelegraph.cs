@@ -70,6 +70,32 @@ public class AttackTelegraph : MonoBehaviour
         return telegraph;
     }
 
+    /// <summary>
+    /// 돌진 예고 — 지나갈 복도와 맞는 부채꼴을 <b>한 도형으로</b> 그린다.
+    /// 두 모양을 따로 얹으면 겹친 자리만 짙어져 한 공격이 셋으로 나뉘어 보인다
+    /// (<see cref="PrimitiveSprites.DashZone"/>에 자세히 적어 두었다).
+    ///
+    /// 두 색의 <b>알파만</b> 서로 다른 진하기로 쓰이고 RGB는 <paramref name="hitColor"/> 것을
+    /// 따른다. 한 번의 공격을 그린 것이라 색까지 갈리면 서로 다른 일처럼 읽힌다.
+    /// </summary>
+    public static AttackTelegraph CreateDashZone(Transform parent, Vector2 origin, Vector2 direction,
+                                                 float corridorLength, float corridorHalfWidth,
+                                                 float hitCenter, float hitRadius, float sweepAngle,
+                                                 Color corridorColor, Color hitColor)
+    {
+        Vector2 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
+
+        // 복도는 부채꼴보다 옅게. 텍스처에 그 비율을 새겨 두고, 렌더러는 진한 쪽 알파로 칠한다.
+        float weight = hitColor.a > 0.001f ? corridorColor.a / hitColor.a : 1f;
+        Sprite sprite = PrimitiveSprites.DashZone(corridorLength, corridorHalfWidth,
+                                                  hitCenter, hitRadius, sweepAngle, weight);
+
+        // 스프라이트가 이미 월드 단위이고 피벗이 몸 중심이라, 자리와 회전만 맞추면 된다.
+        AttackTelegraph telegraph = Create(parent, origin, sprite, hitColor);
+        telegraph.transform.rotation = Quaternion.FromToRotation(Vector3.right, dir);
+        return telegraph;
+    }
+
     private static AttackTelegraph Create(Transform parent, Vector2 position, Sprite sprite, Color color)
     {
         // 방에 붙는 것이라 싸움이 끝나면 걷어 낼 수 있도록 표식을 단다.

@@ -32,6 +32,16 @@ public class GameAudio : MonoBehaviour
     private int active;
 
     private AudioSource sfx;
+
+    /// <summary>
+    /// 도중에 끊을 수 있어야 하는 효과음 전용 재생기.
+    ///
+    /// <see cref="AudioSource.PlayOneShot"/>으로 낸 소리는 <b>따로 멈출 수가 없다</b> — 한 재생기에
+    /// 여러 소리가 겹쳐 흐르므로 Stop을 부르면 그때 울리던 것이 전부 끊긴다. 진화음처럼
+    /// 몇 초간 이어지다가 확정·취소 순간에 딱 끊겨야 하는 소리는 자기 재생기를 하나 갖는다.
+    /// </summary>
+    private AudioSource loopSfx;
+
     private Coroutine fadeRoutine;
 
     /// <summary>음악 크기에 곱하는 값. 1이 제 크기, 싸움이 끝난 방에서는 이보다 낮아진다.</summary>
@@ -71,6 +81,8 @@ public class GameAudio : MonoBehaviour
         // PlayOneShot의 크기는 재생기 volume에 곱해진다. 음악 재생기와 달리 여기는 1로 열어 두고,
         // 실제 크기는 PlayOneShot 인자로 준다.
         sfx.volume = 1f;
+
+        loopSfx = CreateSource("SfxLoop", false);
     }
 
     private AudioSource CreateSource(string name, bool loop)
@@ -271,13 +283,24 @@ public class GameAudio : MonoBehaviour
     }
 
     /// <summary>
-    /// 메뉴에서 가리키는 칸이 바뀌었다. "바뀐 순간"을 가려내는 일은 부르는 쪽이 한다
-    /// (<see cref="PmdUi.TrackHoverSound"/>) — 매 프레임 부르면 커서를 올려 둔 내내 이어진다.
+    /// 버튼 위에 커서가 올라섰다.
+    ///
+    /// 겹쳐 울리는 것을 막지 않는다. <see cref="AudioSource.PlayOneShot"/>은 이미 울리는 소리를
+    /// 끊지 않고 새 소리를 얹으므로, 버튼 사이를 빠르게 오가도 하나하나 다 난다. 여기에
+    /// "너무 자주 울리면 건너뛰기" 같은 문턱을 두면 빠르게 훑을 때 소리가 뚝뚝 빠진다 —
+    /// 커서가 칸에 올라섰는데 아무 소리도 안 나는 쪽이 훨씬 어색하다.
     /// </summary>
     public static void PlayUiHover()
     {
         if (Instance != null && Instance.library != null)
             Instance.PlaySfx(Instance.library.uiHover, Instance.library.uiVolumeScale);
+    }
+
+    /// <summary>버튼을 눌렀다.</summary>
+    public static void PlayUiClick()
+    {
+        if (Instance != null && Instance.library != null)
+            Instance.PlaySfx(Instance.library.uiClick, Instance.library.uiVolumeScale);
     }
 
     /// <summary>
@@ -287,6 +310,40 @@ public class GameAudio : MonoBehaviour
     public static void PlaySfx(AudioClip clip)
     {
         if (Instance != null) Instance.PlaySfx(clip, 1f);
+    }
+
+    // ---------------------------------------------------------------- 진화
+
+    /// <summary>
+    /// 진화가 시작되어 몸이 빛나기 시작했다. 확정되든 취소되든
+    /// <see cref="StopEvolving"/>으로 끊길 때까지 이어진다.
+    /// </summary>
+    public static void PlayEvolving()
+    {
+        if (Instance == null || Instance.library == null) return;
+        Instance.PlayLoopSfx(Instance.library.evolving);
+    }
+
+    /// <summary>진화음을 끊는다. 진화가 확정됐거나 취소됐다.</summary>
+    public static void StopEvolving()
+    {
+        if (Instance != null && Instance.loopSfx != null) Instance.loopSfx.Stop();
+    }
+
+    /// <summary>진화가 확정됐다. 이어지던 진화음을 끊고 완료음을 얹는다.</summary>
+    public static void PlayEvolved()
+    {
+        StopEvolving();
+        if (Instance != null && Instance.library != null)
+            Instance.PlaySfx(Instance.library.evolved, 1f);
+    }
+
+    private void PlayLoopSfx(AudioClip clip)
+    {
+        if (clip == null || loopSfx == null) return;
+        loopSfx.clip = clip;
+        loopSfx.volume = library != null ? library.sfxVolume : 0.9f;
+        loopSfx.Play();
     }
 
     private void PlaySfx(AudioClip clip, float scale)

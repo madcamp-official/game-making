@@ -933,7 +933,6 @@ public class ButterfreeBossController : MonoBehaviour
     private IEnumerator PhaseTransitionRoutine()
     {
         state = BossState.PhaseTransition;
-        RoomFlowController.PlayBossCry();
         BeginPhaseInvulnerability();
         // 전환 연출 중에는 새 공격 판정이 남아 있으면 안 된다.
         ClearAttackObjects();
@@ -957,8 +956,11 @@ public class ButterfreeBossController : MonoBehaviour
         if (spriteRenderer != null) spriteRenderer.color = Color.white;
         if (health.IsDead) yield break;
 
-        // 피해 없는 바람 파동
+        // 피해 없는 바람 파동. 울음소리는 이 파동에 맞춘다 — 전환이 시작될 때 울리면
+        // 아직 몸이 부풀고 있는 중이라 무엇 때문에 우는지 보이지 않는다. 소리와 그림이
+        // 같은 순간에 터져야 파동이 울음의 결과로 읽힌다.
         AttackTelegraph wave = AttackTelegraph.CreateRing(attackRoot, transform.position, 0.6f, silverColor);
+        RoomFlowController.PlayBossCry();
         wave.Expand(0.6f, 6f, 0.6f);
         yield return new WaitForSeconds(0.6f);
         if (health.IsDead) yield break;

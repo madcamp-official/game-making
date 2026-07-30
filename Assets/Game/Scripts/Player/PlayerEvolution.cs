@@ -13,7 +13,20 @@ public class PlayerEvolution : MonoBehaviour
         public RuntimeAnimatorController animatorController;
         [Tooltip("진화 컷씬에 표시할 정면 스프라이트 (남쪽 대기 1프레임)")]
         public Sprite portrait;
+
+        [Tooltip("진화 컷씬 전용 큰 그림 (Art/Characters/Evolution). 비우면 portrait을 쓴다.")]
+        public Sprite evolutionArt;
+
+        [Tooltip("결과 화면 — 쓰러졌을 때 띄울 Dizzy 표정 초상.")]
+        public Sprite dizzyPortrait;
+
+        [Tooltip("결과 화면 — 클리어했을 때 띄울 Happy 표정 초상.")]
+        public Sprite happyPortrait;
+
         [Min(1)] public int maxHealth = 100;
+
+        /// <summary>컷씬에 세울 그림. 전용 그림이 없으면 예전처럼 정면 스프라이트로 버틴다.</summary>
+        public Sprite CutsceneArt => evolutionArt != null ? evolutionArt : portrait;
 
         [Tooltip("현재 기술 세트의 슬롯 순서대로 적는 단계별 기준 위력. 0이면 기술 구현의 기본값을 쓴다.")]
         public int[] movePowers;
@@ -150,14 +163,29 @@ public class PlayerEvolution : MonoBehaviour
             Stage next = stages[CurrentStageIndex];
 
             bool canPlayCutscene = EvolutionCutscene.Instance != null &&
-                                   previous.portrait != null && next.portrait != null;
+                                   previous.CutsceneArt != null && next.CutsceneArt != null;
             if (canPlayCutscene)
             {
                 // 풀스크린 컷씬. 백색 섬광 순간(onReveal)에 실제 능력치가 바뀐다.
                 yield return EvolutionCutscene.Instance.Play(
-                    previous.portrait, next.portrait,
+                    previous.CutsceneArt, next.CutsceneArt,
                     previous.stageName, next.stageName,
                     () => ApplyStage(next, learnMove: true));
+
+                // B로 그만두었다면 올려 둔 단계를 도로 내린다.
+                //
+                // 단계는 <see cref="Evolve"/>가 <b>연출을 시작하기 전에</b> 올린다 — 연출이 도는
+                // 동안 진화가 두 번 걸리는 것을 막으려는 것이다. 그래서 취소도 그 자리를
+                // 되돌리는 일이 된다. 컷씬은 onReveal을 부르지 않았으므로 능력치·애니메이터·
+                // 기술은 애초에 손대지 않은 채다.
+                if (EvolutionCutscene.Instance.WasCancelled)
+                {
+                    CurrentStageIndex--;
+                    if (UIManager.Instance != null)
+                        UIManager.Instance.ShowMessage(
+                            previous.stageName + KoreanText.TopicParticle(previous.stageName)
+                            + " 진화를 그만두었다.", 2.5f);
+                }
             }
             else
             {
@@ -211,6 +239,10 @@ public class PlayerEvolution : MonoBehaviour
     /// </param>
     private void ApplyStage(Stage next, bool learnMove)
     {
+        // 결과 화면이 "쓰러진 그 모습"의 얼굴을 고를 수 있도록 단계를 기록에 남긴다.
+        // 여기가 단계가 바뀌는 두 길(판 시작의 1단계 입히기, 실제 진화)이 모두 지나는 곳이다.
+        RunStats.ReachedStage(CurrentStageIndex);
+
         Animator animator = GetComponent<Animator>();
         if (animator != null && next.animatorController != null)
             animator.runtimeAnimatorController = next.animatorController;

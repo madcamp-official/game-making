@@ -160,6 +160,9 @@ MonoBehaviour:
   attackSelfDamage: 20
   attackGoldReward: 50
   leaveAfterEvent: 1
+  sleepSprite: {fileID: 21300000, guid: 7d882104dae544acaa0b0aa00afbe912, type: 3}
+  sleepMarkWidthFraction: 0.42
+  sleepMarkGapFraction: 0.06
 --- !u!95 &8617542859854920208
 Animator:
   serializedVersion: 7
@@ -2297,11 +2300,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa218e6ad9461421ba6d4003f3d44511, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExitDoor
-  closedColor: {r: 0.35, g: 0.2, b: 0.2, a: 1}
-  openColor: {r: 0.3, g: 0.9, b: 0.4, a: 1}
-  closedSprite: {fileID: 0}
-  openSprite: {fileID: 0}
   startOpen: 0
+  passHalfHeight: 0.5
+  passDuration: 0.25
 --- !u!1 &6133370487167883740
 GameObject:
   m_ObjectHideFlags: 0

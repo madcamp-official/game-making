@@ -9,9 +9,9 @@ using UnityEngine;
 public class MartialArtsEvent : ChoiceEvent
 {
     [Header("스승")]
-    [Tooltip("시라소몬 — 근접 강화")]
+    [Tooltip("시라소몬 — 원거리 강화")]
     [SerializeField] private Sprite hitmonleePortrait;
-    [Tooltip("홍수몬 — 원거리 강화")]
+    [Tooltip("홍수몬 — 근접 강화")]
     [SerializeField] private Sprite hitmonchanPortrait;
 
     [Header("방 안의 NPC")]
@@ -35,30 +35,32 @@ public class MartialArtsEvent : ChoiceEvent
                     "어떻게 하시겠습니까?",
         };
 
-        prompt.choices.Add(new EventChoice("시라소몬의 제자가 된다", LearnMelee,
-            EventEffectLine.Good("근접공격이 " + Percent(meleeBonus) + "% 강해집니다.")));
-        prompt.choices.Add(new EventChoice("홍수몬의 제자가 된다", LearnRanged,
+        prompt.choices.Add(new EventChoice("시라소몬의 제자가 된다", LearnRanged,
             EventEffectLine.Good("원거리공격이 " + Percent(rangedBonus) + "% 강해집니다.")));
+        prompt.choices.Add(new EventChoice("홍수몬의 제자가 된다", LearnMelee,
+            EventEffectLine.Good("근접공격이 " + Percent(meleeBonus) + "% 강해집니다.")));
         prompt.choices.Add(new EventChoice("둘을 보고 독학한다", LearnAlone,
             EventEffectLine.Good("이동속도가 " + Percent(speedBonus) + "% 증가합니다.")));
         return prompt;
     }
 
-    private EventOutcome LearnMelee()
-    {
-        EventBuffs.Instance.AddMeleeDamage(meleeBonus);
-        // 선택된 스승은 수련을 멈추고 쉰다.
-        if (hitmonleeNpc != null) hitmonleeNpc.SetIdle();
-        return EventOutcome.Say("당연히 나를 골라야지!",
-            "근접공격이 " + Percent(meleeBonus) + "% 강해졌습니다.", hitmonleePortrait);
-    }
-
+    /// <summary>시라소몬의 제자 — 원거리 강화.</summary>
     private EventOutcome LearnRanged()
     {
         EventBuffs.Instance.AddRangedDamage(rangedBonus);
-        if (hitmonchanNpc != null) hitmonchanNpc.SetIdle();
+        // 선택된 스승은 수련을 멈추고 쉰다.
+        if (hitmonleeNpc != null) hitmonleeNpc.SetIdle();
         return EventOutcome.Say("현명한 선택을 하셨군요.",
-            "원거리공격이 " + Percent(rangedBonus) + "% 강해졌습니다.", hitmonchanPortrait);
+            "원거리공격이 " + Percent(rangedBonus) + "% 강해졌습니다.", hitmonleePortrait);
+    }
+
+    /// <summary>홍수몬의 제자 — 근접 강화.</summary>
+    private EventOutcome LearnMelee()
+    {
+        EventBuffs.Instance.AddMeleeDamage(meleeBonus);
+        if (hitmonchanNpc != null) hitmonchanNpc.SetIdle();
+        return EventOutcome.Say("당연히 나를 골라야지!",
+            "근접공격이 " + Percent(meleeBonus) + "% 강해졌습니다.", hitmonchanPortrait);
     }
 
     private EventOutcome LearnAlone()

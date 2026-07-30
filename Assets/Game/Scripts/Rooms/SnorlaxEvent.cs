@@ -23,7 +23,34 @@ public class SnorlaxEvent : ChoiceEvent
     [Tooltip("이벤트가 끝나면 잠만보가 비켜나며 사라진다.")]
     [SerializeField] private bool leaveAfterEvent = true;
 
+    [Header("잠 표시")]
+    [Tooltip("머리 위에 띄울 Zzz 그림 (Art/Environment/sleep). 비우면 표시가 뜨지 않는다.")]
+    [SerializeField] private Sprite sleepSprite;
+
+    [Tooltip("Zzz를 잠만보 몸 높이의 몇 할로 그릴지. 그림이 세로로 길어 높이를 기준으로 잡는다.")]
+    [SerializeField, Range(0.1f, 1.5f)] private float sleepMarkHeightFraction = 0.7f;
+
+    [Tooltip("몸 위쪽 끝에서 얼마나 띄울지 (몸 높이에 대한 비율).")]
+    [SerializeField, Range(0f, 0.5f)] private float sleepMarkGapFraction = 0.06f;
+
+    private SleepMark sleepMark;
+
     private int attempt;
+
+    private void Start()
+    {
+        // 자고 있다는 것을 그림만으로 알 수 있게 한다. 말을 걸어 봐야 아는 것은 늦다.
+        if (sleepSprite == null) return;
+        SpriteRenderer body = GetComponentInChildren<SpriteRenderer>();
+        sleepMark = SleepMark.Create(body, sleepSprite, sleepMarkHeightFraction, sleepMarkGapFraction);
+    }
+
+    /// <summary>더 이상 자고 있지 않다. 표시를 거둔다.</summary>
+    private void WakeUp()
+    {
+        if (sleepMark != null) sleepMark.Dismiss();
+        sleepMark = null;
+    }
 
     protected override EventPrompt BuildPrompt() => MakePrompt(
         "잠만보가 잠을 자고 있습니다. 잠만보는 쉽게 일어날 것 같지 않습니다. 어떻게 하시겠습니까?");
@@ -59,6 +86,9 @@ public class SnorlaxEvent : ChoiceEvent
                 "힘껏 잠만보를 흔들었으나 잠만보가 일어나지 않습니다. 어떻게 하시겠습니까?"));
         }
 
+        // 깨우기에 성공했다. 이제 자고 있지 않다.
+        WakeUp();
+
         // 판을 통째로 결정짓는 구애 시리즈는 이런 도박 자리에서 나오지 않게 한다.
         RelicData relic = RelicManager.GrantNonChoiceReward();
         string result = relic != null
@@ -69,6 +99,9 @@ public class SnorlaxEvent : ChoiceEvent
 
     private EventOutcome Attack()
     {
+        // 두들겨 맞고 일어났다. 여기서도 잠은 깬다.
+        WakeUp();
+
         Health health = PlayerHealth;
         if (health != null) health.TakeToll(attackSelfDamage);
         if (RunManager.Instance != null) RunManager.Instance.AddGold(attackGoldReward);
@@ -78,17 +111,35 @@ public class SnorlaxEvent : ChoiceEvent
             + attackGoldReward + "G)", portrait);
     }
 
-    private EventOutcome SneakPast() =>
-        EventOutcome.Plain("잠만보를 건드리지 않고 옆의 샛길로 지나갑니다.");
+    private EventOutcome SneakPast()
+    {
+        sneakedPast = true;
+        return EventOutcome.Plain("잠만보를 건드리지 않고 옆의 샛길로 지나갑니다.");
+    }
+
+    /// <summary>샛길로 지나가기를 골랐는가. 이 길만 방을 곧장 떠난다.</summary>
+    private bool sneakedPast;
 
     protected override void OnFinished()
     {
+        // 샛길로 지나갔다면 이 방에 더 볼 일이 없다. 잠만보가 비켜나는 것을 지켜본 뒤
+        // 출구까지 걸어가게 하면, 이미 "지나갔다"고 말해 놓고 다시 걸으라는 셈이 된다.
+        // 화면을 덮고 곧바로 다음 방으로 넘긴다 — 출구를 밟았을 때와 같은 연출이다.
+        if (sneakedPast)
+        {
+            RoomTransition.Ensure().Go();
+            return;
+        }
+
         if (leaveAfterEvent) StartCoroutine(LeaveRoutine());
     }
 
     /// <summary>아래로 미끄러지듯 비켜나며 사라진다.</summary>
     private IEnumerator LeaveRoutine()
     {
+        // 몸이 사라지는데 Zzz만 남아 떠 있으면 안 된다.
+        WakeUp();
+
         foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
             col.enabled = false;
 

@@ -27,7 +27,19 @@ public class TitleScreen : FlowScreen
     private Text notice;
 
     /// <summary>로고가 머무는 높이. 떠다니는 움직임은 이 자리를 기준으로 오간다.</summary>
-    private const float LogoY = 250f;
+    private const float LogoY = 246f;
+
+    /// <summary>
+    /// 로고를 그림 크기의 몇 배로 놓을지. 1.8배면 423×264가 761×475가 된다.
+    ///
+    /// 정수배(2배)가 픽셀은 더 깨끗하지만 528픽셀이라 화면 위쪽이 눌렸다. 로고는 획이 굵어
+    /// 흔들림이 잘 드러나지 않으므로 크기를 택했다 — 자세한 사정은
+    /// <see cref="PmdUi.MakeLogo"/>에 적혀 있다.
+    ///
+    /// ⚠️ 이 값을 바꾸면 <see cref="LogoY"/>·<see cref="MenuTop"/>을 함께 다시 재야 한다.
+    /// 로고 아래끝과 첫 메뉴 칸 윗끝 사이가 40픽셀 남짓뿐이다.
+    /// </summary>
+    private const float LogoPixelScale = 1.8f;
 
     /// <summary>
     /// 메뉴 칸의 크기와 글자.
@@ -43,9 +55,9 @@ public class TitleScreen : FlowScreen
     private const int MenuFontSize = 36;
     private static readonly Vector2 MenuSize = new Vector2(560f, 78f);
 
-    /// <summary>칸 사이 간격과 첫 칸의 높이.</summary>
+    /// <summary>칸 사이 간격과 첫 칸의 높이. 로고를 키우면서 그만큼 아래로 내렸다.</summary>
     private const float MenuGap = 14f;
-    private const float MenuTop = 20f;
+    private const float MenuTop = -72f;
 
     /// <summary>
     /// 로고가 떠다니는 폭과 한 번 오가는 데 걸리는 시간.
@@ -83,13 +95,14 @@ public class TitleScreen : FlowScreen
 
         // 제목은 로고 그림이 맡는다. 그림이 없으면 글자로 되돌아간다 — 스프라이트를 아직
         // 들여오지 않은 사람의 화면에서 제목이 통째로 사라지는 것이 가장 나쁘다.
-        Image logo = PmdUi.MakeLogo(Root, "Logo");
+        Image logo = PmdUi.MakeLogo(Root, "Logo", LogoPixelScale);
         if (logo != null)
         {
             logoRect = logo.rectTransform;
             logoRect.anchorMin = logoRect.anchorMax = new Vector2(0.5f, 0.5f);
             logoRect.pivot = new Vector2(0.5f, 0.5f);
-            // 크기는 SetNativeSize가 이미 정했다. 자리만 옮긴다.
+            // 크기는 MakeLogo가 이미 정했다. 자리만 옮긴다. 앵커와 피벗이 모두 한가운데라
+            // 크기를 키워도 가로 가운데는 저절로 유지된다.
             logoRect.anchoredPosition = new Vector2(0f, LogoY);
         }
         else

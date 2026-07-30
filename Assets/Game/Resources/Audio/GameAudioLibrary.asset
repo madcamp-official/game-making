@@ -16,13 +16,16 @@ MonoBehaviour:
   gameOverBgm: {fileID: 8300000, guid: 4364036376a3d45f482b8ecd393ada32, type: 3}
   itemAcquired: {fileID: 8300000, guid: 7c6b6e48279f644bba426f9995519367, type: 3}
   moveLearned: {fileID: 8300000, guid: 97a131931ca904a40b3de3a214b4309d, type: 3}
+  evolving: {fileID: 8300000, guid: 50a51ea8c544e4faa8d4609601e25e2a, type: 3}
+  evolved: {fileID: 8300000, guid: ca906058e24e14f29a41781108c9853f, type: 3}
   playerHit: {fileID: 8300000, guid: 43ff105eb4e61411a9570791d1ebb1ab, type: 3}
   playerHurt: {fileID: 8300000, guid: b10a52b5793b941c2bc1aae1fdf628f2, type: 3}
   uiHover: {fileID: 8300000, guid: c10566b755c85468c9415030393b68e0, type: 3}
+  uiClick: {fileID: 8300000, guid: 1c039554221e24c5e826fbe4204b9205, type: 3}
   bgmVolume: 0.5
   sfxVolume: 0.9
   hitVolumeScale: 0.6
-  uiVolumeScale: 0.35
+  uiVolumeScale: 0.7
   crossfade: 0.5
   clearedRoomVolumeScale: 0.3
   duckFade: 0.8

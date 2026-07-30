@@ -144,19 +144,20 @@ public class EnemyComboMeleeAbility : EnemyAbility
         }
     }
 
-    /// <summary>돌진 경로와 피해 범위를 함께 그린다. 그리는 동안 제자리에 선다.</summary>
+    /// <summary>
+    /// 돌진 경로와 피해 범위를 <b>한 도형으로</b> 그린다. 그리는 동안 제자리에 선다.
+    ///
+    /// 예전에는 띠와 부채꼴을 따로 얹었는데, 부채꼴 반지름(2유닛 남짓)이 돌진 거리보다 커서
+    /// 띠를 통째로 덮었다. 겹친 자리는 알파가 두 번 쌓여 그 부분만 짙어졌고, 한 번의 공격을
+    /// 그린 것인데도 복도·겹친 띠·부채꼴 셋으로 나뉘어 보였다. 이제 합집합을 한 장에 굽는다
+    /// (<see cref="PrimitiveSprites.DashZone"/>).
+    /// </summary>
     private IEnumerator Telegraph(Vector2 aim)
     {
-        Vector2 origin = transform.position;
-
-        // 경로 — 몸이 지나갈 띠. 폭은 몸통 굵기에 맞춘다.
-        AttackTelegraph path = AttackTelegraph.CreateLine(
-            EffectRoot, origin, aim, dashDistance, BodyRadius * 2f, pathColor);
-        // 피해 범위 — 타격 프레임에 몸이 있을 자리에서 앞쪽 부채꼴. 실제 판정과 같은 각도·거리다.
-        AttackTelegraph zone = AttackTelegraph.CreateSector(
-            EffectRoot, origin + aim * HitTravel, TelegraphRadius,
-            Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg, sweepAngle, hitColor);
-        path.Pulse(telegraph);
+        AttackTelegraph zone = AttackTelegraph.CreateDashZone(
+            EffectRoot, transform.position, aim,
+            dashDistance, BodyRadius, HitTravel, TelegraphRadius, sweepAngle,
+            pathColor, hitColor);
         zone.Pulse(telegraph);
 
         float end = Time.time + telegraph;
@@ -165,10 +166,8 @@ public class EnemyComboMeleeAbility : EnemyAbility
             HoldPosition();
             // 그린 자리를 몸에 붙여 둔다. 예고하는 동안 넉백으로 밀려날 수 있는데
             // (HoldPosition이 그 0.15초는 놓아 준다), 그림만 처음 자리에 남으면
-            // 예고와 실제 돌진이 어긋난다. 방향은 이미 고정됐고 시작점만 따라간다.
-            Vector2 at = transform.position;
-            if (path != null) path.transform.position = at + aim * (dashDistance * 0.5f);
-            if (zone != null) zone.transform.position = at + aim * HitTravel;
+            // 예고와 실제 돌진이 어긋난다. 피벗이 몸 중심이라 자리만 따라가면 된다.
+            if (zone != null) zone.transform.position = transform.position;
             yield return null;
         }
     }

@@ -25,6 +25,16 @@ public static class RunStats
     public static int DeepestFloor { get; private set; }
     public static int DeepestRoom { get; private set; }
 
+    /// <summary>
+    /// 도달한 진화 단계 (0부터). 결과 화면이 <b>그때 그 모습의</b> 표정 초상을 고르는 데 쓴다 —
+    /// 이상해꽃으로 쓰러졌으면 이상해씨가 아니라 이상해꽃의 얼굴이 떠야 한다.
+    ///
+    /// 플레이어 오브젝트에게 직접 묻지 않는 이유: 결과 화면은 쓰러진 <b>뒤에</b> 세워지는데
+    /// 그때 플레이어가 아직 살아 있으리라는 보장이 없다. 단계가 바뀌는 순간 여기 적어 두면
+    /// 화면은 기록만 읽으면 된다.
+    /// </summary>
+    public static int StageIndex { get; private set; }
+
     /// <summary>판이 끝났는지. 끝난 뒤에는 시간이 더 흐르지 않는다.</summary>
     public static bool Finished { get; private set; }
 
@@ -58,6 +68,7 @@ public static class RunStats
         GoldEarned = 0;
         DeepestFloor = 0;
         DeepestRoom = 0;
+        StageIndex = 0;
         Finished = false;
         startedAt = Time.unscaledTime;
         finishedAt = 0f;
@@ -72,6 +83,15 @@ public static class RunStats
     }
 
     public static void CountKill() => Kills++;
+
+    /// <summary>
+    /// 진화 단계가 정해질 때마다 알린다. <b>가장 높은 단계</b>를 남긴다 — 판을 시작할 때
+    /// 1단계를 입히는 것도 이 문을 지나므로, 그냥 덮어쓰면 되돌아가 버린다.
+    /// </summary>
+    public static void ReachedStage(int index)
+    {
+        if (index > StageIndex) StageIndex = index;
+    }
 
     public static void CountGold(int amount)
     {

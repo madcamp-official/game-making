@@ -930,7 +930,6 @@ public class RhydonBossController : MonoBehaviour
 
     private IEnumerator PhaseTransitionRoutine()
     {
-        RoomFlowController.PlayBossCry();
         holdPosition = true;
         dashing = false;
         SetPassThroughPlayer(false);
@@ -955,9 +954,10 @@ public class RhydonBossController : MonoBehaviour
         if (spriteRenderer != null) spriteRenderer.color = Color.white;
         if (health.IsDead) yield break;
 
-        // 피해 없는 충격파
+        // 피해 없는 충격파. 울음소리를 여기에 맞춘다 (버터플과 같은 이유).
         AttackTelegraph wave = AttackTelegraph.CreateRing(
             attackRoot, transform.position, 0.6f, rockColor);
+        RoomFlowController.PlayBossCry();
         wave.Expand(0.6f, 6f, 0.6f);
         yield return new WaitForSeconds(0.6f);
         if (health.IsDead) yield break;

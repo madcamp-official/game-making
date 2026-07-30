@@ -760,7 +760,6 @@ public class GyaradosBossController : MonoBehaviour
     private IEnumerator PhaseTransitionRoutine()
     {
         state = State.Exit;
-        RoomFlowController.PlayBossCry();
         BeginStateInvulnerability();
         // 똬리치기 판정과 예고, 남은 잉어킹을 모두 지운다.
         ClearAttackObjects();
@@ -768,7 +767,9 @@ public class GyaradosBossController : MonoBehaviour
         if (enemyAnimator != null) enemyAnimator.ClearActionState();
         Trace("페이즈 전환 실행");
 
+        // 물보라 파동. 울음소리를 여기에 맞춘다 (버터플과 같은 이유).
         AttackTelegraph wave = AttackTelegraph.CreateRing(attackRoot, transform.position, 0.8f, splashColor);
+        RoomFlowController.PlayBossCry();
         wave.Expand(0.8f, ArenaHalfSize.x + ArenaHalfSize.y, Mathf.Max(0.1f, phaseRoarDuration));
 
         Vector3 baseScale = transform.localScale;

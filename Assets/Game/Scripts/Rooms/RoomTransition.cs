@@ -57,6 +57,29 @@ public class RoomTransition : MonoBehaviour
         StartCoroutine(Sequence());
     }
 
+    /// <summary>
+    /// 화면을 덮었다가 다시 밝힌다. 어두운 동안 <paramref name="whileDark"/>가 한 번 돈다.
+    ///
+    /// 방을 바꾸지 않고 <b>자리만 옮기는</b> 연출에 쓴다 — 계곡을 혼자 헤엄쳐 건너는 것처럼,
+    /// 보여 줄 것이 없는 이동을 어둠으로 건너뛰는 자리다. 눈앞에서 몸이 미끄러져 가는 것보다
+    /// 한 번 깜빡이고 반대편에 서 있는 편이 짧고 깔끔하다.
+    ///
+    /// 조작은 이 안에서 잠갔다 풀지 않는다. 부르는 쪽이 이미 잠가 둔 경우가 많고, 여기서
+    /// 임의로 풀면 이벤트가 아직 끝나지 않았는데 움직일 수 있게 된다.
+    /// </summary>
+    public IEnumerator Blink(System.Action whileDark, float holdSeconds = 0.1f)
+    {
+        yield return Fade(0f, 1f, fadeOutDuration);
+        whileDark?.Invoke();
+
+        // 어둠을 아주 잠깐 붙들어 둔다. 옮긴 즉시 밝히면 카메라가 따라오기 전에 화면이
+        // 열려서, 새 자리가 한 프레임 어긋나 보인다.
+        float held = 0f;
+        while (held < holdSeconds) { held += Time.unscaledDeltaTime; yield return null; }
+
+        yield return Fade(1f, 0f, fadeInDuration);
+    }
+
     private IEnumerator Sequence()
     {
         IsPlaying = true;

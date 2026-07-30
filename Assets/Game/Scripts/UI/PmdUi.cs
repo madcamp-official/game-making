@@ -71,11 +71,19 @@ public static class PmdUi
     public static Sprite LogoSprite => Load(ref logo, "PmdLogo");
 
     /// <summary>
-    /// 타이틀 로고 한 장. <b>그림 크기 그대로</b> 놓는다 — 픽셀 아트를 정수배 아닌 비율로
-    /// 늘리면 획 굵기가 자리마다 달라진다. 스프라이트가 없으면 아무것도 만들지 않고 null을
-    /// 돌려주므로, 부르는 쪽이 글자 제목으로 되돌아갈 수 있다.
+    /// 타이틀 로고 한 장. 스프라이트가 없으면 아무것도 만들지 않고 null을 돌려주므로,
+    /// 부르는 쪽이 글자 제목으로 되돌아갈 수 있다.
     /// </summary>
-    public static Image MakeLogo(Transform parent, string name)
+    /// <param name="pixelScale">
+    /// 그림 크기의 몇 배로 놓을지.
+    ///
+    /// 정수배가 가장 깨끗하다 — 픽셀 아트를 1.8배처럼 늘리면 원본 한 픽셀이 화면 한 픽셀과
+    /// 두 픽셀에 번갈아 걸쳐, 같은 굵기로 그린 획이 자리마다 미세하게 두껍고 얇아진다.
+    /// 다만 로고는 획이 굵고 검은 윤곽이 둘러 있어 그 흔들림이 잘 드러나지 않으므로,
+    /// 크기를 우선해 정수가 아닌 배율도 받는다. 대신 <b>결과 크기는 정수 픽셀로 끊는다</b> —
+    /// 소수 자리에 놓인 사각형은 그 자체로 획을 한 겹 더 번지게 한다.
+    /// </param>
+    public static Image MakeLogo(Transform parent, string name, float pixelScale = 1f)
     {
         Sprite sprite = LogoSprite;
         if (sprite == null) return null;
@@ -86,8 +94,22 @@ public static class PmdUi
         image.sprite = sprite;
         image.raycastTarget = false;
         image.SetNativeSize();
+
+        float scale = Mathf.Max(1f, pixelScale);
+        if (!Mathf.Approximately(scale, 1f))
+        {
+            Vector2 size = image.rectTransform.sizeDelta * scale;
+            image.rectTransform.sizeDelta = new Vector2(RoundToEven(size.x), RoundToEven(size.y));
+        }
         return image;
     }
+
+    /// <summary>
+    /// 짝수로 끊는다. 로고는 앵커도 피벗도 한가운데라 <b>폭이 홀수면 양 끝이 반 픽셀에 걸린다</b> —
+    /// 761폭을 가운데에 놓으면 왼쪽 끝이 579.5가 되고, 점 필터로 그리는 그림이 그 자리에서
+    /// 두 픽셀에 나뉘어 샘플된다. 짝수면 언제나 정수 자리에 떨어진다.
+    /// </summary>
+    private static float RoundToEven(float value) => Mathf.Round(value * 0.5f) * 2f;
 
     /// <summary>9슬라이스 Image 하나. 스프라이트가 없으면 단색 사각형으로 버틴다.</summary>
     public static Image MakeSliced(Transform parent, string name, Sprite sprite)

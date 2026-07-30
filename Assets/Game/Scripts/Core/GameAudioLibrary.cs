@@ -29,14 +29,23 @@ public class GameAudioLibrary : ScriptableObject
     [Tooltip("기술 강화를 고르고 났을 때.")]
     public AudioClip moveLearned;
 
+    [Tooltip("진화 컷씬이 시작되어 몸이 빛나기 시작할 때. 진화가 확정되거나 취소되면 끊는다.")]
+    public AudioClip evolving;
+
+    [Tooltip("진화가 확정되는 순간 — 백색 섬광에 맞춰 울린다.")]
+    public AudioClip evolved;
+
     [Tooltip("주인공의 공격이 적에게 닿았을 때.")]
     public AudioClip playerHit;
 
     [Tooltip("주인공이 얻어맞았을 때.")]
     public AudioClip playerHurt;
 
-    [Tooltip("메뉴에서 고르는 칸이 바뀌었을 때. 커서를 옮기는 내내 울리므로 짧고 작아야 한다.")]
+    [Tooltip("버튼 위에 커서가 올라섰을 때.")]
     public AudioClip uiHover;
+
+    [Tooltip("버튼을 눌렀을 때.")]
+    public AudioClip uiClick;
 
     [Header("소리 크기")]
     [Range(0f, 1f)] public float bgmVolume = 0.5f;
@@ -46,8 +55,9 @@ public class GameAudioLibrary : ScriptableObject
              "화면을 뒤덮는다. 0.6이면 다른 효과음의 여섯 할.")]
     [Range(0f, 1f)] public float hitVolumeScale = 0.6f;
 
-    [Tooltip("메뉴 커서음에만 곱하는 크기. 칸을 옮길 때마다 울려서 타격음보다도 작아야 한다.")]
-    [Range(0f, 1f)] public float uiVolumeScale = 0.35f;
+    [Tooltip("메뉴 hover·click에만 곱하는 크기. 메뉴를 훑기만 해도 계속 울리는 소리라 " +
+             "따로 낮춰 둔다.")]
+    [Range(0f, 1f)] public float uiVolumeScale = 0.7f;
 
     [Tooltip("곡이 바뀔 때 겹쳐 넘기는 시간(초). 0이면 바로 갈아탄다.")]
     [Range(0f, 4f)] public float crossfade = 0.5f;

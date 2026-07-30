@@ -24,8 +24,15 @@ public class EvolutionCutscene : MonoBehaviour
 
     [Header("연출 리소스")]
     [SerializeField] private Sprite backgroundSprite;
-    [Tooltip("포켓몬 스프라이트 확대 배율 (원본 픽셀 크기 기준)")]
-    [SerializeField, Min(1f)] private float spriteScale = 4f;
+    /// <summary>
+    /// 포켓몬 스프라이트 확대 배율 (원본 픽셀 크기 기준). 80×80 그림이 5배면 화면 400×400이다.
+    ///
+    /// ⚠️ <b>정수로 둘 것.</b> 그림은 점 필터로 그리는 픽셀 아트라, 4.5배 같은 값을 주면 원본
+    /// 한 픽셀이 화면 네 픽셀과 다섯 픽셀에 번갈아 걸쳐 획 굵기가 자리마다 달라진다.
+    /// 그래서 크기를 조금 키우려 해도 한 단계가 곧 25%다.
+    /// </summary>
+    [Tooltip("포켓몬 스프라이트 확대 배율 (원본 픽셀 크기 기준). 점 필터라 정수로 둘 것.")]
+    [SerializeField, Min(1f)] private float spriteScale = 5f;
 
     [Header("타이밍 (초)")]
     [SerializeField, Min(0f)] private float fadeDuration = 0.4f;
@@ -41,7 +48,14 @@ public class EvolutionCutscene : MonoBehaviour
     [Header("메시지")]
     [SerializeField] private string introMessage = "어라...?! {0}이(가) 진화하려고 한다!";
     [SerializeField] private string resultMessage = "축하합니다! {0}은(는) {1}(으)로 진화했다!";
-    [SerializeField] private string skipHint = "Space : 빨리 감기";
+    [SerializeField] private string cancelMessage = "어라...? {0}은(는) 진화를 그만두었다!";
+    [SerializeField] private string skipHint = "Space : 빨리 감기      B : 진화 취소";
+
+    [Header("취소 연출")]
+    [Tooltip("취소했을 때 원래 모습으로 되돌아오는 데 걸리는 시간.")]
+    [SerializeField, Min(0f)] private float cancelSettleDuration = 0.5f;
+    [Tooltip("취소 문구를 보여 주는 시간.")]
+    [SerializeField, Min(0f)] private float cancelHoldDuration = 2f;
 
     public bool IsPlaying { get; private set; }
 
@@ -59,6 +73,13 @@ public class EvolutionCutscene : MonoBehaviour
     private Image flashImage;
     private Text messageText;
     private bool skipRequested;
+    private bool cancelRequested;
+
+    /// <summary>
+    /// 지난 재생이 취소로 끝났는가. 부르는 쪽(<see cref="PlayerEvolution"/>)이 단계를 되돌릴지
+    /// 판단하는 데 쓴다 — 컷씬은 연출만 맡고, 실제로 무엇을 되돌릴지는 그쪽이 안다.
+    /// </summary>
+    public bool WasCancelled { get; private set; }
 
     // 에디터 프레임이 밀려도 연출이 통째로 건너뛰지 않도록 프레임당 시간 상한을 둔다.
     private static float Dt => Mathf.Min(Time.unscaledDeltaTime, 0.05f);
@@ -84,6 +105,24 @@ public class EvolutionCutscene : MonoBehaviour
     }
 
     /// <summary>
+    /// 빨리 감기·취소 입력은 여기서 본다.
+    ///
+    /// 연출 단계마다 따로 보지 않는 이유: 예전에는 교차 연출 안에서만 입력을 봤는데, 그래서
+    /// 안내 문구가 떠 있는 1.2초와 몸이 빛나는 0.7초 동안 누른 키가 통째로 무시됐다. 진화가
+    /// 시작되자마자 B를 누르는 것이 가장 자연스러운 자리인데 하필 그 자리가 먹통이었다.
+    ///
+    /// <see cref="Update"/>는 <see cref="Time.timeScale"/>이 0이어도 매 프레임 돈다 — 컷씬이
+    /// 시간을 세워 두었어도 입력은 그대로 들어온다.
+    /// </summary>
+    private void Update()
+    {
+        if (IsPlaying && acceptingInput) CheckSkip();
+    }
+
+    /// <summary>지금 입력을 받는 구간인가. 결과가 확정된 뒤에는 되돌릴 것이 없으므로 닫는다.</summary>
+    private bool acceptingInput;
+
+    /// <summary>
     /// 컷씬을 재생한다. onReveal은 백색 섬광이 화면을 덮은 순간(새 모습 확정) 호출되며,
     /// 여기서 실제 진화(애니메이터·능력치 교체)를 수행하면 컷씬이 끝났을 때 이미 새 모습이다.
     /// </summary>
@@ -92,6 +131,8 @@ public class EvolutionCutscene : MonoBehaviour
         if (IsPlaying) yield break;
         IsPlaying = true;
         skipRequested = false;
+        cancelRequested = false;
+        WasCancelled = false;
 
         float previousTimeScale = Time.timeScale;
         CanvasGroup hud = HudGroup();
@@ -105,44 +146,99 @@ public class EvolutionCutscene : MonoBehaviour
             BuildUi(oldSprite, newSprite);
             SetZoom(oldRoot, 1f); SetZoom(newRoot, 0f);
 
-            // 1. 페이드 인 + 안내 메시지
+            // 1. 페이드 인 + 안내 메시지. 여기서부터 진화음이 깔린다 —
+            //    몸이 빛나기 시작하는 것과 소리가 시작되는 것이 같은 순간이어야 한다.
             yield return FadeCanvas(0f, 1f, fadeDuration);
+            GameAudio.PlayEvolving();
+            acceptingInput = true;
             SetMessage(string.Format(introMessage, oldName));
-            yield return Hold(introHoldDuration);
+            yield return HoldOrInterrupt(introHoldDuration);
 
             // 2. 현재 모습이 흰 실루엣으로
-            yield return FadeGraphic(oldSilhouette, 0f, 1f, brightenDuration);
+            yield return FadeGraphicOrInterrupt(oldSilhouette, 0f, 1f, brightenDuration);
             SetAlpha(newSilhouette, 1f); // 새 모습은 등장 순간부터 실루엣
 
-            // 3. 줌 스왑 (점점 빨라짐, Space/클릭으로 빨리 감기)
-            for (int i = 0; i < swapVelocities.Length && !skipRequested; i++)
+            // 3. 줌 스왑 (점점 빨라짐, Space/클릭으로 빨리 감기, B로 취소)
+            for (int i = 0; i < swapVelocities.Length && !skipRequested && !cancelRequested; i++)
             {
                 bool toNew = i % 2 == 0; // 원본도 새 모습 먼저 보여주며 시작한다
                 float duration = 1f / (swapVelocities[i] * 40f * swapSpeedMultiplier);
                 yield return SwapStep(toNew, duration);
             }
 
-            // 4. 백색 섬광 → 새 모습 확정
-            SetMessage("");
-            yield return FadeGraphic(flashImage, 0f, 1f, flashInDuration);
-            onReveal?.Invoke();
-            SetZoom(oldRoot, 0f); SetZoom(newRoot, 1f);
-            SetAlpha(oldSilhouette, 0f); SetAlpha(newSilhouette, 0f);
-            yield return Hold(flashHoldDuration);
-            yield return FadeGraphic(flashImage, 1f, 0f, flashOutDuration);
+            if (cancelRequested)
+            {
+                // 4-A. 취소 — 새 모습을 지우고 원래 모습으로 되돌아간다. onReveal을 부르지
+                //      않으므로 능력치도 애니메이터도 손대지 않은 채로 남는다.
+                yield return CancelRoutine(oldName);
+            }
+            else
+            {
+                // 4-B. 백색 섬광 → 새 모습 확정. 진화음이 여기서 끊기고 완료음으로 갈아탄다.
+                //      여기서부터는 되돌릴 것이 없으므로 입력을 닫는다.
+                acceptingInput = false;
+                SetMessage("");
+                yield return FadeGraphic(flashImage, 0f, 1f, flashInDuration);
+                GameAudio.PlayEvolved();
+                onReveal?.Invoke();
+                SetZoom(oldRoot, 0f); SetZoom(newRoot, 1f);
+                SetAlpha(oldSilhouette, 0f); SetAlpha(newSilhouette, 0f);
+                yield return Hold(flashHoldDuration);
+                yield return FadeGraphic(flashImage, 1f, 0f, flashOutDuration);
 
-            // 5. 축하 메시지
-            SetMessage(string.Format(resultMessage, oldName, newName));
-            yield return Hold(resultHoldDuration);
-            yield return FadeCanvas(1f, 0f, fadeDuration);
+                // 5. 축하 메시지
+                SetMessage(string.Format(resultMessage, oldName, newName));
+                yield return Hold(resultHoldDuration);
+                yield return FadeCanvas(1f, 0f, fadeDuration);
+            }
         }
         finally
         {
+            // 연출이 어떻게 끝나든(확정·취소·도중에 끊김) 진화음은 반드시 멈춘다.
+            // 이 소리는 전용 재생기에서 도므로, 놓치면 컷씬이 사라진 뒤에도 계속 울린다.
+            GameAudio.StopEvolving();
             if (panelRoot != null) Destroy(panelRoot);
             if (hud != null) hud.alpha = hudAlpha;
             Time.timeScale = previousTimeScale;
             IsPlaying = false;
         }
+    }
+
+    /// <summary>
+    /// 진화를 그만둔다. 새 모습을 지우고 원래 모습을 제자리로 되돌린 뒤, 그만두었다고 알린다.
+    ///
+    /// 섬광을 터뜨리지 않는 것이 핵심이다 — 섬광은 "확정됐다"는 신호라, 취소에도 번쩍이면
+    /// 무엇이 일어난 것인지 읽을 수가 없다. 대신 실루엣이 사그라들며 원래 모습이 돌아온다.
+    /// </summary>
+    private IEnumerator CancelRoutine(string oldName)
+    {
+        WasCancelled = true;
+        acceptingInput = false;
+        GameAudio.StopEvolving();
+
+        SetMessage("");
+
+        // 새 모습을 접고 원래 모습을 온전히 되돌린다. 교차 도중 어느 쪽이 얼마나 보이던
+        // 중이었든 여기서 하나로 수렴한다.
+        float from = oldRoot != null ? oldRoot.localScale.x / Mathf.Max(0.0001f, spriteScale) : 0f;
+        float elapsed = 0f;
+        while (elapsed < cancelSettleDuration)
+        {
+            elapsed += Dt;
+            float t = Mathf.Clamp01(elapsed / Mathf.Max(0.0001f, cancelSettleDuration));
+            SetZoom(oldRoot, Mathf.Lerp(from, 1f, t));
+            SetZoom(newRoot, Mathf.Lerp(1f - from, 0f, t));
+            // 흰 실루엣이 벗겨지며 원래 색이 드러난다.
+            SetAlpha(oldSilhouette, 1f - t);
+            SetAlpha(newSilhouette, 1f - t);
+            yield return null;
+        }
+        SetZoom(oldRoot, 1f); SetZoom(newRoot, 0f);
+        SetAlpha(oldSilhouette, 0f); SetAlpha(newSilhouette, 0f);
+
+        SetMessage(string.Format(cancelMessage, oldName));
+        yield return Hold(cancelHoldDuration);
+        yield return FadeCanvas(1f, 0f, fadeDuration);
     }
 
     /// <summary>
@@ -173,8 +269,9 @@ public class EvolutionCutscene : MonoBehaviour
         float elapsed = 0f;
         while (elapsed < duration)
         {
-            CheckSkip();
-            if (skipRequested) yield break;
+            // 빨리 감기든 취소든 이 교차는 즉시 접는다. 빨리 감기는 곧장 섬광으로,
+            // 취소는 곧장 되돌리는 연출로 넘어간다. 입력은 Update가 본다.
+            if (skipRequested || cancelRequested) yield break;
             elapsed += Dt;
             float t = Mathf.Clamp01(elapsed / duration);
             float oldZoom = toNew ? from - t : t;
@@ -188,6 +285,34 @@ public class EvolutionCutscene : MonoBehaviour
     {
         float elapsed = 0f;
         while (elapsed < duration) { elapsed += Dt; yield return null; }
+    }
+
+    /// <summary>지금 빨리 감기나 취소가 걸려 있는가.</summary>
+    private bool Interrupted => skipRequested || cancelRequested;
+
+    /// <summary>
+    /// 기다리다가 입력이 들어오면 즉시 끊는다. 섬광 앞의 구간에만 쓴다.
+    ///
+    /// 이 구간을 끊지 않으면 눌러도 최대 1.2초를 더 기다려야 해서, 키가 씹힌 것처럼 느껴진다.
+    /// </summary>
+    private IEnumerator HoldOrInterrupt(float duration)
+    {
+        float elapsed = 0f;
+        while (elapsed < duration && !Interrupted) { elapsed += Dt; yield return null; }
+    }
+
+    /// <summary>같은 이유로 중간에 끊을 수 있는 페이드. 끊기면 목표값으로 바로 맞춰 둔다.</summary>
+    private IEnumerator FadeGraphicOrInterrupt(Graphic graphic, float from, float to, float duration)
+    {
+        if (graphic == null) yield break;
+        float elapsed = 0f;
+        while (elapsed < duration && !Interrupted)
+        {
+            elapsed += Dt;
+            SetAlpha(graphic, Mathf.Lerp(from, to, Mathf.Clamp01(elapsed / duration)));
+            yield return null;
+        }
+        SetAlpha(graphic, to);
     }
 
     private IEnumerator FadeCanvas(float from, float to, float duration)
@@ -215,10 +340,23 @@ public class EvolutionCutscene : MonoBehaviour
         SetAlpha(graphic, to);
     }
 
+    /// <summary>
+    /// 빨리 감기와 취소 입력을 본다.
+    ///
+    /// 취소가 빨리 감기를 이긴다. 한 프레임에 둘 다 눌렸다면 그만두려는 쪽이 분명한 뜻이다 —
+    /// 빨리 감기는 "결과를 빨리 보고 싶다"이지만 취소는 "그 결과를 원하지 않는다"이다.
+    /// </summary>
     private void CheckSkip()
     {
         Keyboard kb = Keyboard.current;
         Mouse mouse = Mouse.current;
+
+        if (kb != null && kb.bKey.wasPressedThisFrame)
+        {
+            cancelRequested = true;
+            return;
+        }
+
         if ((kb != null && kb.spaceKey.wasPressedThisFrame) ||
             (mouse != null && mouse.leftButton.wasPressedThisFrame))
             skipRequested = true;

@@ -134,9 +134,15 @@ public class BossRewardSequence : MonoBehaviour
             {
                 MoveType move = learned.Value;
                 PlayerMoveSet moveSet = PlayerMoves.Instance != null ? PlayerMoves.Instance.MoveSet : null;
+                // 조작키와 속성을 각각 "이름 : 값"으로 적는다. 예전에는 가운뎃점으로 이어
+                // 붙였는데, 앞은 이름이 붙어 있고 뒤는 값만 덩그러니 있어 점 뒤의 "근접"이
+                // 무엇을 말하는지 읽는 사람이 짐작해야 했다.
+                string tag = MoveInfo.TagOf(move, moveSet);
+                string keys = "조작 : " + MoveInfo.KeyLabelOf(move, moveSet);
+                if (!string.IsNullOrEmpty(tag)) keys += "    속성 : " + tag;
+
                 yield return ShowPage("새로운 기술!", null, MoveInfo.NameOf(move, moveSet),
-                    "조작 : " + MoveInfo.KeyLabelOf(move, moveSet) + "   ·   " + MoveInfo.TagOf(move, moveSet)
-                    + "\n" + MoveInfo.SummaryOf(move, moveSet));
+                    keys + "\n" + MoveInfo.SummaryOf(move, moveSet));
             }
 
             // 4. 유물. 다우징머신이 있으면 둘 중 하나를 고르고, 없으면 하나를 크게 보여준다.

@@ -213,7 +213,9 @@ public class MoveSlotsHud : MonoBehaviour
                 slot.frame.sprite = PmdUi.MoveFrameOffSprite;
                 slot.nameBand.color = LockedBand;
                 slot.infoBand.color = LockedInfoBand;
-                slot.nameText.text = "—";
+                // 아직 못 배운 칸은 <b>비워 둔다</b>. 줄표를 적어 두면 그것이 기술 이름인가
+                // 싶어 한 번 더 보게 되는데, 눌린 색과 꺼진 테두리만으로 이미 "아직 없다"가 읽힌다.
+                slot.nameText.text = "";
                 slot.nameText.color = LockedText;
                 slot.keyText.text = "";
                 slot.tagChip.gameObject.SetActive(false);

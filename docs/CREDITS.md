@@ -53,10 +53,30 @@
 
 ## 대사창 얼굴
 
-`Assets/Game/Art/Portraits/` — 같은 저장소의 `portrait/<도감번호>/Normal.png` (40×40).
-잠만보·시라소몬·홍수몬·라프라스 네 장을 이벤트 대사창에 쓴다 (잉어킹 얼굴은 이벤트가
-사라져 지금은 쓰는 곳이 없지만 보스전 소환물과 함께 보관한다). 원본 `credits.txt`는
-스프라이트와 같은 폴더에 `portrait_credits.txt`로 함께 보관한다.
+`Assets/Game/Art/Portraits/` — 같은 저장소의 `portrait/<도감번호>/*.png` (모두 40×40).
+원본 `credits.txt`는 스프라이트와 같은 폴더에 `portrait_credits.txt`로 함께 보관한다.
+
+- **`Normal.png`** (`{이름}.png`) — 이벤트 대사창. 잠만보·시라소몬·홍수몬·라프라스 네 장을
+  쓴다 (잉어킹 얼굴은 이벤트가 사라져 지금은 쓰는 곳이 없지만 보스전 소환물과 함께 보관한다).
+- **`Dizzy.png` / `Happy.png`** (`{이름}_Dizzy.png`, `{이름}_Happy.png`) — 결과 화면. 쓰러지면
+  Dizzy, 던전을 깨면 Happy가 뜬다. 플레이어블 세 계열의 **아홉 단계 모두**를 받아 두었다
+  (이상해씨·이상해풀·이상해꽃 / 파이리·리자드·리자몽 / 꼬부기·어니부기·거북왕) — 어느 단계에서
+  끝나든 그때 그 모습의 얼굴이 떠야 하기 때문이다. 연결은 `StagePortraitSetup`이 맡는다.
+
+## 진화 컷씬 그림
+
+`Assets/Game/Art/Characters/Evolution/` — [PokeAPI/sprites](https://github.com/PokeAPI/sprites)의
+`sprites/pokemon/versions/generation-iv/heartgold-soulsilver/{도감번호}.png` (모두 80×80).
+플레이어블 세 계열의 아홉 단계를 쓴다. 원저작은 Game Freak / Nintendo이고, PokeAPI의 스프라이트
+저장소는 이 그림들을 모아 둔 곳이다.
+
+PMD 스프라이트를 쓰지 않는 이유는 크기다. 컷씬은 그림을 4배로 키워 화면 한가운데 세우는데,
+던전에서 쓰는 PMD 도트는 한 변이 40픽셀 남짓이라 그만큼 키우면 뭉개졌다. 하트골드·소울실버
+정면 스프라이트는 80×80이라 같은 배율에서 훨씬 또렷하다.
+
+`SetNativeSize`가 `rect / (PPU / 캔버스 기준 100)`으로 크기를 잡으므로 **PPU는 100으로 둔다** —
+이 프로젝트의 픽셀 아트 규칙인 32로 두면 화면 밖으로 넘친다. 자세한 사정은
+`StagePortraitSetup.FixEvolutionArtImport`에 적어 두었다.
 
 ## 환경 타일
 

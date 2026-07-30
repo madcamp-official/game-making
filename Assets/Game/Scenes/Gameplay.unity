@@ -1091,7 +1091,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EvolutionCutscene
   backgroundSprite: {fileID: 21300000, guid: af9daa51cd7ac431bb4ef3de8d786299, type: 3}
-  spriteScale: 4
+  spriteScale: 5
   fadeDuration: 0.4
   introHoldDuration: 1.2
   brightenDuration: 0.7
@@ -1104,7 +1104,10 @@ MonoBehaviour:
     \uD55C\uB2E4!"
   resultMessage: "\uCD95\uD558\uD569\uB2C8\uB2E4! {0}\uC740(\uB294) {1}(\uC73C)\uB85C
     \uC9C4\uD654\uD588\uB2E4!"
-  skipHint: "Space : \uBE68\uB9AC \uAC10\uAE30"
+  cancelMessage: "\uC5B4\uB77C...? {0}\uC740(\uB294) \uC9C4\uD654\uB97C \uADF8\uB9CC\uB450\uC5C8\uB2E4!"
+  skipHint: "Space : \uBE68\uB9AC \uAC10\uAE30      B : \uC9C4\uD654 \uCDE8\uC18C"
+  cancelSettleDuration: 0.5
+  cancelHoldDuration: 2
 --- !u!4 &1906208095
 Transform:
   m_ObjectHideFlags: 0

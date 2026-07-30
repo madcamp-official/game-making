@@ -123,8 +123,22 @@ public class LaprasEvent : ChoiceEvent
         else
         {
             // 혼자 헤엄쳐 건넌다. 라프라스는 왼쪽에 그대로 남는다.
+            //
+            // 눈앞에서 몸을 미끄러뜨리지 않고 <b>화면을 덮었다가 반대편에서 밝힌다</b>.
+            // 헤엄치는 그림이 따로 없어서 서 있는 자세 그대로 물 위를 지나가는 꼴이었는데,
+            // 한 번 깜빡이고 건너편에 서 있는 편이 짧고 말이 된다.
             if (playerDropoff != null)
-                yield return MoveBody(body, playerDropoff.position, glideDuration);
+            {
+                Vector2 landing = playerDropoff.position;
+                yield return RoomTransition.Ensure().Blink(() =>
+                {
+                    body.linearVelocity = Vector2.zero;
+                    body.position = landing;
+                    // 카메라가 따라오기 전에 화면이 열리지 않도록 Transform도 함께 옮긴다 —
+                    // Rigidbody2D.position은 다음 물리 갱신에야 Transform에 반영된다.
+                    body.transform.position = landing;
+                });
+            }
         }
 
         if (ownCollider != null) ownCollider.enabled = true;

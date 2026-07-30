@@ -37,9 +37,24 @@ public class ControlsGuideScreen : FlowScreen
         return screen;
     }
 
-    private Text body;
-    private Text characterLine;
+    private Text actionColumn;
+    private Text keyColumn;
     private PmdUi.Entry skipToggle;
+
+    /// <summary>
+    /// 안내 줄의 자리. 동작 이름과 키를 <b>서로 다른 글자 상자</b>에 나눠 담아 키가 언제나
+    /// 같은 열에서 시작하게 한다.
+    ///
+    /// 예전에는 한 상자에 공백을 채워 맞췄다. PMD 비트맵 폰트는 한글 한 칸이 공백 셋 폭이라
+    /// 글자 수 대신 폭을 세어 맞췄는데, 그 3:1이 모든 글리프에 정확히 들어맞지는 않아서
+    /// 줄마다 키가 한두 픽셀씩 어긋났다 — 좌클릭과 우클릭처럼 나란한 줄에서 특히 눈에 띈다.
+    /// 상자를 나누면 맞추는 계산 자체가 없어진다.
+    /// </summary>
+    private const float ActionLeft = -300f;
+    private const float ActionWidth = 220f;
+    private const float KeyLeft = ActionLeft + ActionWidth;
+    private const float KeyWidth = 380f;
+    private const int BodyFontSize = 26;
 
     /// <summary>타이틀에서 구경하러 들어왔는가. 시작할 캐릭터가 없으면 그 길이다.</summary>
     private bool FromTitle => character == null;
@@ -60,12 +75,13 @@ public class ControlsGuideScreen : FlowScreen
         heading.color = PmdUi.AccentColor;
         Place(heading.rectTransform, new Vector2(0f, 160f), new Vector2(700f, 50f));
 
-        body = PmdUi.MakeText(panel.rectTransform, "Body", "", 26, TextAnchor.UpperLeft);
-        Place(body.rectTransform, new Vector2(0f, -10f), new Vector2(640f, 240f));
+        actionColumn = PmdUi.MakeText(panel.rectTransform, "Actions", "", BodyFontSize,
+                                      TextAnchor.UpperLeft);
+        PlaceLeft(actionColumn.rectTransform, ActionLeft, 110f, ActionWidth, 260f);
 
-        characterLine = PmdUi.MakeText(panel.rectTransform, "CharacterLine", "", 22);
-        characterLine.color = PmdUi.HighlightColor;
-        Place(characterLine.rectTransform, new Vector2(0f, -160f), new Vector2(700f, 40f));
+        keyColumn = PmdUi.MakeText(panel.rectTransform, "Keys", "", BodyFontSize,
+                                   TextAnchor.UpperLeft);
+        PlaceLeft(keyColumn.rectTransform, KeyLeft, 110f, KeyWidth, 260f);
 
         if (FromTitle)
         {
@@ -92,38 +108,25 @@ public class ControlsGuideScreen : FlowScreen
     {
         // 기술 이름은 적지 않는다. 캐릭터마다 다르고 진화하며 늘어나는데, 여기는 "어느 키가
         // 몇 번째 기술인가"만 알려 주면 되는 자리다. 이름은 기술 칸 HUD와 습득 화면이 맡는다.
-        var text = new System.Text.StringBuilder();
-        text.Append(Row("이동", "WASD / 방향키"));
-        for (int i = 0; i < MoveInfo.MaxMoves; i++)
-            text.Append(Row("기술 " + (i + 1), MoveInfo.KeyLabelForSlot(i)));
-        text.Append(Row("상호작용", "E"));
-        text.Append(Row("일시정지", "Esc"));
-        body.text = text.ToString().TrimEnd('\n');
+        //
+        // 두 칸에 같은 줄 수를 같은 차례로 넣는다. 줄 높이가 같으니 n번째 줄끼리 저절로 나란해진다.
+        var actions = new System.Text.StringBuilder();
+        var keys = new System.Text.StringBuilder();
 
-        if (character == null)
+        void Row(string label, string key)
         {
-            characterLine.text = "";
-            return;
+            actions.Append(label).Append('\n');
+            keys.Append(key).Append('\n');
         }
 
-        CharacterData playable = character.ResolvePlayable();
-        characterLine.text = playable != null && playable != character
-            ? character.displayName + " 선택 — 현재 " + playable.displayName + "로 시작"
-            : character.displayName + " — " + character.playStyle;
-    }
+        Row("이동", "WASD / 방향키");
+        for (int i = 0; i < MoveInfo.MaxMoves; i++)
+            Row("기술 " + (i + 1), MoveInfo.KeyLabelForSlot(i));
+        Row("상호작용", "E");
+        Row("일시정지", "Esc");
 
-    /// <summary>
-    /// 안내 한 줄. 이름과 키 사이를 공백으로 메워 키 자리를 세로로 맞춘다.
-    ///
-    /// PMD 비트맵 폰트는 <b>한글 한 칸이 공백 셋 폭</b>이다. 글자 수로만 맞추면
-    /// "이동"과 "상호작용"의 키가 어긋난다.
-    /// </summary>
-    private static string Row(string label, string key)
-    {
-        const int column = 18;   // 공백 단위. "이동"(6) + 12칸이 예전 자리였다.
-        int width = 0;
-        foreach (char c in label) width += c >= 0x1100 ? 3 : 1;
-        return label + new string(' ', Mathf.Max(1, column - width)) + key + "\n";
+        actionColumn.text = actions.ToString().TrimEnd('\n');
+        keyColumn.text = keys.ToString().TrimEnd('\n');
     }
 
     private void UpdateSkipLabel()
@@ -151,5 +154,14 @@ public class ControlsGuideScreen : FlowScreen
         rt.pivot = new Vector2(0.5f, 0.5f);
         rt.sizeDelta = size;
         rt.anchoredPosition = position;
+    }
+
+    /// <summary>왼쪽 위 끝을 기준으로 놓는다. 두 칸이 같은 열에서 시작하려면 이쪽이라야 한다.</summary>
+    private static void PlaceLeft(RectTransform rt, float left, float top, float width, float height)
+    {
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0f, 1f);
+        rt.sizeDelta = new Vector2(width, height);
+        rt.anchoredPosition = new Vector2(left, top);
     }
 }

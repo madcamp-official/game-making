@@ -24,6 +24,22 @@ public class CharacterSelectScreen : FlowScreen
         public Text nameLabel;
     }
 
+    /// <summary>
+    /// 카드 위 그림을 원본 픽셀의 몇 배로 그릴지.
+    ///
+    /// ⚠️ <b>칸에 맞춰 늘리지 않고 배율을 못 박는다.</b> 예전에는 160×160 칸에
+    /// <see cref="Image.preserveAspect"/>로 채웠는데, 그러면 원본이 작을수록 더 크게 확대된다.
+    /// 이상해씨·파이리의 대기 프레임은 32×40이라 4배(128×160)로 들어갔지만 꼬부기는 32×32라
+    /// 5배(160×160)가 되어, 꼬부기만 한 눈에 알아볼 만큼 컸다. 같은 배율로 그려야 세 마리가
+    /// 같은 세상에 사는 것처럼 보인다.
+    ///
+    /// 정수배인 것도 중요하다 — 픽셀 아트를 1.25배 같은 비율로 늘리면 획 굵기가 들쭉날쭉해진다.
+    /// </summary>
+    private const float PreviewPixelScale = 4f;
+
+    /// <summary>그림이 아직 없는 캐릭터의 자리를 대신 잡아 주는 크기.</summary>
+    private static readonly Vector2 FallbackPreviewSize = new Vector2(128f, 160f);
+
     private readonly List<Card> cards = new List<Card>();
     private PmdUi.Entry startButton;
     private PmdUi.Entry backButton;
@@ -62,7 +78,7 @@ public class CharacterSelectScreen : FlowScreen
             card.portrait.sprite = data.portrait;
             card.portrait.preserveAspect = true;
             card.portrait.enabled = data.HasPortrait;
-            Place(card.portrait.rectTransform, new Vector2(0f, 30f), new Vector2(160f, 160f));
+            Place(card.portrait.rectTransform, new Vector2(0f, 30f), PreviewSize(data.portrait));
 
             if (data.previewController != null)
             {
@@ -127,13 +143,27 @@ public class CharacterSelectScreen : FlowScreen
             if (card.entry != entry) continue;
             chosen = card.data;
             CharacterData playable = card.data.ResolvePlayable();
+            // "이름 : 설명" 꼴로 적는다. 줄표는 이름과 설명이 대등한 두 토막처럼 보이는데,
+            // 여기는 이름이 항목이고 설명이 그 내용이라 쌍점이 관계를 바로 읽힌다.
             styleLine.text = playable != null && playable != card.data
-                ? card.data.displayName + " — 준비 중 · 현재 " + playable.displayName + "로 시작"
-                : card.data.displayName + " — " + card.data.playStyle;
+                ? card.data.displayName + " : 준비 중 — 현재 " + playable.displayName + "로 시작"
+                : card.data.displayName + " : " + card.data.playStyle;
             startButton.enabled = true;
             Refresh();
             return;
         }
+    }
+
+    /// <summary>
+    /// 그림 한 장이 차지할 칸 크기. 원본 픽셀 크기에 <see cref="PreviewPixelScale"/>을 곱한다.
+    ///
+    /// 한 계열의 대기 프레임은 모두 같은 크기로 잘려 있으므로, 마우스를 올려 걷기 시작해
+    /// 프레임이 바뀌어도 칸을 다시 잡을 필요가 없다.
+    /// </summary>
+    private static Vector2 PreviewSize(Sprite sprite)
+    {
+        if (sprite == null) return FallbackPreviewSize;
+        return sprite.rect.size * PreviewPixelScale;
     }
 
     private static void Place(RectTransform rt, Vector2 position, Vector2 size)

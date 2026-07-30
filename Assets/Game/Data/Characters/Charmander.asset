@@ -57,6 +57,9 @@ MonoBehaviour:
   - stageName: "\uD30C\uC774\uB9AC"
     animatorController: {fileID: 9100000, guid: 840ef9778f3aa4a1291d09e38d5ddbde, type: 2}
     portrait: {fileID: 395062027, guid: 2e43421295a6a4771a14b4207de160f8, type: 3}
+    evolutionArt: {fileID: 21300000, guid: 0d2c4a122e41f45de997258e968c5335, type: 3}
+    dizzyPortrait: {fileID: 21300000, guid: 33bc718e36874169822533df66c38eb1, type: 3}
+    happyPortrait: {fileID: 21300000, guid: 7cdc3d064d214343bf7b30466f5cf365, type: 3}
     maxHealth: 85
     movePowers: 0c000000000000001a0000000e000000
     attackDamage: 11
@@ -64,6 +67,9 @@ MonoBehaviour:
   - stageName: "\uB9AC\uC790\uB4DC"
     animatorController: {fileID: 9100000, guid: eb56d1cb6613d448e885c4b6fcf6a433, type: 2}
     portrait: {fileID: -365429761, guid: cfefa52e55ae34c43b1f41f409d58415, type: 3}
+    evolutionArt: {fileID: 21300000, guid: 1a234385c44ba4647972bcd5721d0a82, type: 3}
+    dizzyPortrait: {fileID: 21300000, guid: 4fb9657d308e4797b19c3e469f1c1135, type: 3}
+    happyPortrait: {fileID: 21300000, guid: 6eb4ef1e690f4fe8af0c0bec246cd642, type: 3}
     maxHealth: 105
     movePowers: 1200000000000000260000000e000000
     attackDamage: 11
@@ -71,6 +77,9 @@ MonoBehaviour:
   - stageName: "\uB9AC\uC790\uBABD"
     animatorController: {fileID: 9100000, guid: 1f0ecd23081524d93bd710cbcc3ec285, type: 2}
     portrait: {fileID: 448003726, guid: 6c4e712c9695d4b338d941e2021cc422, type: 3}
+    evolutionArt: {fileID: 21300000, guid: d2e43edae6c5d4de1950a6e9b519a1eb, type: 3}
+    dizzyPortrait: {fileID: 21300000, guid: 41c78e43b6154a9e83d60e3024c994d8, type: 3}
+    happyPortrait: {fileID: 21300000, guid: 36aa9c1a024a47629e0796b237f0682a, type: 3}
     maxHealth: 130
     movePowers: 1900000000000000340000000e000000
     attackDamage: 11

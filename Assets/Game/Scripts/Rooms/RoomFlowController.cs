@@ -184,7 +184,15 @@ public class RoomFlowController : MonoBehaviour
         currentRoom = Instantiate(floor.roomPrefabs[index]);
 
         PlayerController player = FindAnyObjectByType<PlayerController>();
-        if (player != null) player.transform.position = playerSpawn;
+        if (player != null)
+        {
+            player.transform.position = playerSpawn;
+
+            // 새 방에는 손패를 다 갖추고 들어선다. 통로에서 긴 쿨타임이 도는 것을 서서
+            // 기다리는 것은 선택이 아니라 그냥 기다림이었다.
+            PlayerCombat combat = player.GetComponent<PlayerCombat>();
+            if (combat != null) combat.ResetCooldowns();
+        }
 
         // 양쪽 통로를 막는 구름. 방마다 프리팹에 심지 않고 여기서 세운다 —
         // 스물한 방의 통로 자리를 전부 같게 맞춰 두었으므로 자리를 계산하는 편이 안전하다.

@@ -27,12 +27,12 @@ public class EventDialogue : MonoBehaviour
     private const float TopMargin = 96f;
     // 아래쪽 조작 힌트(y 40, 높이 60)를 덮지 않도록 남겨 두는 자리.
     private const float BottomMargin = 108f;
-    private const float MaxWidth = 1080f;
+    private const float MaxWidth = 1240f;
     private const float ScreenPadding = 30f;
     private const float PanelGap = 12f;
     private const int Padding = 16;
-    private const float CardGap = 8f;
-    private const float CardPadding = 10f;
+    private const float CardGap = 12f;
+    private const float CardPadding = 16f;
 
     /// <summary>
     /// 글자 크기 단계. 캔버스가 Constant Pixel Size라 UI가 절대 픽셀이어서, 창이 작으면
@@ -49,6 +49,7 @@ public class EventDialogue : MonoBehaviour
 
     private static readonly Tier[] Tiers =
     {
+        new Tier { fontSize = 36, lineHeight = 46f, portraitSize = 128f, minDialogueHeight = 176f },
         new Tier { fontSize = 24, lineHeight = 30f, portraitSize = 96f, minDialogueHeight = 132f },
         new Tier { fontSize = 12, lineHeight = 18f, portraitSize = 56f, minDialogueHeight = 80f },
     };

@@ -376,6 +376,33 @@ public class PlayerCombat : MonoBehaviour
         CombatRoomController.CombatActive && seedUsedInRoom != CombatRoomController.VisitId;
 
     /// <summary>
+    /// 모든 기술의 쿨타임을 즉시 채운다. 방을 옮길 때 부른다.
+    ///
+    /// 방과 방 사이는 어차피 싸움이 없는 시간이라, 긴 쿨타임을 들고 통로에서 서성이는 것은
+    /// 기다림일 뿐 선택이 아니었다. 방에 들어설 때 손패가 항상 갖춰져 있으면 "지금 쓸까,
+    /// 아껴 둘까"를 <b>그 방 안에서</b> 정하게 된다.
+    ///
+    /// 씨뿌리기는 여기서 건드리지 않는다. 그쪽은 시간이 아니라 <b>방</b>으로 도는 쿨타임이라
+    /// (<see cref="SeedReady"/>) 방이 바뀌면 저절로 돌아온다.
+    /// </summary>
+    public void ResetCooldowns()
+    {
+        // Time.time보다 확실히 앞선 값이면 어떤 쿨타임이든 이미 다 찬 것으로 계산된다.
+        const float longAgo = -999f;
+        lastMeleeTime = longAgo;
+        lastVineTime = longAgo;
+        lastPetalTime = longAgo;
+        lastFireSpitTime = longAgo;
+        lastDanceTime = longAgo;
+        lastClawTime = longAgo;
+        lastFlameTime = longAgo;
+        lastWaterGunTime = longAgo;
+        lastSurfTime = longAgo;
+        lastRocketTime = longAgo;
+        lastHydroTime = longAgo;
+    }
+
+    /// <summary>
     /// 기술 칸 HUD가 쓰는 쿨타임 진행도. 1이면 바로 쓸 수 있고, 0이면 방금 썼다.
     /// 쿨타임이 없는 기술은 항상 1이다.
     /// </summary>

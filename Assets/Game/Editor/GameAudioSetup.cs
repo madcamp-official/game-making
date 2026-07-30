@@ -19,6 +19,9 @@ using UnityEngine;
 public static class GameAudioSetup
 {
     private const string BgmDir = "Assets/Game/Audio/BGM/";
+
+    /// <summary>효과음 폴더. 지금은 진화음 둘만 여기 있고, 나머지 효과음은 BGM 폴더에 섞여 있다.</summary>
+    private const string SfxDir = "Assets/Game/Audio/SFX/";
     private const string LibraryDir = "Assets/Game/Resources/Audio";
     private const string LibraryPath = LibraryDir + "/GameAudioLibrary.asset";
     private const string FloorDir = "Assets/Game/Data/Floors/";
@@ -41,6 +44,10 @@ public static class GameAudioSetup
     private const string GetSkill = "getskill.mp3";
     private const string PlayerHit = "song409.mp3";
     private const string PlayerHurt = "song410.mp3";
+    private const string UiHover = "hover.mp3";
+    private const string UiClick = "click.mp3";
+    private const string Evolving = "evolving.mp3";
+    private const string Evolved = "evolved.mp3";
     private const string BossCry1 = "boss1.wav";
     private const string BossCry2 = "boss2.wav";
     private const string BossCry3 = "boss3.wav";
@@ -96,8 +103,18 @@ public static class GameAudioSetup
         // 게임 오버 곡은 음악 자리에서 틀지만 2초짜리 스팅이다. 스트리밍으로 두면 쓰러진 순간
         // 스트림을 여느라 첫 음이 늦는데, 하필 그 자리가 가장 늦으면 안 되는 자리다.
         foreach (string file in new[] { GameOver, GetItem, GetSkill,
-                                        PlayerHit, PlayerHurt, BossCry1, BossCry2, BossCry3 })
+                                        PlayerHit, PlayerHurt, UiHover, UiClick,
+                                        BossCry1, BossCry2, BossCry3 })
             SetLoadType(BgmDir + file, AudioClipLoadType.DecompressOnLoad, log);
+
+        // 완료음(5초)은 확정되는 순간에 딱 맞춰 터져야 하므로 미리 풀어 둔다.
+        SetLoadType(SfxDir + Evolved, AudioClipLoadType.DecompressOnLoad, log);
+
+        // 진화음은 56초짜리 긴 곡이다. 풀어 두면 10MB 가까운 PCM이 되는데, 정작 컷씬은
+        // 십몇 초 만에 끝나고 나머지는 잘려 나간다. 그렇다고 스트리밍으로 두면 컷씬이
+        // 시작되는 순간 스트림을 여느라 첫 음이 늦는다 — 하필 "빛나기 시작했는데 조용한"
+        // 한 박자가 생기는 자리다. 압축된 채로 메모리에 두면 둘 다 피한다.
+        SetLoadType(SfxDir + Evolving, AudioClipLoadType.CompressedInMemory, log);
     }
 
     private static void SetLoadType(string path, AudioClipLoadType loadType, StringBuilder log)
@@ -144,6 +161,10 @@ public static class GameAudioSetup
         library.moveLearned = Clip(GetSkill, log);
         library.playerHit = Clip(PlayerHit, log);
         library.playerHurt = Clip(PlayerHurt, log);
+        library.uiHover = Clip(UiHover, log);
+        library.uiClick = Clip(UiClick, log);
+        library.evolving = ClipIn(SfxDir, Evolving, log);
+        library.evolved = ClipIn(SfxDir, Evolved, log);
         return library;
     }
 
@@ -168,10 +189,12 @@ public static class GameAudioSetup
         }
     }
 
-    private static AudioClip Clip(string file, StringBuilder log)
+    private static AudioClip Clip(string file, StringBuilder log) => ClipIn(BgmDir, file, log);
+
+    private static AudioClip ClipIn(string dir, string file, StringBuilder log)
     {
-        var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(BgmDir + file);
-        if (clip == null) log.AppendLine("  못 찾음 " + BgmDir + file);
+        var clip = AssetDatabase.LoadAssetAtPath<AudioClip>(dir + file);
+        if (clip == null) log.AppendLine("  못 찾음 " + dir + file);
         return clip;
     }
 }
