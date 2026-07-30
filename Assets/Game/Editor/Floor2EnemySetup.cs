@@ -54,11 +54,11 @@ public static class Floor2EnemySetup
                 ("dashDistance", 2.2f), ("dashSpeed", 9f), ("hitDelay", 0.18f),
                 // 피격 무적(0.5초)보다 짧다 — 연타가 다 들어가지는 않지만 쉴 틈도 주지 않는다.
                 ("betweenDashes", 0.38f),
-                // 부채꼴을 걷어내고 직사각형으로. 앞이면 맞고 옆이면 안 맞는다.
-                ("hitLength", 1.5f), ("hitWidth", 1.6f), ("damage", 15),
+                // 몸 앞에서 시작하는 직사각형 하나. 앞이면 맞고 옆이면 안 맞는다.
+                // 그리는 크기는 2.8 × 1.8칸(여기 값 + 플레이어 반지름)이고, 그것이 곧 판정이다.
+                ("hitLength", 2.5f), ("hitWidth", 1.2f), ("damage", 15),
                 ("hitPause", 0.5f), ("missPause", 1f),
-                // 예고 색을 붉은색으로 통일했다 — 회색 경로와 붉은 피해 범위가 섞여 읽히지 않았다.
-                ("pathColor", new Color(0.88f, 0.12f, 0.2f, 0.24f)),
+                // 도형이 하나라 색도 하나다. "여기 서 있으면 맞는다" 말고 뜻할 것이 없다.
                 ("hitColor", new Color(0.88f, 0.12f, 0.2f, 0.52f)),
             },
         },

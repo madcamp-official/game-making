@@ -5,9 +5,8 @@ using UnityEngine;
 /// 성원숭의 연속 돌진 공격. 주먹을 들어 올린 준비 자세를 보인 뒤, 플레이어 쪽으로
 /// <b>짧게 돌진하며</b> 후려치기를 최대 <see cref="maxDashes"/>번 반복한다.
 ///
-/// 돌진 한 번마다 <b>어디로 뛸지(경로)와 어디가 맞는지(피해 범위)를 미리 그린다.</b>
-/// 예고 없이 몸이 날아오면 읽을 수가 없고, 경로만 그리면 스쳐 지나간 자리가 안전한지
-/// 알 수 없다 — 둘을 같이 그려야 "옆으로 반 걸음"이 정답이라는 게 보인다.
+/// 돌진 한 번마다 <b>앞으로 뻗는 직사각형 하나</b>를 미리 그린다. 그 사각형이 곧
+/// 그림이자 판정이라, 예고선 밖으로 반 걸음이 언제나 정답이다.
 ///
 /// 방향은 <b>돌진을 시작할 때만</b> 다시 잡고 도중에는 고정한다. 그래서 같은 방향으로
 /// 도망치면 따라붙지만, 예고선 옆으로 비키면 빗나간다.
@@ -41,20 +40,26 @@ public class EnemyComboMeleeAbility : EnemyAbility
 
     // ---------------------------------------------------------------- 판정
     //
-    // 예전에는 반지름 1.2 · 150도짜리 부채꼴이었다. 몸 반지름과 플레이어 반지름을 더하면
+    // 처음에는 반지름 1.2 · 150도짜리 부채꼴이었다. 몸 반지름과 플레이어 반지름을 더하면
     // 실제로는 반지름 1.9의 <b>반원에 가까운</b> 범위라, 옆으로 비켜도 여전히 안에 들어 있는
     // 일이 잦았다. 부채꼴은 "어디까지 도는가"를 눈대중해야 하는데 그 각도가 넓을수록
     // 눈대중이 통하지 않는다.
     //
-    // 그래서 <b>앞으로 뻗은 직사각형</b>으로 바꿨다. 규칙이 "앞이면 맞고 옆이면 안 맞는다"
-    // 하나로 줄어, 예고선을 보고 옆으로 반 걸음이 그대로 정답이 된다. 넓이도 함께 줄였다
-    // (약 4.8 → 4.0 유닛²) — 모양만 바꾸고 크기를 두면 옆이 좁아진 만큼 앞이 길어져
-    // 체감이 그대로다.
+    // 그다음에는 직사각형이 되었지만 <b>둘</b>이었다 — 몸이 지나갈 좁고 긴 복도와, 그 끝에
+    // 붙은 정사각형에 가까운 판정 상자. 이어 붙인 자리에서 폭이 갑자기 벌어져 여전히
+    // 눈으로 재기 어려웠고, 무엇보다 판정이 몸에서 1.6칸 앞에서야 시작해 <b>코앞이 안전</b>했다.
+    //
+    // 지금은 <b>몸 앞에서 시작하는 직사각형 하나</b>다. 규칙이 "앞이면 맞고 옆이면 안 맞는다"
+    // 하나로 줄어, 예고선을 보고 옆으로 반 걸음이 그대로 정답이 된다.
+    //
+    // 길이는 늘리되 <b>닿는 끝은 짧아졌다.</b> 그리는 사각형이 2.8칸(1.5 → 2.5 + 플레이어
+    // 반지름)으로 복도(2.2)보다 길어졌지만, 예전에는 상자가 1.6칸 앞에서 시작해 1.8칸을
+    // 더 뻗어 <b>출발점에서 3.4칸</b>까지 닿았다. 앞은 짧아지고 발밑이 채워진 셈이다.
     [Header("판정")]
-    [Tooltip("타격 프레임의 몸 중심에서 앞으로 뻗는 길이.")]
-    [SerializeField, Min(0.1f)] private float hitLength = 1.5f;
+    [Tooltip("출발한 자리에서 앞으로 뻗는 길이. 판정도 예고도 여기서 시작한다.")]
+    [SerializeField, Min(0.1f)] private float hitLength = 2.5f;
     [Tooltip("직사각형의 전체 폭. 이 값이 곧 '옆으로 얼마나 비켜야 사는가'다.")]
-    [SerializeField, Min(0.1f)] private float hitWidth = 1.6f;
+    [SerializeField, Min(0.1f)] private float hitWidth = 1.2f;
     [Tooltip("돌진 한 번의 피해.")]
     [SerializeField, Min(0)] private int damage = 14;
 
@@ -67,31 +72,11 @@ public class EnemyComboMeleeAbility : EnemyAbility
     [Header("예고 색")]
     // 2층 바닥이 밝은 모래(연노랑)라, 주황 계열을 옅게 얹으면 배경에 묻혀 아예 안 보인다.
     //
-    // 경로와 피해 범위는 <b>같은 붉은색</b>을 진하기만 달리해서 쓴다. 예전에는 경로가 회색빛
-    // 보라, 피해 범위가 붉은색이라 색이 둘로 갈렸는데 — 한 번의 공격을 그린 것인데도 서로
-    // 다른 일처럼 읽혔다. 색은 "여기 서 있으면 맞는다" 하나만 뜻해야 한다. 진하기 차이가
-    // 곧 "지나갈 자리"와 "실제로 맞는 자리"의 구분이다.
-    [Tooltip("돌진 경로. 몸이 지나갈 자리다.")]
-    [SerializeField] private Color pathColor = new Color(0.88f, 0.12f, 0.2f, 0.24f);
-    [Tooltip("피해 범위. 실제로 맞는 자리다.")]
+    // 색이 하나인 것도 뜻이 있다. 도형이 둘이던 시절에는 진하기를 달리해 "지나갈 자리"와
+    // "맞는 자리"를 갈랐는데, 이제 그 둘이 같은 사각형이라 나눌 것이 없다.
+    // 색은 "여기 서 있으면 맞는다" 하나만 뜻한다.
+    [Tooltip("피해 범위. 그린 그대로가 맞는 자리다.")]
     [SerializeField] private Color hitColor = new Color(0.88f, 0.12f, 0.2f, 0.52f);
-
-    /// <summary>돌진 경로 띠의 굵기를 몸통에 맞추는 데 쓴다.</summary>
-    private float BodyRadius
-    {
-        get
-        {
-            Collider2D col = GetComponent<Collider2D>();
-            return col != null ? Mathf.Max(col.bounds.extents.x, col.bounds.extents.y) : 0.5f;
-        }
-    }
-
-    /// <summary>
-    /// 예고를 그릴 중심. 판정은 <b>돌진이 끝난 자리가 아니라 타격 프레임의 자리</b>에서 난다 —
-    /// hitDelay(0.18초) 동안 나아간 거리까지다. 돌진 끝에 그리면 그린 자리와 맞는 자리가
-    /// 반 칸 넘게 어긋나, 예고를 믿고 비킨 쪽이 억울해진다.
-    /// </summary>
-    private float HitTravel => Mathf.Min(dashDistance, hitDelay * dashSpeed);
 
     /// <summary>플레이어 몸의 반지름. 판정을 중심점 기준으로 옮길 때 쓴다.</summary>
     private float PlayerRadius
@@ -176,24 +161,22 @@ public class EnemyComboMeleeAbility : EnemyAbility
     }
 
     /// <summary>
-    /// 돌진 경로와 피해 범위를 <b>한 도형으로</b> 그린다. 그리는 동안 제자리에 선다.
+    /// 앞으로 뻗는 <b>직사각형 하나</b>를 그린다. 그리는 동안 제자리에 선다.
     ///
-    /// 예전에는 띠와 판정 도형을 따로 얹었다. 둘이 겹친 자리는 알파가 두 번 쌓여 그 부분만
-    /// 짙어졌고, 한 번의 공격을 그린 것인데도 복도·겹친 띠·판정 셋으로 나뉘어 보였다.
-    /// 이제 두 사각형의 합집합을 한 장에 굽는다 (<see cref="PrimitiveSprites.DashZone"/>) —
-    /// 겹친 자리는 진한 쪽만 남으므로 이음매가 없다.
+    /// 예전에는 도형이 둘이었다 — 몸이 지나갈 좁고 긴 복도와, 그 끝 머리 자리에 붙은
+    /// 정사각형에 가까운 판정 상자. 한 번의 공격인데도 <b>두 개가 붙어 있는 모양</b>으로
+    /// 읽혔고, 이어 붙인 자리에서 폭이 갑자기 벌어져 어디까지가 위험한지 눈으로 재기 어려웠다.
+    ///
+    /// 이제 하나다. 그 하나가 곧 <b>그림이자 판정</b>이고(<see cref="PlayerInHitBox"/>가 같은
+    /// <see cref="HitBox"/>를 쓴다), 몸 앞에서 시작하므로 <b>코앞이 안전지대가 아니다</b> —
+    /// 예전에는 판정 상자가 몸에서 1.6칸 앞에서 시작해, 바짝 붙어 있으면 돌진이 몸을
+    /// 관통하고도 맞지 않는 일이 있었다.
     /// </summary>
     private IEnumerator Telegraph(Vector2 aim)
     {
-        // 판정 사각형은 실제로 재는 것과 <b>같은 도형</b>이다 (PlayerInHitBox와 같은 HitBox를 쓴다).
-        HitBox(transform.position + (Vector3)(aim * HitTravel), aim,
-               out _, out float boxLength, out float boxWidth);
-
-        AttackTelegraph zone = AttackTelegraph.CreateDashZone(
-            EffectRoot, transform.position, aim,
-            dashDistance, BodyRadius,                     // 지나갈 복도
-            HitTravel, boxLength, boxWidth * 0.5f,        // 실제로 맞는 사각형
-            pathColor, hitColor);
+        HitBox(transform.position, aim, out _, out float boxLength, out float boxWidth);
+        AttackTelegraph zone = AttackTelegraph.CreateLine(
+            EffectRoot, transform.position, aim, boxLength, boxWidth, hitColor);
         zone.Pulse(telegraph);
 
         float end = Time.time + telegraph;
@@ -202,9 +185,10 @@ public class EnemyComboMeleeAbility : EnemyAbility
             HoldPosition();
             // 그린 자리를 몸에 붙여 둔다. 예고하는 동안 넉백으로 밀려날 수 있는데
             // (HoldPosition이 그 0.15초는 놓아 준다), 그림만 처음 자리에 남으면
-            // 예고와 실제 돌진이 어긋난다. 피벗이 몸 중심이라 자리만 따라가면 된다 —
-            // 도형이 한 장이라 조각마다 다른 만큼 밀어 줄 일도 없어졌다.
-            if (zone != null) zone.transform.position = transform.position;
+            // 예고와 실제 판정이 어긋난다. CreateLine은 밑변이 아니라 <b>가운데</b>에
+            // 오브젝트를 놓으므로 반 칸 앞으로 밀어 준다.
+            if (zone != null)
+                zone.transform.position = (Vector2)transform.position + aim * (boxLength * 0.5f);
             yield return null;
         }
     }
@@ -213,6 +197,13 @@ public class EnemyComboMeleeAbility : EnemyAbility
     private IEnumerator Dash(Vector2 aim, System.Action<bool> report)
     {
         ReplayAction(actionState, aim);
+
+        // 판정의 기준은 <b>출발한 자리</b>다. 예고를 마지막으로 그린 자리가 여기이므로,
+        // 그린 사각형과 재는 사각형이 완전히 같아진다.
+        //
+        // 몸을 따라가게 두면 안 된다 — 타격 시점(hitDelay)에는 몸이 이미 앞으로 나아가 있어서,
+        // 사각형째 딸려 가면 예고보다 한참 앞을 때리게 된다.
+        Vector2 origin = transform.position;
 
         float duration = dashDistance / Mathf.Max(0.01f, dashSpeed);
         float elapsed = 0f;
@@ -229,7 +220,7 @@ public class EnemyComboMeleeAbility : EnemyAbility
             if (!resolved && elapsed >= hitDelay)
             {
                 resolved = true;
-                if (PlayerInHitBox(transform.position, aim) &&
+                if (PlayerInHitBox(origin, aim) &&
                     PlayerHealth != null && !PlayerHealth.IsDead && !PlayerHealth.IsInvincible)
                 {
                     PlayerHealth.TakeDamage(damage);
