@@ -4787,7 +4787,7 @@ MonoBehaviour:
   silverTelegraphRadius: 3.2
   projectilePoolSize: 128
   phase2GraceTime: 0.6
-  contactDamage: 10
+  contactDamage: 0
   contactInterval: 1
   logPatterns: 0
   warningColor: {r: 1, g: 0.9, b: 0.25, a: 0.45}

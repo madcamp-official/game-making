@@ -223,8 +223,11 @@ public class ButterfreeBossController : MonoBehaviour
     [Tooltip("2페이즈에 들어간 뒤 공격하지 않고 두는 시간. 전환을 인지할 여유를 준다.")]
     [SerializeField, Min(0f)] private float phase2GraceTime = 0.6f;
 
-    [Header("접촉 피해")]
-    [SerializeField, Min(0)] private int contactDamage = 10;
+    [Header("접촉 피해 — 꺼 둔다")]
+    [Tooltip("몸이 닿기만 해도 자동으로 주는 피해. 0이면 접촉 피해가 없다. " +
+             "잡몹과 같은 규칙으로 0에 둔다 — 피해는 예고가 보이는 기술에만 있어야 한다. " +
+             "돌풍·독가루·은빛바람 셋으로 이미 방 전체를 덮으므로 몸으로 밀 이유도 없다.")]
+    [SerializeField, Min(0)] private int contactDamage;
     [SerializeField, Min(0f)] private float contactInterval = 1f;
 
     [Header("디버그")]

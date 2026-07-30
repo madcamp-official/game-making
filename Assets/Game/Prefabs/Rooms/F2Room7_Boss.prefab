@@ -423,7 +423,7 @@ MonoBehaviour:
   dashHitRadius: 1.05
   dashStopDistance: 0.4
   phase2GraceTime: 0.6
-  contactDamage: 14
+  contactDamage: 0
   contactInterval: 1
   logPatterns: 0
   rockColor: {r: 0.72, g: 0.47, b: 0.22, a: 0.85}

@@ -279,8 +279,12 @@ public class GyaradosBossController : MonoBehaviour
         ringDamage = 34, innerDamage = 36, recovery = 0.2f,
     };
 
-    [Header("접촉 피해 — 노출 상태에서만")]
-    [SerializeField, Min(0)] private int contactDamage = 18;
+    [Header("접촉 피해 — 꺼 둔다")]
+    [Tooltip("몸이 닿기만 해도 자동으로 주는 피해. 0이면 접촉 피해가 없다. " +
+             "잡몹과 같은 규칙으로 0에 둔다 — 피해는 예고가 보이는 기술에만 있어야 한다. " +
+             "노출 상태는 붙어서 때리라고 있는 시간이라 특히 그렇다. 그 자리를 위험하게 " +
+             "만드는 몫은 똬리치기의 안쪽 원이 맡는다.")]
+    [SerializeField, Min(0)] private int contactDamage;
     [SerializeField, Min(0f)] private float contactInterval = 1f;
 
     [Header("페이즈 전환")]

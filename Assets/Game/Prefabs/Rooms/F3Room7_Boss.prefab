@@ -2810,7 +2810,7 @@ MonoBehaviour:
     ringDamage: 34
     innerDamage: 36
     recovery: 0.2
-  contactDamage: 18
+  contactDamage: 0
   contactInterval: 1
   phaseRoarDuration: 0.8
   arenaCameraSize: 6.8
