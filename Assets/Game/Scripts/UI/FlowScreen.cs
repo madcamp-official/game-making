@@ -73,7 +73,7 @@ public abstract class FlowScreen : MonoBehaviour
             for (int i = 0; i < entries.Count; i++)
             {
                 if (!entries[i].enabled || !entries[i].Contains(point)) continue;
-                if (cursor != i) { cursor = i; Refresh(); }
+                SetCursor(i);
                 break;
             }
 
@@ -96,6 +96,20 @@ public abstract class FlowScreen : MonoBehaviour
             Activate(cursor);
     }
 
+    /// <summary>
+    /// 커서를 옮기고 소리를 낸다. 칸이 실제로 바뀔 때만 울린다.
+    ///
+    /// 마우스와 키보드가 커서를 옮기는 길이 둘이라 소리도 두 군데에서 나야 하는데,
+    /// <see cref="Refresh"/>에 넣으면 화면을 세울 때(<see cref="Create{T}"/>가 한 번 부른다)도
+    /// 울린다. 열자마자 나는 소리는 무엇이 바뀌었다는 뜻이 아니다.
+    /// </summary>
+    private void SetCursor(int index)
+    {
+        if (cursor == index) return;
+        cursor = PmdUi.TrackHoverSound(cursor, index);
+        Refresh();
+    }
+
     /// <summary>고를 수 없는 칸은 건너뛰며 커서를 옮긴다.</summary>
     private void Step(int delta)
     {
@@ -104,7 +118,7 @@ public abstract class FlowScreen : MonoBehaviour
         for (int i = 0; i < entries.Count; i++)
         {
             index = (index + delta + entries.Count) % entries.Count;
-            if (entries[index].enabled) { cursor = index; Refresh(); return; }
+            if (entries[index].enabled) { SetCursor(index); return; }
         }
     }
 }

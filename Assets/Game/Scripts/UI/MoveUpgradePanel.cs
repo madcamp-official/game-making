@@ -51,6 +51,8 @@ public class MoveUpgradePanel : MonoBehaviour
     private PlayerMoves moves;
     private float savedTimeScale = 1f;
     private int openedFrame = -1;
+    /// <summary>지난 프레임에 가리키던 칸. 칸이 바뀐 순간에만 소리를 내려고 들고 있는다.</summary>
+    private int lastHovered = -1;
 
     private void Awake()
     {
@@ -199,6 +201,11 @@ public class MoveUpgradePanel : MonoBehaviour
                 break;
             }
         }
+
+        // 칸이 바뀐 순간에만 커서음을 낸다. 판단은 PmdUi가 맡는다 —
+        // 창마다 hover 판정을 따로 돌리는 구조라(이 씬에는 EventSystem이 없다)
+        // 그 규칙까지 창마다 흩어지면 창을 하나 더 만들 때마다 다시 정하게 된다.
+        lastHovered = PmdUi.TrackHoverSound(lastHovered, hovered);
 
         for (int i = 0; i < shown.Count; i++)
             Highlight(cardImages[i], cardTexts[i], i == hovered);
