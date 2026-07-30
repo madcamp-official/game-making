@@ -13,8 +13,9 @@ public class RoomFlowController : MonoBehaviour
     [SerializeField] private FloorData[] floors;
     [SerializeField] private Vector2 playerSpawn = new Vector2(-7f, 0f);
 
-    [Tooltip("다음 층으로 넘어갈 때 비어 있는 체력 중 몇 할을 채울지. 1이면 완전 회복.")]
-    [SerializeField, Range(0f, 1f)] private float floorHealMissingFraction = 0.6f;
+    [Tooltip("다음 층으로 넘어갈 때 비어 있는 체력 중 몇 할을 채울지. 1이면 완전 회복. " +
+             "그 층에서 이미 진화로 회복했다면 이 회복은 건너뛴다 — 회복은 층당 한 번이다.")]
+    [SerializeField, Range(0f, 1f)] private float floorHealMissingFraction = 0.45f;
 
     [Header("통로를 막는 구름")]
     [Tooltip("통로를 메우는 뭉게구름 그림(CorridorCloud.png). 비우면 구름 없이 예전처럼 동작한다.")]
@@ -78,20 +79,44 @@ public class RoomFlowController : MonoBehaviour
                 return;
             }
             CurrentFloorIndex++;
+            bool healed = HealForNewFloor();
             if (UIManager.Instance != null)
-                UIManager.Instance.ShowMessage((CurrentFloorIndex + 1) + "층 — " + floors[CurrentFloorIndex].floorName + "에 도착했다! 체력을 조금 회복했다.", 2.5f);
+                UIManager.Instance.ShowMessage(
+                    (CurrentFloorIndex + 1) + "층 — " + floors[CurrentFloorIndex].floorName + "에 도착했다!" +
+                    (healed ? " 체력을 조금 회복했다." : ""), 2.5f);
             LoadRoom(0);
-
-            // 층을 넘어가면 모자란 체력의 일부를 회복한다 (완전 회복이 아니다).
-            PlayerController player = FindAnyObjectByType<PlayerController>();
-            if (player != null)
-            {
-                Health health = player.GetComponent<Health>();
-                if (health != null) health.HealMissingFraction(floorHealMissingFraction);
-            }
             return;
         }
         LoadRoom(CurrentRoomIndex + 1);
+    }
+
+    /// <summary>
+    /// 층을 넘어가며 모자란 체력의 일부를 채운다 (완전 회복이 아니다).
+    /// 실제로 회복했으면 참 — 도착 알림에 "회복했다"를 넣을지 정하는 데 쓴다.
+    ///
+    /// <b>이 층에서 이미 진화로 회복했다면 건너뛴다.</b> 층의 마지막 방이 보스방이고 보스를
+    /// 잡으면 진화하므로, 그냥 두면 두 회복이 잇달아 터진다 — 각각 빈 체력의 절반 가까이라
+    /// 합치면 대부분이 채워져, 보스에게 아무리 두들겨 맞아도 다음 층은 늘 만신창이가 아닌
+    /// 몸으로 시작하게 된다. 회복은 층당 한 번이면 족하다.
+    ///
+    /// 진화가 없었던 층(마지막 단계에 이미 도달한 경우)에는 여기가 그 한 번을 맡는다.
+    /// </summary>
+    private bool HealForNewFloor()
+    {
+        PlayerController player = FindAnyObjectByType<PlayerController>();
+        if (player == null) return false;
+
+        PlayerEvolution evolution = player.GetComponent<PlayerEvolution>();
+        bool alreadyHealed = evolution != null && evolution.HealedThisFloor;
+        if (evolution != null) evolution.NotifyFloorChanged();
+        if (alreadyHealed) return false;
+
+        Health health = player.GetComponent<Health>();
+        if (health == null || health.IsDead) return false;
+
+        int before = health.CurrentHealth;
+        health.HealMissingFraction(floorHealMissingFraction);
+        return health.CurrentHealth > before;
     }
 
     /// <summary>

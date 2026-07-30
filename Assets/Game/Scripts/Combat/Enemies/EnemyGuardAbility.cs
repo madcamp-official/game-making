@@ -93,7 +93,7 @@ public class EnemyGuardAbility : EnemyAbility
         float readyEnd = Time.time + readyDuration;
         while (Time.time < readyEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             Vector2 look = DirectionToPlayer;
             if (!string.IsNullOrEmpty(readyState)) PlayAction(readyState, look);
             if (zone != null)
@@ -143,7 +143,7 @@ public class EnemyGuardAbility : EnemyAbility
         float guardEnd = Time.time + guardDuration;
         while (Time.time < guardEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
 
@@ -158,7 +158,7 @@ public class EnemyGuardAbility : EnemyAbility
         float pauseEnd = Time.time + recovery;
         while (Time.time < pauseEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
     }

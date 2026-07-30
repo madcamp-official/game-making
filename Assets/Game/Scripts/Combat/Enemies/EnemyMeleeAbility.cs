@@ -53,7 +53,7 @@ public class EnemyMeleeAbility : EnemyAbility
         float end = Time.time + recovery;
         while (Time.time < end && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
         StopAction();

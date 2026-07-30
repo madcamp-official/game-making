@@ -120,7 +120,7 @@ public class EnemyBurrowAbility : EnemyAbility
         float stunEnd = Time.time + recovery;
         while (Time.time < stunEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
     }

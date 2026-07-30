@@ -323,7 +323,7 @@ MonoBehaviour:
     attackDamage: 22
     vineDamage: 9
   flashStepDuration: 0.15
-  healMissingFraction: 0.6
+  healMissingFraction: 0.45
 --- !u!114 &510344029345414639
 MonoBehaviour:
   m_ObjectHideFlags: 0

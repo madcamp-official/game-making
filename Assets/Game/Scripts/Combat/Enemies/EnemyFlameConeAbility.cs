@@ -12,6 +12,11 @@ using UnityEngine;
 /// 붙어 다녀서 멀어지는 것 말고는 답이 없었다. 회전을 늦추면 "옆으로 돌아 각을 벌린다"가
 /// 성립한다. 각도를 좁힌 것도 같은 이유다.
 ///
+/// 그래도 옆으로 도는 쪽이 멀어지는 쪽보다 한참 빡빡해서 각도를 55°→45°, 사거리를 6.2→5.2로
+/// 낮췄다. 대기 거리 4.2에서 옆으로 도는 플레이어의 각속도는 초당 68도, 조준은 25도이므로
+/// 초당 43도씩 벌어진다 — 반각 22.5°를 벗어나는 데 0.52초, 예고 0.75초 안에 든다.
+/// (55°였을 때는 0.64초라 예고가 거의 끝나서야 겨우 빠져나왔다.)
+///
 /// 화염에는 직접 피해만 있다. 감속도, 밀치기도, 바닥에 남는 불(장판)도 없다 —
 /// 분사가 끝나면 그 자리는 즉시 안전하다. 대신 분사가 끝나면 과열로 한동안 정지한다.
 /// 넓게 지지는 대신 쓰고 나면 빈틈이 큰, 전형적인 후열이다.
@@ -22,9 +27,9 @@ public class EnemyFlameConeAbility : EnemyAbility
     [Tooltip("예고 시간. 부채꼴이 플레이어를 따라 돌다가 분사 순간 고정된다.")]
     [SerializeField, Min(0.1f)] private float windup = 0.75f;
     [Tooltip("부채꼴의 반지름(사거리).")]
-    [SerializeField, Min(1f)] private float coneRange = 5f;
+    [SerializeField, Min(1f)] private float coneRange = 5.2f;
     [Tooltip("부채꼴의 전체 각도.")]
-    [SerializeField, Range(10f, 180f)] private float coneAngle = 55f;
+    [SerializeField, Range(10f, 180f)] private float coneAngle = 45f;
     [Tooltip("예고 중 조준이 도는 최대 속도(초당 각도). 플레이어가 옆으로 돌 때의 각속도보다 " +
              "느려야 회피가 성립한다 — 거리 4.2에서 플레이어(속도 5)의 각속도는 초당 약 68도다. " +
              "0이면 곧바로 따라붙어 옆으로 도는 회피가 통하지 않는다.")]
@@ -61,7 +66,7 @@ public class EnemyFlameConeAbility : EnemyAbility
         float aimAngle = AngleOf(aim);
         while (Time.time < windupEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
 
             // 곧바로 겨누지 않고 정해진 속도만큼만 돌린다. 이 한 줄이 "옆으로 돌아 피한다"를
             // 만든다 — 곧바로 따라붙으면 부채꼴이 몸에 붙어 다녀 멀어지는 것 말고는 답이 없다.
@@ -97,7 +102,7 @@ public class EnemyFlameConeAbility : EnemyAbility
         float nextFlame = 0f;
         while (Time.time < sprayEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
 
             // 불꽃 그림 — 부채꼴 안 아무 곳에나 잠깐 피었다 사라진다. 판정과 무관한 그림이라
             // 바닥에 아무것도 남기지 않는다. 프레임마다가 아니라 일정 간격으로만 피운다.
@@ -138,7 +143,7 @@ public class EnemyFlameConeAbility : EnemyAbility
         float overheatEnd = Time.time + overheatDuration;
         while (Time.time < overheatEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
     }

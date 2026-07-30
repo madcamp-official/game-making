@@ -22,10 +22,28 @@ public class PlayerEvolution : MonoBehaviour
     [SerializeField] private Stage[] stages;
     [SerializeField, Min(0f)] private float flashStepDuration = 0.15f;
 
-    [Tooltip("진화(=보스 클리어) 시 비어 있는 체력 중 몇 할을 채울지. 1이면 완전 회복.")]
-    [SerializeField, Range(0f, 1f)] private float healMissingFraction = 0.6f;
+    [Tooltip("진화(=보스 클리어) 시 비어 있는 체력 중 몇 할을 채울지. 1이면 완전 회복. " +
+             "최대 체력을 올린 뒤에 채우므로 늘어난 몫까지 회복 대상에 들어간다 — " +
+             "겉보기 회복량은 이 값보다 크다.")]
+    [SerializeField, Range(0f, 1f)] private float healMissingFraction = 0.45f;
 
     public int CurrentStageIndex { get; private set; }
+
+    /// <summary>
+    /// 이 층에 들어온 뒤 진화로 체력을 채운 적이 있는지.
+    ///
+    /// 층을 넘어갈 때도 회복이 있어서(<see cref="RoomFlowController"/>), 보스를 잡고 나가면
+    /// 한 층에 회복이 두 번 겹쳤다. 각각 비어 있는 체력의 6할이면 합쳐서 8할 4푼이 찬다 —
+    /// 체력 관리라는 것이 사실상 사라진다. 층마다 <b>한 번만</b> 회복하도록, 이미 진화로
+    /// 채웠으면 층 회복을 건너뛴다.
+    ///
+    /// 행복의알로 상점에서 미리 진화했을 때도 같은 값이 서므로, 진화 시점이 앞당겨져도
+    /// "층당 한 번"은 그대로다.
+    /// </summary>
+    public bool HealedThisFloor { get; private set; }
+
+    /// <summary>층이 바뀌었다. 다음 층에서 다시 한 번 회복할 수 있게 표시를 지운다.</summary>
+    public void NotifyFloorChanged() => HealedThisFloor = false;
 
     /// <summary>진화 연출이 진행 중인지. 연출 중 재진입을 막는다.</summary>
     public bool IsEvolving { get; private set; }
@@ -88,6 +106,7 @@ public class PlayerEvolution : MonoBehaviour
         if (newStages == null || newStages.Length == 0) return;
         stages = newStages;
         LastLearnedMove = null;
+        HealedThisFloor = false;
         SetStageImmediate(0);
     }
 
@@ -177,7 +196,7 @@ public class PlayerEvolution : MonoBehaviour
     /// 비어 있는 체력의 일부만 채우도록 바꿨다 (<see cref="healMissingFraction"/>).
     /// </summary>
     /// <param name="learnMove">
-    /// 기술을 하나 더 배울지. <b>진화할 때만 참이다.</b>
+    /// 진짜 진화인지. 기술 습득과 회복이 여기에 달려 있다 — 둘 다 <b>진화할 때만</b> 일어난다.
     ///
     /// 예전에는 이 안에서 무조건 <c>LearnNext()</c>를 불렀다. 진화가 이 함수를 부르는
     /// 유일한 길이던 시절에는 맞는 자리였지만, 판을 시작할 때 캐릭터의 1단계를 입히는
@@ -196,7 +215,14 @@ public class PlayerEvolution : MonoBehaviour
         if (health != null)
         {
             health.SetMaxHealth(next.maxHealth, refill: false);
-            if (!health.IsDead) health.HealMissingFraction(healMissingFraction);
+            // 회복은 진짜 진화일 때만 센다. 판을 시작하며 1단계를 입히는 길에서는 체력이
+            // 이미 가득이라 회복량이 0이지만, 그것까지 "이 층에서 회복했다"로 세면
+            // 1층을 넘어갈 때의 회복이 통째로 사라진다.
+            if (!health.IsDead && learnMove)
+            {
+                health.HealMissingFraction(healMissingFraction);
+                HealedThisFloor = true;
+            }
         }
 
         PlayerCombat combat = GetComponent<PlayerCombat>();

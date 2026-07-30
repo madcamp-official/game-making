@@ -114,7 +114,7 @@ public class EnemyStarLaserAbility : EnemyAbility
         float recoverEnd = Time.time + recovery;
         while (Time.time < recoverEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
     }

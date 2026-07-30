@@ -675,7 +675,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a8ce78b99ffe346ecacd96705dd567c5, type: 2}
   - {fileID: 11400000, guid: d9bfc60dfd55d4c1e86a09dce56adeaa, type: 2}
   playerSpawn: {x: -5.5, y: 0}
-  floorHealMissingFraction: 0.6
+  floorHealMissingFraction: 0.45
   corridorCloudSprite: {fileID: 21300000, guid: f48054c9735f3420099aae07ede8f991, type: 3}
 --- !u!4 &826172832
 Transform:

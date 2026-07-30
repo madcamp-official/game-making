@@ -78,8 +78,10 @@ public class CorridorCloud : MonoBehaviour
     }
 
     /// <summary>런타임에 구름을 세운다. 방마다 프리팹을 두지 않고 여기서 만든다.</summary>
+    /// <param name="size">그림을 늘릴 크기. 통로보다 넉넉해도 된다 — 이음매가 보이지 않아야 한다.</param>
+    /// <param name="blockHeight">몸을 막는 높이. 통로 구멍의 높이여야 한다.</param>
     public static CorridorCloud Create(Transform parent, string name, Vector2 localPosition,
-                                       Vector2 size, Sprite sprite, bool faceRight)
+                                       Vector2 size, float blockHeight, Sprite sprite, bool faceRight)
     {
         var go = new GameObject(name);
         go.transform.SetParent(parent, false);
@@ -100,15 +102,18 @@ public class CorridorCloud : MonoBehaviour
         }
 
         var box = go.AddComponent<BoxCollider2D>();
-        // ⚠️ 콜라이더는 안개 전체 크기로 준다. 예전에 1x1(원본 2x2칸을 스케일로 늘리던
-        // 시절의 값)을 뒀다가, 원본이 통로 크기가 되면서 한가운데 한 칸짜리 점이 됐고 —
-        // 통로 높이가 2칸이라 위아래로 비켜 돌아갈 수 있는 구멍이 났다.
-        // 방 쪽으로 반 칸 더 내밀어, 안개의 옅은 앞자락에도 발을 들일 수 없게 한다.
-        const float reach = 0.6f;
-        Vector2 world = new Vector2(size.x + reach, size.y);
+        // ⚠️ 막는 크기는 <b>통로 구멍과 똑같이</b> 준다 — 벽과 같은 판정이어야 한다.
+        //
+        // 두 번 어긋났던 자리다. 처음에는 1x1(원본 2x2칸을 스케일로 늘리던 시절의 값)이라
+        // 한가운데 한 칸짜리 점이 됐고, 통로 높이가 2칸이라 위아래로 비켜 돌아갈 구멍이 났다.
+        // 그 반동으로 그림 크기(높이 2.33칸)에 방 쪽으로 반 칸(reach)까지 더 내밀었더니,
+        // 이번에는 벽 안쪽 면(±7)보다 0.3칸 안으로 들어와 <b>방 안에</b> 보이지 않는 턱이 생겼다 —
+        // 오른쪽 벽에 붙어 오르내리기만 해도 아무것도 없는 곳에 걸렸다.
+        //
+        // 그림은 넉넉히 덮되(이음매가 보이면 안 된다), 막는 것은 뚫린 만큼만 막는다.
         Vector3 s = go.transform.localScale;
-        box.size = new Vector2(world.x / s.x, world.y / s.y);
-        box.offset = new Vector2((faceRight ? reach : -reach) * 0.5f / s.x, 0f);
+        box.size = new Vector2(size.x / s.x, blockHeight / s.y);
+        box.offset = Vector2.zero;
 
         return go.AddComponent<CorridorCloud>();
     }

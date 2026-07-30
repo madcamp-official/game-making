@@ -138,6 +138,27 @@ public abstract class EnemyAbility : MonoBehaviour
     }
 
     /// <summary>
+    /// 시전 중 제자리에 붙잡아 둔다. <b>단 넉백으로 밀려나는 동안에는 놓아 준다.</b>
+    ///
+    /// 시전 중인 적은 <see cref="EnemyController"/>의 기본 AI가 꺼져 있어, 몸을 잡고 있는 것이
+    /// <see cref="Perform"/> 안의 이 한 줄뿐이다. 그래서 매 프레임 속도를 0으로 눌러 버리면
+    /// <see cref="EnemyController.ApplyKnockback"/>이 넣은 속도가 <b>한 프레임 만에 지워진다</b> —
+    /// 예고·후딜처럼 가만히 서 있는 동안 때리면 아무 반응이 없었다. 2층 적들이 패턴 중에
+    /// 굳어 있는 시간이 길어서 특히 두드러졌다.
+    ///
+    /// 놓아 주는 시간은 <c>knockbackStunDuration</c>(0.15초)뿐이고, 그 뒤 컨트롤러가
+    /// 속도를 거두면 다시 여기서 붙잡는다. 그래서 패턴이 무너지지 않고 "살짝 밀린다"에서 끝난다.
+    ///
+    /// 예고 그림과 몸이 어긋나면 안 되는 곳(스타 레이저의 빔, 강챙이 소용돌이의 중심,
+    /// 돌진 중의 몸)에서는 이걸 쓰지 않고 그대로 0으로 누른다.
+    /// </summary>
+    protected void HoldPosition()
+    {
+        if (Controller != null && Controller.IsKnockedBack) return;
+        Body.linearVelocity = Vector2.zero;
+    }
+
+    /// <summary>
     /// 시전 동작을 재생하며 바라보는 방향을 고정한다.
     /// Charge 시트가 없는 적이면 <see cref="EnemyAnimator"/>가 알아서 무시한다.
     /// </summary>

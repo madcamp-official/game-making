@@ -75,7 +75,7 @@ public class EnemyCurrentBandAbility : EnemyAbility
         float telegraphEnd = Time.time + telegraph;
         while (Time.time < telegraphEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
         if (Health.IsDead) yield break;

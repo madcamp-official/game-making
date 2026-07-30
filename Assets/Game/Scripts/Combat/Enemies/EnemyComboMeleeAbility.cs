@@ -106,7 +106,7 @@ public class EnemyComboMeleeAbility : EnemyAbility
         float readyEnd = Time.time + windup;
         while (Time.time < readyEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             if (!string.IsNullOrEmpty(readyState)) PlayAction(readyState, DirectionToPlayer);
             yield return null;
         }
@@ -127,7 +127,7 @@ public class EnemyComboMeleeAbility : EnemyAbility
                 float gap = Time.time + betweenDashes;
                 while (Time.time < gap && !Health.IsDead)
                 {
-                    Body.linearVelocity = Vector2.zero;
+                    HoldPosition();
                     yield return null;
                 }
             }
@@ -139,7 +139,7 @@ public class EnemyComboMeleeAbility : EnemyAbility
         float pauseEnd = Time.time + (connected ? hitPause : missPause);
         while (Time.time < pauseEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
     }
@@ -162,7 +162,13 @@ public class EnemyComboMeleeAbility : EnemyAbility
         float end = Time.time + telegraph;
         while (Time.time < end && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
+            // 그린 자리를 몸에 붙여 둔다. 예고하는 동안 넉백으로 밀려날 수 있는데
+            // (HoldPosition이 그 0.15초는 놓아 준다), 그림만 처음 자리에 남으면
+            // 예고와 실제 돌진이 어긋난다. 방향은 이미 고정됐고 시작점만 따라간다.
+            Vector2 at = transform.position;
+            if (path != null) path.transform.position = at + aim * (dashDistance * 0.5f);
+            if (zone != null) zone.transform.position = at + aim * HitTravel;
             yield return null;
         }
     }

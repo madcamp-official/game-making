@@ -59,7 +59,7 @@ public class EnemyBoomerangAbility : EnemyAbility
         float pauseEnd = Time.time + (boneConnected ? hitRecovery : missRecovery);
         while (Time.time < pauseEnd && !Health.IsDead)
         {
-            Body.linearVelocity = Vector2.zero;
+            HoldPosition();
             yield return null;
         }
     }
