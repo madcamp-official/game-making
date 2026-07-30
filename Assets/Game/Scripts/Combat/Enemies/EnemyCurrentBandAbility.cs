@@ -25,8 +25,8 @@ public class EnemyCurrentBandAbility : EnemyAbility
     [Tooltip("예고에 띄우는 방향 화살표의 길이.")]
     [SerializeField, Min(0.5f)] private float telegraphArrowSize = 2.4f;
     [Tooltip("해류 안의 플레이어를 미는 속도. 플레이어(5)보다 느려 거슬러 걸을 수 있다.")]
-    [SerializeField, Min(0f)] private float pushSpeed = 2.4f;
-    [SerializeField, Min(0.05f)] private float telegraph = 0.8f;
+    [SerializeField, Min(0f)] private float pushSpeed = 3.2f;
+    [SerializeField, Min(0.05f)] private float telegraph = 0.55f;
     [SerializeField, Min(0.5f)] private float bandDuration = 4f;
     [SerializeField] private Color bandColor = new Color(0.35f, 0.7f, 1f, 0.28f);
     [SerializeField] private Color arrowColor = new Color(0.08f, 0.28f, 0.62f, 0.8f);

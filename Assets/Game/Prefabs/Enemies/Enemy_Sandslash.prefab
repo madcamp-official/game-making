@@ -222,14 +222,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3.9
+  moveSpeed: 3.7
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
   attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 3
-  goldRewardMax: 7
+  goldRewardMin: 5
+  goldRewardMax: 9
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 0.6
@@ -290,7 +290,7 @@ MonoBehaviour:
   dashDamage: 12
   dashHitRadius: 0.6
   spikeWindup: 0.55
-  spikeCount: 10
+  spikeCount: 8
   spikeSpeed: 8
   spikeDamage: 12
   spikeRadius: 0.17

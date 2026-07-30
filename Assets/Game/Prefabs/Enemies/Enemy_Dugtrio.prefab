@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 2.5
+  moveSpeed: 2.4
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -279,7 +279,7 @@ MonoBehaviour:
   minRange: 0
   cooldown: 2.3
   initialDelay: 1.8
-  diveSpeed: 10.5
+  diveSpeed: 10
   maxDiveTime: 2.4
   arriveDistance: 0.3
   submergedAlpha: 0.45

@@ -141,10 +141,10 @@ public static class PrimitiveSprites
     }
 
     /// <summary>
-    /// 돌진 예고 한 장 — <b>지나갈 복도와 맞는 부채꼴을 한 도형으로 합쳐서</b> 굽는다.
+    /// 돌진 예고 한 장 — <b>지나갈 복도와 실제로 맞는 사각형을 한 도형으로 합쳐서</b> 굽는다.
     ///
     /// 둘을 따로 그리면 겹친 자리에서 알파가 두 번 쌓여 그 부분만 진해진다. 한 번의 공격을
-    /// 그린 것인데 경계선이 생겨 셋으로 나뉘어 보였다 — 복도, 부채꼴, 그리고 둘이 겹친 띠.
+    /// 그린 것인데 경계선이 생겨 셋으로 나뉘어 보였다 — 복도, 판정 사각형, 그리고 겹친 띠.
     /// 여기서는 두 모양의 <b>합집합</b>을 한 텍스처에 굽고 겹친 자리는 진한 쪽을 취하므로,
     /// 이음매 없이 하나의 덩어리로 읽힌다.
     ///
@@ -152,26 +152,26 @@ public static class PrimitiveSprites
     /// <paramref name="corridorWeight"/>가 복도 쪽 알파를 낮춰 두기 때문이다 — 색을 두 번
     /// 칠하는 대신 텍스처 안에 진하기 차이를 새겨 둔다.
     ///
-    /// 좌표는 <b>월드 단위 그대로</b>다. 피벗이 몸 중심(x=0)에 놓이므로 부르는 쪽은
-    /// localScale을 건드리지 말고 자리와 회전만 맞추면 된다.
+    /// 좌표는 <b>월드 단위 그대로</b>이고 +X가 돌진 방향이다. 피벗이 몸 중심(x=0)에 놓이므로
+    /// 부르는 쪽은 localScale을 건드리지 말고 자리와 회전만 맞추면 된다.
     /// </summary>
     /// <param name="corridorLength">몸 중심에서 돌진이 끝나는 곳까지.</param>
     /// <param name="corridorHalfWidth">복도 반너비 (몸통 굵기의 절반).</param>
-    /// <param name="hitCenter">타격 순간 몸이 있을 자리까지의 거리.</param>
-    /// <param name="hitRadius">그 자리에서의 판정 반지름.</param>
-    /// <param name="corridorWeight">복도 알파를 부채꼴 대비 몇 할로 둘지 (0~1).</param>
+    /// <param name="hitStart">몸 중심에서 판정 사각형이 시작되는 곳까지 (타격 프레임의 자리).</param>
+    /// <param name="hitLength">판정 사각형이 앞으로 뻗는 길이.</param>
+    /// <param name="hitHalfWidth">판정 사각형의 반너비.</param>
+    /// <param name="corridorWeight">복도 알파를 판정 쪽 대비 몇 할로 둘지 (0~1).</param>
     public static Sprite DashZone(float corridorLength, float corridorHalfWidth,
-                                  float hitCenter, float hitRadius, float sweepDegrees,
+                                  float hitStart, float hitLength, float hitHalfWidth,
                                   float corridorWeight)
     {
-        var key = (Q(corridorLength), Q(corridorHalfWidth), Q(hitCenter), Q(hitRadius),
-                   Mathf.Clamp(Mathf.RoundToInt(sweepDegrees), 1, 360),
-                   Mathf.RoundToInt(Mathf.Clamp01(corridorWeight) * 20f));
+        var key = (Q(corridorLength), Q(corridorHalfWidth), Q(hitStart), Q(hitLength),
+                   Q(hitHalfWidth), Mathf.RoundToInt(Mathf.Clamp01(corridorWeight) * 20f));
 
         if (!dashZones.TryGetValue(key, out Sprite sprite) || sprite == null)
         {
-            sprite = MakeDashZone(corridorLength, corridorHalfWidth, hitCenter, hitRadius,
-                                  sweepDegrees, Mathf.Clamp01(corridorWeight));
+            sprite = MakeDashZone(corridorLength, corridorHalfWidth, hitStart, hitLength,
+                                  hitHalfWidth, Mathf.Clamp01(corridorWeight));
             dashZones[key] = sprite;
         }
         return sprite;
@@ -191,16 +191,16 @@ public static class PrimitiveSprites
     private const int DashZoneMaxPixels = 512;
 
     private static Sprite MakeDashZone(float corridorLength, float corridorHalfWidth,
-                                       float hitCenter, float hitRadius, float sweepDegrees,
+                                       float hitStart, float hitLength, float hitHalfWidth,
                                        float corridorWeight)
     {
         const float ppu = DashZonePixelsPerUnit;
-        float halfSweep = sweepDegrees * 0.5f;
+        float hitEnd = hitStart + hitLength;
 
-        // 두 모양을 모두 담는 사각형. 부채꼴이 몸 뒤로 벌어질 수 있어 왼쪽도 열어 둔다.
-        float minX = Mathf.Min(0f, hitCenter - hitRadius);
-        float maxX = Mathf.Max(corridorLength, hitCenter + hitRadius);
-        float halfY = Mathf.Max(corridorHalfWidth, hitRadius);
+        // 두 모양을 모두 담는 사각형. 판정이 몸 뒤에서 시작할 수도 있어 왼쪽도 열어 둔다.
+        float minX = Mathf.Min(0f, hitStart);
+        float maxX = Mathf.Max(corridorLength, hitEnd);
+        float halfY = Mathf.Max(corridorHalfWidth, hitHalfWidth);
 
         int width = Mathf.Clamp(Mathf.CeilToInt((maxX - minX) * ppu), 1, DashZoneMaxPixels);
         int height = Mathf.Clamp(Mathf.CeilToInt(halfY * 2f * ppu), 1, DashZoneMaxPixels);
@@ -224,20 +224,19 @@ public static class PrimitiveSprites
                     corridor = Mathf.Min(endEdge, sideEdge);
                 }
 
-                // --- 부채꼴: 타격 순간의 자리에서 앞쪽으로 벌어진 판정 범위
-                float dx = wx - hitCenter;
-                float distance = Mathf.Sqrt(dx * dx + wy * wy);
-                float radiusEdge = Mathf.Clamp01((hitRadius - distance) * ppu);
-                // 각도 경계도 호의 길이로 환산해 깎는다. 중심에 가까울수록 한 도가 짧아지므로
-                // 각도를 그대로 쓰면 안쪽만 과하게 깎여 부채꼴 꼭지가 뾰족하게 파인다.
-                float angle = Mathf.Abs(Mathf.Atan2(wy, dx) * Mathf.Rad2Deg);
-                float angleEdge = distance < 1f / ppu
-                    ? 1f
-                    : Mathf.Clamp01((halfSweep - angle) * Mathf.Deg2Rad * distance * ppu);
-                float sector = Mathf.Min(radiusEdge, angleEdge);
+                // --- 판정: 타격 프레임의 자리에서 앞으로 뻗는 사각형.
+                //     실제로 재는 도형(EnemyComboMeleeAbility.HitBox)과 같은 모양이다.
+                float hit = 0f;
+                if (hitLength > 0f && hitHalfWidth > 0f)
+                {
+                    float nearEdge = Mathf.Clamp01((wx - hitStart) * ppu);
+                    float farEdge = Mathf.Clamp01((hitEnd - wx) * ppu);
+                    float sideEdge = Mathf.Clamp01((hitHalfWidth - Mathf.Abs(wy)) * ppu);
+                    hit = Mathf.Min(Mathf.Min(nearEdge, farEdge), sideEdge);
+                }
 
                 // 합집합 — 겹친 자리는 진한 쪽만 남는다. 더하면 그 띠만 두 배로 짙어진다.
-                float alpha = Mathf.Max(corridor * corridorWeight, sector);
+                float alpha = Mathf.Max(corridor * corridorWeight, hit);
                 pixels[y * width + x] = new Color(1f, 1f, 1f, alpha);
             }
         }

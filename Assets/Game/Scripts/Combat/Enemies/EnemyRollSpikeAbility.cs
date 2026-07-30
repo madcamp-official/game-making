@@ -58,7 +58,7 @@ public class EnemyRollSpikeAbility : EnemyAbility
     [SerializeField, Min(0f)] private float spikeWindup = 0.55f;
     [Tooltip("사방으로 뻗는 가시의 개수. 갈래 사이의 빈틈이 곧 설 자리다 — " +
              "늘릴수록 빈틈이 좁아진다.")]
-    [SerializeField, Min(2)] private int spikeCount = 10;
+    [SerializeField, Min(2)] private int spikeCount = 6;
     [SerializeField, Min(0f)] private float spikeSpeed = 8f;
     [SerializeField, Min(0)] private int spikeDamage = 12;
     [Tooltip("가시의 판정 반지름. 그림은 이보다 길쭉하지만 판정은 이 원이다.")]

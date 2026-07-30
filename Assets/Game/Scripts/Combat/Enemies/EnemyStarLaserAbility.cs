@@ -23,15 +23,15 @@ public class EnemyStarLaserAbility : EnemyAbility
     [SerializeField, Min(0f)] private float edgeInset = 1.1f;
     [Tooltip("플레이어와 이 거리 이상 떨어진 지점만 고른다 — 코앞 순간이동은 반칙 같다.")]
     [SerializeField, Min(0f)] private float minTeleportDistance = 2.6f;
-    [SerializeField, Min(0.05f)] private float teleportTelegraph = 0.45f;
+    [SerializeField, Min(0.05f)] private float teleportTelegraph = 0.32f;
 
     [Header("레이저")]
     [SerializeField, Min(0.1f)] private float laserLength = 13f;
     [SerializeField, Min(0.05f)] private float laserWidth = 0.55f;
     [Tooltip("순간이동 후 레이저를 예고하는 시간. 어떤 경우에도 줄지 않는다.")]
-    [SerializeField, Min(0.05f)] private float laserTelegraph = 0.75f;
+    [SerializeField, Min(0.05f)] private float laserTelegraph = 0.55f;
     [Tooltip("레이저가 켜져 피해 판정을 유지하는 시간.")]
-    [SerializeField, Min(0.05f)] private float laserDuration = 0.35f;
+    [SerializeField, Min(0.05f)] private float laserDuration = 0.4f;
     [SerializeField, Min(0)] private int laserDamage = 18;
     [Tooltip("발사 중 Idle 동작을 이만큼 배속해 회전을 빠르게 보여 준다.")]
     [SerializeField, Min(1f)] private float spinSpeedMultiplier = 2.6f;
@@ -40,7 +40,7 @@ public class EnemyStarLaserAbility : EnemyAbility
 
     [Header("후딜")]
     [Tooltip("발사 후 정지해 공격받을 기회를 주는 시간.")]
-    [SerializeField, Min(0f)] private float recovery = 1.1f;
+    [SerializeField, Min(0f)] private float recovery = 0.7f;
 
     /// <summary>직전에 × 모양을 썼는지. 매번 반대 모양을 쓴다.</summary>
     private bool lastWasDiagonal;

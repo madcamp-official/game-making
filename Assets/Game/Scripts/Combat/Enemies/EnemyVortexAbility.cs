@@ -15,11 +15,11 @@ public class EnemyVortexAbility : EnemyAbility
     [Header("소용돌이(흡인)")]
     [Tooltip("이 반지름 안의 플레이어를 당긴다. 예고 원과 같은 크기다.")]
     [SerializeField, Min(0.1f)] private float vortexRadius = 4f;
-    [SerializeField, Min(0.05f)] private float telegraph = 0.6f;
+    [SerializeField, Min(0.05f)] private float telegraph = 0.45f;
     [Tooltip("당기는 시간.")]
-    [SerializeField, Min(0.1f)] private float pullDuration = 1.5f;
+    [SerializeField, Min(0.1f)] private float pullDuration = 1.2f;
     [Tooltip("당기는 속도. 플레이어(5)보다 확실히 느려야 반대로 걸어 빠져나갈 수 있다.")]
-    [SerializeField, Min(0f)] private float pullSpeed = 2.7f;
+    [SerializeField, Min(0f)] private float pullSpeed = 3.4f;
     [SerializeField] private Color vortexColor = new Color(0.25f, 0.55f, 0.95f, 0.35f);
 
     [Header("충격파")]
@@ -32,7 +32,7 @@ public class EnemyVortexAbility : EnemyAbility
 
     [Header("후딜")]
     [Tooltip("충격파 뒤의 후딜. 비교적 길게 둬서 확실한 반격 기회를 준다.")]
-    [SerializeField, Min(0f)] private float recovery = 1.5f;
+    [SerializeField, Min(0f)] private float recovery = 0.9f;
 
     protected override IEnumerator Perform()
     {

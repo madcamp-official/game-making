@@ -209,7 +209,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 150
+  maxHealth: 205
   invincibleDuration: 0.3
 --- !u!114 &4277473516659756520
 MonoBehaviour:
@@ -223,7 +223,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 2.9
+  moveSpeed: 3.6
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -278,18 +278,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyVortexAbility
   range: 4.8
   minRange: 0
-  cooldown: 6
-  initialDelay: 2.2
+  cooldown: 4
+  initialDelay: 1.6
   vortexRadius: 4
-  telegraph: 0.6
-  pullDuration: 1.5
-  pullSpeed: 2.7
+  telegraph: 0.45
+  pullDuration: 1.2
+  pullSpeed: 3.4
   vortexColor: {r: 0.25, g: 0.55, b: 0.95, a: 0.35}
   blastRadius: 2
   blastDamage: 12
   blastKnockback: 13
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.5}
-  recovery: 1.5
+  recovery: 0.9
 --- !u!114 &7879367202282387568
 MonoBehaviour:
   m_ObjectHideFlags: 0

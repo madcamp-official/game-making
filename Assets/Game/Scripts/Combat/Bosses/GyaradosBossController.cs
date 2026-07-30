@@ -292,8 +292,12 @@ public class GyaradosBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float phaseRoarDuration = 0.8f;
 
     [Header("카메라")]
+    // 0 — 다른 방과 같은 시야를 쓴다. 예전에는 6.8로 넓혀서 하이드로펌프 원점과 잠항
+    // 표시까지 담았는데, 이 방만 화면이 확 넓어지는 것이 눈에 걸렸다. 넓히려면
+    // PixelPerfectCamera를 꺼야 해서 픽셀 스냅까지 함께 잃는 것도 값이 컸다.
+    // 다시 넓힐 일이 있으면 6.8로 되돌리면 된다 — 걷어낸 것은 값뿐이고 길은 그대로다.
     [Tooltip("위·아래 하이드로펌프 원점과 잠항 표시가 화면에 들어오도록 넓히는 값. 0이면 그대로 둔다.")]
-    [SerializeField, Min(0f)] private float arenaCameraSize = 6.8f;
+    [SerializeField, Min(0f)] private float arenaCameraSize;
 
     [Header("디버그")]
     [Tooltip("상태·패턴·해류·경로를 콘솔에 남긴다. 수치를 조정할 때만 켠다.")]

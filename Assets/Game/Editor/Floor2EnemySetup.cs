@@ -41,8 +41,8 @@ public static class Floor2EnemySetup
         // 맞히면 거기서 끝(0.7초), 세 번 다 빗나가면 지쳐서 길게 멈춘다(1.6초).
         new EnemySpec
         {
-            name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.4f,
-            goldMin = 3, goldMax = 7,
+            name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.2f,
+            goldMin = 5, goldMax = 9,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
             {
@@ -54,7 +54,8 @@ public static class Floor2EnemySetup
                 ("dashDistance", 2.2f), ("dashSpeed", 9f), ("hitDelay", 0.18f),
                 // 피격 무적(0.5초)보다 짧다 — 연타가 다 들어가지는 않지만 쉴 틈도 주지 않는다.
                 ("betweenDashes", 0.38f),
-                ("reach", 1.2f), ("sweepAngle", 150f), ("damage", 15),
+                // 부채꼴을 걷어내고 직사각형으로. 앞이면 맞고 옆이면 안 맞는다.
+                ("hitLength", 1.5f), ("hitWidth", 1.6f), ("damage", 15),
                 ("hitPause", 0.5f), ("missPause", 1f),
                 // 예고 색을 붉은색으로 통일했다 — 회색 경로와 붉은 피해 범위가 섞여 읽히지 않았다.
                 ("pathColor", new Color(0.88f, 0.12f, 0.2f, 0.24f)),
@@ -66,9 +67,9 @@ public static class Floor2EnemySetup
         // 굴러온 자리가 곧 가시의 중심이라 첫 회피가 두 번째 회피를 정한다.
         new EnemySpec
         {
-            // 이속은 3.0(처음)과 3.6(상향) 사이. 붙는 맛은 살리되 플레이어(5)를 따라붙지는 못한다.
-            name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.9f,
-            goldMin = 3, goldMax = 7, knockbackMultiplier = 0.6f,
+            // 플레이어(5)보다 확실히 느리게 두어 구르기 사이에 거리를 다시 벌릴 수 있게 한다.
+            name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.7f,
+            goldMin = 5, goldMax = 9, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyRollSpikeAbility),
             abilityValues = new (string, object)[]
             {
@@ -79,8 +80,10 @@ public static class Floor2EnemySetup
                 // 스라크 돌진(5.5)의 절반쯤. 붙는 수단이지 가로지르는 거리가 아니다.
                 ("windup", 0.5f), ("dashDistance", 2.8f), ("dashSpeed", 10f),
                 ("dashDamage", 12), ("dashHitRadius", 0.6f),
-                // 열 갈래면 거리 3에서 갈래 사이가 1.9칸 — 플레이어(폭 0.7)가 설 만하다.
-                ("spikeWindup", 0.55f), ("spikeCount", 10), ("spikeSpeed", 8f),
+                // 여덟 갈래. 거리 3에서 갈래 사이가 약 2.4칸이라 몸(0.7칸)이 지나갈 길은
+                // 여전히 남지만, 아무렇게나 서 있어도 비는 자리에 걸리던 여섯 갈래보다
+                // 확실히 골라 서야 한다.
+                ("spikeWindup", 0.55f), ("spikeCount", 8), ("spikeSpeed", 8f),
                 ("spikeDamage", 12), ("spikeRadius", 0.17f), ("spikeLifetime", 1.6f),
                 ("spikeTelegraphLength", 5f),
                 // 몸 펴기(0.14) + 정지(0.9) ≈ 1초 — 다 뿌리고 나면 치르는 값이다.
@@ -91,8 +94,8 @@ public static class Floor2EnemySetup
         // 투척 자세로 무방비다. 맞혔으면 0.7초, 왕복이 다 빗나가면 1.3초 정지.
         new EnemySpec
         {
-            name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.6f,
-            goldMin = 3, goldMax = 7, keepDistance = 3.2f,
+            name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.4f,
+            goldMin = 5, goldMax = 9, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
             {
@@ -109,7 +112,7 @@ public static class Floor2EnemySetup
         {
             // 넉백 배율 1.6 — 몸통박치기(힘 6)에 맞으면 9.6으로 밀려난다. 파고들 때의 속도(9.5)와
             // 같게 맞춘 값이다. 맞고 땅속으로 밀려나는 것도 이 적에게는 '이동'이라 느리면 답답하다.
-            name = "Dugtrio", health = 240, scale = 1.35f, moveSpeed = 2.5f,
+            name = "Dugtrio", health = 240, scale = 1.35f, moveSpeed = 2.4f,
             goldMin = 7, goldMax = 17, knockbackMultiplier = 1.1f, basicAI = false,
             boxSize = new Vector2(0.9f, 0.55f),
             ability = typeof(EnemyBurrowAbility),
@@ -123,15 +126,15 @@ public static class Floor2EnemySetup
                 ("recovery", 1.15f),
                 // 맞고 나서 땅속으로 사라지는 것이 유일한 도피다. 플레이어(5)보다 확실히 빨라야
                 // 쫓아가 잡는 게 아니라 놓치는 느낌이 된다.
-                ("diveSpeed", 10.5f),
+                ("diveSpeed", 10f),
             },
         },
         // 나인테일 — 후열. 중거리를 지키다 부채꼴 예고와 함께 넓게 화염을 뿜는다.
         // 잔류 장판 없음, 직접 피해만. 분사가 끝나면 과열로 2초 정지.
         new EnemySpec
         {
-            name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 4f,
-            goldMin = 4, goldMax = 10, keepDistance = 4.2f,
+            name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 3.8f,
+            goldMin = 5, goldMax = 11, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
             {
@@ -167,41 +170,45 @@ public static class Floor2EnemySetup
 
     // 방 구성. 방 이름 → (프리팹 이름, 로컬 좌표). 방 안쪽은 대략 ±6 × ±4다.
     //
-    // 마릿수를 줄이고 한 마리를 강하게 했다. 다섯이 한꺼번에 달려들면 누구의 예고인지
-    // 읽을 수가 없어, 결국 몸으로 부딪히는 싸움이 된다 — 2층이 피하려던 바로 그것이다.
-    // 셋 안팎이면 "지금 누가 멈출 차례인지"를 눈으로 좇을 수 있다.
-    // 닥트리오는 엘리트라 방마다 한 마리를 넘지 않고, 뒤쪽 두 방에만 나온다.
+    // 전투방당 3 → 4 → 4 → 5마리로 완만하게 늘린다. 원거리 견제 둘과 근접 압박 둘을
+    // 기본 상한으로 삼고, 마지막 방에만 닥트리오 한 마리를 더한다. 한 화면에 예고가 너무 많이
+    // 겹쳐 피할 길이 사라지지 않으면서도 뒤쪽 방으로 갈수록 조합이 복잡해지는 구성이다.
     private static readonly Dictionary<string, (string enemy, Vector2 at)[]> Rooms =
         new Dictionary<string, (string, Vector2)[]>
     {
-        // 1번방 — 근접 둘의 소개. 돌진(성원숭)과 단발 강타(고지)를 따로 배운다.
+        // 1번방 — 성원숭의 직사각형 한 겹을 익히면서 왕복 뼈다귀 하나를 함께 본다.
+        // 이 층에서 처음 만나는 적이라, 읽을 것이 "앞이냐 옆이냐" 하나뿐인 쪽을 앞에 둔다.
         ["F2Room1_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(2.2f, 0f)),
-            ("Primeape", new Vector2(4.6f, 2.4f)),
-            ("Primeape", new Vector2(4.6f, -2.4f)),
+            ("Primeape", new Vector2(2.4f, 2.7f)),
+            ("Primeape", new Vector2(1.9f, -2.9f)),
+            ("Marowak", new Vector2(5.6f, 0.1f)),
         },
-        // 2번방 — 근접을 상대하는 동안 왕복 뼈다귀가 등 뒤를 노린다.
+        // 2번방 — 서로 다른 전위 둘을 상대하며 위아래에서 돌아오는 뼈를 피한다.
         ["F2Room2_Combat"] = new (string, Vector2)[]
         {
-            ("Primeape", new Vector2(2.4f, 1.8f)),
-            ("Sandslash", new Vector2(2.4f, -1.8f)),
-            ("Marowak", new Vector2(5.4f, 0f)),
+            ("Primeape", new Vector2(1.8f, -0.4f)),
+            ("Sandslash", new Vector2(3.6f, 3f)),
+            ("Marowak", new Vector2(5.8f, -2.6f)),
+            ("Marowak", new Vector2(5.3f, 2.5f)),
         },
-        // 4번방 — 엘리트 첫 등장. 전위 뒤에서 화염이 길을 막고, 발밑에서 기습이 온다.
+        // 4번방 — 고지 둘이 압박하고, 서로 다른 후열 공격 하나씩이 빈 길을 바꾼다.
+        // 고지는 구르기와 가시로 자리를 두 번 묻는 적이라 뒤쪽 방으로 옮겼다.
         ["F2Room4_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(2.2f, 1.8f)),
-            ("Ninetales", new Vector2(5.4f, -1.6f)),
-            ("Dugtrio", new Vector2(4f, 3.2f)),
+            ("Sandslash", new Vector2(1.6f, 1.3f)),
+            ("Sandslash", new Vector2(3.2f, -2.6f)),
+            ("Ninetales", new Vector2(6f, 3f)),
+            ("Marowak", new Vector2(0.6f, -3.6f)),
         },
-        // 5번방 — 혼합 전투. 멈출 적을 골라 때리는 층의 최종 시험.
+        // 5번방 — 두 전위·두 화염에 닥트리오 한 마리를 더한 층의 최종 시험.
         ["F2Room5_Combat"] = new (string, Vector2)[]
         {
-            ("Primeape", new Vector2(2.4f, 2f)),
-            ("Marowak", new Vector2(5.6f, -2.2f)),
-            ("Ninetales", new Vector2(5.6f, 2.2f)),
-            ("Dugtrio", new Vector2(3.4f, -3f)),
+            ("Sandslash", new Vector2(1.4f, -1f)),
+            ("Sandslash", new Vector2(4.2f, 2.2f)),
+            ("Ninetales", new Vector2(6.2f, -2.4f)),
+            ("Ninetales", new Vector2(5f, 3.4f)),
+            ("Dugtrio", new Vector2(0.2f, 0.6f)),
         },
     };
 

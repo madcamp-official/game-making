@@ -71,7 +71,7 @@ public class AttackTelegraph : MonoBehaviour
     }
 
     /// <summary>
-    /// 돌진 예고 — 지나갈 복도와 맞는 부채꼴을 <b>한 도형으로</b> 그린다.
+    /// 돌진 예고 — 지나갈 복도와 실제로 맞는 사각형을 <b>한 도형으로</b> 그린다.
     /// 두 모양을 따로 얹으면 겹친 자리만 짙어져 한 공격이 셋으로 나뉘어 보인다
     /// (<see cref="PrimitiveSprites.DashZone"/>에 자세히 적어 두었다).
     ///
@@ -80,15 +80,15 @@ public class AttackTelegraph : MonoBehaviour
     /// </summary>
     public static AttackTelegraph CreateDashZone(Transform parent, Vector2 origin, Vector2 direction,
                                                  float corridorLength, float corridorHalfWidth,
-                                                 float hitCenter, float hitRadius, float sweepAngle,
+                                                 float hitStart, float hitLength, float hitHalfWidth,
                                                  Color corridorColor, Color hitColor)
     {
         Vector2 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
 
-        // 복도는 부채꼴보다 옅게. 텍스처에 그 비율을 새겨 두고, 렌더러는 진한 쪽 알파로 칠한다.
+        // 복도는 판정 쪽보다 옅게. 텍스처에 그 비율을 새겨 두고, 렌더러는 진한 쪽 알파로 칠한다.
         float weight = hitColor.a > 0.001f ? corridorColor.a / hitColor.a : 1f;
         Sprite sprite = PrimitiveSprites.DashZone(corridorLength, corridorHalfWidth,
-                                                  hitCenter, hitRadius, sweepAngle, weight);
+                                                  hitStart, hitLength, hitHalfWidth, weight);
 
         // 스프라이트가 이미 월드 단위이고 피벗이 몸 중심이라, 자리와 회전만 맞추면 된다.
         AttackTelegraph telegraph = Create(parent, origin, sprite, hitColor);
