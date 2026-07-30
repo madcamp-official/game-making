@@ -56,6 +56,33 @@ public class EnemyController : MonoBehaviour
     /// <summary>아직 넉백으로 밀려나는 중인지. 이 동안에는 능력을 시전하지 않는다.</summary>
     public bool IsKnockedBack => knockbackActive && Time.time < stunnedUntil;
 
+    /// <summary>지금 발이 묶여 있는지. 그림에 찬 기운을 입힐지 정하는 데 쓴다.</summary>
+    public bool IsSlowed => Time.time < slowUntil;
+
+    /// <summary>
+    /// 발을 묶는다. 걷는 속도에만 걸린다 — 이미 시작한 돌진이나 잠수처럼 능력이 직접
+    /// 속도를 넣는 동작은 그대로 간다. <b>내지른 것은 끝까지 간다</b>가 맞고, 그래야
+    /// 예고를 보고 자리를 잡는 판단이 감속 여부로 뒤집히지 않는다.
+    ///
+    /// 보스에게는 저절로 닿지 않는다. 보스는 <see cref="basicAIEnabled"/>가 꺼져 있어
+    /// 전용 컨트롤러가 직접 움직이므로, 걷는 속도를 깎아도 쓰이는 곳이 없다.
+    /// 보스 이동까지 늦추면 패턴 사이 거리 계산이 통째로 무너진다.
+    /// </summary>
+    /// <param name="multiplier">남는 속도의 비율. 0.55면 45% 느려진다.</param>
+    public void ApplySlow(float multiplier, float duration)
+    {
+        if (health.IsDead || duration <= 0f) return;
+
+        float clamped = Mathf.Clamp01(multiplier);
+        // 겹쳐 걸리면 더 센 쪽(더 작은 배율)을 남기고, 시간은 늘 늘어난다.
+        // 약한 감속을 나중에 걸었다고 강한 감속이 풀리면 순서에 따라 결과가 달라진다.
+        if (!IsSlowed || clamped < slowMultiplier) slowMultiplier = clamped;
+        slowUntil = Mathf.Max(slowUntil, Time.time + duration);
+        // 다시 칠하게 한다. 돌진처럼 몸빛을 흰색으로 되돌리는 능력이 사이에 끼면
+        // 걸려 있는데도 색이 지워진 채로 남는다.
+        tintedSlow = false;
+    }
+
     /// <summary>
     /// 기본 추적 AI를 켜고 끈다. 전용 컨트롤러와 이 스크립트가 동시에 Rigidbody를 조작하면
     /// 서로 속도를 덮어써서 움직임이 망가지므로, 보스는 이걸 꺼 두고 직접 이동한다.
@@ -78,6 +105,13 @@ public class EnemyController : MonoBehaviour
     private float stunnedUntil = -999f;
     /// <summary>넉백으로 넣은 속도가 아직 남아 있는지.</summary>
     private bool knockbackActive;
+    private float slowUntil = -999f;
+    private float slowMultiplier = 1f;
+    private SpriteRenderer spriteRenderer;
+    private bool tintedSlow;
+
+    /// <summary>발이 묶인 동안 입히는 찬 기운. 눈에 보이지 않으면 걸렸는지 알 수 없다.</summary>
+    private static readonly Color SlowTint = new Color(0.62f, 0.78f, 1f);
 
     /// <summary>플레이어 공격 등으로 밀려나며 잠시 행동 불능이 된다.</summary>
     public void ApplyKnockback(Vector2 direction, float force)
@@ -114,6 +148,7 @@ public class EnemyController : MonoBehaviour
         body = GetComponent<Rigidbody2D>();
         health = GetComponent<Health>();
         ownCollider = GetComponent<Collider2D>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
         // 프리팹 값에 기대지 않고 여기서 못박는다. 눈에 띄지 않는 수치라 한 번 어긋나면
         // "이 보스만 밀린다"가 되고, 원인을 프리팹에서 찾기 어렵다.
         if (immovable) body.mass = ImmovableMass;
@@ -218,12 +253,30 @@ public class EnemyController : MonoBehaviour
     /// </summary>
     private Vector2 DesiredVelocity(float distance)
     {
+        float speed = moveSpeed * (IsSlowed ? slowMultiplier : 1f);
         Vector2 toPlayer = ((Vector2)player.position - (Vector2)transform.position).normalized;
-        if (keepDistance <= 0f) return toPlayer * moveSpeed;
+        if (keepDistance <= 0f) return toPlayer * speed;
 
         float gap = distance - keepDistance;
         if (Mathf.Abs(gap) <= DistanceDeadZone) return Vector2.zero;
-        return toPlayer * (gap > 0f ? moveSpeed : -moveSpeed);
+        return toPlayer * (gap > 0f ? speed : -speed);
+    }
+
+    /// <summary>
+    /// 발이 묶인 동안 몸에 찬 기운을 입힌다. 풀리면 한 번만 되돌린다.
+    ///
+    /// 매 프레임 덮어쓰는 것이 아니라 <b>상태가 바뀔 때만</b> 손대는 것이 중요하다.
+    /// 돌진처럼 잠시 몸빛을 바꾸는 능력이 있어서(<c>EnemyDashAbility</c>), 계속 덮어쓰면
+    /// 그쪽 연출이 아예 보이지 않는다. 감속이 걸리고 풀리는 순간에만 칠한다.
+    /// </summary>
+    private void Update()
+    {
+        if (spriteRenderer == null || health.IsDead) return;
+
+        bool slowed = IsSlowed;
+        if (slowed == tintedSlow) return;
+        tintedSlow = slowed;
+        spriteRenderer.color = slowed ? SlowTint : Color.white;
     }
 
     private const float DistanceDeadZone = 0.35f;
@@ -259,6 +312,8 @@ public class EnemyController : MonoBehaviour
 
     private void HandleDeath()
     {
+        // 찬 기운을 입은 채로 쓰러지면 사라지는 0.4초 동안 파랗게 남는다.
+        if (spriteRenderer != null && tintedSlow) spriteRenderer.color = Color.white;
         body.linearVelocity = Vector2.zero;
         foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
             col.enabled = false;

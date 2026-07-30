@@ -230,9 +230,11 @@ MonoBehaviour:
   vineWidth: 0.9
   vineKnockbackForce: 5
   vineStunDuration: 0.25
+  vineSlowMultiplier: 0.55
+  vineSlowDuration: 1.8
   vineColor: {r: 0.3, g: 0.85, b: 0.25, a: 0.95}
-  seedRadius: 2
-  seedDuration: 5
+  seedRadius: 3.6
+  seedDuration: 6
   seedHealPerTick: 6
   seedTickInterval: 1
   seedColor: {r: 0.6, g: 1, b: 0.45, a: 0.4}

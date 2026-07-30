@@ -66,7 +66,7 @@ public static class MoveInfo
                 return "겨눈 방향을 후려치는 근접 공격.";
             case MoveType.VineWhip:
                 return "두어 칸 밖까지 채찍을 뻗어 그 선 위의 적을 때리고 밀쳐 낸다.\n" +
-                       "휘두른 뒤에는 잠깐 움직일 수 없다.";
+                       "맞은 적은 한동안 느려진다. 휘두른 뒤에는 잠깐 움직일 수 없다.";
             case MoveType.SeedSow:
                 return "발밑에 회복 장판을 깐다. 그 위에 서 있는 동안 체력이 차오른다.\n" +
                        "전투방마다 한 번 쓸 수 있다.";

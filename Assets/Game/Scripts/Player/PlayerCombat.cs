@@ -51,12 +51,21 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField, Min(0f)] private float vineKnockbackForce = 5f;
     [Tooltip("휘두른 뒤 움직이지 못하는 시간.")]
     [SerializeField, Min(0f)] private float vineStunDuration = 0.25f;
+    [Tooltip("맞은 적에게 남는 속도의 비율. 0.55면 45% 느려진다. 1이면 감속이 없다. " +
+             "걷는 속도만 깎으므로 이미 시작한 돌진은 그대로 간다.")]
+    [SerializeField, Range(0.1f, 1f)] private float vineSlowMultiplier = 0.55f;
+    [Tooltip("감속이 남는 시간. 쿨타임보다 짧게 두어야 한 대상을 영영 묶어 두지 못한다.")]
+    [SerializeField, Min(0f)] private float vineSlowDuration = 1.8f;
     [SerializeField] private Color vineColor = new Color(0.3f, 0.85f, 0.25f, 0.95f);
 
     [Header("기술 3 — 씨뿌리기")]
-    [Tooltip("발밑에 까는 회복 장판의 반지름.")]
-    [SerializeField, Min(0f)] private float seedRadius = 2f;
-    [SerializeField, Min(0f)] private float seedDuration = 5f;
+    // 반지름 2에서 3.6으로 키웠다 (넓이 3.2배). 2층부터 쓰는 기술인데 그 난이도에서는
+    // 지름 4칸짜리 장판 위에 가만히 서 있을 틈이 없어, 쓸 수 있는 길이 "한 마리만 남기고
+    // 깔기" 하나로 굳었다. 그걸 떠올리지 못하면 이 기술은 <b>왜 있는지 알 수 없는 칸</b>이 된다.
+    // 지름 7.2칸은 방(14×10)의 한쪽을 덮으므로, 싸우면서 그 안에 머무는 것이 가능해진다.
+    [Tooltip("발밑에 까는 회복 장판의 반지름. 싸우면서 안에 머무를 수 있어야 하므로 넓다.")]
+    [SerializeField, Min(0f)] private float seedRadius = 3.6f;
+    [SerializeField, Min(0f)] private float seedDuration = 6f;
     [Tooltip("장판 위에 서 있는 동안 한 번에 차오르는 체력.")]
     [SerializeField, Min(0)] private int seedHealPerTick = 6;
     [SerializeField, Min(0.05f)] private float seedTickInterval = 1f;
@@ -337,8 +346,18 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>
-    /// 덩굴채찍. 조준 방향으로 2칸 길이의 초록 채찍을 뻗어, 그 선 위에 닿은 적을 전부 때린다.
-    /// 휘두른 뒤에는 짧게 경직이 걸려 바로 도망칠 수 없다 — 사거리를 준 대신 붙은 대가다.
+    /// 덩굴채찍. 조준 방향으로 2칸 길이의 초록 채찍을 뻗어, 그 선 위에 닿은 적을 전부
+    /// 때리고 <b>발을 묶는다.</b> 휘두른 뒤에는 짧게 경직이 걸려 바로 도망칠 수 없다 —
+    /// 사거리를 준 대신 붙은 대가다.
+    ///
+    /// 피해는 몸통박치기의 4할이라 이 기술로 적을 잡을 수는 없다. 그래서 값어치를
+    /// <b>거리를 벌리는 쪽</b>에 몰아 둔다 — 밀쳐 내고(넉백), 따라오는 발을 늦추고(감속),
+    /// 그 사이에 자리를 다시 잡는다. 예전에는 밀쳐 내기만 해서 몸통박치기의 못한 판이었다.
+    ///
+    /// 기본값(감속 1.8초 · 쿨타임 2.2초)은 한 대상에게 <b>여덟 할쯤의 지속</b>이다 —
+    /// 끊기는 틈이 있어서 계속 걸어 두려면 계속 겨눠야 한다. 재사용 대기시간 강화를 두 번
+    /// 걸면(×0.64 = 1.41초) 그 틈이 사라져 사실상 영구가 되는데, 그것은 <b>한 기술에 강화를
+    /// 몰아 준 값</b>이라 그대로 둔다. 피해 4에 자기 경직 0.25초를 매번 치르는 대가다.
     /// </summary>
     private void VineWhipAttack(Vector2 direction)
     {
@@ -372,6 +391,7 @@ public class PlayerCombat : MonoBehaviour
 
             enemyHealth.TakeDamage(damage);
             enemy.ApplyKnockback(direction, vineKnockbackForce);
+            if (vineSlowMultiplier < 1f) enemy.ApplySlow(vineSlowMultiplier, vineSlowDuration);
             PlayerRelicEffects.ReportDamageDealt(damage);
         }
 
