@@ -24,14 +24,18 @@ public class MoveSlotsHud : MonoBehaviour
     /// <summary>위쪽(이름) 띠의 높이. 아래 띠는 남는 만큼 가져간다.</summary>
     private const float NameBandHeight = 32f;
 
-    private static readonly Color NameBand = new Color32(240, 238, 226, 255);
-    private static readonly Color InfoBand = new Color32(192, 176, 150, 255);
-    private static readonly Color NameText = new Color32(56, 52, 44, 255);
-    private static readonly Color InfoText = new Color32(74, 66, 56, 255);
+    // ⚠️ 띠는 어둡게, 글자는 밝게. PMD 폰트는 글리프에 검은 윤곽이 구워져 있어서
+    // (PmdUi.MakeText 참고) 어두운 글자를 주면 윤곽과 뭉쳐 덩어리가 된다. 처음에는
+    // moves.png처럼 밝은 띠에 어두운 글자로 뒀다가 기술 이름이 읽히지 않았다.
+    // 원작은 자기 폰트라 그렇게 할 수 있었지만 우리 폰트는 밝은 글자용이다.
+    private static readonly Color NameBand = new Color32(58, 52, 40, 255);
+    private static readonly Color InfoBand = new Color32(92, 80, 62, 255);
+    private static readonly Color NameText = new Color32(255, 252, 240, 255);
+    private static readonly Color InfoText = new Color32(236, 226, 206, 255);
 
-    private static readonly Color LockedBand = new Color32(126, 126, 130, 255);
-    private static readonly Color LockedInfoBand = new Color32(104, 104, 108, 255);
-    private static readonly Color LockedText = new Color32(58, 58, 62, 255);
+    private static readonly Color LockedBand = new Color32(64, 64, 68, 255);
+    private static readonly Color LockedInfoBand = new Color32(80, 80, 84, 255);
+    private static readonly Color LockedText = new Color32(150, 150, 156, 255);
 
     /// <summary>배웠지만 지금은 쓸 수 없을 때(전투방 밖) 띠를 눌러 두는 정도.</summary>
     private static readonly Color RestingTint = new Color(0.72f, 0.72f, 0.74f, 1f);
@@ -71,24 +75,22 @@ public class MoveSlotsHud : MonoBehaviour
     }
 
     /// <summary>
-    /// 속성 꼬리표의 색. 원작의 타입 배지처럼 <b>밝은 바탕에 어두운 글자</b>로 둔다 —
-    /// 12px 글자는 획이 얇아서, 어두운 바탕에 밝은 글자로 두면 뭉개진다.
+    /// 속성 꼬리표의 색. 포켓몬 타입 배지처럼 <b>짙은 바탕에 흰 글자</b>다 — 우리 폰트는
+    /// 밝은 글자용이라(<see cref="PmdUi.MakeText"/>) 바탕이 짙어야 글자가 산다.
     /// </summary>
     private static void TagPalette(string tag, out Color box, out Color ink)
     {
+        ink = new Color32(255, 252, 244, 255);
         switch (tag)
         {
             case "근접":
-                box = new Color32(240, 160, 84, 255);
-                ink = new Color32(58, 42, 24, 255);
+                box = new Color32(184, 76, 32, 255);
                 return;
             case "원거리":
-                box = new Color32(156, 192, 240, 255);
-                ink = new Color32(30, 46, 74, 255);
+                box = new Color32(48, 84, 168, 255);
                 return;
             default:                                  // "방당 1회" 같은 제약 표시
-                box = new Color32(168, 220, 160, 255);
-                ink = new Color32(30, 58, 32, 255);
+                box = new Color32(42, 112, 60, 255);
                 return;
         }
     }

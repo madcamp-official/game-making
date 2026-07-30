@@ -29,9 +29,13 @@ public class PlayerHealthHud : MonoBehaviour
     /// </summary>
     private static readonly Color FillColor = new Color32(24, 195, 32, 255);
 
-    /// <summary>"HP" 꼬리표의 호박색. bars.png에서 그대로 잰 값이다.</summary>
-    private static readonly Color ChipColor = new Color32(251, 178, 0, 255);
-    private static readonly Color ChipInk = new Color32(58, 42, 0, 255);
+    /// <summary>
+    /// "HP" 꼬리표. 색은 bars.png의 호박색을 조금 눌러 쓴다 — 글자를 <b>밝게</b> 둬야
+    /// 폰트에 구워진 검은 윤곽이 제 몫을 하는데(<see cref="PmdUi.MakeText"/>), 원본
+    /// 호박색(251,178,0)은 너무 밝아 흰 글자가 묻힌다.
+    /// </summary>
+    private static readonly Color ChipColor = new Color32(216, 138, 0, 255);
+    private static readonly Color ChipInk = new Color32(255, 250, 236, 255);
 
     private Health health;
     private BarFill bar;
@@ -60,8 +64,9 @@ public class PlayerHealthHud : MonoBehaviour
         barRt.sizeDelta = new Vector2(BarWidth, BarHeight);
         barRt.anchoredPosition = new Vector2(BarFill.BarOffsetX, 0f);
 
-        // 수치는 바 위에 겹쳐 얹는다. 흰 트랙과 초록 채움을 오가므로 윤곽을 둘러 둔다.
-        hud.valueText = PmdUi.MakeOutlinedText(barRt, "Value", "", 24);
+        // 수치는 바 위에 겹쳐 얹는다. 폰트에 검은 윤곽이 구워져 있어 흰 트랙과 초록 채움을
+        // 오가도 읽힌다 — Outline을 더 얹으면 그림자가 이중이 되어 오히려 뭉개진다.
+        hud.valueText = PmdUi.MakeText(barRt, "Value", "", 24);
         hud.valueText.horizontalOverflow = HorizontalWrapMode.Overflow;
         PmdUi.Stretch(hud.valueText.rectTransform);
 

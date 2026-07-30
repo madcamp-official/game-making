@@ -39,22 +39,34 @@ public class HealthBar : MonoBehaviour
     private const float ShadeFraction = 0.34f;
     private const float ShadeMultiplier = 0.62f;
 
-    /// <summary>가운데를 축으로 삼는 흰 사각형. 윤곽과 트랙처럼 자리가 변하지 않는 것이 쓴다.</summary>
-    private static Sprite whiteSprite;
-
     /// <summary>
-    /// <b>왼쪽 끝</b>을 축으로 삼는 흰 사각형. 채움이 이것을 쓴다.
+    /// <b>왼쪽 끝</b>을 축으로 삼는 흰 사각형. 바의 네 조각이 모두 이것을 쓴다.
     ///
-    /// 축이 왜 중요한가: 이 씬의 카메라는 Pixel Perfect(Pixel Snapping)라 스프라이트마다
-    /// 자리를 픽셀 격자에 맞춰 반올림한다. 축이 가운데면 채움의 <b>자리</b>가 남은 비율에 따라
-    /// 움직여서(왼쪽 끝 = 중심 − 폭/2), 트랙과 서로 다른 픽셀로 반올림된다. 캐릭터가 걸을
-    /// 때마다 둘이 각각 다른 쪽으로 튀면서 바 왼쪽에 흰 틈이 벌어지던 것이 이 때문이다.
+    /// 왜 전부 왼쪽 축인가: 이 씬의 카메라는 Pixel Perfect이고 Pixel Snapping이 켜져 있어
+    /// (<c>m_GridSnapping: 1</c>, PPU 24) <b>렌더러마다 월드 자리를 픽셀 격자로 반올림한다</b>.
+    /// 반올림이 조각마다 다른 쪽으로 떨어지면 조각들이 서로 한 픽셀씩 어긋난다.
     ///
-    /// 축을 왼쪽 끝에 두면 채움의 자리는 트랙의 왼쪽 끝과 <b>늘 같은 한 점</b>이고 비율이
-    /// 바뀌어도 움직이지 않는다. 같은 자리는 같은 픽셀로 반올림되므로 왼쪽 끝이 붙어 있다.
-    /// 폭만 변하니 오른쪽 끝은 한 픽셀 흔들릴 수 있지만, 그쪽은 채움과 트랙의 경계라 보이지 않는다.
+    /// 어긋나지 않으려면 두 가지가 필요하다.
+    /// <list type="number">
+    /// <item>네 조각의 <b>왼쪽 끝이 같은 한 점</b>이어야 한다. 축이 가운데면 그 점이
+    ///   중심 − 폭/2이라 폭에 따라 달라진다 — 트랙만 가운데 축으로 뒀을 때 여전히 밀린
+    ///   이유가 이것이었다.</item>
+    /// <item>조각들의 로컬 x 차이가 <b>픽셀의 정수배</b>여야 한다. 그러면 캐릭터가 어디에
+    ///   서 있든 네 조각의 소수부가 같아서 반올림이 같은 방향으로 떨어진다.</item>
+    /// </list>
+    /// 그래서 크기와 자리를 모두 <see cref="SnapToPixel"/>로 픽셀에 맞춘다.
     /// </summary>
     private static Sprite whiteLeftSprite;
+
+    /// <summary>
+    /// PixelPerfectCamera의 Assets Pixels Per Unit(24)에 대응하는 한 픽셀의 월드 크기.
+    /// 스냅 격자가 이 값이라, 바의 치수도 여기에 맞춰야 조각들이 함께 움직인다.
+    /// </summary>
+    private const float PixelSize = 1f / 24f;
+
+    /// <summary>픽셀 격자에 맞춘 값. 프리팹에 굳어 있는 수치를 그대로 못 믿으므로 실행 중에 맞춘다.</summary>
+    private static float SnapToPixel(float value) =>
+        Mathf.Max(PixelSize, Mathf.Round(value / PixelSize) * PixelSize);
 
     private Health health;
     private Transform barRoot;
@@ -62,25 +74,39 @@ public class HealthBar : MonoBehaviour
     private SpriteRenderer shadeRenderer;
     private TextMesh valueText;
 
+    /// <summary>픽셀에 맞춘 실제 치수. 프리팹의 값을 반올림한 것이다.</summary>
+    private float barWidth;
+    private float barHeight;
+    private float shadeHeight;
+
     private void Awake()
     {
         health = GetComponent<Health>();
         EnsureSprites();
+
+        barWidth = SnapToPixel(width);
+        barHeight = SnapToPixel(height);
+        shadeHeight = SnapToPixel(barHeight * ShadeFraction);
+        // 왼쪽 끝도 픽셀에 맞춘다. 네 조각이 여기서 함께 시작한다.
+        float left = -SnapToPixel(barWidth * 0.5f);
 
         barRoot = new GameObject("HealthBar").transform;
         // worldPositionStays를 그대로 둔다(참). 적마다 몸 크기가 달라서(닥트리오 1.35배 등)
         // 그 배율이 바에 전해지면 바 크기가 적마다 달라진다. 이 값이 참이면 Unity가
         // 부모 배율을 상쇄하는 localScale을 넣어 주므로 바는 누구에게 붙어도 같은 크기다.
         barRoot.SetParent(transform);
-        barRoot.localPosition = new Vector3(0f, offsetY, 0f);
+        barRoot.localPosition = new Vector3(0f, SnapToPixel(offsetY), 0f);
 
-        // 어두운 윤곽 — 트랙보다 사방으로 조금 크게 깔아 테두리처럼 보이게 한다.
-        SpriteRenderer outline = CreatePart("Outline", barRoot, whiteSprite, OutlineColor, 39);
-        outline.transform.localScale = new Vector3(width + Outline * 2f, height + Outline * 2f, 1f);
+        // 네 조각 모두 왼쪽 끝을 축으로 삼고 같은 x에서 시작한다. 윤곽만 한 픽셀 더 왼쪽이다.
+        SpriteRenderer outline = CreatePart("Outline", barRoot, whiteLeftSprite, OutlineColor, 39);
+        outline.transform.localPosition = new Vector3(left - PixelSize, 0f, 0f);
+        outline.transform.localScale =
+            new Vector3(barWidth + PixelSize * 2f, barHeight + PixelSize * 2f, 1f);
 
         // 흰 트랙 — 아직 차지 않은 자리다. 검정으로 두면 남은 양이 얼마인지 눈에 덜 띈다.
-        SpriteRenderer track = CreatePart("Track", barRoot, whiteSprite, TrackColor, 40);
-        track.transform.localScale = new Vector3(width, height, 1f);
+        SpriteRenderer track = CreatePart("Track", barRoot, whiteLeftSprite, TrackColor, 40);
+        track.transform.localPosition = new Vector3(left, 0f, 0f);
+        track.transform.localScale = new Vector3(barWidth, barHeight, 1f);
 
         // 프리팹마다 색을 따로 넣게 하면 적을 하나 추가할 때마다 빠뜨릴 자리가 생긴다.
         // 누구 몸에 붙었는지 보고 정한다.
@@ -88,14 +114,14 @@ public class HealthBar : MonoBehaviour
 
         // 채움과 짙은 줄은 왼쪽 끝에 못박아 두고 폭만 줄인다. 자리는 앞으로 바뀌지 않는다.
         fillRenderer = CreatePart("Fill", barRoot, whiteLeftSprite, fillColor, 41);
-        fillRenderer.transform.localPosition = new Vector3(-width * 0.5f, 0f, 0f);
+        fillRenderer.transform.localPosition = new Vector3(left, 0f, 0f);
 
         // 위쪽 짙은 줄 — 좌하단 바와 같은 두 톤이다. 이게 없으면 바가 납작해 보인다.
         shadeRenderer = CreatePart("Shade", barRoot, whiteLeftSprite,
             new Color(fillColor.r * ShadeMultiplier, fillColor.g * ShadeMultiplier,
                       fillColor.b * ShadeMultiplier, fillColor.a), 42);
         shadeRenderer.transform.localPosition =
-            new Vector3(-width * 0.5f, height * 0.5f * (1f - ShadeFraction), 0f);
+            new Vector3(left, SnapToPixel(barHeight * 0.5f) - shadeHeight * 0.5f, 0f);
 
         // 바 오른쪽에 "현재/최대" 수치 표시 (기본은 그리지 않는다)
         if (showValue)
@@ -130,14 +156,12 @@ public class HealthBar : MonoBehaviour
     private static void EnsureSprites()
     {
         // 플레이 모드를 다시 들어오면 텍스처가 파괴되므로 널 검사로 다시 만든다.
-        if (whiteSprite != null && whiteLeftSprite != null) return;
+        if (whiteLeftSprite != null) return;
 
         var tex = new Texture2D(1, 1);
         tex.SetPixel(0, 0, Color.white);
         tex.Apply();
-        var rect = new Rect(0, 0, 1, 1);
-        whiteSprite = Sprite.Create(tex, rect, new Vector2(0.5f, 0.5f), 1f);
-        whiteLeftSprite = Sprite.Create(tex, rect, new Vector2(0f, 0.5f), 1f);
+        whiteLeftSprite = Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0f, 0.5f), 1f);
     }
 
     private static SpriteRenderer CreatePart(string name, Transform parent, Sprite sprite,
@@ -157,10 +181,13 @@ public class HealthBar : MonoBehaviour
     private void UpdateBar(int current, int max)
     {
         // 색은 건드리지 않는다. 길이만 줄어든다 — 자리는 왼쪽 끝에 못박혀 있다.
+        // 폭도 픽셀에 맞춰 끊는다. 소수 픽셀로 끝나면 오른쪽 끝이 반투명하게 번진다.
         float ratio = max > 0 ? Mathf.Clamp01((float)current / max) : 0f;
-        fillRenderer.transform.localScale = new Vector3(width * ratio, height, 1f);
-        shadeRenderer.transform.localScale =
-            new Vector3(width * ratio, height * ShadeFraction, 1f);
+        float fillWidth = ratio <= 0f
+            ? 0f
+            : Mathf.Max(PixelSize, Mathf.Round(barWidth * ratio / PixelSize) * PixelSize);
+        fillRenderer.transform.localScale = new Vector3(fillWidth, barHeight, 1f);
+        shadeRenderer.transform.localScale = new Vector3(fillWidth, shadeHeight, 1f);
         if (valueText != null) valueText.text = current + "/" + max;
     }
 

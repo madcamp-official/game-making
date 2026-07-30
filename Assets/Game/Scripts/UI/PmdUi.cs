@@ -136,7 +136,20 @@ public static class PmdUi
         return image;
     }
 
-    /// <summary>대화창 속 한 줄. 글자색과 폰트는 여기서 통일한다.</summary>
+    /// <summary>
+    /// 대화창 속 한 줄. 글자색과 폰트는 여기서 통일한다.
+    ///
+    /// ⚠️ <b>글자에 <c>Outline</c>·<c>Shadow</c>를 더하지 말고, 글자색을 어둡게 두지 말 것.</b>
+    /// PMD 비트맵 폰트(<c>Resources/Fonts/PMDFont_Atlas</c>)는 글리프마다 <b>검은 윤곽이 이미
+    /// 구워져 있다</b> — 흰 속에 검은 테두리다. 어떤 바탕에도 얹을 수 있게 원작이 그렇게 만든
+    /// 폰트다. 그래서
+    /// <list type="bullet">
+    /// <item><c>Outline</c>을 또 얹으면 그림자가 이중이 되어 획이 뭉개진다.</item>
+    /// <item>어두운 색을 주면 흰 속이 검은 윤곽과 같은 밝기가 되어 글자가 덩어리로 뭉친다.
+    ///   밝은 띠 위에서 특히 심하다 — 기술 칸과 체력바 꼬리표가 그래서 안 읽혔다.</item>
+    /// </list>
+    /// 밝은 속 + 구워진 검은 윤곽이면 바탕이 밝든 어둡든 글자 모양이 그대로 읽힌다.
+    /// </summary>
     public static Text MakeText(Transform parent, string name, string body, int size,
                                 TextAnchor anchor = TextAnchor.MiddleCenter)
     {
@@ -145,19 +158,6 @@ public static class PmdUi
         return text;
     }
 
-    /// <summary>
-    /// 바탕이 고르지 않은 곳(붉은 버튼, 체력바, 게임 화면 위)에 얹는 글자.
-    /// 1px 어두운 윤곽을 둘러 어떤 바탕에서도 획이 끊겨 보이지 않게 한다.
-    /// </summary>
-    public static Text MakeOutlinedText(Transform parent, string name, string body, int size,
-                                        TextAnchor anchor = TextAnchor.MiddleCenter)
-    {
-        Text text = MakeText(parent, name, body, size, anchor);
-        var outline = text.gameObject.AddComponent<Outline>();
-        outline.effectColor = new Color(0f, 0f, 0f, 0.85f);
-        outline.effectDistance = new Vector2(1.5f, 1.5f);
-        return text;
-    }
 
     // ---------------------------------------------------------------- 버튼
 
@@ -195,6 +195,23 @@ public static class PmdUi
         }
     }
 
+    /// <summary>
+    /// 커서가 <b>새 칸에 올라선 순간</b>에만 hover 소리를 내고, 지금 칸 번호를 돌려준다.
+    /// 부르는 쪽은 돌려받은 값을 다음 프레임까지 들고 있으면 된다:
+    /// <code>lastHovered = PmdUi.TrackHoverSound(lastHovered, hovered);</code>
+    ///
+    /// 창마다 hover 판정을 따로 돌리는 구조라(이 씬에는 EventSystem이 없다) 소리를 내는
+    /// 규칙도 창마다 흩어질 뻔했다. "칸이 바뀐 순간"이라는 판단만 여기 모아 둔다 —
+    /// 매 프레임 부르면 커서를 올려 둔 내내 소리가 이어진다.
+    ///
+    /// 칸 밖으로 나가는 것(−1)은 소리를 내지 않는다. 나가는 것은 알릴 일이 아니다.
+    /// </summary>
+    public static int TrackHoverSound(int previous, int hovered)
+    {
+        if (hovered >= 0 && hovered != previous) GameAudio.PlayUiHover();
+        return hovered;
+    }
+
     /// <summary>버튼 한 칸을 만든다. 자리는 부모 rect 가운데를 기준으로 잡는다.</summary>
     public static Entry MakeEntry(Transform parent, string name, string body, int size,
                                   Vector2 anchoredPosition, Vector2 boxSize)
@@ -214,7 +231,7 @@ public static class PmdUi
         entry.panel = MakeSliced(parent, name, ButtonSprite);
         entry.rect = entry.panel.rectTransform;
 
-        entry.label = MakeOutlinedText(entry.rect, name + "Label", body, size);
+        entry.label = MakeText(entry.rect, name + "Label", body, size);
         Stretch(entry.label.rectTransform);
         // 글자가 링에 닿지 않게 좌우로 물러선다.
         entry.label.rectTransform.offsetMin = new Vector2(12f, 0f);

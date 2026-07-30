@@ -20,9 +20,12 @@ public class ExpBar : MonoBehaviour
     /// </summary>
     private static readonly Color FillColor = new Color32(73, 146, 251, 255);
 
-    /// <summary>"EXP" 꼬리표. 체력의 호박색 표와 같은 형식이고, 색만 바의 푸른색을 따른다.</summary>
-    private static readonly Color ChipColor = new Color32(73, 146, 251, 255);
-    private static readonly Color ChipInk = new Color32(14, 34, 71, 255);
+    /// <summary>
+    /// "EXP" 꼬리표. 체력의 호박색 표와 같은 형식이고 색만 바의 푸른색을 따른다.
+    /// 바보다 한 단계 짙게 둔다 — 흰 글자가 묻히지 않을 만큼이어야 한다.
+    /// </summary>
+    private static readonly Color ChipColor = new Color32(44, 104, 208, 255);
+    private static readonly Color ChipInk = new Color32(240, 248, 255, 255);
 
     private PlayerLevel level;
     private BarFill bar;
