@@ -19,6 +19,7 @@ GameObject:
   - component: {fileID: 2884767510596923021}
   - component: {fileID: 9178336927224971346}
   - component: {fileID: 4263529269642912710}
+  - component: {fileID: 5949551639433931846}
   m_Layer: 0
   m_Name: Enemy_Dewgong
   m_TagString: Untagged
@@ -233,6 +234,7 @@ MonoBehaviour:
   keepDistance: 6.5
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
+  immovable: 0
   basicAIEnabled: 1
   aggroOnSpawn: 1
 --- !u!114 &8167514399309133896
@@ -279,6 +281,7 @@ MonoBehaviour:
   minRange: 0.8
   cooldown: 2.8
   initialDelay: 1.2
+  initialDelayJitter: 1
   reach: 11.5
   sweepAngle: 22
   turnSpeed: 45
@@ -579,3 +582,26 @@ MonoBehaviour:
   - {fileID: -929212051, guid: ee203f39c1f1a4723bcfee7d855c7807, type: 3}
   shadowColor: {r: 0, g: 0, b: 0, a: 0.5}
   sortingOffset: -1
+--- !u!114 &5949551639433931846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4924571153742321099}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 304beb39aec6344b180ad731905521a8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyMeleeAbility
+  range: 2.5
+  minRange: 0
+  cooldown: 1.3
+  initialDelay: 1.4
+  initialDelayJitter: 1
+  actionState: Attack
+  reach: 1
+  sweepAngle: 200
+  hitDelay: 0.13
+  recovery: 0.3
+  damage: 9

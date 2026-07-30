@@ -70,6 +70,11 @@ public static class MeleeAttackSetup
         new MeleeSpec { species = "Poliwrath", thirdParty = "0062_Poliwrath", anim = "Attack",
                         hitDelay = 0.15f, reach = 1.0f, range = 2.4f, sweepAngle = 200f,
                         damage = 12, cooldown = 1.3f, initialDelay = 2.6f, recovery = 0.3f },
+        // 3층 쥬레곤 — 원거리(냉기 숨결)가 주무기라, 붙었을 때의 근접기는 일부러 약하다.
+        // hitDelay는 AnimData Attack의 HitTime: HitFrame 3이 끝나는 (2+4+1+1)/60 = 0.13초.
+        new MeleeSpec { species = "Dewgong", thirdParty = "0087_Dewgong", anim = "Attack",
+                        hitDelay = 0.13f, reach = 1.0f, range = 2.5f, sweepAngle = 200f,
+                        damage = 9, cooldown = 1.3f, initialDelay = 1.4f, recovery = 0.3f },
     };
 
     /// <summary>접촉 피해를 걷어낼 잡몹. 보스는 목록에 없다.</summary>
