@@ -18,9 +18,11 @@ MonoBehaviour:
   moveLearned: {fileID: 8300000, guid: 97a131931ca904a40b3de3a214b4309d, type: 3}
   playerHit: {fileID: 8300000, guid: 43ff105eb4e61411a9570791d1ebb1ab, type: 3}
   playerHurt: {fileID: 8300000, guid: b10a52b5793b941c2bc1aae1fdf628f2, type: 3}
+  uiHover: {fileID: 8300000, guid: c10566b755c85468c9415030393b68e0, type: 3}
   bgmVolume: 0.5
   sfxVolume: 0.9
   hitVolumeScale: 0.6
+  uiVolumeScale: 0.35
   crossfade: 0.5
   clearedRoomVolumeScale: 0.3
   duckFade: 0.8

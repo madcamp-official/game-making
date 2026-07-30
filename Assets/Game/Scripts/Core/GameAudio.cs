@@ -271,6 +271,16 @@ public class GameAudio : MonoBehaviour
     }
 
     /// <summary>
+    /// 메뉴에서 가리키는 칸이 바뀌었다. "바뀐 순간"을 가려내는 일은 부르는 쪽이 한다
+    /// (<see cref="PmdUi.TrackHoverSound"/>) — 매 프레임 부르면 커서를 올려 둔 내내 이어진다.
+    /// </summary>
+    public static void PlayUiHover()
+    {
+        if (Instance != null && Instance.library != null)
+            Instance.PlaySfx(Instance.library.uiHover, Instance.library.uiVolumeScale);
+    }
+
+    /// <summary>
     /// 효과음 하나를 낸다. 어느 소리를 낼지 <b>부르는 쪽이 들고 있는</b> 경우를 위한 문이다 —
     /// 보스 울음소리처럼 층마다 다른 소리는 라이브러리에 이름으로 박아 둘 수 없다.
     /// </summary>

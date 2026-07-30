@@ -35,6 +35,9 @@ public class GameAudioLibrary : ScriptableObject
     [Tooltip("주인공이 얻어맞았을 때.")]
     public AudioClip playerHurt;
 
+    [Tooltip("메뉴에서 고르는 칸이 바뀌었을 때. 커서를 옮기는 내내 울리므로 짧고 작아야 한다.")]
+    public AudioClip uiHover;
+
     [Header("소리 크기")]
     [Range(0f, 1f)] public float bgmVolume = 0.5f;
     [Range(0f, 1f)] public float sfxVolume = 0.9f;
@@ -42,6 +45,9 @@ public class GameAudioLibrary : ScriptableObject
     [Tooltip("타격·피격음에만 곱하는 크기. 이 둘은 싸우는 내내 울리므로 획득음과 같은 크기로 두면 " +
              "화면을 뒤덮는다. 0.6이면 다른 효과음의 여섯 할.")]
     [Range(0f, 1f)] public float hitVolumeScale = 0.6f;
+
+    [Tooltip("메뉴 커서음에만 곱하는 크기. 칸을 옮길 때마다 울려서 타격음보다도 작아야 한다.")]
+    [Range(0f, 1f)] public float uiVolumeScale = 0.35f;
 
     [Tooltip("곡이 바뀔 때 겹쳐 넘기는 시간(초). 0이면 바로 갈아탄다.")]
     [Range(0f, 4f)] public float crossfade = 0.5f;
