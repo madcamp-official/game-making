@@ -63,14 +63,11 @@
 `carpet.png`, `cloud.png`, `cloud-move.png`는 프로젝트에 들여온 그림이다 (상점 깔개와
 구름 참고용). 원본 그대로 쓰는 것은 `carpet.png`뿐이고, 통로를 막는
 `CorridorCloud.png`는 <b>참고 그림의 여섯 색 팔레트만</b> 가져와 새로 구운 것이다 —
-뭉치 비트맵을 겹쳐 찍으면 실루엣이 서로 지워져 노이즈가 되므로, 둥근 덩이를 직접 그리고
-가로로 이어지는 열여섯 프레임으로 잘랐다 (`scratchpad/bake_cloud.py`, `CorridorCloudSetup`).
+둥근 덩이들의 합집합 실루엣으로 통로를 끝까지 메우는 정적인 뭉게구름 한 장이다
+(`scratchpad/bake_cloudbank.py`, `CorridorCloudSetup`).
 
 `ForestPath.png`도 파생물이다. 숲 타일셋에 길이 없어서, 풀 타일(F_13_1)의 잔디 결은
 그대로 두고 색만 흙빛으로 낮춰 여섯 장을 구웠다 (`ForestPathSetup` 참고).
-
-`ForestLogGate.png`는 이 프로젝트에서 새로 그린 픽셀 아트다. 전투방 출구를 막는 넘어진
-통나무 두 장(성한 것·부러진 것)이며, 타일셋에서 가져온 픽셀은 없다 (`LogGateSetup` 참고).
 
 ## 아이템 아이콘
 

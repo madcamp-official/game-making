@@ -15,26 +15,30 @@ public class RoomGates : MonoBehaviour
     /// <summary>지금 방의 구름. 방이 바뀌면 새 것으로 갈린다.</summary>
     public static RoomGates Current { get; private set; }
 
-    /// <summary>통로 입구의 x. 방 벽 바로 밖이다 (벽 안쪽 면이 ±7, 벽 두께 0.5).</summary>
-    private const float MouthX = 8f;
+    /// <summary>구름 둑의 중심 x. 벽 안쪽 면(±7)부터 화면 밖까지 통로 전체를 덮는다 —
+    /// 문 앞에 서서 통로를 들여다봐도 구름 너머가 보이지 않아야 한다.</summary>
+    private const float BankX = 13.2f;
 
-    /// <summary>통로 입구 크기. 높이 2칸은 통로 두 줄과 같고, 폭은 넉넉히 덮는다.</summary>
-    private static readonly Vector2 MouthSize = new Vector2(1.6f, 2f);
+    /// <summary>구름 둑 크기. 폭 12칸은 카메라 반폭(10칸)보다 길어 문 앞에 바짝 서도
+    /// 구름 끝이 보이지 않고, 높이 3칸은 통로 두 줄에 위아래로 반 칸씩 부풀어
+    /// 벽에 걸쳐 보인다.</summary>
+    private static readonly Vector2 BankSize = new Vector2(12f, 3f);
 
     public CorridorCloud Left { get; private set; }
     public CorridorCloud Right { get; private set; }
 
     /// <summary>방 안에 구름을 세운다.</summary>
-    public static RoomGates Create(Transform room, Sprite[] frames)
+    public static RoomGates Create(Transform room, Sprite sprite)
     {
         var go = new GameObject("RoomGates");
         go.transform.SetParent(room, false);
         var gates = go.AddComponent<RoomGates>();
 
+        // 그림의 둥근 얼굴이 방을 향한다 — 왼쪽 구름은 뒤집는다(faceRight).
         gates.Left = CorridorCloud.Create(go.transform, "Cloud_Left",
-            new Vector2(-MouthX, 0f), MouthSize, frames);
+            new Vector2(-BankX, 0f), BankSize, sprite, true);
         gates.Right = CorridorCloud.Create(go.transform, "Cloud_Right",
-            new Vector2(MouthX, 0f), MouthSize, frames);
+            new Vector2(BankX, 0f), BankSize, sprite, false);
 
         // 둘 다 막힌 채로 시작한다. 들어오는 연출이 왼쪽을 잠시 열어 준다.
         gates.Left.SetOpenImmediate(false);

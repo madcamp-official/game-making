@@ -17,8 +17,8 @@ public class RoomFlowController : MonoBehaviour
     [SerializeField, Range(0f, 1f)] private float floorHealMissingFraction = 0.6f;
 
     [Header("통로를 막는 구름")]
-    [Tooltip("흘러가는 구름 프레임(CorridorCloud.png를 자른 것). 비우면 구름 없이 예전처럼 동작한다.")]
-    [SerializeField] private Sprite[] corridorCloudFrames;
+    [Tooltip("통로를 메우는 뭉게구름 그림(CorridorCloud.png). 비우면 구름 없이 예전처럼 동작한다.")]
+    [SerializeField] private Sprite corridorCloudSprite;
 
     public int CurrentFloorIndex { get; private set; }
     public int CurrentRoomIndex { get; private set; } = -1;
@@ -154,8 +154,8 @@ public class RoomFlowController : MonoBehaviour
 
         // 양쪽 통로를 막는 구름. 방마다 프리팹에 심지 않고 여기서 세운다 —
         // 스물한 방의 통로 자리를 전부 같게 맞춰 두었으므로 자리를 계산하는 편이 안전하다.
-        if (corridorCloudFrames != null && corridorCloudFrames.Length > 0)
-            RoomGates.Create(currentRoom.transform, corridorCloudFrames);
+        if (corridorCloudSprite != null)
+            RoomGates.Create(currentRoom.transform, corridorCloudSprite);
 
         RunStats.ReachedRoom(CurrentFloorIndex, index);
 
