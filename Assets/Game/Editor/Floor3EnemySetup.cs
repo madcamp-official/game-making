@@ -49,7 +49,7 @@ public static class Floor3EnemySetup
         new EnemySpec
         {
             name = "Kingler", health = 180, scale = 1.25f, moveSpeed = 4.3f,
-            contactDamage = 0, goldMin = 3, goldMax = 9, knockbackMultiplier = 0.7f,
+            contactDamage = 0, goldMin = 5, goldMax = 13, knockbackMultiplier = 0.7f,
             boxSize = new Vector2(0.85f, 0.6f),
             ability = typeof(EnemyPincerAbility),
             abilityValues = new (string, object)[]
@@ -68,7 +68,7 @@ public static class Floor3EnemySetup
         new EnemySpec
         {
             name = "Poliwrath", health = 205, scale = 1.25f, moveSpeed = 3.6f,
-            contactDamage = 0, goldMin = 4, goldMax = 10, knockbackMultiplier = 0.7f,
+            contactDamage = 0, goldMin = 5, goldMax = 15, knockbackMultiplier = 0.7f,
             ability = typeof(EnemyVortexAbility),
             abilityValues = new (string, object)[]
             {
@@ -94,7 +94,7 @@ public static class Floor3EnemySetup
             // 대기 거리 2.6 → 6.5 — 회전 상한이 만드는 '피할 수 없는 경계'(약 6.4칸)
             // 바로 바깥이다. 여기까지 걸어가 붙는 것이 이 적의 답이다.
             name = "Dewgong", health = 145, scale = 1.25f, moveSpeed = 2.8f,
-            contactDamage = 0, goldMin = 3, goldMax = 9, keepDistance = 6.5f,
+            contactDamage = 0, goldMin = 4, goldMax = 12, keepDistance = 6.5f,
             ability = typeof(EnemyFrostBreathAbility),
             abilityValues = new (string, object)[]
             {
@@ -118,7 +118,7 @@ public static class Floor3EnemySetup
         new EnemySpec
         {
             name = "Starmie", health = 130, scale = 1.2f, moveSpeed = 4f,
-            contactDamage = 0, goldMin = 3, goldMax = 9, keepDistance = 3.8f,
+            contactDamage = 0, goldMin = 3, goldMax = 11, keepDistance = 3.8f,
             ability = typeof(EnemyStarLaserAbility),
             abilityValues = new (string, object)[]
             {
@@ -139,7 +139,7 @@ public static class Floor3EnemySetup
         new EnemySpec
         {
             name = "Dragonair", health = 310, scale = 1.3f, moveSpeed = 3.7f,
-            contactDamage = 0, goldMin = 7, goldMax = 17, knockbackMultiplier = 0.5f,
+            contactDamage = 0, goldMin = 9, goldMax = 23, knockbackMultiplier = 0.5f,
             keepDistance = 4.2f,
             boxSize = new Vector2(0.7f, 0.75f),
             ability = typeof(EnemyCurrentBandAbility),
