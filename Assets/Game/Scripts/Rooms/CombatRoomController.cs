@@ -102,15 +102,16 @@ public class CombatRoomController : MonoBehaviour
             RelicManager.GrantReward(bossRewardRelic);
             PlayerEvolution evolution = FindAnyObjectByType<PlayerEvolution>();
             if (evolution != null) evolution.Evolve();
-        }
-        else
-        {
-            // 보스방은 진화로 기술을 하나 주므로 경험치까지 얹지 않는다.
-            // 일반 전투방 두 개마다 레벨이 올라 강화 팔레트가 뜬다.
-            if (PlayerLevel.Instance != null) PlayerLevel.Instance.AddRoomClear();
+            if (exitDoor != null) exitDoor.SetOpen(true);
+            return;
         }
 
-        if (exitDoor != null) exitDoor.SetOpen(true);
+        // 일반 전투방은 스테이지 클리어 글씨 → 강화 선택 → 출구 개방 순서로 마무리한다.
+        // 경험치도 그 흐름 안에서 얹는다 — 여기서 얹으면 글씨보다 팔레트가 먼저 뜬다.
+        //
+        // 보스방이 이 길로 오지 않는 것이 중요하다. 그쪽은 진화로 기술을 하나 주므로
+        // 경험치까지 얹으면 보스 한 번에 강화를 두 번 받는다.
+        RoomClearSequence.Begin(exitDoor);
     }
 
     /// <summary>

@@ -58,7 +58,13 @@ public class RoomGates : MonoBehaviour
     {
         // 싸움이 남아 있지 않으면 오른쪽이 열린다. 전투방이 아닌 방(상점·이벤트)은
         // CombatActive가 처음부터 거짓이라 들어서자마자 열린다.
-        if (Right != null && !Right.IsOpen && !CombatRoomController.CombatActive)
+        //
+        // 단 방 정리 마무리(스테이지 클리어 글씨 → 강화 선택)가 도는 동안에는 닫아 둔다.
+        // CombatActive는 마지막 적이 죽는 즉시 거짓이 되는데 — 그래야 뒤늦게 씨뿌리기를
+        // 깔 수 없다 — 그 순간 길까지 열리면 강화를 고르다 말고 다음 방으로 나갈 수 있다.
+        if (Right != null && !Right.IsOpen &&
+            !CombatRoomController.CombatActive &&
+            !RoomClearSequence.IsRunning && !BossRewardSequence.IsRunning)
             Right.Open();
     }
 }

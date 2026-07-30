@@ -22,6 +22,9 @@ public class UIManager : MonoBehaviour
     private RelicChoicePanel relicChoicePanel;
     private EventDialogue eventDialogue;
 
+    /// <summary>방을 정리했을 때 뜨는 큰 글씨. <see cref="RoomClearSequence"/>가 쓴다.</summary>
+    public StageClearBanner StageClear { get; private set; }
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -83,6 +86,10 @@ public class UIManager : MonoBehaviour
         ExpBar.Create(canvasRoot);
         MoveSlotsHud.Create(canvasRoot);
         relicPopup = MakeFullScreenChild(canvasRoot, "RelicPopup").AddComponent<RelicPopup>();
+
+        // 팔레트·대사창보다 먼저 만든다. 뒤에 만드는 것들이 SetAsLastSibling으로 위에 얹히므로,
+        // 글씨가 미처 안 지워진 순간에도 고르는 창을 가리지 않는다.
+        StageClear = StageClearBanner.Create(canvasRoot);
 
         // 툴팁은 다른 HUD 요소 위에 그려져야 한다.
         GameObject tooltipGo = MakeFullScreenChild(canvasRoot, "RelicTooltip");

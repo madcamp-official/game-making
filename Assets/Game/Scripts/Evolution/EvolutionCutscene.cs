@@ -25,7 +25,7 @@ public class EvolutionCutscene : MonoBehaviour
     [Header("연출 리소스")]
     [SerializeField] private Sprite backgroundSprite;
     [Tooltip("포켓몬 스프라이트 확대 배율 (원본 픽셀 크기 기준)")]
-    [SerializeField, Min(1f)] private float spriteScale = 8f;
+    [SerializeField, Min(1f)] private float spriteScale = 4f;
 
     [Header("타이밍 (초)")]
     [SerializeField, Min(0f)] private float fadeDuration = 0.4f;
