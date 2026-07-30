@@ -17,7 +17,7 @@ public class ShopKeeper : MonoBehaviour
 {
     [Tooltip("방에 들어섰을 때 잡는 자세. 이 시간만큼 유지한 뒤 끄덕임으로 넘어간다.")]
     [SerializeField] private string poseState = "Pose_0";
-    [SerializeField, Min(0f)] private float poseHold = 0.5f;
+    [SerializeField, Min(0f)] private float poseHold = 1f;
     [Tooltip("평소 동작. 반복 재생이라 한 번 걸어 두면 계속 끄덕인다.")]
     [SerializeField] private string idleState = "Nod_0";
     [Tooltip("물건이 팔릴 때 한 번 하는 동작.")]

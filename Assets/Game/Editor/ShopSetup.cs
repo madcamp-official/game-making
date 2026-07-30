@@ -28,13 +28,26 @@ public static class ShopSetup
     private const int CarpetY = 1;
     private const int CarpetMinX = -5, CarpetMaxX = 3;
 
-    /// <summary>켈리몬은 맨 왼쪽 카펫 칸 위에 선다.</summary>
-    private static readonly Vector3 KeeperPos = new Vector3(CarpetMinX + 0.5f, CarpetY + 0.8f, 0f);
+    /// <summary>방에 들어서서 자세를 잡고 있는 시간. 짧으면 인사한 줄도 모르고 지나간다.</summary>
+    private const float PoseHold = 1f;
 
-    /// <summary>상품 넷의 x. 켈리몬 오른쪽으로 두 칸씩 띄운다.</summary>
-    private static readonly float[] SlotX = { -3f, -1f, 1f, 3f };
-    /// <summary>상품 그림. 카펫 띠(y 1~2)의 가운데에 얹는다.</summary>
-    private const float SlotY = 1.8f;
+    /// <summary>
+    /// 카펫 칸의 가운데 y. 타일 (x, CarpetY)는 월드 [CarpetY, CarpetY+1]을 덮으므로
+    /// 그 한가운데가 여기다. 켈리몬과 상품 모두 칸 위에 걸치지 않고 <b>칸 가운데</b>에 얹는다.
+    /// </summary>
+    private const float RowCenterY = CarpetY + 0.5f;
+
+    /// <summary>칸 번호(1부터)의 가운데 x. 1번 칸이 CarpetMinX다.</summary>
+    private static float TileCenterX(int tileNumber) => CarpetMinX + (tileNumber - 1) + 0.5f;
+
+    /// <summary>켈리몬은 1번 칸 가운데에 선다.</summary>
+    private static readonly Vector3 KeeperPos = new Vector3(TileCenterX(1), RowCenterY, 0f);
+
+    /// <summary>
+    /// 상품이 올라가는 칸 번호. 한 칸씩 띄워 3·5·7·9번에 놓는다 — 사이 칸이 비어 있어야
+    /// 네 상품의 경계가 눈에 잡히고, 아홉 칸에 딱 맞아떨어진다.
+    /// </summary>
+    private static readonly int[] SlotTiles = { 3, 5, 7, 9 };
 
     // ---------------------------------------------------------------- 1단계 · 카펫 타일
 
@@ -123,14 +136,14 @@ public static class ShopSetup
                 laid++;
             }
 
-            // 상품 넷과 받침대를 카펫 위로 옮긴다.
+            // 상품 넷과 받침대를 카펫 칸 가운데로 옮긴다.
             int moved = 0;
-            for (int i = 0; i < SlotX.Length; i++)
+            for (int i = 0; i < SlotTiles.Length; i++)
             {
                 Transform slot = FindChild(root.transform, "ShopSlot" + i);
                 if (slot != null)
                 {
-                    slot.localPosition = new Vector3(SlotX[i], SlotY, 0f);
+                    slot.localPosition = new Vector3(TileCenterX(SlotTiles[i]), RowCenterY, 0f);
                     moved++;
                 }
                 // 받침대는 걷어낸다. 모래 바닥에 놓을 때는 진열대 노릇을 했지만, 카펫 위에서는
@@ -167,8 +180,12 @@ public static class ShopSetup
             box.size = new Vector2(0.7f, 0.5f);
             box.offset = new Vector2(0f, -0.3f);   // 발치만 막아 머리 위로는 지나가 보인다
 
-            if (keeper.GetComponent<ShopKeeper>() == null)
-                keeper.gameObject.AddComponent<ShopKeeper>();
+            ShopKeeper shopKeeper = keeper.GetComponent<ShopKeeper>();
+            if (shopKeeper == null) shopKeeper = keeper.gameObject.AddComponent<ShopKeeper>();
+            // 자세를 잡는 시간. 프리팹에 이미 굳어 있는 값을 여기서 덮어써야 바뀐다.
+            var keeperSo = new SerializedObject(shopKeeper);
+            keeperSo.FindProperty("poseHold").floatValue = PoseHold;
+            keeperSo.ApplyModifiedPropertiesWithoutUndo();
 
             PrefabUtility.SaveAsPrefabAsset(root, path);
             return roomName + ": 카펫 " + laid + "칸, 상품 " + moved + "개 재배치, 켈리몬 배치";
