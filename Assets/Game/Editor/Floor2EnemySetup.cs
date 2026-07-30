@@ -41,59 +41,65 @@ public static class Floor2EnemySetup
         // 맞히면 거기서 끝(0.7초), 세 번 다 빗나가면 지쳐서 길게 멈춘다(1.6초).
         new EnemySpec
         {
-            name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 3.7f,
+            name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.4f,
             goldMin = 14, goldMax = 19,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
             {
                 // 발동은 중심 거리 기준(EnemyAbility) — 돌진으로 거리를 좁히므로
                 // 조금 멀리서도 시작할 수 있게 넉넉히 둔다.
-                ("range", 5.5f), ("cooldown", 1.1f), ("initialDelay", 1.0f),
+                ("range", 5.5f), ("cooldown", 0.85f), ("initialDelay", 1.0f),
                 ("actionState", "MultiStrike"), ("readyState", "Ready"),
-                ("maxDashes", 3), ("windup", 0.45f), ("telegraph", 0.4f),
+                ("maxDashes", 3), ("windup", 0.32f), ("telegraph", 0.32f),
                 ("dashDistance", 2.2f), ("dashSpeed", 9f), ("hitDelay", 0.18f),
-                // 돌진 사이 간격은 피격 무적(0.5초)보다 길어야 연타가 먹히지 않는다.
-                ("betweenDashes", 0.55f),
-                ("reach", 1.2f), ("sweepAngle", 150f), ("damage", 14),
-                ("hitPause", 0.7f), ("missPause", 1.6f),
-                // 밝은 모래 위에서 읽히도록 대비를 준다. 옅은 주황은 배경에 묻힌다.
-                ("pathColor", new Color(0.3f, 0.2f, 0.42f, 0.42f)),
+                // 피격 무적(0.5초)보다 짧다 — 연타가 다 들어가지는 않지만 쉴 틈도 주지 않는다.
+                ("betweenDashes", 0.38f),
+                ("reach", 1.2f), ("sweepAngle", 150f), ("damage", 15),
+                ("hitPause", 0.5f), ("missPause", 1f),
+                // 예고 색을 붉은색으로 통일했다 — 회색 경로와 붉은 피해 범위가 섞여 읽히지 않았다.
+                ("pathColor", new Color(0.88f, 0.12f, 0.2f, 0.24f)),
                 ("hitColor", new Color(0.88f, 0.12f, 0.2f, 0.52f)),
             },
         },
-        // 고지 — 방어형 전위. 발톱을 들어 길게 예고하고 한 번 크게 할퀸 뒤, 공처럼 말려
-        // 물러나 30%만 받으며 버티고, 몸을 펴면서 1.2초 무방비로 굳는다.
+        // 고지 — 자리를 두 번 묻는 적. 몸을 말고 짧게 굴러 붙은 뒤, 멈춘 자리에서
+        // 사방으로 가시를 뿌린다. 돌진은 선을 보고 비키고, 가시는 갈래 사이에 선다.
+        // 굴러온 자리가 곧 가시의 중심이라 첫 회피가 두 번째 회피를 정한다.
         new EnemySpec
         {
             // 이속은 3.0(처음)과 3.6(상향) 사이. 붙는 맛은 살리되 플레이어(5)를 따라붙지는 못한다.
-            name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.3f,
+            name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.9f,
             goldMin = 15, goldMax = 20, knockbackMultiplier = 0.6f,
-            ability = typeof(EnemyGuardAbility),
+            ability = typeof(EnemyRollSpikeAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 2.6f), ("cooldown", 2.2f), ("initialDelay", 1f),
-                // 한 방이 무거운 만큼 예고를 길게 준다 — 보고 피하라는 뜻이다.
-                ("readyState", "StrikeReady"), ("readyDuration", 0.6f),
-                ("strikeDamage", 22), ("strikeHitDelay", 0.18f),
-                ("strikeDuration", 0.5f), ("strikeReach", 1.3f), ("strikeSweepAngle", 180f),
-                ("guardDuration", 1f), ("damageReduction", 0.7f),
-                // 몸 펴기(0.14) + 정지(1.05) ≈ 1.2초 — 방어가 풀린 값이다.
-                ("uncurlDuration", 0.14f), ("recovery", 1.05f),
+                // 구르기로 거리를 좁히므로 붙기 전부터 시작할 수 있게 넉넉히 둔다.
+                ("range", 6f), ("minRange", 0f), ("cooldown", 2.6f), ("initialDelay", 1f),
+                ("readyState", "StrikeReady"), ("rollState", "Attack"),
+                ("curlState", "Guard"), ("uncurlState", "Uncurl"),
+                // 스라크 돌진(5.5)의 절반쯤. 붙는 수단이지 가로지르는 거리가 아니다.
+                ("windup", 0.5f), ("dashDistance", 2.8f), ("dashSpeed", 10f),
+                ("dashDamage", 12), ("dashHitRadius", 0.6f),
+                // 열 갈래면 거리 3에서 갈래 사이가 1.9칸 — 플레이어(폭 0.7)가 설 만하다.
+                ("spikeWindup", 0.55f), ("spikeCount", 10), ("spikeSpeed", 8f),
+                ("spikeDamage", 12), ("spikeRadius", 0.17f), ("spikeLifetime", 1.6f),
+                ("spikeTelegraphLength", 5f),
+                // 몸 펴기(0.14) + 정지(0.9) ≈ 1초 — 다 뿌리고 나면 치르는 값이다.
+                ("uncurlDuration", 0.14f), ("recovery", 0.9f),
             },
         },
         // 텅구리 — 중거리 견제. 거리를 지키며 왕복하는 뼈를 던지고, 뼈가 돌아올 때까지
         // 투척 자세로 무방비다. 맞혔으면 0.7초, 왕복이 다 빗나가면 1.3초 정지.
         new EnemySpec
         {
-            name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3f,
+            name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.6f,
             goldMin = 15, goldMax = 20, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 6.5f), ("minRange", 1.2f), ("cooldown", 1.2f), ("initialDelay", 1f),
+                ("range", 6.5f), ("minRange", 1.2f), ("cooldown", 0.95f), ("initialDelay", 1f),
                 // 던지는 손이 빨라졌다 — 예고를 짧게, 뼈를 빠르게, 쿨을 절반으로.
-                ("windup", 0.25f), ("boneSpeed", 13f), ("damage", 18),
-                ("hitRecovery", 0.7f), ("missRecovery", 1.3f),
+                ("windup", 0.25f), ("boneSpeed", 14.5f), ("damage", 19),
+                ("hitRecovery", 0.55f), ("missRecovery", 0.95f),
             },
         },
         // 닥트리오 — 이 층의 엘리트. 방마다 한 마리만 나오고, 체력·피해가 잡몹의 갑절이다.
@@ -112,28 +118,28 @@ public static class Floor2EnemySetup
                 // 사거리 = 방 전체. 잠수가 유일한 이동 수단이라, 사거리 밖이면 조각상이 되어
                 // 어그로가 풀린 것처럼 보인다.
                 // 엘리트답게 한 방이 무겁다. 대신 주기를 늘려 "가끔 오는 큰 것"으로 만든다.
-                ("range", 20f), ("cooldown", 3.2f), ("initialDelay", 1.8f),
-                ("surfaceWindup", 0.7f), ("surfaceRadius", 1.9f), ("damage", 34),
-                ("recovery", 1.5f),
+                ("range", 20f), ("cooldown", 2.3f), ("initialDelay", 1.8f),
+                ("surfaceWindup", 0.7f), ("surfaceRadius", 1.9f), ("damage", 36),
+                ("recovery", 1.15f),
                 // 맞고 나서 땅속으로 사라지는 것이 유일한 도피다. 플레이어(5)보다 확실히 빨라야
                 // 쫓아가 잡는 게 아니라 놓치는 느낌이 된다.
-                ("diveSpeed", 9.5f),
+                ("diveSpeed", 10.5f),
             },
         },
         // 나인테일 — 후열. 중거리를 지키다 부채꼴 예고와 함께 넓게 화염을 뿜는다.
         // 잔류 장판 없음, 직접 피해만. 분사가 끝나면 과열로 2초 정지.
         new EnemySpec
         {
-            name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 3.4f,
+            name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 4f,
             goldMin = 16, goldMax = 21, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
             {
-                ("range", 8f), ("minRange", 1f), ("cooldown", 1.8f), ("initialDelay", 1.2f),
-                // 넓게 지지는 것이 이 적의 값이다 — 부채꼴을 길고 두툼하게.
-                ("windup", 0.75f), ("coneRange", 6.8f), ("coneAngle", 95f),
-                ("sprayDuration", 1.2f), ("damage", 13), ("tickInterval", 0.45f),
-                ("overheatDuration", 2f),
+                ("range", 8f), ("minRange", 1f), ("cooldown", 1.35f), ("initialDelay", 1.2f),
+                // 옆으로 돌아 피할 수 있어야 한다 — 각도를 좁히고 조준 회전에 상한을 뒀다.
+                ("windup", 0.75f), ("coneRange", 5.2f), ("coneAngle", 45f), ("turnSpeed", 25f),
+                ("sprayDuration", 1f), ("damage", 14), ("tickInterval", 0.45f),
+                ("overheatDuration", 1.3f),
             },
         },
         // 데구리 — 예비 전력. 이번 개편의 방 구성에서는 빠졌지만, 프리팹은 같은 규칙을

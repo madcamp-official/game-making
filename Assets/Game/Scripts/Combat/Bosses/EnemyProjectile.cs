@@ -59,8 +59,15 @@ public class EnemyProjectile : MonoBehaviour
     }
 
     /// <summary>빌려 온 투사체를 발사한다. 이전 상태는 전부 덮어쓴다.</summary>
+    /// <param name="shape">그림. 비우면 동그란 탄이다. 고지의 가시는 삼각형을 쓴다.</param>
+    /// <param name="stretch">
+    /// 나아가는 방향으로 그림만 늘리는 배율. <b>판정은 늘어나지 않는다</b> —
+    /// 콜라이더는 <paramref name="radius"/>짜리 원 그대로다. 가시처럼 길쭉해 보여야 하는
+    /// 탄을 위한 값이고, 판정까지 늘리면 "스치지도 않았는데 맞았다"가 된다.
+    /// </param>
     public void Launch(Vector2 position, Vector2 direction, float speed, int damageAmount,
-                       float lifetime, float radius, Color color)
+                       float lifetime, float radius, Color color,
+                       Sprite shape = null, float stretch = 1f)
     {
         Vector2 dir = direction.sqrMagnitude > 0.0001f ? direction.normalized : Vector2.right;
 
@@ -73,7 +80,9 @@ public class EnemyProjectile : MonoBehaviour
 
         circle.radius = radius;
         circle.enabled = true;
-        visualTransform.localScale = Vector3.one * (radius * 2f);
+        // 풀에서 빌려 쓰므로 그림도 매번 다시 정해 준다. 앞서 쓴 탄의 모양이 남으면 안 된다.
+        visual.sprite = shape != null ? shape : PrimitiveSprites.Circle;
+        visualTransform.localScale = new Vector3(radius * 2f * Mathf.Max(0.01f, stretch), radius * 2f, 1f);
         visual.color = color;
 
         gameObject.SetActive(true);
