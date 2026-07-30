@@ -169,11 +169,11 @@ public class PlayerCombat : MonoBehaviour
     private int EffectiveSeedHeal =>
         seedHealPerTick + (moves != null ? moves.SeedHealBonus : 0);
 
-    private float EffectivePetalCooldown => petalCooldown * RelicCooldownMultiplier;
+    private float EffectivePetalCooldown =>
+        petalCooldown * (moves != null ? moves.PetalCooldownMultiplier : 1f) * RelicCooldownMultiplier;
     private float EffectivePetalRadius =>
         petalRadius * (moves != null ? moves.PetalRadiusMultiplier : 1f) * RelicAttackSizeMultiplier;
-    private float EffectivePetalDuration =>
-        (petalDuration + (moves != null ? moves.PetalDurationBonus : 0f)) * RelicZoneDurationMultiplier;
+    private float EffectivePetalDuration => petalDuration * RelicZoneDurationMultiplier;
 
     /// <summary>
     /// 꽃잎댄스 한 틱의 피해. 몸통박치기의 <b>기본</b> 피해가 기준이라, 몸통박치기를 강화해도

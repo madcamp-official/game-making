@@ -35,7 +35,7 @@ public class PlayerMoves : MonoBehaviour
     public float SeedRadiusMultiplier { get; private set; } = 1f;
     public float PetalRadiusMultiplier { get; private set; } = 1f;
     public float PetalDamageMultiplier { get; private set; } = 1f;
-    public float PetalDurationBonus { get; private set; }
+    public float PetalCooldownMultiplier { get; private set; } = 1f;
 
     public IReadOnlyList<MoveType> Learned => learned;
 
@@ -88,7 +88,7 @@ public class PlayerMoves : MonoBehaviour
         SeedRadiusMultiplier = 1f;
         PetalRadiusMultiplier = 1f;
         PetalDamageMultiplier = 1f;
-        PetalDurationBonus = 0f;
+        PetalCooldownMultiplier = 1f;
 
         OnMovesChanged?.Invoke();
     }
@@ -202,8 +202,8 @@ public class PlayerMoves : MonoBehaviour
                 PetalRadiusMultiplier *= MoveUpgrades.PetalRadiusStep; break;
             case MoveUpgradeId.PetalDamage:
                 PetalDamageMultiplier *= MoveUpgrades.PetalDamageStep; break;
-            case MoveUpgradeId.PetalDuration:
-                PetalDurationBonus += MoveUpgrades.PetalDurationStep; break;
+            case MoveUpgradeId.PetalCooldown:
+                PetalCooldownMultiplier *= MoveUpgrades.PetalCooldownStep; break;
         }
 
         OnMovesChanged?.Invoke();
