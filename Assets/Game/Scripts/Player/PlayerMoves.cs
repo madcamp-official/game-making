@@ -23,10 +23,9 @@ public class PlayerMoves : MonoBehaviour
     // 강화로 쌓이는 배율. 곱셈으로 누적된다.
     public float TackleDamageMultiplier { get; private set; } = 1f;
     public float TackleCooldownMultiplier { get; private set; } = 1f;
-    /// <summary>공격 중 이속 "감소량"에 곱하는 값. 1이면 원래대로, 작을수록 덜 느려진다.</summary>
-    public float TackleSlowReductionMultiplier { get; private set; } = 1f;
+    public float TackleRadiusMultiplier { get; private set; } = 1f;
     public float VineRangeMultiplier { get; private set; } = 1f;
-    public float VineStunMultiplier { get; private set; } = 1f;
+    public float VineSlowDurationMultiplier { get; private set; } = 1f;
     public float VineCooldownMultiplier { get; private set; } = 1f;
 
     // 장판 계열. 회복량과 지속시간은 명세가 더할 값을 못박아 두어 배율이 아니라 덧셈으로 쌓인다.
@@ -79,9 +78,9 @@ public class PlayerMoves : MonoBehaviour
 
         TackleDamageMultiplier = 1f;
         TackleCooldownMultiplier = 1f;
-        TackleSlowReductionMultiplier = 1f;
+        TackleRadiusMultiplier = 1f;
         VineRangeMultiplier = 1f;
-        VineStunMultiplier = 1f;
+        VineSlowDurationMultiplier = 1f;
         VineCooldownMultiplier = 1f;
         SeedHealBonus = 0;
         SeedDurationBonus = 0f;
@@ -182,14 +181,14 @@ public class PlayerMoves : MonoBehaviour
         {
             case MoveUpgradeId.TackleDamage:
                 TackleDamageMultiplier *= MoveUpgrades.DamageStep; break;
-            case MoveUpgradeId.TackleSlow:
-                TackleSlowReductionMultiplier *= MoveUpgrades.SlowStep; break;
+            case MoveUpgradeId.TackleRadius:
+                TackleRadiusMultiplier *= MoveUpgrades.TackleRadiusStep; break;
             case MoveUpgradeId.TackleSpeed:
                 TackleCooldownMultiplier *= MoveUpgrades.SpeedStep; break;
             case MoveUpgradeId.VineRange:
                 VineRangeMultiplier *= MoveUpgrades.RangeStep; break;
-            case MoveUpgradeId.VineStun:
-                VineStunMultiplier *= MoveUpgrades.StunStep; break;
+            case MoveUpgradeId.VineSlowDuration:
+                VineSlowDurationMultiplier *= MoveUpgrades.VineSlowDurationStep; break;
             case MoveUpgradeId.VineCooldown:
                 VineCooldownMultiplier *= MoveUpgrades.CooldownStep; break;
             case MoveUpgradeId.SeedHeal:

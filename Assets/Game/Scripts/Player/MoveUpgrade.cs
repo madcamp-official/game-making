@@ -4,10 +4,10 @@
 public enum MoveUpgradeId
 {
     TackleDamage = 0,    // 피해량 20% 증가
-    TackleSlow = 1,      // 공격 중 이동 감속 30% 감소
+    TackleRadius = 1,    // 공격 범위 15% 증가
     TackleSpeed = 2,     // 재사용 대기시간 15% 감소
     VineRange = 3,       // 길이 20% 증가
-    VineStun = 4,        // 공격 후 경직 50% 감소
+    VineSlowDuration = 4, // 감속 지속시간 50% 증가
     VineCooldown = 5,    // 재사용 대기시간 10% 감소
     SeedHeal = 6,        // 회복량 33% 증가 (6 → 8)
     SeedDuration = 7,    // 장판 지속시간 2초 증가
@@ -38,10 +38,10 @@ public static class MoveUpgrades
 {
     /// <summary>강화 한 번당 곱해지는 값. 여러 번 걸면 곱으로 쌓인다.</summary>
     public const float DamageStep = 1.2f;      // 피해량 20% 증가
-    public const float SlowStep = 0.7f;        // 공격 중 이동 "감속"을 30% 줄인다
+    public const float TackleRadiusStep = 1.15f; // 공격 반지름 15% 증가
     public const float SpeedStep = 0.85f;      // 재사용 대기시간 15% 감소
     public const float RangeStep = 1.2f;       // 길이 20% 증가
-    public const float StunStep = 0.5f;        // 공격 후 경직 50% 감소
+    public const float VineSlowDurationStep = 1.5f; // 감속 지속시간 50% 증가
     public const float CooldownStep = 0.9f;    // 재사용 대기시간 10% 감소
 
     // 장판 계열. 회복량과 지속시간은 비율이 아니라 고정값으로 더한다 —
@@ -66,14 +66,14 @@ public static class MoveUpgrades
     {
         new MoveUpgradeOption(MoveUpgradeId.TackleDamage, MoveType.Tackle,
             "몸통박치기", "피해량 20% 증가"),
-        new MoveUpgradeOption(MoveUpgradeId.TackleSlow, MoveType.Tackle,
-            "몸통박치기", "공격 중 이동 감속 30% 감소"),
+        new MoveUpgradeOption(MoveUpgradeId.TackleRadius, MoveType.Tackle,
+            "몸통박치기", "공격 범위 15% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.TackleSpeed, MoveType.Tackle,
             "몸통박치기", "재사용 대기시간 15% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.VineRange, MoveType.VineWhip,
             "덩굴채찍", "길이 20% 증가"),
-        new MoveUpgradeOption(MoveUpgradeId.VineStun, MoveType.VineWhip,
-            "덩굴채찍", "공격 후 경직 50% 감소"),
+        new MoveUpgradeOption(MoveUpgradeId.VineSlowDuration, MoveType.VineWhip,
+            "덩굴채찍", "감속 지속시간 50% 증가"),
         new MoveUpgradeOption(MoveUpgradeId.VineCooldown, MoveType.VineWhip,
             "덩굴채찍", "재사용 대기시간 10% 감소"),
         new MoveUpgradeOption(MoveUpgradeId.SeedHeal, MoveType.SeedSow,

@@ -220,7 +220,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerCombat
   meleeDamage: 11
   meleeRange: 0.9
-  meleeRadius: 0.85
+  meleeRadius: 0.78
   meleeCooldown: 0.5
   meleeKnockbackForce: 6
   attackEffectPrefab: {fileID: 0}
@@ -231,7 +231,7 @@ MonoBehaviour:
   vineKnockbackForce: 5
   vineStunDuration: 0.25
   vineSlowMultiplier: 0.55
-  vineSlowDuration: 1.8
+  vineSlowDuration: 1.2
   vineColor: {r: 0.3, g: 0.85, b: 0.25, a: 0.95}
   seedRadius: 3.6
   seedDuration: 6

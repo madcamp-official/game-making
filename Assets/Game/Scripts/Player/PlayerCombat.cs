@@ -27,9 +27,9 @@ public class PlayerCombat : MonoBehaviour
     // 내림 쪽으로 붙였다 — 반올림으로 제자리에 남으면 하향이 아니게 된다.
     [SerializeField, Min(0)] private int meleeDamage = 11;
     [SerializeField, Min(0f)] private float meleeRange = 0.9f;
-    [Tooltip("휘두르는 원의 반지름. 0.6에서 넓이가 두 배가 되도록 √2를 곱했다 — " +
-             "몰려드는 잡몹을 한 번에 쓸어야 근접이 근접다워진다.")]
-    [SerializeField, Min(0f)] private float meleeRadius = 0.85f;
+    [Tooltip("휘두르는 원의 반지름. 범위 강화 15%를 고르면 0.897이 되어, 예전 기본값 0.85보다 " +
+             "약 5.5% 넓어진다.")]
+    [SerializeField, Min(0f)] private float meleeRadius = 0.78f;
     [SerializeField, Min(0f)] private float meleeCooldown = 0.5f;
     [SerializeField, Min(0f)] private float meleeKnockbackForce = 6f;
     [SerializeField] private GameObject attackEffectPrefab;
@@ -54,8 +54,8 @@ public class PlayerCombat : MonoBehaviour
     [Tooltip("맞은 적에게 남는 속도의 비율. 0.55면 45% 느려진다. 1이면 감속이 없다. " +
              "걷는 속도만 깎으므로 이미 시작한 돌진은 그대로 간다.")]
     [SerializeField, Range(0.1f, 1f)] private float vineSlowMultiplier = 0.55f;
-    [Tooltip("감속이 남는 시간. 쿨타임보다 짧게 두어야 한 대상을 영영 묶어 두지 못한다.")]
-    [SerializeField, Min(0f)] private float vineSlowDuration = 1.8f;
+    [Tooltip("감속이 남는 시간. 강화 50%를 고르면 1.8초가 되어 이전 기본 성능을 되찾는다.")]
+    [SerializeField, Min(0f)] private float vineSlowDuration = 1.2f;
     [SerializeField] private Color vineColor = new Color(0.3f, 0.85f, 0.25f, 0.95f);
 
     [Header("기술 3 — 씨뿌리기")]
@@ -138,19 +138,11 @@ public class PlayerCombat : MonoBehaviour
     private float EffectiveMeleeCooldown =>
         meleeCooldown * (moves != null ? moves.TackleCooldownMultiplier : 1f) * RelicCooldownMultiplier;
 
-    /// <summary>몸통박치기 판정 원의 반지름. 광각렌즈가 키운다.</summary>
-    private float EffectiveMeleeRadius => meleeRadius * RelicAttackSizeMultiplier;
+    /// <summary>몸통박치기 판정 원의 반지름. 기술 강화와 광각렌즈가 함께 키운다.</summary>
+    private float EffectiveMeleeRadius =>
+        meleeRadius * (moves != null ? moves.TackleRadiusMultiplier : 1f) * RelicAttackSizeMultiplier;
 
-    /// <summary>공격 중 이동 배율. 강화는 "느려지는 정도"를 깎는 것이라 1에서 뺀 값에 곱한다.</summary>
-    private float EffectiveAttackMoveSpeedMultiplier
-    {
-        get
-        {
-            float reduction = 1f - attackMoveSpeedMultiplier;
-            if (moves != null) reduction *= moves.TackleSlowReductionMultiplier;
-            return Mathf.Clamp01(1f - reduction);
-        }
-    }
+    private float EffectiveAttackMoveSpeedMultiplier => attackMoveSpeedMultiplier;
 
     private float EffectiveVineCooldown =>
         vineCooldown * (moves != null ? moves.VineCooldownMultiplier : 1f) * RelicCooldownMultiplier;
@@ -158,8 +150,8 @@ public class PlayerCombat : MonoBehaviour
         vineRange * (moves != null ? moves.VineRangeMultiplier : 1f) * RelicAttackSizeMultiplier;
     /// <summary>채찍 판정의 굵기. 길이와 함께 광각렌즈를 탄다.</summary>
     private float EffectiveVineWidth => vineWidth * RelicAttackSizeMultiplier;
-    private float EffectiveVineStun =>
-        vineStunDuration * (moves != null ? moves.VineStunMultiplier : 1f);
+    private float EffectiveVineSlowDuration =>
+        vineSlowDuration * (moves != null ? moves.VineSlowDurationMultiplier : 1f);
 
     // 씨뿌리기는 공격이 아니라 회복 장판이라 광각렌즈가 닿지 않는다. 지속시간만 빛의점토를 탄다.
     private float EffectiveSeedRadius =>
@@ -354,10 +346,9 @@ public class PlayerCombat : MonoBehaviour
     /// <b>거리를 벌리는 쪽</b>에 몰아 둔다 — 밀쳐 내고(넉백), 따라오는 발을 늦추고(감속),
     /// 그 사이에 자리를 다시 잡는다. 예전에는 밀쳐 내기만 해서 몸통박치기의 못한 판이었다.
     ///
-    /// 기본값(감속 1.8초 · 쿨타임 2.2초)은 한 대상에게 <b>여덟 할쯤의 지속</b>이다 —
-    /// 끊기는 틈이 있어서 계속 걸어 두려면 계속 겨눠야 한다. 재사용 대기시간 강화를 두 번
-    /// 걸면(×0.64 = 1.41초) 그 틈이 사라져 사실상 영구가 되는데, 그것은 <b>한 기술에 강화를
-    /// 몰아 준 값</b>이라 그대로 둔다. 피해 4에 자기 경직 0.25초를 매번 치르는 대가다.
+    /// 기본 감속은 1.2초라 쿨타임 2.2초의 절반 남짓만 발을 묶는다. 감속 지속시간 강화를
+    /// 고르면 50% 늘어난 1.8초가 되어 이전 기본 성능을 되찾는다. 쿨타임 강화까지 함께 골라도
+    /// 1.8초 대 1.98초라 짧은 틈은 남고, 선제공격손톱까지 얻어야 사실상 계속 유지할 수 있다.
     /// </summary>
     private void VineWhipAttack(Vector2 direction)
     {
@@ -365,7 +356,7 @@ public class PlayerCombat : MonoBehaviour
         // 감속도 걸지 않는다 — 감속은 공격 모션 길이에 묶인 값인데 모션이 없고,
         // 어차피 경직 동안 못 움직인다.
         controller.SetFacing(direction);
-        controller.Stun(EffectiveVineStun);
+        controller.Stun(vineStunDuration);
 
         // 판정은 플레이어 앞으로 뻗은 직사각형이다. 그린 채찍과 같은 범위여야 한다.
         float range = EffectiveVineRange;
@@ -391,7 +382,7 @@ public class PlayerCombat : MonoBehaviour
 
             enemyHealth.TakeDamage(damage);
             enemy.ApplyKnockback(direction, vineKnockbackForce);
-            if (vineSlowMultiplier < 1f) enemy.ApplySlow(vineSlowMultiplier, vineSlowDuration);
+            if (vineSlowMultiplier < 1f) enemy.ApplySlow(vineSlowMultiplier, EffectiveVineSlowDuration);
             PlayerRelicEffects.ReportDamageDealt(damage);
         }
 
