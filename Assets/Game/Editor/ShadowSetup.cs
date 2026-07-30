@@ -139,6 +139,13 @@ public static class ShadowSetup
         return log.ToString();
     }
 
+    /// <summary>방 안에 사는 캐릭터 하나에 그림자를 단다 (상점의 켈리몬 등).</summary>
+    public static string AttachToRoomChild(string roomName, string childName, string species)
+    {
+        return AttachToPrefab("Assets/Game/Prefabs/Rooms/" + roomName + ".prefab",
+                              childName, new[] { species });
+    }
+
     /// <summary>적 프리팹 하나에만 그림자를 단다. 나중에 추가된 종(성원숭)에 쓴다.</summary>
     public static string AttachOne(string species)
     {

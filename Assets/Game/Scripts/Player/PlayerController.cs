@@ -42,6 +42,24 @@ public class PlayerController : MonoBehaviour
         stunnedUntil = Mathf.Max(stunnedUntil, Time.time + duration);
     }
 
+    /// <summary>
+    /// 연출이 대신 걸리게 하는 방향. 조작이 꺼진 동안에만 쓴다.
+    ///
+    /// 방을 옮길 때 주인공이 왼쪽 통로에서 걸어 들어오는 장면에 쓴다. 조작을 끄면
+    /// <see cref="MoveInput"/>이 0이 되고 <see cref="FixedUpdate"/>가 속도를 0으로 눌러
+    /// 버리므로, 밖에서 Rigidbody를 밀어도 한 프레임 만에 멈춘다. 그래서 <b>같은 통로로</b>
+    /// 방향을 넣어 준다 — 그러면 걷는 그림과 발소리, 속도 배율이 평소와 똑같이 나온다.
+    /// </summary>
+    public void SetScriptedMove(Vector2 direction)
+    {
+        scriptedMove = direction.sqrMagnitude > 0.001f ? direction.normalized : Vector2.zero;
+        if (scriptedMove != Vector2.zero) FacingDirection = scriptedMove;
+    }
+
+    /// <summary>연출 이동을 멈춘다.</summary>
+    public void ClearScriptedMove() => scriptedMove = Vector2.zero;
+
+    private Vector2 scriptedMove;
     private float stunnedUntil = -999f;
     private Rigidbody2D body;
     private Health health;
@@ -59,7 +77,10 @@ public class PlayerController : MonoBehaviour
         // 채찍을 휘두른 자세 그대로 굳었다가 풀리게 한다.
         if (!ControlEnabled || IsStunned || (health != null && health.IsDead))
         {
-            MoveInput = Vector2.zero;
+            // 연출이 걸으라고 넣어 준 방향은 살린다. 죽었으면 그것마저 무시한다.
+            bool dead = health != null && health.IsDead;
+            MoveInput = dead ? Vector2.zero : scriptedMove;
+            if (MoveInput.sqrMagnitude > 0.01f) FacingDirection = MoveInput;
             return;
         }
 

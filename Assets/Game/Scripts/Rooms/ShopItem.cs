@@ -73,6 +73,13 @@ public class ShopItem : MonoBehaviour, IInteractable
 
         sold = true;
 
+        // 상인에게 알린다. 방을 뒤져 찾는 것은 사는 순간 한 번뿐이라 값이 싸고,
+        // 상품마다 상인을 미리 물려 두지 않아도 된다.
+        ShopKeeper keeper = GetComponentInParent<ShopKeeper>();
+        if (keeper == null && transform.parent != null)
+            keeper = transform.parent.GetComponentInChildren<ShopKeeper>(true);
+        if (keeper != null) keeper.OnPurchased();
+
         if (relicData != null)
         {
             if (RelicManager.Instance != null) RelicManager.Instance.AddRelic(relicData);

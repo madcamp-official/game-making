@@ -67,7 +67,9 @@ public class ExitDoor : MonoBehaviour
         used = true;
         if (RoomFlowController.Instance != null)
         {
-            RoomFlowController.Instance.NextRoom();
+            // 방을 바로 갈아 끼우지 않고 연출에 맡긴다 — 화면을 덮고, 다음 방을 올린 뒤,
+            // 왼쪽 통로에서 걸어 들어오게 한다. 연출이 NextRoom을 부른다.
+            RoomTransition.Ensure().Go();
         }
         else
         {

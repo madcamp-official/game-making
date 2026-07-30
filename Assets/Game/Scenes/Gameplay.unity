@@ -675,6 +675,23 @@ MonoBehaviour:
   - {fileID: 11400000, guid: d9bfc60dfd55d4c1e86a09dce56adeaa, type: 2}
   playerSpawn: {x: -5.5, y: 0}
   floorHealMissingFraction: 0.6
+  corridorCloudFrames:
+  - {fileID: 7198289212358160226, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: -1089186190, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 36732069, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 53515645, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 639583682, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 89574283, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: -22629442, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 343001633, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 386481630, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: -1168037372, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: -922818357, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: -1610621700, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: -1430001563, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 322370744, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: -488439156, guid: f48054c9735f3420099aae07ede8f991, type: 3}
+  - {fileID: 191261824, guid: f48054c9735f3420099aae07ede8f991, type: 3}
 --- !u!4 &826172832
 Transform:
   m_ObjectHideFlags: 0

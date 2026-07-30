@@ -19,6 +19,7 @@
 | 콘팡 | 0048 | CHUNSOFT (공식 PMD 유래) |
 | 닥트리오 | 0051 | CHUNSOFT (공식 PMD 유래) |
 | 성원숭 | 0057 | CHUNSOFT (공식 PMD 유래) |
+| 켈리몬 | 0352 | CHUNSOFT (공식 PMD 유래) |
 | 강챙이 | 0062 | CHUNSOFT (공식 PMD 유래) |
 | 모다피 | 0069 | CHUNSOFT (공식 PMD 유래) |
 | 쥬래곤 | 0087 | CHUNSOFT (공식 PMD 유래) |
@@ -58,6 +59,12 @@
 
 갸라도스 방의 흐르는 바닥은 새로 그린 그림이 아니다. 방에 깔린 바닥 타일을 그대로 빌려
 수로마다 통째로 밀어 흐르게 한 것이다 (`WaterCurrentField` 참고).
+
+`carpet.png`, `cloud.png`, `cloud-move.png`는 프로젝트에 들여온 그림이다 (상점 깔개와
+구름 참고용). 원본 그대로 쓰는 것은 `carpet.png`뿐이고, 통로를 막는
+`CorridorCloud.png`는 <b>참고 그림의 여섯 색 팔레트만</b> 가져와 새로 구운 것이다 —
+뭉치 비트맵을 겹쳐 찍으면 실루엣이 서로 지워져 노이즈가 되므로, 둥근 덩이를 직접 그리고
+가로로 이어지는 열여섯 프레임으로 잘랐다 (`scratchpad/bake_cloud.py`, `CorridorCloudSetup`).
 
 `ForestPath.png`도 파생물이다. 숲 타일셋에 길이 없어서, 풀 타일(F_13_1)의 잔디 결은
 그대로 두고 색만 흙빛으로 낮춰 여섯 장을 구웠다 (`ForestPathSetup` 참고).
