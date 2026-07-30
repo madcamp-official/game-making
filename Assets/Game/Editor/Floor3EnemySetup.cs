@@ -125,10 +125,12 @@ public static class Floor3EnemySetup
                 // 사거리 = 방 전체. 어디서든 외곽으로 이동해 쏘는 것이 패턴이다.
                 ("range", 20f), ("minRange", 0f), ("cooldown", 2.8f), ("initialDelay", 1f),
                 // 예고 0.75 → 0.55초. 갈래가 넷뿐이고 전부 직선이라 이 정도로도 읽힌다.
-                // 대신 켜져 있는 시간을 0.35 → 0.4초로 늘려, 예고를 늦게 읽고 뛰어드는 쪽이
-                // 빔 사이로 미끄러져 지나가지 못하게 했다.
+                // 켜져 있는 시간은 0.35 → 0.9초로 크게 늘렸다. 이 층의 CC는 플레이어를
+                // 옮기기만 하므로 옮겨진 자리가 위험해야 뜻이 생기는데, 짧은 빔은 밀려나는
+                // 동안 이미 꺼져 있어 밀치기·흡인·해류가 전부 헛돌았다. 0.9초면 피격
+                // 무적(0.5초)이 한 번 돌아, 머물면 두 번까지 맞는다.
                 ("teleportTelegraph", 0.32f), ("laserTelegraph", 0.55f),
-                ("laserDuration", 0.4f), ("recovery", 0.7f),
+                ("laserDuration", 0.9f), ("recovery", 0.7f),
             },
         },
         // 신뇽 — 해류 지원 엘리트. 마지막 일반 전투방에 한 마리만 나온다.
@@ -192,15 +194,16 @@ public static class Floor3EnemySetup
             ("Starmie", new Vector2(5.2f, 3f)),
             ("Starmie", new Vector2(5.2f, -3f)),
         },
-        // 5번방 — 엘리트 종합. 신뇽 해류 위에서 흡인 둘과 레이저 둘이 겹친다.
+        // 5번방 — 엘리트 종합. 자리를 옮기는 것 셋(해류·흡인 둘)과 그 자리를 태우는 것
+        // 둘만 남겼다. 쥬래곤을 뺀 것은 겹치는 성질이라서다 — 해류와 흡인이 이미 발을
+        // 묶는데 감속까지 얹으면 세 겹이 같은 일을 하고, 정작 읽을 것은 하나도 늘지 않는다.
         ["F3Room5_Combat"] = new (string, Vector2)[]
         {
             ("Dragonair", new Vector2(4.4f, 0f)),
             ("Poliwrath", new Vector2(2.6f, 2.4f)),
             ("Poliwrath", new Vector2(2.6f, -2.4f)),
-            ("Dewgong", new Vector2(6f, 3.2f)),
-            ("Starmie", new Vector2(5.6f, 1.2f)),
-            ("Starmie", new Vector2(5.6f, -3.2f)),
+            ("Starmie", new Vector2(5.6f, 2.4f)),
+            ("Starmie", new Vector2(5.6f, -2.4f)),
         },
     };
 
