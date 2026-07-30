@@ -30,6 +30,24 @@ public class TitleScreen : FlowScreen
     private const float LogoY = 250f;
 
     /// <summary>
+    /// 메뉴 칸의 크기와 글자.
+    ///
+    /// 타이틀은 이 게임에서 <b>가장 먼저 보는 화면</b>이고 칸이 넷뿐이라, 게임 안의 창들보다
+    /// 큼직해도 화면이 비지 않는다. 예전 크기(420×58, 글자 30)는 흐르는 배경 위에서 작은
+    /// 표처럼 보였다.
+    ///
+    /// ⚠️ 글자 크기는 <b>12의 배수</b>여야 한다. PMD 비트맵 폰트라 그 사이 값은
+    /// <see cref="PixelUi.SnapFontSize"/>가 반올림해 버리는데, 30은 24로 내려간다(짝수 쪽으로
+    /// 반올림) — 키운 줄 알았던 값이 오히려 작아지는 자리다.
+    /// </summary>
+    private const int MenuFontSize = 36;
+    private static readonly Vector2 MenuSize = new Vector2(560f, 78f);
+
+    /// <summary>칸 사이 간격과 첫 칸의 높이.</summary>
+    private const float MenuGap = 14f;
+    private const float MenuTop = 20f;
+
+    /// <summary>
     /// 로고가 떠다니는 폭과 한 번 오가는 데 걸리는 시간.
     ///
     /// 폭을 정수 픽셀로 두는 것이 중요하다. 로고는 픽셀 아트이고 캔버스는 ConstantPixelSize라,
@@ -87,12 +105,12 @@ public class TitleScreen : FlowScreen
         commands.Add(Command.Controls);
         commands.Add(Command.Credits);
 
-        float y = 30f;
+        float y = MenuTop;
         for (int i = 0; i < commands.Count; i++)
         {
-            entries.Add(PmdUi.MakeEntry(Root, "Menu" + i, LabelOf(commands[i]), 30,
-                new Vector2(0f, y), new Vector2(420f, 58f)));
-            y -= 68f;
+            entries.Add(PmdUi.MakeEntry(Root, "Menu" + i, LabelOf(commands[i]), MenuFontSize,
+                new Vector2(0f, y), MenuSize));
+            y -= MenuSize.y + MenuGap;
         }
         cursor = 0;
 

@@ -137,15 +137,25 @@ public static class TitleMapSetup
     }
 
     /// <summary>
-    /// 판이 시작될 때 채워지는 자리표시자를 감춘다.
+    /// 재생 중에만 제 모습을 갖추는 것들을 감춘다.
     ///
-    /// 상점 상품은 판마다 새로 뽑히므로 프리팹에는 <b>흰 사각형</b>으로 남아 있다. 재생 중에는
-    /// 곧바로 그림이 들어가지만 에디터에서 찍으면 그대로 찍혀, 배경에 난 구멍처럼 보인다.
+    /// 에디터에서는 <c>Awake</c>가 돌지 않으므로, 프리팹에 굳어 있는 <b>자리표시자</b>가 그대로
+    /// 찍힌다. 게임에서는 아무도 보지 못하는 것들이라 배경에 남으면 얼룩으로 보인다.
+    ///
+    /// <list type="bullet">
+    /// <item><b>상점 상품</b> — 판마다 새로 뽑히므로 프리팹에는 흰 사각형으로 남아 있다.</item>
+    /// <item><b>출구 문</b> — 오른쪽 통로에 놓인 짙은 갈색 판이다. 통로를 막는 일은 이제 구름이
+    ///   하고(<c>RoomGates</c>) <see cref="ExitDoor"/>는 <c>Awake</c>에서 자기 그림을 끄는데,
+    ///   그 코드가 돌지 않으니 갈색 블록이 남는다.</item>
+    /// </list>
     /// </summary>
     private static void HidePlaceholders(GameObject map)
     {
         foreach (ShopItem item in map.GetComponentsInChildren<ShopItem>(true))
             item.gameObject.SetActive(false);
+
+        foreach (ExitDoor door in map.GetComponentsInChildren<ExitDoor>(true))
+            door.gameObject.SetActive(false);
     }
 
     /// <summary>이름에 번호를 두 자리로 박아 둔다. <see cref="TitleMapBackdrop"/>이 이 순서로 읽는다.</summary>
