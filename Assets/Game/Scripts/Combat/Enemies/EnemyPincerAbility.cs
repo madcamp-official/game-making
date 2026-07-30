@@ -5,9 +5,12 @@ using UnityEngine;
 /// 킹크랩의 가위치기 — 밀치기 전위. 플레이어 방향으로 넓은 부채꼴을 예고하고,
 /// 가위를 닫으며(Strike) 범위 안의 플레이어를 공격 방향으로 강하게 밀어낸다.
 ///
-/// 피해보다 넉백이 핵심이다. 아쿠스타의 레이저나 다른 적의 범위로 밀어 넣는
-/// 역할이라 피해는 낮게, 미는 힘은 세게 둔다. 기절은 걸지 않고, 민 뒤에는
-/// 잠시 멈춰 서서 반격할 틈을 준다.
+/// 아쿠스타의 레이저나 다른 적의 범위로 밀어 넣는 역할이라 미는 힘이 세다. 기절은
+/// 걸지 않고, 민 뒤에는 잠시 멈춰 서서 반격할 틈을 준다.
+///
+/// 피해도 가볍지 않다(16). 예전에는 8이라 "밀리기만 하고 아프지는 않은" 공격이었는데,
+/// 그러면 밀려나는 것 자체를 감수하고 그냥 붙어 있는 쪽이 이득이 된다. 밀어 넣는 역할은
+/// 밀린 쪽이 그 값을 이미 한 번 치렀을 때 성립한다.
 /// </summary>
 public class EnemyPincerAbility : EnemyAbility
 {
@@ -19,8 +22,11 @@ public class EnemyPincerAbility : EnemyAbility
     [SerializeField, Min(0.05f)] private float telegraph = 0.4f;
     [Tooltip("Strike 동작이 시작되고 실제로 닫히기까지의 시간.")]
     [SerializeField, Min(0f)] private float hitDelay = 0.15f;
-    [Tooltip("넉백이 역할이라 피해는 낮게 유지한다.")]
-    [SerializeField, Min(0)] private int damage = 8;
+    // 8 → 16. 밀어내는 것이 이 공격의 본체라는 말이 어느새 "맞아도 그만"이 되어 있었다.
+    // 다른 적의 범위로 밀어 넣는 역할은 밀린 쪽이 그 값을 <b>이미 한 번 치르고</b> 밀려야
+    // 성립한다. 3층 전위로서 2층 성원숭(15)·텅구리(19) 사이에 놓는다.
+    [Tooltip("맞으면 아픈 값. 다만 이 공격의 무게 중심은 여전히 밀어내기다.")]
+    [SerializeField, Min(0)] private int damage = 16;
 
     [Header("밀어내기")]
     [Tooltip("공격 방향으로 미는 속도. 감쇠하며 사라지는 임펄스다.")]

@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3.9
+  moveSpeed: 2.8
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -230,7 +230,7 @@ MonoBehaviour:
   attackCooldown: 1
   goldRewardMin: 3
   goldRewardMax: 9
-  keepDistance: 2.6
+  keepDistance: 6.5
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
   basicAIEnabled: 1
@@ -275,21 +275,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 08d478a94101c413195ed96008a56455, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyFrostBreathAbility
-  range: 4.4
+  range: 10.5
   minRange: 0.8
   cooldown: 2.8
   initialDelay: 1.2
-  reach: 5.5
-  sweepAngle: 70
+  reach: 11.5
+  sweepAngle: 22
+  turnSpeed: 45
   telegraph: 0.45
   breathDuration: 1.5
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.45}
   frostColor: {r: 0.6, g: 0.85, b: 1, a: 0.4}
   maxSlowExposure: 0.8
   maxSlowFactor: 0.45
-  freezeExposure: 1.2
-  freezeDuration: 0.5
-  refreezeImmunity: 2.5
   exposureDecay: 1.6
   recovery: 0.7
 --- !u!114 &4263529269642912710
