@@ -266,27 +266,36 @@ public static class PmdUi
     public const float ChipPadding = 4f;
 
     /// <summary>
-    /// 글자를 칸 가운데로 올려 앉힌다.
+    /// 글자칸 안에서 <b>글자가 처진 만큼만</b> 올려 앉힌다.
     ///
-    /// ⚠️ uGUI는 <b>폰트가 보고하는 높이</b>로 세로 정렬을 맞추는데, PMD 비트맵 폰트는
-    /// 글자칸이 12인데 ascent를 9로 보고한다 — 크기 24짜리 한 줄을 18로 보고하면서 실제로는
-    /// 24를 그린다(<see cref="PixelUi.LineBoxHeight"/>에 같은 함정이 적혀 있다). 그래서
-    /// 가운데 정렬을 맡기면 글자가 그 차이만큼 <b>아래로</b> 내려앉고, 글리프에 구워진 검은
-    /// 윤곽까지 더해져 칸의 아래 테두리를 뚫고 나간다 — "HP"·"EXP"·"근접"이 그랬다.
+    /// ⚠️ uGUI에게 세로 가운데를 맡기면 글자가 아래로 처진다. PMD 비트맵 폰트가 글자칸은
+    /// 12인데 ascent를 9로 보고해서(<see cref="PixelUi.LineBoxHeight"/>에 같은 함정이 적혀
+    /// 있다), 정렬 기준이 실제로 그리는 칸보다 작기 때문이다.
     ///
-    /// 보고값과 실제 칸의 차이의 절반만큼 올려 주면 눈으로 보는 가운데에 온다.
-    /// 윤곽 한 픽셀만큼 더 올려 아래 테두리와 사이를 띄운다.
+    /// 처지는 양은 <b>재서 얻은 값</b>이다. TextGenerator가 내놓는 글리프 사각형의 가운데가
+    /// 글자 rect의 가운데보다 늘 <c>1.5</c>(폰트 단위)만큼 아래였다 — 글자 크기·글자 종류·칸
+    /// 높이를 바꿔도 값이 변하지 않았다. 폰트 단위를 화면 픽셀로 바꾸면 <c>크기 / 8</c>이다
+    /// (크기 24면 3px, 12면 1.5px).
+    ///
+    /// ⚠️ <b>올리는 양은 정수 픽셀이어야 한다.</b> 이 캔버스는 ConstantPixelSize이고 폰트는
+    /// 점 필터를 쓰는 비트맵이라, 반 픽셀 밀린 자리에 놓이면 글리프가 두 픽셀에 걸쳐 샘플되어
+    /// 획이 빠지거나 뭉개진다 — 속성 꼬리표와 조작키 글자가 깨져 보인 것이 이것이었다.
+    ///
+    /// 예전에는 여기에 "윤곽 한 픽셀"을 더 얹었는데, 그만큼 글자가 칸 위로 치우쳤다.
+    /// 처진 만큼만 되돌리는 것이 곧 가운데다.
     /// </summary>
     public static void CenterGlyphs(Text text)
     {
-        if (text == null) return;
-        float reported = text.preferredHeight;
-        if (reported <= 0f) return;
-        float lift = Mathf.Max(0f, (text.fontSize - reported) * 0.5f) + 1f;
+        if (text == null || text.fontSize <= 0) return;
+        float lift = Mathf.Round(text.fontSize * GlyphSagRatio);
+        if (lift <= 0f) return;
         RectTransform rt = text.rectTransform;
         rt.offsetMin = new Vector2(rt.offsetMin.x, rt.offsetMin.y + lift);
         rt.offsetMax = new Vector2(rt.offsetMax.x, rt.offsetMax.y + lift);
     }
+
+    /// <summary>글자 크기에 대한 처짐 비율. 폰트 단위 1.5를 글자칸 12로 나눈 값이다.</summary>
+    private const float GlyphSagRatio = 1.5f / 12f;
 
     // ---------------------------------------------------------------- 자리 맞추기
 

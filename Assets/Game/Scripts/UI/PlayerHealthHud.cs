@@ -71,6 +71,8 @@ public class PlayerHealthHud : MonoBehaviour
         hud.valueText = PmdUi.MakeText(barRt, "Value", "", 24);
         hud.valueText.horizontalOverflow = HorizontalWrapMode.Overflow;
         PmdUi.Stretch(hud.valueText.rectTransform);
+        // 이 수치도 바 안에서 3px 처져 있었다 — 꼬리표와 같은 보정을 받는다.
+        PmdUi.CenterGlyphs(hud.valueText);
 
         return hud;
     }

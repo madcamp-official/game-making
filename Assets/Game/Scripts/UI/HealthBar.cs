@@ -31,11 +31,11 @@ public class HealthBar : MonoBehaviour
     /// <summary>
     /// bars.png의 바 윤곽·트랙 색. 좌하단 바(<see cref="BarFill"/>)와 같은 값이다.
     ///
-    /// 트랙은 흰색이 아니라 옅은 회색이다. 흰색으로 두면 아직 차지 않은 자리가 밝은 지형
+    /// 트랙은 흰색이 아니라 회색이다. 흰색으로 두면 아직 차지 않은 자리가 밝은 지형
     /// 위에서 유독 튀어, 남은 체력보다 <b>빈 자리</b>가 먼저 눈에 들어온다.
     /// </summary>
     private static readonly Color OutlineColor = new Color32(73, 73, 73, 255);
-    private static readonly Color TrackColor = new Color32(186, 186, 186, 255);
+    private static readonly Color TrackColor = new Color32(150, 150, 150, 255);
 
     /// <summary>윤곽 두께(월드 단위). 바가 작아 한 픽셀 남짓이면 충분하다.</summary>
     private const float Outline = 0.035f;
