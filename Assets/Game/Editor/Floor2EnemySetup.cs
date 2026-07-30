@@ -42,7 +42,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.4f,
-            goldMin = 3, goldMax = 7,
+            goldMin = 5, goldMax = 9,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
             {
@@ -68,7 +68,7 @@ public static class Floor2EnemySetup
         {
             // 이속은 3.0(처음)과 3.6(상향) 사이. 붙는 맛은 살리되 플레이어(5)를 따라붙지는 못한다.
             name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.9f,
-            goldMin = 3, goldMax = 7, knockbackMultiplier = 0.6f,
+            goldMin = 5, goldMax = 9, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyRollSpikeAbility),
             abilityValues = new (string, object)[]
             {
@@ -92,7 +92,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.6f,
-            goldMin = 3, goldMax = 7, keepDistance = 3.2f,
+            goldMin = 5, goldMax = 9, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
             {
@@ -131,7 +131,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 4f,
-            goldMin = 4, goldMax = 10, keepDistance = 4.2f,
+            goldMin = 5, goldMax = 11, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
             {
@@ -167,41 +167,43 @@ public static class Floor2EnemySetup
 
     // 방 구성. 방 이름 → (프리팹 이름, 로컬 좌표). 방 안쪽은 대략 ±6 × ±4다.
     //
-    // 마릿수를 줄이고 한 마리를 강하게 했다. 다섯이 한꺼번에 달려들면 누구의 예고인지
-    // 읽을 수가 없어, 결국 몸으로 부딪히는 싸움이 된다 — 2층이 피하려던 바로 그것이다.
-    // 셋 안팎이면 "지금 누가 멈출 차례인지"를 눈으로 좇을 수 있다.
-    // 닥트리오는 엘리트라 방마다 한 마리를 넘지 않고, 뒤쪽 두 방에만 나온다.
+    // 전투방당 3 → 4 → 4 → 5마리로 완만하게 늘린다. 원거리 견제 둘과 근접 압박 둘을
+    // 기본 상한으로 삼고, 마지막 방에만 닥트리오 한 마리를 더한다. 한 화면에 예고가 너무 많이
+    // 겹쳐 피할 길이 사라지지 않으면서도 뒤쪽 방으로 갈수록 조합이 복잡해지는 구성이다.
     private static readonly Dictionary<string, (string enemy, Vector2 at)[]> Rooms =
         new Dictionary<string, (string, Vector2)[]>
     {
-        // 1번방 — 근접 둘의 소개. 돌진(성원숭)과 단발 강타(고지)를 따로 배운다.
+        // 1번방 — 고지의 두 단계 공격을 익히면서 왕복 뼈다귀 하나를 함께 본다.
         ["F2Room1_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(2.2f, 0f)),
-            ("Primeape", new Vector2(4.6f, 2.4f)),
-            ("Primeape", new Vector2(4.6f, -2.4f)),
+            ("Sandslash", new Vector2(2.4f, 2.7f)),
+            ("Sandslash", new Vector2(1.9f, -2.9f)),
+            ("Marowak", new Vector2(5.6f, 0.1f)),
         },
-        // 2번방 — 근접을 상대하는 동안 왕복 뼈다귀가 등 뒤를 노린다.
+        // 2번방 — 서로 다른 전위 둘을 상대하며 위아래에서 돌아오는 뼈를 피한다.
         ["F2Room2_Combat"] = new (string, Vector2)[]
         {
-            ("Primeape", new Vector2(2.4f, 1.8f)),
-            ("Sandslash", new Vector2(2.4f, -1.8f)),
-            ("Marowak", new Vector2(5.4f, 0f)),
+            ("Sandslash", new Vector2(1.8f, -0.4f)),
+            ("Primeape", new Vector2(3.6f, 3f)),
+            ("Marowak", new Vector2(5.8f, -2.6f)),
+            ("Marowak", new Vector2(5.3f, 2.5f)),
         },
-        // 4번방 — 엘리트 첫 등장. 전위 뒤에서 화염이 길을 막고, 발밑에서 기습이 온다.
+        // 4번방 — 성원숭 둘이 압박하고, 서로 다른 후열 공격 하나씩이 빈 길을 바꾼다.
         ["F2Room4_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(2.2f, 1.8f)),
-            ("Ninetales", new Vector2(5.4f, -1.6f)),
-            ("Dugtrio", new Vector2(4f, 3.2f)),
+            ("Primeape", new Vector2(1.6f, 1.3f)),
+            ("Primeape", new Vector2(3.2f, -2.6f)),
+            ("Ninetales", new Vector2(6f, 3f)),
+            ("Marowak", new Vector2(0.6f, -3.6f)),
         },
-        // 5번방 — 혼합 전투. 멈출 적을 골라 때리는 층의 최종 시험.
+        // 5번방 — 두 전위·두 화염에 닥트리오 한 마리를 더한 층의 최종 시험.
         ["F2Room5_Combat"] = new (string, Vector2)[]
         {
-            ("Primeape", new Vector2(2.4f, 2f)),
-            ("Marowak", new Vector2(5.6f, -2.2f)),
-            ("Ninetales", new Vector2(5.6f, 2.2f)),
-            ("Dugtrio", new Vector2(3.4f, -3f)),
+            ("Primeape", new Vector2(1.4f, -1f)),
+            ("Primeape", new Vector2(4.2f, 2.2f)),
+            ("Ninetales", new Vector2(6.2f, -2.4f)),
+            ("Ninetales", new Vector2(5f, 3.4f)),
+            ("Dugtrio", new Vector2(0.2f, 0.6f)),
         },
     };
 
