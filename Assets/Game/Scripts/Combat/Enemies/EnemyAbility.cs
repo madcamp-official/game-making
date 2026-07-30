@@ -25,6 +25,9 @@ public abstract class EnemyAbility : MonoBehaviour
     [SerializeField, Min(0f)] private float cooldown = 3f;
     [Tooltip("방에 들어오자마자 터지지 않도록 첫 시전만 늦춘다.")]
     [SerializeField, Min(0f)] private float initialDelay = 1.2f;
+    [Tooltip("첫 시전을 이 시간 안에서 무작위로 더 늦춘다. 같은 종이 여럿 있을 때 " +
+             "박자를 흩어 놓는 값이다 — 0이면 전부 같은 순간에 시작한다.")]
+    [SerializeField, Min(0f)] private float initialDelayJitter = 0.6f;
 
     protected EnemyController Controller { get; private set; }
     protected Health Health { get; private set; }
@@ -162,7 +165,13 @@ public abstract class EnemyAbility : MonoBehaviour
             Player = pc.transform;
             PlayerHealth = pc.GetComponent<Health>();
         }
-        nextReadyTime = Time.time + initialDelay;
+        // 첫 시전만 개체마다 어긋나게 한다.
+        //
+        // 같은 종이 둘 있으면 방에 들어서는 순간 함께 어그로가 끌리고, 같은 initialDelay와
+        // 같은 cooldown으로 도는 탓에 <b>영영 같은 박자로 붙어 다닌다</b> — 둘이 동시에
+        // 달려들고 동시에 굳는다. 시작점만 흩어 놓으면 그 뒤로는 패턴 길이가 적중 여부에
+        // 따라 달라지므로 저절로 더 벌어진다.
+        nextReadyTime = Time.time + initialDelay + Random.Range(0f, initialDelayJitter);
     }
 
     private void Update()

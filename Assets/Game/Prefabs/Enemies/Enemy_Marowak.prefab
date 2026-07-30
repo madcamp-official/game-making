@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3
+  moveSpeed: 3.6
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -277,16 +277,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBoomerangAbility
   range: 6.5
   minRange: 1.2
-  cooldown: 1.2
+  cooldown: 0.95
   initialDelay: 1
   windup: 0.25
   releaseDelay: 0.13
   throwDistance: 4.6
-  boneSpeed: 13
-  damage: 18
+  boneSpeed: 14.5
+  damage: 19
   hitRadius: 0.55
-  hitRecovery: 0.7
-  missRecovery: 1.3
+  hitRecovery: 0.55
+  missRecovery: 0.95
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.35}
   boneColor: {r: 0.93, g: 0.9, b: 0.8, a: 1}
 --- !u!114 &9112598229982884337

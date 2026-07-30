@@ -54,9 +54,13 @@ public class EnemyComboMeleeAbility : EnemyAbility
 
     [Header("예고 색")]
     // 2층 바닥이 밝은 모래(연노랑)라, 주황 계열을 옅게 얹으면 배경에 묻혀 아예 안 보인다.
-    // 경로는 바닥보다 어두운 보라빛으로, 피해 범위는 진한 붉은색으로 대비를 준다.
+    //
+    // 경로와 피해 범위는 <b>같은 붉은색</b>을 진하기만 달리해서 쓴다. 예전에는 경로가 회색빛
+    // 보라, 피해 범위가 붉은색이라 색이 둘로 갈렸는데 — 한 번의 공격을 그린 것인데도 서로
+    // 다른 일처럼 읽혔다. 색은 "여기 서 있으면 맞는다" 하나만 뜻해야 한다. 진하기 차이가
+    // 곧 "지나갈 자리"와 "실제로 맞는 자리"의 구분이다.
     [Tooltip("돌진 경로. 몸이 지나갈 자리다.")]
-    [SerializeField] private Color pathColor = new Color(0.3f, 0.2f, 0.42f, 0.42f);
+    [SerializeField] private Color pathColor = new Color(0.88f, 0.12f, 0.2f, 0.24f);
     [Tooltip("피해 범위. 실제로 맞는 자리다.")]
     [SerializeField] private Color hitColor = new Color(0.88f, 0.12f, 0.2f, 0.52f);
 

@@ -53,14 +53,54 @@ public class EnemyGuardAbility : EnemyAbility
     [Tooltip("몸을 편 뒤 무방비로 정지하는 시간. 방어가 풀린 값을 치르는 반격 창이다.")]
     [SerializeField, Min(0f)] private float recovery = 1.05f;
 
+    [Header("예고 색")]
+    // 2층 바닥이 밝은 모래(연노랑)라 주황 계열은 묻힌다. 성원숭의 피해 범위와 같은 붉은색을
+    // 쓴다 — 색이 곧 "여기 서 있으면 맞는다"라는 뜻이어야 적이 달라도 한눈에 읽힌다.
+    [SerializeField] private Color hitColor = new Color(0.88f, 0.12f, 0.2f, 0.52f);
+
+    /// <summary>
+    /// 판정 반지름을 중심 거리로 환산한 값. <see cref="EnemyAbility.PlayerWithinSector"/>는
+    /// 몸 <b>표면</b> 사이로 재므로, 그림으로 옮기려면 두 몸의 반지름을 모두 더해야 한다.
+    /// 덜 그리면 예고 밖에 서 있다가 맞는다 — 넘칠지언정 모자라면 안 된다.
+    /// </summary>
+    private float TelegraphRadius
+    {
+        get
+        {
+            Collider2D own = GetComponent<Collider2D>();
+            float ownHalf = own != null ? Mathf.Max(own.bounds.extents.x, own.bounds.extents.y) : 0.5f;
+
+            float playerHalf = 0.3f;
+            if (PlayerHealth != null)
+            {
+                Collider2D col = PlayerHealth.GetComponent<Collider2D>();
+                if (col != null) playerHalf = Mathf.Max(col.bounds.extents.x, col.bounds.extents.y);
+            }
+            return strikeReach + ownHalf + playerHalf;
+        }
+    }
+
     protected override IEnumerator Perform()
     {
-        // 1. 예고 — 발톱을 들고 노려본다. 자세가 곧 "이 방향을 할퀸다"다.
+        // 1. 예고 — 발톱을 들고 노려보며, 할퀼 자리를 부채꼴로 깔아 보여 준다.
+        //    자세만으로는 "어디까지 닿는지"를 알 수 없어, 붙어도 되는 거리인지 판단할 수 없었다.
+        //    부채꼴은 플레이어를 따라 돌다가 이 단계가 끝나는 순간 그 방향으로 고정된다.
+        AttackTelegraph zone = AttackTelegraph.CreateSector(
+            EffectRoot, transform.position, TelegraphRadius,
+            AngleOf(DirectionToPlayer), strikeSweepAngle, hitColor);
+        zone.Pulse(readyDuration);
+
         float readyEnd = Time.time + readyDuration;
         while (Time.time < readyEnd && !Health.IsDead)
         {
             Body.linearVelocity = Vector2.zero;
-            if (!string.IsNullOrEmpty(readyState)) PlayAction(readyState, DirectionToPlayer);
+            Vector2 look = DirectionToPlayer;
+            if (!string.IsNullOrEmpty(readyState)) PlayAction(readyState, look);
+            if (zone != null)
+            {
+                zone.transform.position = transform.position;
+                zone.transform.rotation = Quaternion.Euler(0f, 0f, AngleOf(look));
+            }
             yield return null;
         }
         if (Health.IsDead) yield break;
@@ -122,4 +162,7 @@ public class EnemyGuardAbility : EnemyAbility
             yield return null;
         }
     }
+
+    private static float AngleOf(Vector2 direction) =>
+        Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 }

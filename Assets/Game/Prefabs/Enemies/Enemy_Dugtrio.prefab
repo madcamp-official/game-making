@@ -277,16 +277,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBurrowAbility
   range: 20
   minRange: 0
-  cooldown: 3.2
+  cooldown: 2.3
   initialDelay: 1.8
-  diveSpeed: 9.5
+  diveSpeed: 10.5
   maxDiveTime: 2.4
   arriveDistance: 0.3
   submergedAlpha: 0.45
   surfaceWindup: 0.7
   surfaceRadius: 1.9
-  damage: 34
-  recovery: 1.5
+  damage: 36
+  recovery: 1.15
   fleeDistance: 4.5
   fleeRecovery: 0.35
   fleeCooldown: 1.5

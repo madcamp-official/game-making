@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3.7
+  moveSpeed: 4.4
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -582,21 +582,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyComboMeleeAbility
   range: 5.5
   minRange: 0
-  cooldown: 1.1
+  cooldown: 0.85
   initialDelay: 1
   actionState: MultiStrike
   readyState: Ready
   maxDashes: 3
-  windup: 0.45
-  telegraph: 0.4
+  windup: 0.32
+  telegraph: 0.32
   dashDistance: 2.2
   dashSpeed: 9
   hitDelay: 0.18
-  betweenDashes: 0.55
+  betweenDashes: 0.38
   reach: 1.2
   sweepAngle: 150
-  damage: 14
-  hitPause: 0.7
-  missPause: 1.6
-  pathColor: {r: 0.3, g: 0.2, b: 0.42, a: 0.42}
+  damage: 15
+  hitPause: 0.5
+  missPause: 1
+  pathColor: {r: 0.88, g: 0.12, b: 0.2, a: 0.24}
   hitColor: {r: 0.88, g: 0.12, b: 0.2, a: 0.52}
