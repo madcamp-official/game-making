@@ -1324,9 +1324,10 @@ corridorCloudSprite = CorridorCloud, guid f48054…   ← 디스크의 Gameplay.
 `origin`을 붙든다). 사각형이 이제 몸 앞에서 시작하므로, 몸을 따라가게 두면 타격 시점
 (hitDelay 0.18초 = 1.6칸 전진)에 사각형째 딸려 가 예고보다 한참 앞을 때린다.
 
-`AttackTelegraph.CreateDashZone`과 `PrimitiveSprites.DashZone`은 **부르는 곳이 없어졌다.**
-두 사각형의 합집합을 한 장에 굽는 도구인데 유일한 호출자가 성원숭이었다. 지우지 않고 두었으니,
-쓸 일이 없다고 판단되면 함께 걷어낼 것.
+**`DashZone` 계열을 통째로 걷어냈다** (137줄). 두 사각형의 합집합을 텍스처 한 장에 굽는
+도구였는데 유일한 호출자가 성원숭이었다 — `AttackTelegraph.CreateDashZone`,
+`PrimitiveSprites.DashZone` · `MakeDashZone` · 캐시(`dashZones`) · 열쇠 함수(`Q`) ·
+상수 둘. 도형이 하나가 된 지금은 `CreateLine`(단색 사각형 한 장)이면 충분하다.
 
 ## 층 예산을 110 / 130 / 150으로 (2026-07-31)
 
