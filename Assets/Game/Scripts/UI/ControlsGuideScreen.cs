@@ -27,12 +27,15 @@ public class ControlsGuideScreen : FlowScreen
 
     private CharacterData character;
 
-    public static ControlsGuideScreen Open(GameFlow flow, CharacterData character)
+    /// <summary>일시정지 메뉴에서 구경하러 온 길인지. 뒤로가기가 타이틀 대신 그 메뉴로 돌아간다.</summary>
+    private bool fromPause;
+
+    public static ControlsGuideScreen Open(GameFlow flow, CharacterData character, bool fromPause = false)
     {
         // ⚠️ 캐릭터는 반드시 Build보다 먼저 넣는다. Build가 이 값으로 버튼을 정하는데,
         // 돌려받은 뒤에 넣으면 Build는 언제나 빈 값을 본다.
         var screen = Create<ControlsGuideScreen>(flow, "ControlsGuideScreen", SortingOrder,
-            s => s.character = character);
+            s => { s.character = character; s.fromPause = fromPause; });
         screen.FillBody();
         return screen;
     }
@@ -83,7 +86,7 @@ public class ControlsGuideScreen : FlowScreen
                                    TextAnchor.UpperLeft);
         PlaceLeft(keyColumn.rectTransform, KeyLeft, 110f, KeyWidth, 260f);
 
-        if (FromTitle)
+        if (FromTitle || fromPause)
         {
             // 구경하러 온 길에는 갈 곳이 하나다. "다시 보지 않기"는 게임을 시작하는 길에서만
             // 뜻이 있는 설정이라 여기서는 내보내지 않는다.
@@ -143,8 +146,10 @@ public class ControlsGuideScreen : FlowScreen
             return;
         }
 
-        // 캐릭터를 고르고 온 길이면 게임으로, 타이틀에서 구경만 온 길이면 타이틀로.
-        if (FromTitle) Flow.GoTitle();
+        // 온 길로 되돌아간다 — 일시정지에서 왔으면 그 메뉴로, 타이틀에서 구경만 왔으면
+        // 타이틀로, 캐릭터를 고르고 왔으면 게임으로.
+        if (fromPause) Flow.OpenPauseMenu();
+        else if (FromTitle) Flow.GoTitle();
         else Flow.BeginRun();
     }
 

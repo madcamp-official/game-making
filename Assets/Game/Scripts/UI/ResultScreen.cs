@@ -122,12 +122,13 @@ public class ResultScreen : FlowScreen
         portrait.rectTransform.offsetMin = new Vector2(FaceBorder, FaceBorder);
         portrait.rectTransform.offsetMax = new Vector2(-FaceBorder, -FaceBorder);
 
+        // 판(아래끝 −190)과 첫 칸 사이를 벌려 둔다. 판에 바짝 붙으면 결과의 일부처럼 읽힌다.
         entries.Add(PmdUi.MakeEntry(Root, "Retry", "같은 포켓몬으로 다시", 26,
-            new Vector2(0f, -230f), new Vector2(420f, 52f)));
+            new Vector2(0f, -254f), new Vector2(420f, 52f)));
         entries.Add(PmdUi.MakeEntry(Root, "Reselect", "포켓몬 다시 고르기", 26,
-            new Vector2(0f, -292f), new Vector2(420f, 52f)));
+            new Vector2(0f, -316f), new Vector2(420f, 52f)));
         entries.Add(PmdUi.MakeEntry(Root, "Title", "타이틀로 돌아가기", 26,
-            new Vector2(0f, -354f), new Vector2(420f, 52f)));
+            new Vector2(0f, -378f), new Vector2(420f, 52f)));
         cursor = 0;
     }
 

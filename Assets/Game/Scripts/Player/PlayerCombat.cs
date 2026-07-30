@@ -503,6 +503,11 @@ public class PlayerCombat : MonoBehaviour
         // 특히 보상 화면은 "아무 키나 눌러 계속"이라 넘기는 입력이 그대로 공격이 될 수 있다.
         if (MoveUpgradePanel.IsOpen || RelicChoicePanel.IsOpen || EventDialogue.IsOpen ||
             BossRewardSequence.IsRunning) return;
+        // 일시정지 메뉴가 떠 있는 동안, 그리고 메뉴가 닫힌 그 프레임에도 마찬가지다 —
+        // "계속하기"를 누른 클릭을 이 Update가 같은 프레임에 다시 보면 그대로 공격이 된다.
+        if (GameFlow.Instance != null &&
+            (GameFlow.Instance.Current != GameFlow.State.Playing ||
+             GameFlow.Instance.MenuClosedFrame == Time.frameCount)) return;
 
         Mouse mouse = Mouse.current;
         Keyboard kb = Keyboard.current;

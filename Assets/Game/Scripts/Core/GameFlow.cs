@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// <summary>
 /// 게임 전체 흐름: 타이틀 → 캐릭터 선택 → 조작 안내 → 게임 → 결과.
@@ -16,7 +17,7 @@ using UnityEngine;
 /// </summary>
 public class GameFlow : MonoBehaviour
 {
-    public enum State { Title, CharacterSelect, Guide, Credits, Playing, Result }
+    public enum State { Title, CharacterSelect, Guide, Credits, Playing, Paused, Result }
 
     public static GameFlow Instance { get; private set; }
 
@@ -69,7 +70,17 @@ public class GameFlow : MonoBehaviour
     private CharacterSelectScreen select;
     private ControlsGuideScreen guide;
     private CreditsScreen credits;
+    private PauseScreen pause;
     private ResultScreen result;
+
+    /// <summary>
+    /// 일시정지 메뉴가 닫힌 프레임.
+    ///
+    /// "계속하기"를 <b>클릭</b>한 그 프레임에 <see cref="PlayerCombat"/>도 같은 좌클릭을 보는데,
+    /// 두 Update의 순서는 정해져 있지 않다. 전투 쪽이 나중에 돌면 시간이 이미 풀린 뒤라
+    /// 메뉴를 닫은 클릭이 그대로 공격이 된다. 전투 쪽이 이 값을 보고 그 한 프레임을 거른다.
+    /// </summary>
+    public int MenuClosedFrame { get; private set; } = -1;
 
     private void Awake()
     {
@@ -82,6 +93,25 @@ public class GameFlow : MonoBehaviour
         // 게임은 아직 시작하지 않는다. 방을 미리 올려 두면 타이틀 뒤에서 적이 움직이고
         // 시간이 흐른다 — 판이 언제 시작됐는지가 흐려진다.
         GoTitle();
+    }
+
+    /// <summary>
+    /// Esc — 판 도중에만 일시정지를 연다. 메뉴를 닫는 Esc는 <see cref="PauseScreen"/>이 맡는다.
+    ///
+    /// <b>다른 것이 이미 시간을 세워 둔 동안에는 열지 않는다.</b> 대사창·강화 팔레트·유물 선택·
+    /// 보상 연출은 각자 timeScale을 0으로 세웠다 되돌리는데, 그 위에 일시정지가 겹치면 되돌리는
+    /// 값이 서로 엉킨다 — 시간이 흐르는 중(timeScale &gt; 0)일 때만 여는 것으로 전부 걸러진다.
+    /// 방을 건너가는 연출도 실제 시간으로 돌아서 따로 거른다.
+    /// </summary>
+    private void Update()
+    {
+        if (Current != State.Playing) return;
+        Keyboard kb = Keyboard.current;
+        if (kb == null || !kb.escapeKey.wasPressedThisFrame) return;
+
+        if (Time.timeScale <= 0f || BossRewardSequence.IsRunning) return;
+        if (RoomTransition.Instance != null && RoomTransition.Instance.IsPlaying) return;
+        OpenPauseMenu();
     }
 
     // ---------------------------------------------------------------- 화면 전환
@@ -132,13 +162,41 @@ public class GameFlow : MonoBehaviour
     /// <see cref="Selected"/>가 지난 판의 것으로 남아 있어서, 구경하러 들어온 것인데도
     /// "시작"이 떠 버린다.
     /// </param>
-    public void GoGuide(bool fromTitle = false)
+    /// <param name="fromPause">
+    /// 일시정지 메뉴에서 구경하러 온 길인지. 이 길에는 곡을 갈지 않는다 — 판의 곡이 흐르는
+    /// 채로 들어왔다 나가는 것이라, 메뉴 곡으로 갈아 버리면 돌아간 전투에 메뉴 곡이 남는다
+    /// (판의 곡은 방을 들어설 때 한 번만 걸리기 때문이다).
+    /// </param>
+    public void GoGuide(bool fromTitle = false, bool fromPause = false)
     {
         CloseAll();
         Current = State.Guide;
         Time.timeScale = 0f;
-        GameAudio.PlayMenuBgm();
-        guide = ControlsGuideScreen.Open(this, fromTitle ? null : Selected);
+        if (!fromPause) GameAudio.PlayMenuBgm();
+        guide = ControlsGuideScreen.Open(this, fromTitle || fromPause ? null : Selected, fromPause);
+    }
+
+    // ---------------------------------------------------------------- 일시정지
+
+    /// <summary>
+    /// 일시정지 메뉴를 연다. Esc의 길과, 조작 안내에서 되돌아오는 길이 함께 쓴다.
+    /// 곡은 건드리지 않는다 — 판이 잠깐 멈춘 것이지 다른 장면으로 간 것이 아니다.
+    /// </summary>
+    public void OpenPauseMenu()
+    {
+        CloseAll();
+        Current = State.Paused;
+        Time.timeScale = 0f;
+        pause = PauseScreen.Open(this);
+    }
+
+    /// <summary>판으로 돌아간다. 판 상태는 그대로다 — 시간만 다시 흐른다.</summary>
+    public void ResumeRun()
+    {
+        CloseAll();
+        Current = State.Playing;
+        Time.timeScale = 1f;
+        MenuClosedFrame = Time.frameCount;
     }
 
     /// <summary>
@@ -279,6 +337,7 @@ public class GameFlow : MonoBehaviour
         if (select != null) { select.Close(); select = null; }
         if (guide != null) { guide.Close(); guide = null; }
         if (credits != null) { credits.Close(); credits = null; }
+        if (pause != null) { pause.Close(); pause = null; }
         if (result != null) { result.Close(); result = null; }
     }
 }
