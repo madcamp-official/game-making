@@ -6,7 +6,8 @@ using UnityEngine;
 /// 배운 기술과 그 강화 상태를 들고 있는 곳. 실제 공격은 <see cref="PlayerCombat"/>가 하고,
 /// 여기서 나오는 배율을 곱해 쓴다.
 ///
-/// 기술은 처음에 둘(몸통박치기·덩굴채찍)로 시작해 진화할 때마다 하나씩 늘어난다.
+/// 기술의 종류와 순서는 선택한 캐릭터의 <see cref="PlayerMoveSet"/>에서 받는다.
+/// 이상해씨는 처음에 둘(몸통박치기·덩굴채찍)로 시작해 진화할 때마다 하나씩 늘어난다.
 /// 강화는 한 기술당 최대 두 번이고, 한 번 고른 선택지는 다시 나오지 않는다.
 /// </summary>
 public class PlayerMoves : MonoBehaviour
@@ -19,6 +20,8 @@ public class PlayerMoves : MonoBehaviour
     private readonly List<MoveType> learned = new List<MoveType>();
     private readonly Dictionary<MoveType, int> upgradeCounts = new Dictionary<MoveType, int>();
     private readonly HashSet<MoveUpgradeId> taken = new HashSet<MoveUpgradeId>();
+
+    public PlayerMoveSet MoveSet { get; private set; }
 
     // 강화로 쌓이는 배율. 곱셈으로 누적된다.
     public float TackleDamageMultiplier { get; private set; } = 1f;
@@ -38,7 +41,18 @@ public class PlayerMoves : MonoBehaviour
 
     public IReadOnlyList<MoveType> Learned => learned;
 
+    public int MoveCount => MoveSet != null ? MoveSet.Count : 0;
+
+    public MoveType MoveAt(int slot)
+    {
+        PlayerMoveDefinition definition = MoveSet?.DefinitionAt(slot);
+        return definition != null ? definition.type : default;
+    }
+
     public bool Has(MoveType move) => learned.Contains(move);
+
+    /// <summary>특수한 기술 실행부가 선택한 강화의 유무를 직접 확인할 때 쓴다.</summary>
+    public bool HasUpgrade(MoveUpgradeId id) => taken.Contains(id);
 
     public int UpgradeCount(MoveType move) =>
         upgradeCounts.TryGetValue(move, out int count) ? count : 0;
@@ -50,9 +64,6 @@ public class PlayerMoves : MonoBehaviour
     {
         if (Instance != null && Instance != this) { Destroy(this); return; }
         Instance = this;
-
-        for (int i = 0; i < MoveInfo.StartingMoveCount && i < MoveInfo.LearnOrder.Length; i++)
-            learned.Add(MoveInfo.LearnOrder[i]);
     }
 
     private void Start()
@@ -73,8 +84,14 @@ public class PlayerMoves : MonoBehaviour
         learned.Clear();
         upgradeCounts.Clear();
         taken.Clear();
-        for (int i = 0; i < MoveInfo.StartingMoveCount && i < MoveInfo.LearnOrder.Length; i++)
-            learned.Add(MoveInfo.LearnOrder[i]);
+        if (MoveSet != null)
+        {
+            for (int i = 0; i < MoveSet.StartingCount; i++)
+            {
+                PlayerMoveDefinition definition = MoveSet.DefinitionAt(i);
+                if (definition != null) learned.Add(definition.type);
+            }
+        }
 
         TackleDamageMultiplier = 1f;
         TackleCooldownMultiplier = 1f;
@@ -90,6 +107,16 @@ public class PlayerMoves : MonoBehaviour
         PetalCooldownMultiplier = 1f;
 
         OnMovesChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// 선택한 캐릭터의 기술 세트를 입히고 새 런 상태로 초기화한다.
+    /// 캐릭터를 바꾸지 않고 재도전해도 강화를 반드시 비워야 하므로 설정과 초기화를 한 길로 둔다.
+    /// </summary>
+    public void LoadMoveSet(PlayerMoveSet moveSet)
+    {
+        MoveSet = moveSet;
+        ResetForNewRun();
     }
 
     private void OnDestroy()
@@ -111,9 +138,12 @@ public class PlayerMoves : MonoBehaviour
     /// </summary>
     public MoveType? LearnNext()
     {
-        if (learned.Count >= MoveInfo.MaxMoves) return null;
-        foreach (MoveType move in MoveInfo.LearnOrder)
+        if (MoveSet == null || learned.Count >= MoveSet.Count) return null;
+        for (int i = 0; i < MoveSet.Count; i++)
         {
+            PlayerMoveDefinition definition = MoveSet.DefinitionAt(i);
+            if (definition == null) continue;
+            MoveType move = definition.type;
             if (learned.Contains(move)) continue;
             learned.Add(move);
             OnMovesChanged?.Invoke();
@@ -137,11 +167,21 @@ public class PlayerMoves : MonoBehaviour
     public List<MoveUpgradeOption> AvailableUpgrades()
     {
         List<MoveUpgradeOption> result = new List<MoveUpgradeOption>();
-        foreach (MoveUpgradeOption option in MoveUpgrades.All)
+        if (MoveSet == null) return result;
+
+        for (int moveIndex = 0; moveIndex < MoveSet.Count; moveIndex++)
         {
-            if (taken.Contains(option.id)) continue;
-            if (!CanUpgrade(option.move)) continue;
-            result.Add(option);
+            PlayerMoveDefinition definition = MoveSet.DefinitionAt(moveIndex);
+            if (definition == null || definition.upgrades == null || !CanUpgrade(definition.type)) continue;
+
+            foreach (MoveUpgradeId id in definition.upgrades)
+            {
+                if (taken.Contains(id)) continue;
+                if (!MoveUpgrades.TryGet(id, out MoveUpgradeOption option)) continue;
+                // 데이터 연결 실수를 조용히 허용하면 다른 기술의 강화가 표시된다.
+                if (option.move != definition.type) continue;
+                result.Add(option);
+            }
         }
         return result;
     }
@@ -168,11 +208,10 @@ public class PlayerMoves : MonoBehaviour
     {
         if (taken.Contains(id)) return;
 
-        MoveUpgradeOption option = default;
-        bool found = false;
-        foreach (MoveUpgradeOption candidate in MoveUpgrades.All)
-            if (candidate.id == id) { option = candidate; found = true; break; }
-        if (!found || !CanUpgrade(option.move)) return;
+        if (!MoveUpgrades.TryGet(id, out MoveUpgradeOption option) || !CanUpgrade(option.move)) return;
+        PlayerMoveDefinition definition = MoveSet?.Find(option.move);
+        if (definition == null || definition.upgrades == null ||
+            System.Array.IndexOf(definition.upgrades, id) < 0) return;
 
         taken.Add(id);
         upgradeCounts[option.move] = UpgradeCount(option.move) + 1;

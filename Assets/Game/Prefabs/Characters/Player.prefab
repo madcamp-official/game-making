@@ -310,18 +310,21 @@ MonoBehaviour:
     animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
     portrait: {fileID: 0}
     maxHealth: 100
+    movePowers: [11, 4, 0, 11]
     attackDamage: 11
     vineDamage: 4
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
     portrait: {fileID: 0}
     maxHealth: 130
+    movePowers: [16, 6, 0, 16]
     attackDamage: 16
     vineDamage: 6
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
     portrait: {fileID: 0}
     maxHealth: 170
+    movePowers: [22, 9, 0, 22]
     attackDamage: 22
     vineDamage: 9
   flashStepDuration: 0.15

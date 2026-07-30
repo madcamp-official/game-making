@@ -133,9 +133,10 @@ public class BossRewardSequence : MonoBehaviour
             if (learned.HasValue)
             {
                 MoveType move = learned.Value;
-                yield return ShowPage("새로운 기술!", null, MoveInfo.NameOf(move),
-                    "조작 : " + MoveInfo.KeyLabelOf(move) + "   ·   " + MoveInfo.TagOf(move)
-                    + "\n" + MoveInfo.SummaryOf(move));
+                PlayerMoveSet moveSet = PlayerMoves.Instance != null ? PlayerMoves.Instance.MoveSet : null;
+                yield return ShowPage("새로운 기술!", null, MoveInfo.NameOf(move, moveSet),
+                    "조작 : " + MoveInfo.KeyLabelOf(move, moveSet) + "   ·   " + MoveInfo.TagOf(move, moveSet)
+                    + "\n" + MoveInfo.SummaryOf(move, moveSet));
             }
 
             // 4. 유물. 다우징머신이 있으면 둘 중 하나를 고르고, 없으면 하나를 크게 보여준다.

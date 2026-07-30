@@ -94,15 +94,22 @@ public class ControlsGuideScreen : FlowScreen
         // 몇 번째 기술인가"만 알려 주면 되는 자리다. 이름은 기술 칸 HUD와 습득 화면이 맡는다.
         var text = new System.Text.StringBuilder();
         text.Append(Row("이동", "WASD / 방향키"));
-        for (int i = 0; i < MoveInfo.LearnOrder.Length; i++)
-            text.Append(Row("기술 " + (i + 1), MoveInfo.KeyLabelOf(MoveInfo.LearnOrder[i])));
+        for (int i = 0; i < MoveInfo.MaxMoves; i++)
+            text.Append(Row("기술 " + (i + 1), MoveInfo.KeyLabelForSlot(i)));
         text.Append(Row("상호작용", "E"));
         text.Append(Row("일시정지", "Esc"));
         body.text = text.ToString().TrimEnd('\n');
 
-        characterLine.text = character != null
-            ? character.displayName + " — " + character.playStyle
-            : "";
+        if (character == null)
+        {
+            characterLine.text = "";
+            return;
+        }
+
+        CharacterData playable = character.ResolvePlayable();
+        characterLine.text = playable != null && playable != character
+            ? character.displayName + " 선택 — 현재 " + playable.displayName + "로 시작"
+            : character.displayName + " — " + character.playStyle;
     }
 
     /// <summary>

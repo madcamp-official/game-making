@@ -29,6 +29,12 @@ public class GameFlow : MonoBehaviour
     /// <summary>이번 판에 고른 캐릭터.</summary>
     public CharacterData Selected { get; private set; }
 
+    /// <summary>
+    /// 이번 판에 실제로 입힌 완성 캐릭터. 미구현 캐릭터를 골랐으면 그 캐릭터가 지정한
+    /// 폴백이 들어간다. <see cref="Selected"/>는 재도전과 마지막 선택 기억을 위해 그대로 둔다.
+    /// </summary>
+    public CharacterData ActiveCharacter { get; private set; }
+
     public IReadOnlyList<CharacterData> Characters => characters;
 
     /// <summary>마지막으로 고른 캐릭터의 이름. 타이틀의 '빠른 시작'이 이걸 본다.</summary>
@@ -138,12 +144,20 @@ public class GameFlow : MonoBehaviour
     public void BeginRun()
     {
         if (Selected == null && characters != null && characters.Length > 0) Selected = characters[0];
+        ActiveCharacter = ResolvePlayableCharacter(Selected);
+        if (ActiveCharacter == null)
+        {
+            Debug.LogError("플레이 가능한 CharacterData가 없다. 진화 단계·기술 세트 또는 fallbackCharacter를 확인한다.");
+            GoCharacterSelect();
+            return;
+        }
+
         CloseAll();
         Current = State.Playing;
 
-        RunStats.Begin(Selected);
+        RunStats.Begin(ActiveCharacter);
         ResetRunState();
-        ApplyCharacter(Selected);
+        ApplyCharacter(ActiveCharacter);
         // 캐릭터의 1단계를 입힌 뒤에 되살려야 그 단계의 최대 체력으로 찬다.
         ResetPlayer();
 
@@ -204,16 +218,39 @@ public class GameFlow : MonoBehaviour
     // ---------------------------------------------------------------- 캐릭터 입히기
 
     /// <summary>
-    /// 고른 캐릭터를 플레이어에게 입힌다. 진화 단계 배열을 통째로 갈아 끼우면
-    /// 그림·체력·공격력·진화 뒤 모습까지 한꺼번에 따라온다.
+    /// 고른 캐릭터를 플레이어에게 입힌다. 진화 단계와 기술 세트를 함께 갈아 끼우면
+    /// 그림·체력·공격력·진화 뒤 모습·습득 순서가 한꺼번에 따라온다.
     /// </summary>
     private void ApplyCharacter(CharacterData character)
     {
-        if (character == null || character.stages == null || character.stages.Length == 0) return;
+        if (character == null || !character.HasOwnImplementation) return;
 
+        var moves = FindAnyObjectByType<PlayerMoves>();
+        if (moves != null) moves.LoadMoveSet(character.moveSet);
+        else Debug.LogWarning("PlayerMoves를 찾지 못해 캐릭터 기술 세트를 적용하지 못했다.");
+
+        // 단계별 위력을 어느 기술에 넣을지 알려면 기술 세트가 먼저 들어가 있어야 한다.
         var evolution = FindAnyObjectByType<PlayerEvolution>();
-        if (evolution == null) return;
-        evolution.LoadStages(character.stages);
+        if (evolution != null) evolution.LoadStages(character.stages);
+        else Debug.LogWarning("PlayerEvolution을 찾지 못해 캐릭터 진화 단계를 적용하지 못했다.");
+    }
+
+    /// <summary>
+    /// 선택 데이터의 폴백을 따라 실제 구현을 찾는다. 연결이 빠졌을 때도 첫 번째 완성 캐릭터로
+    /// 안전하게 시작하지만, 미구현 캐릭터에는 명시적인 fallbackCharacter를 연결하는 것이 원칙이다.
+    /// </summary>
+    public CharacterData ResolvePlayableCharacter(CharacterData requested)
+    {
+        CharacterData resolved = requested != null ? requested.ResolvePlayable() : null;
+        if (resolved != null) return resolved;
+
+        if (characters == null) return null;
+        foreach (CharacterData candidate in characters)
+        {
+            resolved = candidate != null ? candidate.ResolvePlayable() : null;
+            if (resolved != null) return resolved;
+        }
+        return null;
     }
 
     private void CloseAll()

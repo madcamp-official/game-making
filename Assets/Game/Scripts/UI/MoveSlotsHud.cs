@@ -200,8 +200,10 @@ public class MoveSlotsHud : MonoBehaviour
             Slot slot = slots[i];
             if (slot == null) continue;
 
-            MoveType move = MoveInfo.LearnOrder[i];
-            bool learned = moves != null && moves.Has(move);
+            bool hasDefinition = moves != null && i < moves.MoveCount &&
+                                 moves.MoveSet.DefinitionAt(i) != null;
+            MoveType move = hasDefinition ? moves.MoveAt(i) : default;
+            bool learned = hasDefinition && moves.Has(move);
 
             if (!learned)
             {
@@ -223,12 +225,12 @@ public class MoveSlotsHud : MonoBehaviour
             slot.nameBand.color = NameBand * tint;
             slot.infoBand.color = InfoBand * tint;
 
-            slot.nameText.text = MoveInfo.NameOf(move);
+            slot.nameText.text = MoveInfo.NameOf(move, moves.MoveSet);
             slot.nameText.color = NameText;
-            slot.keyText.text = MoveInfo.KeyLabelOf(move);
+            slot.keyText.text = MoveInfo.KeyLabelForSlot(i);
             slot.keyText.color = InfoText;
 
-            string tag = MoveInfo.TagOf(move);
+            string tag = MoveInfo.TagOf(move, moves.MoveSet);
             slot.tagChip.gameObject.SetActive(!string.IsNullOrEmpty(tag));
             TagPalette(tag, out Color box, out Color ink);
             slot.tagChip.color = box * tint;

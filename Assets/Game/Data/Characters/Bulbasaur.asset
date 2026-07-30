@@ -18,22 +18,53 @@ MonoBehaviour:
   previewController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
   previewHoverState: Walk_0
   previewIdleState: Idle_0
+  fallbackCharacter: {fileID: 0}
+  moveSet:
+    startingMoveCount: 2
+    moves:
+    - type: 0
+      displayName: "몸통박치기"
+      summary: "겨눈 방향을 후려치는 근접 공격."
+      attackKind: 1
+      tagOverride: ""
+      upgrades: [0, 1, 2]
+    - type: 1
+      displayName: "덩굴채찍"
+      summary: "두어 칸 밖까지 채찍을 뻗어 그 선 위의 적을 때리고 밀쳐 낸다. 맞은 적은 한동안 느려진다. 휘두른 뒤에는 잠깐 움직일 수 없다."
+      attackKind: 2
+      tagOverride: ""
+      upgrades: [3, 4, 5]
+    - type: 2
+      displayName: "씨뿌리기"
+      summary: "발밑에 회복 장판을 깐다. 그 위에 서 있는 동안 체력이 차오른다. 전투방마다 한 번 쓸 수 있다."
+      attackKind: 0
+      tagOverride: "방당 1회"
+      upgrades: [6, 7, 8]
+    - type: 3
+      displayName: "꽃잎댄스"
+      summary: "몸을 따라다니는 피해 장판을 만든다. 장판 안의 적이 주기적으로 피해를 입는다."
+      attackKind: 2
+      tagOverride: ""
+      upgrades: [9, 10, 11]
   stages:
   - stageName: "\uC774\uC0C1\uD574\uC528"
     animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
     portrait: {fileID: 368746673022191736, guid: c05d9f7d79efe493c9691638561106f3, type: 3}
     maxHealth: 100
+    movePowers: [11, 4, 0, 11]
     attackDamage: 11
     vineDamage: 4
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
     portrait: {fileID: 368746673022191736, guid: 18f8c6b6bacc0462a90c6254b2d49dd2, type: 3}
     maxHealth: 130
+    movePowers: [16, 6, 0, 16]
     attackDamage: 16
     vineDamage: 6
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
     portrait: {fileID: 368746673022191736, guid: 0e8729b0663224c72aa8fd0f99ab8f77, type: 3}
     maxHealth: 170
+    movePowers: [22, 9, 0, 22]
     attackDamage: 22
     vineDamage: 9

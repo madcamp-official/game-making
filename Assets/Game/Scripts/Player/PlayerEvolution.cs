@@ -14,9 +14,15 @@ public class PlayerEvolution : MonoBehaviour
         [Tooltip("진화 컷씬에 표시할 정면 스프라이트 (남쪽 대기 1프레임)")]
         public Sprite portrait;
         [Min(1)] public int maxHealth = 100;
-        [Min(0)] public int attackDamage = 11;   // 기본 공격 1 (근거리)
+
+        [Tooltip("현재 기술 세트의 슬롯 순서대로 적는 단계별 기준 위력. 0이면 기술 구현의 기본값을 쓴다.")]
+        public int[] movePowers;
+
+        // 기존 이상해씨 에셋을 안전하게 읽기 위한 이전 필드. movePowers가 채워진 뒤에도
+        // 구버전 에셋·프리팹을 열 수 있게 당분간 남겨 둔다.
+        [HideInInspector, Min(0)] public int attackDamage = 11;   // 구버전 기본 공격 1
         [UnityEngine.Serialization.FormerlySerializedAs("razorDamage")]
-        [Min(0)] public int vineDamage = 4;      // 기본 공격 2 (덩굴채찍)
+        [HideInInspector, Min(0)] public int vineDamage = 4;      // 구버전 기본 공격 2
     }
 
     [SerializeField] private Stage[] stages;
@@ -226,7 +232,7 @@ public class PlayerEvolution : MonoBehaviour
         }
 
         PlayerCombat combat = GetComponent<PlayerCombat>();
-        if (combat != null) combat.SetDamages(next.attackDamage, next.vineDamage);
+        if (combat != null) combat.SetMovePowers(next.movePowers, next.attackDamage, next.vineDamage);
 
         // 진화할 때마다 기술을 하나 더 배운다 (처음 둘 → 셋 → 넷).
         if (!learnMove) return;

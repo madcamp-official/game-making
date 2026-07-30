@@ -19,4 +19,8 @@ MonoBehaviour:
   previewController: {fileID: 0}
   previewHoverState: Walk_0
   previewIdleState: Idle_0
+  fallbackCharacter: {fileID: 11400000, guid: 1780554f3c84a40b5b87ef7cd1e1fb85, type: 2}
+  moveSet:
+    startingMoveCount: 2
+    moves: []
   stages: []

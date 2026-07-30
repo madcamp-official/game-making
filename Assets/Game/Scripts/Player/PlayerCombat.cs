@@ -102,6 +102,8 @@ public class PlayerCombat : MonoBehaviour
     private float lastMeleeTime = -999f;
     private float lastVineTime = -999f;
     private float lastPetalTime = -999f;
+    /// <summary>단계 데이터가 꽃잎댄스 위력을 따로 주지 않았을 때는 몸통박치기 위력을 쓴다.</summary>
+    private int petalBaseDamage;
     /// <summary>씨뿌리기를 쓴 전투방의 번호. 방이 바뀌면 다시 쓸 수 있다.</summary>
     private int seedUsedInRoom = -1;
     private float slowUntil = -999f;
@@ -173,7 +175,8 @@ public class PlayerCombat : MonoBehaviour
     /// 배율은 기술에 붙은 속성(근접)을 따른다.
     /// </summary>
     private int EffectivePetalDamage =>
-        ScaleDamage(meleeDamage, petalDamageRatio * KindMultiplier(MoveType.PetalDance) *
+        ScaleDamage(petalBaseDamage > 0 ? petalBaseDamage : meleeDamage,
+            petalDamageRatio * KindMultiplier(MoveType.PetalDance) *
             (moves != null ? moves.PetalDamageMultiplier : 1f));
 
     /// <summary>
@@ -204,11 +207,30 @@ public class PlayerCombat : MonoBehaviour
         return Mathf.Clamp01((Time.time - last) / cooldown);
     }
 
-    /// <summary>진화 등으로 기본 공격력을 바꾼다. 유물 배율은 공격할 때 따로 곱해진다.</summary>
-    public void SetDamages(int melee, int vine)
+    /// <summary>
+    /// 진화 단계의 슬롯별 위력을 현재 기술 구현에 나눠 준다. 배열이 없는 구버전 데이터는
+    /// 기존 두 필드를 사용한다. 신규 기술은 실행부를 추가할 때 이 매핑에도 한 줄을 연결한다.
+    /// </summary>
+    public void SetMovePowers(int[] powers, int legacyPrimary, int legacySecondary)
     {
-        meleeDamage = melee;
-        vineDamage = vine;
+        meleeDamage = legacyPrimary;
+        vineDamage = legacySecondary;
+        petalBaseDamage = 0;
+
+        if (moves == null || moves.MoveSet == null || powers == null) return;
+        int count = Mathf.Min(moves.MoveCount, powers.Length);
+        for (int slot = 0; slot < count; slot++)
+        {
+            int power = powers[slot];
+            if (power <= 0) continue;
+
+            switch (moves.MoveAt(slot))
+            {
+                case MoveType.Tackle: meleeDamage = power; break;
+                case MoveType.VineWhip: vineDamage = power; break;
+                case MoveType.PetalDance: petalBaseDamage = power; break;
+            }
+        }
     }
 
     // 속성 배율이 걸린 실제 피해량. 배율이 아무리 낮아도 최소 1은 들어간다.
@@ -241,25 +263,44 @@ public class PlayerCombat : MonoBehaviour
         Mouse mouse = Mouse.current;
         Keyboard kb = Keyboard.current;
 
-        if (mouse != null && mouse.leftButton.wasPressedThisFrame && CanUse(MoveType.Tackle))
+        if (mouse != null && mouse.leftButton.wasPressedThisFrame) TryUseSlot(0);
+        else if (mouse != null && mouse.rightButton.wasPressedThisFrame) TryUseSlot(1);
+        else if (kb != null && kb.leftShiftKey.wasPressedThisFrame) TryUseSlot(2);
+        else if (kb != null && kb.spaceKey.wasPressedThisFrame) TryUseSlot(3);
+    }
+
+    /// <summary>
+    /// 고정 입력을 현재 캐릭터 기술 세트의 슬롯으로 바꾼 뒤 해당 구현을 실행한다.
+    /// 새 캐릭터를 추가할 때 입력과 HUD를 다시 만들 필요 없이, 신규 <see cref="MoveType"/>의
+    /// 실행부만 이 분배기에 연결하면 된다.
+    /// </summary>
+    private void TryUseSlot(int slot)
+    {
+        if (moves == null || slot < 0 || slot >= moves.MoveCount) return;
+        MoveType move = moves.MoveAt(slot);
+        if (!CanUse(move)) return;
+
+        switch (move)
         {
-            lastMeleeTime = Time.time;
-            MeleeAttack(GetMouseDirection());
-        }
-        else if (mouse != null && mouse.rightButton.wasPressedThisFrame && CanUse(MoveType.VineWhip))
-        {
-            lastVineTime = Time.time;
-            VineWhipAttack(GetMouseDirection());
-        }
-        else if (kb != null && kb.leftShiftKey.wasPressedThisFrame && CanUse(MoveType.SeedSow))
-        {
-            seedUsedInRoom = CombatRoomController.VisitId;
-            SowSeeds();
-        }
-        else if (kb != null && kb.spaceKey.wasPressedThisFrame && CanUse(MoveType.PetalDance))
-        {
-            lastPetalTime = Time.time;
-            PetalDance();
+            case MoveType.Tackle:
+                lastMeleeTime = Time.time;
+                MeleeAttack(GetMouseDirection());
+                break;
+            case MoveType.VineWhip:
+                lastVineTime = Time.time;
+                VineWhipAttack(GetMouseDirection());
+                break;
+            case MoveType.SeedSow:
+                seedUsedInRoom = CombatRoomController.VisitId;
+                SowSeeds();
+                break;
+            case MoveType.PetalDance:
+                lastPetalTime = Time.time;
+                PetalDance();
+                break;
+            default:
+                Debug.LogWarning("기술 실행부가 연결되지 않았다: " + move);
+                break;
         }
     }
 

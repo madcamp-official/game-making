@@ -126,7 +126,10 @@ public class CharacterSelectScreen : FlowScreen
         {
             if (card.entry != entry) continue;
             chosen = card.data;
-            styleLine.text = card.data.displayName + " — " + card.data.playStyle;
+            CharacterData playable = card.data.ResolvePlayable();
+            styleLine.text = playable != null && playable != card.data
+                ? card.data.displayName + " — 준비 중 · 현재 " + playable.displayName + "로 시작"
+                : card.data.displayName + " — " + card.data.playStyle;
             startButton.enabled = true;
             Refresh();
             return;

@@ -89,4 +89,20 @@ public static class MoveUpgrades
         new MoveUpgradeOption(MoveUpgradeId.PetalCooldown, MoveType.PetalDance,
             "꽃잎댄스", "재사용 대기시간 15% 감소"),
     };
+
+    /// <summary>
+    /// ID로 강화 정의를 찾는다. 어떤 강화가 후보에 들어가는지는 캐릭터의
+    /// <see cref="PlayerMoveSet"/>이 정하고, 이 카탈로그는 실제 수치와 문구만 제공한다.
+    /// </summary>
+    public static bool TryGet(MoveUpgradeId id, out MoveUpgradeOption option)
+    {
+        foreach (MoveUpgradeOption candidate in All)
+        {
+            if (candidate.id != id) continue;
+            option = candidate;
+            return true;
+        }
+        option = default;
+        return false;
+    }
 }
