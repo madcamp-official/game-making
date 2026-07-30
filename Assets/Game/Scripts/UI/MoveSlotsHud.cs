@@ -134,6 +134,7 @@ public class MoveSlotsHud : MonoBehaviour
                                              NameText, TextAnchor.MiddleCenter);
             slot.nameText.horizontalOverflow = HorizontalWrapMode.Overflow;
             Stretch(slot.nameText.rectTransform, 4f, 0f);
+            PmdUi.CenterGlyphs(slot.nameText);
 
             // 속성 꼬리표는 아래 띠의 왼쪽에 붙는다.
             slot.tagText = PmdUi.MakeChip(slot.infoBand.rectTransform, "Tag", "", 12,
@@ -142,7 +143,9 @@ public class MoveSlotsHud : MonoBehaviour
             RectTransform chipRt = slot.tagChip.rectTransform;
             chipRt.anchorMin = chipRt.anchorMax = new Vector2(0f, 0.5f);
             chipRt.pivot = new Vector2(0f, 0.5f);
-            chipRt.sizeDelta = new Vector2(66f, 18f);
+            // 가장 긴 꼬리표("방당 1회" 40px)에 좌우 여백을 더한 폭, 글자칸 12 +
+            // 구워진 윤곽 2 + 표 테두리 4가 들어가는 높이다.
+            chipRt.sizeDelta = new Vector2(56f, 20f);
             chipRt.anchoredPosition = new Vector2(5f, 0f);
 
             // 조작키는 반대쪽(오른쪽)에 적는다. 원작의 PP가 있던 자리다.
@@ -150,6 +153,7 @@ public class MoveSlotsHud : MonoBehaviour
                                             InfoText, TextAnchor.MiddleRight);
             slot.keyText.horizontalOverflow = HorizontalWrapMode.Overflow;
             Stretch(slot.keyText.rectTransform, 6f, 0f);
+            PmdUi.CenterGlyphs(slot.keyText);
 
             // 덮개는 글자 위에 와야 쿨타임 중이라는 게 확실히 보인다.
             slot.veil = PmdUi.MakeSliced(slot.root, "Veil", null);

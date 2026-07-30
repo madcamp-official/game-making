@@ -18,9 +18,11 @@ public class PlayerHealthHud : MonoBehaviour
 {
     // 아래에서부터 조작 안내(y 25) → 경험치 바(y 52) → 체력바 순으로 쌓는다.
     private const float MarginX = 30f;
-    private const float MarginY = 82f;
+    private const float MarginY = 88f;
     private const float BarWidth = 300f;
-    private const float BarHeight = 26f;
+    /// <summary>글자칸 24 + 구워진 윤곽 2 + 표 테두리 4에 여유를 둔 높이. 이보다 낮으면
+    /// 꼬리표 글자가 아래 테두리를 뚫는다.</summary>
+    private const float BarHeight = 32f;
 
     /// <summary>
     /// 내 체력은 남은 양과 상관없이 늘 초록이다. 예전에는 줄어들수록 빨강으로 물들었는데,

@@ -255,7 +255,37 @@ public static class PmdUi
         text.horizontalOverflow = HorizontalWrapMode.Overflow;
         text.color = textColor;
         Stretch(text.rectTransform);
+        // 글자가 표 테두리에 닿지 않게 좌우로 물러선다.
+        text.rectTransform.offsetMin = new Vector2(ChipPadding, 0f);
+        text.rectTransform.offsetMax = new Vector2(-ChipPadding, 0f);
+        CenterGlyphs(text);
         return text;
+    }
+
+    /// <summary>표·칸 안쪽 좌우 여백.</summary>
+    public const float ChipPadding = 4f;
+
+    /// <summary>
+    /// 글자를 칸 가운데로 올려 앉힌다.
+    ///
+    /// ⚠️ uGUI는 <b>폰트가 보고하는 높이</b>로 세로 정렬을 맞추는데, PMD 비트맵 폰트는
+    /// 글자칸이 12인데 ascent를 9로 보고한다 — 크기 24짜리 한 줄을 18로 보고하면서 실제로는
+    /// 24를 그린다(<see cref="PixelUi.LineBoxHeight"/>에 같은 함정이 적혀 있다). 그래서
+    /// 가운데 정렬을 맡기면 글자가 그 차이만큼 <b>아래로</b> 내려앉고, 글리프에 구워진 검은
+    /// 윤곽까지 더해져 칸의 아래 테두리를 뚫고 나간다 — "HP"·"EXP"·"근접"이 그랬다.
+    ///
+    /// 보고값과 실제 칸의 차이의 절반만큼 올려 주면 눈으로 보는 가운데에 온다.
+    /// 윤곽 한 픽셀만큼 더 올려 아래 테두리와 사이를 띄운다.
+    /// </summary>
+    public static void CenterGlyphs(Text text)
+    {
+        if (text == null) return;
+        float reported = text.preferredHeight;
+        if (reported <= 0f) return;
+        float lift = Mathf.Max(0f, (text.fontSize - reported) * 0.5f) + 1f;
+        RectTransform rt = text.rectTransform;
+        rt.offsetMin = new Vector2(rt.offsetMin.x, rt.offsetMin.y + lift);
+        rt.offsetMax = new Vector2(rt.offsetMax.x, rt.offsetMax.y + lift);
     }
 
     // ---------------------------------------------------------------- 자리 맞추기
