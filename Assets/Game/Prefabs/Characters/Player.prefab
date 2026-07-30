@@ -238,9 +238,9 @@ MonoBehaviour:
   seedHealPerTick: 6
   seedTickInterval: 1
   seedColor: {r: 0.6, g: 1, b: 0.45, a: 0.4}
-  petalRadius: 1.8
+  petalRadius: 1.6
   petalDuration: 2.5
-  petalDamageRatio: 1
+  petalDamageRatio: 0.6
   petalTickInterval: 0.5
   petalCooldown: 12
   petalColor: {r: 1, g: 0.45, b: 0.75, a: 0.38}

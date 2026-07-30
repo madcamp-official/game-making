@@ -593,8 +593,8 @@ MonoBehaviour:
   dashSpeed: 9
   hitDelay: 0.18
   betweenDashes: 0.38
-  reach: 1.2
-  sweepAngle: 150
+  hitLength: 1.5
+  hitWidth: 1.6
   damage: 15
   hitPause: 0.5
   missPause: 1

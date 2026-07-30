@@ -12,7 +12,8 @@ using UnityEngine;
 /// 그 줄만 위험한 것처럼 읽히기 때문이다.
 ///
 /// 시간이 다 되거나 주인(신뇽)이 죽으면 스스로 사라진다. 방이 끝난 뒤 해류가
-/// 남는 일이 없도록, 수명 관리는 전부 이 컴포넌트 안에서 끝낸다.
+/// 남는 일이 없도록, 수명 관리는 전부 이 컴포넌트 안에서 끝낸다 — 바닥 색과
+/// 화살표는 언제나 같이 나고 같이 진다.
 /// </summary>
 public class CurrentBand : MonoBehaviour
 {
@@ -93,8 +94,12 @@ public class CurrentBand : MonoBehaviour
         arrows = new SpriteRenderer[Lines * PerLine];
         for (int i = 0; i < arrows.Length; i++)
         {
-            GameObject go = new GameObject("Arrow");
-            // 부모 배율(해류 크기)에 눌리지 않도록 월드에 두고 위치만 따라간다.
+            // 부모 배율(해류 크기)에 눌리지 않도록 띠의 자식이 아니라 형제로 두고 위치만 따라간다.
+            //
+            // ⚠️ 그래서 표식이 반드시 필요하다. 방을 정리할 때(EnemyEffect.ClearUnder)
+            // 표식이 붙은 띠만 지워지고 형제인 화살표는 살아남아, 신뇽을 잡은 뒤 빈 방
+            // 바닥에 화살표만 떠 있었다. 띠와 같은 표식을 달아 함께 걷히게 한다.
+            GameObject go = EnemyEffect.Mark(new GameObject("Arrow"));
             go.transform.SetParent(transform.parent, false);
             SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
             sr.sprite = PrimitiveSprites.Triangle;
@@ -166,9 +171,21 @@ public class CurrentBand : MonoBehaviour
 
     private void Cleanup()
     {
-        if (arrows != null)
-            foreach (SpriteRenderer arrow in arrows)
-                if (arrow != null) Destroy(arrow.gameObject);
+        // 화살표는 OnDestroy가 치운다 — 띠가 어떤 길로 사라지든 같은 자리를 지나게 한다.
         Destroy(gameObject);
+    }
+
+    /// <summary>
+    /// 띠가 사라지는 모든 길에서 화살표를 함께 걷는다.
+    ///
+    /// 수명이 다한 길(<see cref="Cleanup"/>)만 막아서는 모자랐다. 방 정리가 띠를 바로
+    /// 지워 버리는 길이 따로 있어서, 그때는 화살표를 치울 사람이 아무도 없었다.
+    /// </summary>
+    private void OnDestroy()
+    {
+        if (arrows == null) return;
+        foreach (SpriteRenderer arrow in arrows)
+            if (arrow != null) Destroy(arrow.gameObject);
+        arrows = null;
     }
 }

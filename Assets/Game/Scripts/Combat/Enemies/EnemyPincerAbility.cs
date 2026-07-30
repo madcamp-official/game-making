@@ -16,9 +16,9 @@ public class EnemyPincerAbility : EnemyAbility
     [SerializeField, Min(0.1f)] private float reach = 3f;
     [Tooltip("부채꼴의 전체 각도(도).")]
     [SerializeField, Range(10f, 180f)] private float sweepAngle = 110f;
-    [SerializeField, Min(0.05f)] private float telegraph = 0.55f;
+    [SerializeField, Min(0.05f)] private float telegraph = 0.4f;
     [Tooltip("Strike 동작이 시작되고 실제로 닫히기까지의 시간.")]
-    [SerializeField, Min(0f)] private float hitDelay = 0.2f;
+    [SerializeField, Min(0f)] private float hitDelay = 0.15f;
     [Tooltip("넉백이 역할이라 피해는 낮게 유지한다.")]
     [SerializeField, Min(0)] private int damage = 8;
 
@@ -28,7 +28,7 @@ public class EnemyPincerAbility : EnemyAbility
 
     [Header("후딜")]
     [Tooltip("공격 후 멈춰 서서 반격을 허용하는 시간.")]
-    [SerializeField, Min(0f)] private float recovery = 1f;
+    [SerializeField, Min(0f)] private float recovery = 0.6f;
 
     [SerializeField] private Color warningColor = new Color(0.85f, 0.1f, 0.28f, 0.5f);
 

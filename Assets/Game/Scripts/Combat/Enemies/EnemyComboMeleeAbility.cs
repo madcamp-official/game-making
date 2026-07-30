@@ -39,10 +39,22 @@ public class EnemyComboMeleeAbility : EnemyAbility
              "길어야 연속 타격이 무적에 먹히지 않는다.")]
     [SerializeField, Min(0f)] private float betweenDashes = 0.3f;
 
+    // ---------------------------------------------------------------- 판정
+    //
+    // 예전에는 반지름 1.2 · 150도짜리 부채꼴이었다. 몸 반지름과 플레이어 반지름을 더하면
+    // 실제로는 반지름 1.9의 <b>반원에 가까운</b> 범위라, 옆으로 비켜도 여전히 안에 들어 있는
+    // 일이 잦았다. 부채꼴은 "어디까지 도는가"를 눈대중해야 하는데 그 각도가 넓을수록
+    // 눈대중이 통하지 않는다.
+    //
+    // 그래서 <b>앞으로 뻗은 직사각형</b>으로 바꿨다. 규칙이 "앞이면 맞고 옆이면 안 맞는다"
+    // 하나로 줄어, 예고선을 보고 옆으로 반 걸음이 그대로 정답이 된다. 넓이도 함께 줄였다
+    // (약 4.8 → 4.0 유닛²) — 모양만 바꾸고 크기를 두면 옆이 좁아진 만큼 앞이 길어져
+    // 체감이 그대로다.
     [Header("판정")]
-    [Tooltip("몸 표면에서 더 뻗는 사거리.")]
-    [SerializeField, Min(0.1f)] private float reach = 1.2f;
-    [SerializeField, Range(20f, 360f)] private float sweepAngle = 150f;
+    [Tooltip("타격 프레임의 몸 중심에서 앞으로 뻗는 길이.")]
+    [SerializeField, Min(0.1f)] private float hitLength = 1.5f;
+    [Tooltip("직사각형의 전체 폭. 이 값이 곧 '옆으로 얼마나 비켜야 사는가'다.")]
+    [SerializeField, Min(0.1f)] private float hitWidth = 1.6f;
     [Tooltip("돌진 한 번의 피해.")]
     [SerializeField, Min(0)] private int damage = 14;
 
@@ -64,7 +76,7 @@ public class EnemyComboMeleeAbility : EnemyAbility
     [Tooltip("피해 범위. 실제로 맞는 자리다.")]
     [SerializeField] private Color hitColor = new Color(0.88f, 0.12f, 0.2f, 0.52f);
 
-    /// <summary>예고 부채꼴을 몸 표면이 아니라 중심에서 그려야 해서 몸 반지름만큼 더한다.</summary>
+    /// <summary>돌진 경로 띠의 굵기를 몸통에 맞추는 데 쓴다.</summary>
     private float BodyRadius
     {
         get
@@ -81,23 +93,42 @@ public class EnemyComboMeleeAbility : EnemyAbility
     /// </summary>
     private float HitTravel => Mathf.Min(dashDistance, hitDelay * dashSpeed);
 
-    /// <summary>
-    /// 판정 반지름을 중심 거리로 환산한 값. <see cref="EnemyAbility.PlayerWithinSector"/>는
-    /// 몸 <b>표면</b> 사이로 재므로, 그림으로 옮기려면 두 몸의 반지름을 모두 더해야 한다.
-    /// 덜 그리면 예고 밖에 서 있다가 맞는다 — 넘칠지언정 모자라면 안 된다.
-    /// </summary>
-    private float TelegraphRadius
+    /// <summary>플레이어 몸의 반지름. 판정을 중심점 기준으로 옮길 때 쓴다.</summary>
+    private float PlayerRadius
     {
         get
         {
-            float playerHalf = 0.3f;
-            if (PlayerHealth != null)
-            {
-                Collider2D col = PlayerHealth.GetComponent<Collider2D>();
-                if (col != null) playerHalf = Mathf.Max(col.bounds.extents.x, col.bounds.extents.y);
-            }
-            return reach + BodyRadius + playerHalf;
+            if (PlayerHealth == null) return 0.3f;
+            Collider2D col = PlayerHealth.GetComponent<Collider2D>();
+            return col != null ? Mathf.Max(col.bounds.extents.x, col.bounds.extents.y) : 0.3f;
         }
+    }
+
+    /// <summary>
+    /// 그리고 또 재는 직사각형. <b>플레이어의 중심점</b>이 이 안에 있으면 맞는다.
+    ///
+    /// 몸끼리 스치는 것까지 세려면 두 몸의 반지름을 더해야 하는데, 그러면 그린 사각형보다
+    /// 맞는 자리가 넓어져 예고 밖에 서 있다가 맞는다. 대신 <b>사각형 쪽을 플레이어 반지름만큼
+    /// 부풀려 두고</b> 중심점으로 판정한다 — 그리는 것과 재는 것이 완전히 같은 도형이 된다.
+    /// 넘칠지언정 모자라면 안 된다는 원칙은 그대로다.
+    /// </summary>
+    /// <param name="origin">타격 프레임의 몸 중심.</param>
+    private void HitBox(Vector2 origin, Vector2 aim, out Vector2 center, out float length, out float width)
+    {
+        float playerHalf = PlayerRadius;
+        length = hitLength + playerHalf;
+        width = hitWidth + playerHalf * 2f;
+        center = origin + aim * (length * 0.5f);
+    }
+
+    private bool PlayerInHitBox(Vector2 origin, Vector2 aim)
+    {
+        if (Player == null) return false;
+        HitBox(origin, aim, out Vector2 center, out float length, out float width);
+        Vector2 offset = PlayerPosition - center;
+        Vector2 side = new Vector2(-aim.y, aim.x);
+        return Mathf.Abs(Vector2.Dot(offset, aim)) <= length * 0.5f &&
+               Mathf.Abs(Vector2.Dot(offset, side)) <= width * 0.5f;
     }
 
     protected override IEnumerator Perform()
@@ -152,10 +183,11 @@ public class EnemyComboMeleeAbility : EnemyAbility
         // 경로 — 몸이 지나갈 띠. 폭은 몸통 굵기에 맞춘다.
         AttackTelegraph path = AttackTelegraph.CreateLine(
             EffectRoot, origin, aim, dashDistance, BodyRadius * 2f, pathColor);
-        // 피해 범위 — 타격 프레임에 몸이 있을 자리에서 앞쪽 부채꼴. 실제 판정과 같은 각도·거리다.
-        AttackTelegraph zone = AttackTelegraph.CreateSector(
-            EffectRoot, origin + aim * HitTravel, TelegraphRadius,
-            Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg, sweepAngle, hitColor);
+        // 피해 범위 — 타격 프레임에 몸이 있을 자리에서 앞으로 뻗는 직사각형.
+        // 실제 판정(PlayerInHitBox)과 같은 도형을 같은 자리에 그린다.
+        HitBox(origin + aim * HitTravel, aim, out _, out float boxLength, out float boxWidth);
+        AttackTelegraph zone = AttackTelegraph.CreateLine(
+            EffectRoot, origin + aim * HitTravel, aim, boxLength, boxWidth, hitColor);
         path.Pulse(telegraph);
         zone.Pulse(telegraph);
 
@@ -168,7 +200,9 @@ public class EnemyComboMeleeAbility : EnemyAbility
             // 예고와 실제 돌진이 어긋난다. 방향은 이미 고정됐고 시작점만 따라간다.
             Vector2 at = transform.position;
             if (path != null) path.transform.position = at + aim * (dashDistance * 0.5f);
-            if (zone != null) zone.transform.position = at + aim * HitTravel;
+            // CreateLine은 밑변이 아니라 <b>가운데</b>에 오브젝트를 놓는다. 따라 옮길 때도
+            // 반 칸 앞으로 밀어야 처음 그린 자리와 같은 사각형이 유지된다.
+            if (zone != null) zone.transform.position = at + aim * (HitTravel + boxLength * 0.5f);
             yield return null;
         }
     }
@@ -193,7 +227,7 @@ public class EnemyComboMeleeAbility : EnemyAbility
             if (!resolved && elapsed >= hitDelay)
             {
                 resolved = true;
-                if (PlayerWithinSector(aim, reach, sweepAngle) &&
+                if (PlayerInHitBox(transform.position, aim) &&
                     PlayerHealth != null && !PlayerHealth.IsDead && !PlayerHealth.IsInvincible)
                 {
                     PlayerHealth.TakeDamage(damage);

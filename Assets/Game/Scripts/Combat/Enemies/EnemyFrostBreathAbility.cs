@@ -16,19 +16,19 @@ public class EnemyFrostBreathAbility : EnemyAbility
     [Header("냉기 부채꼴")]
     [SerializeField, Min(0.1f)] private float reach = 5.5f;
     [SerializeField, Range(10f, 180f)] private float sweepAngle = 70f;
-    [SerializeField, Min(0.05f)] private float telegraph = 0.6f;
+    [SerializeField, Min(0.05f)] private float telegraph = 0.45f;
     [Tooltip("냉기를 뿜는 시간. 이 동안 방향은 고정이다.")]
-    [SerializeField, Min(0.1f)] private float breathDuration = 1.8f;
+    [SerializeField, Min(0.1f)] private float breathDuration = 1.5f;
     [SerializeField] private Color warningColor = new Color(0.85f, 0.1f, 0.28f, 0.45f);
     [SerializeField] private Color frostColor = new Color(0.6f, 0.85f, 1f, 0.4f);
 
     [Header("감속과 빙결")]
     [Tooltip("노출이 이만큼 쌓이면 감속이 최대가 된다(초).")]
-    [SerializeField, Min(0.1f)] private float maxSlowExposure = 1.1f;
+    [SerializeField, Min(0.1f)] private float maxSlowExposure = 0.8f;
     [Tooltip("최대로 쌓였을 때 남는 이동 속도 비율.")]
     [SerializeField, Range(0.05f, 1f)] private float maxSlowFactor = 0.45f;
     [Tooltip("노출이 이만큼 쌓이면 빙결한다(초).")]
-    [SerializeField, Min(0.1f)] private float freezeExposure = 1.5f;
+    [SerializeField, Min(0.1f)] private float freezeExposure = 1.2f;
     [SerializeField, Min(0f)] private float freezeDuration = 0.5f;
     [Tooltip("빙결이 풀린 뒤 다시 얼지 않는 시간.")]
     [SerializeField, Min(0f)] private float refreezeImmunity = 2.5f;
@@ -36,7 +36,7 @@ public class EnemyFrostBreathAbility : EnemyAbility
     [SerializeField, Min(0f)] private float exposureDecay = 1.6f;
 
     [Header("후딜")]
-    [SerializeField, Min(0f)] private float recovery = 1.1f;
+    [SerializeField, Min(0f)] private float recovery = 0.7f;
 
     /// <summary>쌓인 노출 시간. 시전이 끝나도 이어져, 연속 시전이 이어 붙는다.</summary>
     private float exposure;

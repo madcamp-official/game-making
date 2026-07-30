@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 220
+  maxHealth: 310
   invincibleDuration: 0.3
 --- !u!114 &8082338798781561088
 MonoBehaviour:
@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3.2
+  moveSpeed: 3.7
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -277,12 +277,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyCurrentBandAbility
   range: 20
   minRange: 0
-  cooldown: 3
-  initialDelay: 3
+  cooldown: 2.2
+  initialDelay: 2.2
   arenaHalf: {x: 7, y: 5}
   telegraphArrowSize: 2.4
-  pushSpeed: 2.4
-  telegraph: 0.8
+  pushSpeed: 3.2
+  telegraph: 0.55
   bandDuration: 4
   bandColor: {r: 0.35, g: 0.7, b: 1, a: 0.28}
   arrowColor: {r: 0.08, g: 0.28, b: 0.62, a: 0.8}

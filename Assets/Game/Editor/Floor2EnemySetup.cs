@@ -54,7 +54,8 @@ public static class Floor2EnemySetup
                 ("dashDistance", 2.2f), ("dashSpeed", 9f), ("hitDelay", 0.18f),
                 // 피격 무적(0.5초)보다 짧다 — 연타가 다 들어가지는 않지만 쉴 틈도 주지 않는다.
                 ("betweenDashes", 0.38f),
-                ("reach", 1.2f), ("sweepAngle", 150f), ("damage", 15),
+                // 부채꼴을 걷어내고 직사각형으로. 앞이면 맞고 옆이면 안 맞는다.
+                ("hitLength", 1.5f), ("hitWidth", 1.6f), ("damage", 15),
                 ("hitPause", 0.5f), ("missPause", 1f),
                 // 예고 색을 붉은색으로 통일했다 — 회색 경로와 붉은 피해 범위가 섞여 읽히지 않았다.
                 ("pathColor", new Color(0.88f, 0.12f, 0.2f, 0.24f)),
@@ -79,8 +80,10 @@ public static class Floor2EnemySetup
                 // 스라크 돌진(5.5)의 절반쯤. 붙는 수단이지 가로지르는 거리가 아니다.
                 ("windup", 0.5f), ("dashDistance", 2.8f), ("dashSpeed", 10f),
                 ("dashDamage", 12), ("dashHitRadius", 0.6f),
-                // 여섯 갈래면 거리 3에서 갈래 사이가 약 3.1칸이라 두 고지가 겹쳐 쏴도 길이 남는다.
-                ("spikeWindup", 0.55f), ("spikeCount", 6), ("spikeSpeed", 8f),
+                // 여덟 갈래. 거리 3에서 갈래 사이가 약 2.4칸이라 몸(0.7칸)이 지나갈 길은
+                // 여전히 남지만, 아무렇게나 서 있어도 비는 자리에 걸리던 여섯 갈래보다
+                // 확실히 골라 서야 한다.
+                ("spikeWindup", 0.55f), ("spikeCount", 8), ("spikeSpeed", 8f),
                 ("spikeDamage", 12), ("spikeRadius", 0.17f), ("spikeLifetime", 1.6f),
                 ("spikeTelegraphLength", 5f),
                 // 몸 펴기(0.14) + 정지(0.9) ≈ 1초 — 다 뿌리고 나면 치르는 값이다.
@@ -173,34 +176,36 @@ public static class Floor2EnemySetup
     private static readonly Dictionary<string, (string enemy, Vector2 at)[]> Rooms =
         new Dictionary<string, (string, Vector2)[]>
     {
-        // 1번방 — 고지의 두 단계 공격을 익히면서 왕복 뼈다귀 하나를 함께 본다.
+        // 1번방 — 성원숭의 직사각형 한 겹을 익히면서 왕복 뼈다귀 하나를 함께 본다.
+        // 이 층에서 처음 만나는 적이라, 읽을 것이 "앞이냐 옆이냐" 하나뿐인 쪽을 앞에 둔다.
         ["F2Room1_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(2.4f, 2.7f)),
-            ("Sandslash", new Vector2(1.9f, -2.9f)),
+            ("Primeape", new Vector2(2.4f, 2.7f)),
+            ("Primeape", new Vector2(1.9f, -2.9f)),
             ("Marowak", new Vector2(5.6f, 0.1f)),
         },
         // 2번방 — 서로 다른 전위 둘을 상대하며 위아래에서 돌아오는 뼈를 피한다.
         ["F2Room2_Combat"] = new (string, Vector2)[]
         {
-            ("Sandslash", new Vector2(1.8f, -0.4f)),
-            ("Primeape", new Vector2(3.6f, 3f)),
+            ("Primeape", new Vector2(1.8f, -0.4f)),
+            ("Sandslash", new Vector2(3.6f, 3f)),
             ("Marowak", new Vector2(5.8f, -2.6f)),
             ("Marowak", new Vector2(5.3f, 2.5f)),
         },
-        // 4번방 — 성원숭 둘이 압박하고, 서로 다른 후열 공격 하나씩이 빈 길을 바꾼다.
+        // 4번방 — 고지 둘이 압박하고, 서로 다른 후열 공격 하나씩이 빈 길을 바꾼다.
+        // 고지는 구르기와 가시로 자리를 두 번 묻는 적이라 뒤쪽 방으로 옮겼다.
         ["F2Room4_Combat"] = new (string, Vector2)[]
         {
-            ("Primeape", new Vector2(1.6f, 1.3f)),
-            ("Primeape", new Vector2(3.2f, -2.6f)),
+            ("Sandslash", new Vector2(1.6f, 1.3f)),
+            ("Sandslash", new Vector2(3.2f, -2.6f)),
             ("Ninetales", new Vector2(6f, 3f)),
             ("Marowak", new Vector2(0.6f, -3.6f)),
         },
         // 5번방 — 두 전위·두 화염에 닥트리오 한 마리를 더한 층의 최종 시험.
         ["F2Room5_Combat"] = new (string, Vector2)[]
         {
-            ("Primeape", new Vector2(1.4f, -1f)),
-            ("Primeape", new Vector2(4.2f, 2.2f)),
+            ("Sandslash", new Vector2(1.4f, -1f)),
+            ("Sandslash", new Vector2(4.2f, 2.2f)),
             ("Ninetales", new Vector2(6.2f, -2.4f)),
             ("Ninetales", new Vector2(5f, 3.4f)),
             ("Dugtrio", new Vector2(0.2f, 0.6f)),

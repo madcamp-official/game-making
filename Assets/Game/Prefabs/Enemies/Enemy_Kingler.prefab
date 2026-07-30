@@ -208,7 +208,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3ec36ebd6cc342a58eb1df120c8ffac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
-  maxHealth: 130
+  maxHealth: 180
   invincibleDuration: 0.3
 --- !u!114 &1911305516875614885
 MonoBehaviour:
@@ -222,7 +222,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9e0d0c3ceb744e379b926b9dffc225a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  moveSpeed: 3.6
+  moveSpeed: 4.3
   detectRange: 7
   attackRange: 0.9
   attackContactReach: 0.25
@@ -277,15 +277,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyPincerAbility
   range: 3.2
   minRange: 0
-  cooldown: 4
+  cooldown: 2.6
   initialDelay: 1
   reach: 3
   sweepAngle: 110
-  telegraph: 0.55
-  hitDelay: 0.2
+  telegraph: 0.4
+  hitDelay: 0.15
   damage: 8
   knockbackSpeed: 15
-  recovery: 1
+  recovery: 0.6
   warningColor: {r: 0.85, g: 0.1, b: 0.28, a: 0.5}
 --- !u!114 &7115456140740947839
 MonoBehaviour:

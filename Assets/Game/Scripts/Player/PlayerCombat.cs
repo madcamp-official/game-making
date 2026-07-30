@@ -76,11 +76,20 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField] private Color seedColor = new Color(0.6f, 1f, 0.45f, 0.4f);
 
     [Header("기술 4 — 꽃잎댄스 (원거리)")]
-    [SerializeField, Min(0f)] private float petalRadius = 1.8f;
+    // 반지름 1.8 → 1.6, 피해 배율 1.0 → 0.6.
+    //
+    // 3층에서 이 기술 하나가 방을 통째로 쓸었다. 배율 1.0이면 한 번 깔 때마다 <b>범위 안의
+    // 모든 적에게</b> 몸통박치기 다섯 대(3단계 기준 110)가 들어가는데, 3층 잡몹의 체력이
+    // 90~150이라 한 방에 여럿이 같이 죽었다. 게다가 장판은 따라다니므로 그동안 몸통박치기도
+    // 그대로 친다 — 얹는 피해가 본체 피해를 넘어서면 다른 기술을 고를 이유가 사라진다.
+    //
+    // 최종 기술다운 무게는 남긴다: 배율 0.6이면 한 번에 65(3단계), 강화를 둘 다 걸면 90이다.
+    // 여럿을 한꺼번에 <b>무르게 만드는</b> 기술이지 <b>정리하는</b> 기술은 아니게 된다.
+    [SerializeField, Min(0f)] private float petalRadius = 1.6f;
     [SerializeField, Min(0f)] private float petalDuration = 2.5f;
     [Tooltip("한 틱의 피해량이 몸통박치기 기본 피해의 몇 배인지. 꽃잎댄스는 원거리 기술이지만 " +
              "기준값은 몸통박치기를 쓴다 — 덩굴채찍은 견제기라 피해가 낮아 기준으로 삼을 수 없다.")]
-    [SerializeField, Min(0f)] private float petalDamageRatio = 1f;
+    [SerializeField, Min(0f)] private float petalDamageRatio = 0.6f;
     [SerializeField, Min(0.05f)] private float petalTickInterval = 0.5f;
     [SerializeField, Min(0f)] private float petalCooldown = 12f;
     [SerializeField] private Color petalColor = new Color(1f, 0.45f, 0.75f, 0.38f);
