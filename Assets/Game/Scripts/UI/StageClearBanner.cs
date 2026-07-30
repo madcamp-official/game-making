@@ -35,9 +35,13 @@ public class StageClearBanner : MonoBehaviour
         RectTransform lrt = banner.label.rectTransform;
         lrt.anchorMin = Vector2.zero;
         lrt.anchorMax = Vector2.one;
-        lrt.offsetMin = Vector2.zero;
         // 화면 한가운데보다 조금 위. 정중앙은 주인공과 겹쳐 글씨가 몸에 걸린다.
-        lrt.offsetMax = new Vector2(0f, -120f);
+        //
+        // ⚠️ 올리려면 <b>아래 변을 끌어올려야</b> 한다(offsetMin). 예전에는 위 변을 내렸는데
+        // (offsetMax −120) 그러면 상자 가운데가 오히려 아래로 내려가, 글씨가 정확히 피하려던
+        // 자리 — 주인공의 몸 — 에 앉았다. "스테이지 시작!"을 붙이면서 눈에 띄었다.
+        lrt.offsetMin = new Vector2(0f, 120f);
+        lrt.offsetMax = Vector2.zero;
         banner.SetAlpha(0f);
         return banner;
     }

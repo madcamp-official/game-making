@@ -36,6 +36,9 @@ public static class UiSpriteSetup
         // 체력바 틀과 작은 꼬리표 — 1px 윤곽(2배라 2px)만 지키면 된다.
         ("PmdBarFrame", new Vector4(2, 2, 2, 2)),
         ("PmdChip", new Vector4(2, 2, 2, 2)),
+        // 타이틀 로고 — 늘려 쓰지 않으므로 테두리가 없다. logo.png의 흰 배경을 걷어낸 것이다
+        // (scratchpad/bake_logo.py). PPU가 100이라 그림 픽셀이 화면 픽셀과 1:1이다.
+        ("PmdLogo", Vector4.zero),
     };
 
     public static string ImportAll()

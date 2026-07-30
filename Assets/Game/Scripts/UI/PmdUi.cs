@@ -43,7 +43,7 @@ public static class PmdUi
 
     // ---------------------------------------------------------------- 스프라이트
 
-    private static Sprite panel, button, buttonOn, buttonOff, moveFrame, moveFrameOff, barFrame, chip;
+    private static Sprite panel, button, buttonOn, buttonOff, moveFrame, moveFrameOff, barFrame, chip, logo;
 
     private static Sprite Load(ref Sprite cache, string name)
     {
@@ -61,6 +61,27 @@ public static class PmdUi
     public static Sprite BarFrameSprite => Load(ref barFrame, "PmdBarFrame");
     /// <summary>작은 꼬리표 — 체력바의 "HP" 표와 기술 칸의 속성 표. 흰 속을 물들여 쓴다.</summary>
     public static Sprite ChipSprite => Load(ref chip, "PmdChip");
+    /// <summary>타이틀 로고. 늘리지 않고 원본 크기로 놓는다 (<see cref="MakeLogo"/>).</summary>
+    public static Sprite LogoSprite => Load(ref logo, "PmdLogo");
+
+    /// <summary>
+    /// 타이틀 로고 한 장. <b>그림 크기 그대로</b> 놓는다 — 픽셀 아트를 정수배 아닌 비율로
+    /// 늘리면 획 굵기가 자리마다 달라진다. 스프라이트가 없으면 아무것도 만들지 않고 null을
+    /// 돌려주므로, 부르는 쪽이 글자 제목으로 되돌아갈 수 있다.
+    /// </summary>
+    public static Image MakeLogo(Transform parent, string name)
+    {
+        Sprite sprite = LogoSprite;
+        if (sprite == null) return null;
+
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var image = go.AddComponent<Image>();
+        image.sprite = sprite;
+        image.raycastTarget = false;
+        image.SetNativeSize();
+        return image;
+    }
 
     /// <summary>9슬라이스 Image 하나. 스프라이트가 없으면 단색 사각형으로 버틴다.</summary>
     public static Image MakeSliced(Transform parent, string name, Sprite sprite)

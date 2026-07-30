@@ -48,6 +48,9 @@ public class RoomFlowController : MonoBehaviour
         gameCleared = false;
         CurrentFloorIndex = 0;
         LoadRoom(0);
+        // 첫 방만은 걸어 들어오는 연출이 없다 — 판이 시작되면 이미 방 안에 서 있다.
+        // 그래서 방을 올리는 것이 곧 들어서는 것이고, 시작 글씨도 여기서 띄워야 한다.
+        OnPlayerEnteredRoom();
     }
 
     /// <summary>
@@ -242,14 +245,55 @@ public class RoomFlowController : MonoBehaviour
     public void OnPlayerEnteredRoom()
     {
         if (floors == null || CurrentFloorIndex < 0 || CurrentFloorIndex >= floors.Length) return;
-        if (IsBossRoom(floors[CurrentFloorIndex], CurrentRoomIndex)) PlayBossCry();
+        FloorData floor = floors[CurrentFloorIndex];
+
+        if (IsBossRoom(floor, CurrentRoomIndex)) { PlayBossCry(); return; }
+
+        // 전투방은 글씨로 시작을 알린다. 방을 정리했을 때 뜨는 "스테이지 클리어!"와 짝이다 —
+        // 시작에도 마디가 있어야 방 하나가 한 판처럼 읽힌다.
+        //
+        // 보스방은 여기로 오지 않는다. 그쪽은 울음소리가 이미 시작을 알리고 있어서 글씨까지
+        // 겹치면 둘 다 묻힌다 (마무리도 마찬가지로 갈라져 있다 — BossRewardSequence).
+        if (IsCombatRoom(floor, CurrentRoomIndex)) AnnounceStageStart();
     }
 
-    private static bool IsBossRoom(FloorData floor, int index)
+    /// <summary>
+    /// "스테이지 시작!"을 띄운다. 방을 정리했을 때와 같은 배너를 쓰므로 두 글씨의 자리와
+    /// 사라지는 방식이 저절로 같다.
+    /// </summary>
+    private static void AnnounceStageStart()
     {
-        if (floor == null || floor.roomPrefabs == null || index < 0 || index >= floor.roomPrefabs.Length) return false;
-        GameObject prefab = floor.roomPrefabs[index];
-        return prefab != null && prefab.name.EndsWith("_Boss");
+        StageClearBanner banner = UIManager.Instance != null ? UIManager.Instance.StageClear : null;
+        if (banner != null) banner.Show("스테이지 시작!", StartBannerHold, StartBannerFade);
+    }
+
+    /// <summary>시작 글씨가 떠 있는 시간과 지워지는 시간. 클리어 글씨보다 짧다 —
+    /// 이쪽은 숨 돌리는 자리가 아니라 알림이고, 그 사이에도 적은 이미 달려온다.</summary>
+    private const float StartBannerHold = 0.6f;
+    private const float StartBannerFade = 0.45f;
+
+    private static bool IsBossRoom(FloorData floor, int index) => RoomNameEndsWith(floor, index, "_Boss");
+
+    /// <summary>
+    /// 보스방이 아닌 순수 전투방인지. 방 종류는 다른 곳과 같은 규칙으로 프리팹 이름 뒤에
+    /// 붙은 꼬리로 읽는다 (<see cref="BgmFor"/> 참고) — 이벤트·상점·보스가 아니면 전투방이다.
+    /// </summary>
+    private static bool IsCombatRoom(FloorData floor, int index) =>
+        !RoomNameEndsWith(floor, index, "_Boss") &&
+        !RoomNameEndsWith(floor, index, "_Shop") &&
+        !RoomNameEndsWith(floor, index, "_Event") &&
+        RoomPrefabAt(floor, index) != null;
+
+    private static GameObject RoomPrefabAt(FloorData floor, int index)
+    {
+        if (floor == null || floor.roomPrefabs == null || index < 0 || index >= floor.roomPrefabs.Length) return null;
+        return floor.roomPrefabs[index];
+    }
+
+    private static bool RoomNameEndsWith(FloorData floor, int index, string suffix)
+    {
+        GameObject prefab = RoomPrefabAt(floor, index);
+        return prefab != null && prefab.name.EndsWith(suffix);
     }
 
     /// <summary>
