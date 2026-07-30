@@ -392,6 +392,10 @@ public class ButterfreeBossController : MonoBehaviour
     {
         state = BossState.Intro;
         body.linearVelocity = Vector2.zero;
+        // 주인공이 통로에서 걸어 들어오는 동안은 아직 전투가 아니다. 조작이 돌아온 뒤에
+        // 등장 대기를 센다 — 안 그러면 걸어 들어오는 사이에 대기가 다 흘러, 멈춰 서는
+        // 순간 첫 패턴이 터진다.
+        yield return CombatFreeze.WaitWhileActive();
         yield return new WaitForSeconds(introDelay);
 
         // 방에 들어서자마자 달려들어야 한다. 첫 패턴은 대기 없이 바로 시작하고,

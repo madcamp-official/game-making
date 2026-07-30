@@ -162,6 +162,15 @@ public class EnemyController : MonoBehaviour
         if (Time.time < stunnedUntil) return;
         knockbackActive = false;
 
+        // 플레이어가 조작할 수 없는 동안에는 멈춰 선다 (방에 걸어 들어오는 연출).
+        // 넉백보다 뒤에 두는 것이 중요하다 — 밀려나던 것까지 여기서 멈추면 안 된다.
+        if (CombatFreeze.Active)
+        {
+            IsEngaged = false;
+            body.linearVelocity = Vector2.zero;
+            return;
+        }
+
         if (health.IsDead || player == null)
         {
             IsEngaged = false;

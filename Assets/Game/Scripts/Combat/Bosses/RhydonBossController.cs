@@ -371,6 +371,8 @@ public class RhydonBossController : MonoBehaviour
     {
         holdPosition = true;
         body.linearVelocity = Vector2.zero;
+        // 주인공이 걸어 들어오는 동안은 아직 전투가 아니다 (CombatFreeze 참고).
+        yield return CombatFreeze.WaitWhileActive();
         yield return new WaitForSeconds(introDelay);
 
         // 방에 들어서자마자 달려든다. 첫 패턴은 대기 없이 시작하고 간격은 두 번째부터 적용한다.

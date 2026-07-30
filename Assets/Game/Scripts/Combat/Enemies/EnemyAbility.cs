@@ -197,6 +197,15 @@ public abstract class EnemyAbility : MonoBehaviour
 
     private void Update()
     {
+        // 플레이어가 조작할 수 없는 동안(방에 걸어 들어오는 연출)에는 시계째로 멈춘다.
+        // 그냥 시전만 막으면 그 사이에 첫 시전 대기가 다 흘러 버려서, 걸음이 멈추는
+        // 순간 예고를 볼 새도 없이 기술이 터진다. 남은 시간을 그대로 밀어 둔다.
+        if (CombatFreeze.Active)
+        {
+            nextReadyTime += Time.deltaTime;
+            return;
+        }
+
         if (AnyAbilityBusy() || Health.IsDead || Player == null) return;
         if (PlayerHealth != null && PlayerHealth.IsDead) return;
         if (!Controller.IsAggro) return;

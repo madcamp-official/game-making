@@ -594,6 +594,10 @@ public class GyaradosBossController : MonoBehaviour
         SetBossCollision(true);
         BeginStateInvulnerability();
 
+        // 자리를 잡은 뒤에, 포효를 터뜨리기 전에 기다린다 (CombatFreeze 참고).
+        // 자리 잡기까지 미루면 주인공이 걸어 들어오는 동안 보스가 눈앞에서 순간이동한다.
+        yield return CombatFreeze.WaitWhileActive();
+
         AttackTelegraph roar = AttackTelegraph.CreateRing(attackRoot, transform.position, 0.8f, splashColor);
         roar.Expand(0.8f, ArenaHalfSize.x, introDuration);
         FaceTowardPlayer();
