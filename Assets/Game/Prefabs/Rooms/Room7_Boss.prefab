@@ -13769,31 +13769,21 @@ MonoBehaviour:
   windLifetime: 3
   windRadius: 0.18
   poisonPhase1:
-    count: 4
+    count: 6
     recordInterval: 0.28
     activationDelay: 0.6
     radius: 1.26
     duration: 6
     recovery: 0.7
     trailSpread: 0.5
-    gateIndex: -1
-    gatePillars: 0
-    gateLead: 3.8
-    gateOpening: 1.6
-    gateOffset: 1.8
   poisonPhase2:
-    count: 6
+    count: 8
     recordInterval: 0.2
     activationDelay: 0.62
     radius: 1.33
     duration: 7.5
     recovery: 0.6
     trailSpread: 0.75
-    gateIndex: 3
-    gatePillars: 4
-    gateLead: 3.8
-    gateOpening: 1.6
-    gateOffset: 1.8
   poisonDamage: 8
   poisonTickInterval: 1
   poisonMinSeparation: 0.95

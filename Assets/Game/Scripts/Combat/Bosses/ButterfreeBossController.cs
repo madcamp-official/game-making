@@ -82,20 +82,6 @@ public class ButterfreeBossController : MonoBehaviour
                  "0이면 한 줄로 쌓인다. 벌릴수록 남는 장판이 넓은 지형이 된다.")]
         public float trailSpread;
 
-        [Header("앞을 가로막는 문")]
-        [Tooltip("이 번째에 장판 하나 대신 문을 세운다. 음수면 문을 쓰지 않는다.")]
-        public int gateIndex = -1;
-        [Tooltip("문을 이루는 기둥 수. 0이면 문을 세우지 않는다.")]
-        public int gatePillars;
-        [Tooltip("문이 플레이어보다 앞서는 거리. 예고가 끝날 때까지 플레이어가 나아가는 " +
-                 "거리(5 x 0.62 = 3.1)보다 길어야 한다 — 짧으면 문이 켜지기도 전에 " +
-                 "그냥 지나쳐 버려 아무것도 강제하지 못한다.")]
-        public float gateLead = 3.8f;
-        [Tooltip("기둥 사이 틈의 폭. 플레이어(폭 약 0.6)가 지나갈 수 있어야 한다.")]
-        public float gateOpening = 1.6f;
-        [Tooltip("틈이 진행선에서 옆으로 비켜난 거리. 0이면 정면이라 꺾을 필요가 없다. " +
-                 "예고 시간 안에 옆으로 달려 닿을 수 있는 거리로 자동 제한된다.")]
-        public float gateOffset = 1.8f;
     }
 
     [System.Serializable]
@@ -123,8 +109,6 @@ public class ButterfreeBossController : MonoBehaviour
     private const float MinSilverFirstWindup = 0.55f;
     private const float MinSilverLaterWindup = 0.40f;
     private const float MinPhase2Recovery = 0.55f;
-    /// <summary>문의 틈까지 옆으로 달려갈 때 남겨 두는 여유 거리. 딱 맞으면 운이 된다.</summary>
-    private const float GateClearance = 0.5f;
 
     // 최대 체력은 Health 컴포넌트의 값을 그대로 쓴다 (프리팹에서 240).
     [Header("기본")]
@@ -183,23 +167,17 @@ public class ButterfreeBossController : MonoBehaviour
     [SerializeField, Min(0f)] private float windRadius = 0.18f;
 
     [Header("독가루 — 1페이즈")]
-    // 1페이즈는 규칙을 가르치는 층이라 문을 세우지 않는다. 지나온 자리가 막힌다는 것만 배운다.
     [SerializeField] private PoisonSettings poisonPhase1 = new PoisonSettings
     {
-        count = 4, recordInterval = 0.28f, activationDelay = 0.6f,
-        radius = 1.26f, duration = 6f, recovery = 0.7f,
-        trailSpread = 0.5f, gateIndex = -1,
+        count = 6, recordInterval = 0.28f, activationDelay = 0.6f,
+        radius = 1.26f, duration = 6f, recovery = 0.7f, trailSpread = 0.5f,
     };
 
     [Header("독가루 — 2페이즈")]
-    // activationDelay는 문이 성립하는 하한이기도 하다. 예고가 끝나기 전에 틈 앞에 설 수
-    // 있어야 하므로 gateOffset + 여유(0.5)를 달리기 속도(5)로 나눈 값, 곧 0.46초보다 길어야
-    // 한다. 넉넉히 잡아 둔 0.62초는 틈이 2.6까지 비켜나도 견딘다.
     [SerializeField] private PoisonSettings poisonPhase2 = new PoisonSettings
     {
-        count = 6, recordInterval = 0.2f, activationDelay = 0.62f,
+        count = 8, recordInterval = 0.2f, activationDelay = 0.62f,
         radius = 1.33f, duration = 7.5f, recovery = 0.6f, trailSpread = 0.75f,
-        gateIndex = 3, gatePillars = 4, gateLead = 3.8f, gateOpening = 1.6f, gateOffset = 1.8f,
     };
 
     [Header("독가루 — 공통")]
@@ -291,8 +269,6 @@ public class ButterfreeBossController : MonoBehaviour
     private Transform player;
     private Health playerHealth;
     private Rigidbody2D playerBody;
-    /// <summary>독가루가 "달리면 빠져나갈 수 있는가"를 재려고 달리기 속도를 읽는다.</summary>
-    private PlayerController playerController;
     private Vector2 fallbackArenaCenter;
     private float nextContactDamageTime;
 
@@ -353,7 +329,6 @@ public class ButterfreeBossController : MonoBehaviour
         if (pc != null)
         {
             player = pc.transform;
-            playerController = pc;
             playerHealth = pc.GetComponent<Health>();
             playerBody = pc.GetComponent<Rigidbody2D>();
         }
@@ -726,20 +701,10 @@ public class ButterfreeBossController : MonoBehaviour
             if (health.IsDead) yield break;
 
             Vector2 moveDir = PlayerMoveDirection;
-
-            // 정해진 차례 한 번만 진행 방향을 가로막는 문을 세운다.
-            if (i == settings.gateIndex && settings.gatePillars > 0 && moveDir != Vector2.zero)
-            {
-                placedCount += PlaceGate(PlayerPosition, moveDir, settings, windup);
-                if (i < settings.count - 1) yield return new WaitForSeconds(settings.recordInterval);
-                continue;
-            }
-
             // 지나온 자리. 좌우로 번갈아 조금씩 벌려 한 줄이 아니라 띠로 깔리게 한다.
             Vector2 raw = PlayerPosition + TrailSpread(moveDir, settings, i);
 
-            if (TryPlaceZone(raw, moveDir, false, hasPrevious, previous,
-                             settings, out Vector2 placed))
+            if (TryPlaceZone(raw, moveDir, hasPrevious, previous, settings, out Vector2 placed))
             {
                 previous = placed;
                 hasPrevious = true;
@@ -801,91 +766,10 @@ public class ButterfreeBossController : MonoBehaviour
     }
 
     /// <summary>
-    /// 진행 방향을 가로막는 짧은 벽을 세우되 <b>틈을 한 곳만</b> 남긴다.
-    ///
-    /// 틈은 진행선에서 옆으로 비켜나 있다. 그대로 직진하면 기둥에 걸리므로 <b>꺾어야 한다</b> —
-    /// 이 패턴이 이동 경로를 강제하는 지점이 여기다. 예전에는 앞을 노리는 장판이 하나뿐이라
-    /// 옆으로 한 걸음 비키면 끝이었다.
-    ///
-    /// 기둥은 틈에서 가까운 쪽부터 좌우 번갈아 놓는다. 장판 수·면적 상한에 걸려 잘리더라도
-    /// 바깥쪽이 떨어져 나가고 <b>틈은 언제나 남는다</b>.
-    /// </summary>
-    private int PlaceGate(Vector2 playerAt, Vector2 forward, PoisonSettings settings, float windup)
-    {
-        Vector2 side = new Vector2(-forward.y, forward.x);
-        Vector2 gateCenter = playerAt + forward * settings.gateLead;
-        float offset = GateOffset(settings, windup) * OpeningSide(gateCenter, side);
-        Vector2 opening = gateCenter + side * offset;
-
-        // 기둥 사이가 뚫리지 않도록 지름보다 좁게 잇는다.
-        float step = settings.radius * 1.7f;
-        float inner = settings.gateOpening * 0.5f + settings.radius;
-        // 이 안쪽으로 들어온 기둥은 틈을 막는 것이므로 놓지 않는다.
-        float keepClear = settings.gateOpening * 0.5f + settings.radius * 0.9f;
-
-        int placed = 0;
-        for (int rank = 0; rank < settings.gatePillars; rank++)
-        {
-            float distance = inner + rank / 2 * step;
-            Vector2 spot = opening + side * (rank % 2 == 0 ? distance : -distance);
-
-            // 벽에 걸려 안쪽으로 당겨진 기둥이 틈을 메우면 그 기둥은 버린다.
-            Vector2 clamped = ClampToArena(spot, poisonArenaMargin);
-            if (Mathf.Abs(Vector2.Dot(clamped - opening, side)) < keepClear) continue;
-
-            if (!TryPlaceZone(clamped, forward, true, false, Vector2.zero,
-                              settings, out Vector2 pillar)) continue;
-            SpawnZone(pillar, windup, settings);
-            placed++;
-        }
-
-        Trace(string.Format("  독가루 문: 기둥 {0}/{1}, 틈이 옆으로 {2:0.00}",
-            placed, settings.gatePillars, offset));
-        return placed;
-    }
-
-    /// <summary>
-    /// 틈을 어느 쪽으로 낼지. <b>전투장 안쪽</b>으로 낸다. 가운데가 어느 쪽인지 분명하지 않으면
-    /// (문이 이미 한가운데면) 무작위로 정한다.
-    ///
-    /// 벽 쪽으로 열면 그 너머의 기둥들이 벽에 걸려 통째로 잘려 나가고, 그 자리가 그대로
-    /// 뚫린 길이 되어 <b>꺾을 이유가 없어진다</b>. 안쪽으로 열면 벽 쪽으로 긴 벽이 서므로
-    /// 문이 온전하게 만들어지고, 플레이어도 구석이 아니라 전투장 가운데로 몰린다.
-    /// </summary>
-    private float OpeningSide(Vector2 gateCenter, Vector2 side)
-    {
-        float inward = Vector2.Dot(ArenaCenter - gateCenter, side);
-        if (Mathf.Abs(inward) < 0.5f) return Random.value < 0.5f ? 1f : -1f;
-        return Mathf.Sign(inward);
-    }
-
-    /// <summary>
-    /// 틈이 진행선에서 옆으로 비켜날 거리. <b>예고가 끝나기 전에 틈 앞에 설 수 있는</b>
-    /// 만큼으로 제한한다 — 옆으로만 달렸을 때 닿는 거리에서 여유를 뺀 값이다.
-    ///
-    /// 속도를 5로 못박지 않고 <see cref="PlayerController.RunSpeed"/>를 읽는 이유는
-    /// 구애스카프 때문이다. 유물 하나에 회피 가능 여부가 뒤집히면 안 된다.
-    /// </summary>
-    private float GateOffset(PoisonSettings settings, float windup)
-    {
-        float speed = playerController != null ? playerController.RunSpeed : 0f;
-        if (speed <= 0f) return settings.gateOffset;
-
-        float reachable = speed * windup - GateClearance;
-        return Mathf.Clamp(settings.gateOffset, 0f, Mathf.Max(0f, reachable));
-    }
-
-    /// <summary>
     /// 명세 7.3의 배치 규칙을 적용한다. 둘 수 없으면 그 장판을 생략한다.
     /// 장판은 기본적으로 플레이어가 이미 지나온 자리라서, 규칙만 지키면 가둘 일이 없다.
     /// </summary>
-    /// <param name="offTrail">
-    /// 지나온 자리를 따라가는 장판이 아니라 문의 기둥인지. 기둥은 간격 규칙과 앞지르기 금지에서
-    /// 빠진다 — 그쪽은 <see cref="PlaceGate"/>가 스스로 기하로 보장한다. 밀어내면 오히려
-    /// 틈이 맞지 않는다. 자리 수·면적 상한은 그대로 지킨다.
-    /// </param>
-    private bool TryPlaceZone(Vector2 raw, Vector2 moveDirection, bool offTrail,
-                              bool hasPrevious, Vector2 previous,
+    private bool TryPlaceZone(Vector2 raw, Vector2 moveDirection, bool hasPrevious, Vector2 previous,
                               PoisonSettings settings, out Vector2 placed)
     {
         placed = ClampToArena(raw, poisonArenaMargin);
@@ -900,7 +784,7 @@ public class ButterfreeBossController : MonoBehaviour
         float zoneArea = Mathf.PI * settings.radius * settings.radius * (occupied + 1);
         if (arenaArea > 0f && zoneArea / arenaArea > poisonMaxAreaRatio) return false;
 
-        if (offTrail || !hasPrevious) return true;
+        if (!hasPrevious) return true;
 
         Vector2 delta = placed - previous;
         if (delta.magnitude >= poisonMinSeparation) return true;
