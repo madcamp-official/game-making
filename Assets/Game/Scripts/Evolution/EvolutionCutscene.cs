@@ -437,7 +437,8 @@ public class EvolutionCutscene : MonoBehaviour
         hint.alignment = TextAnchor.LowerRight;
         hint.color = new Color(1f, 1f, 1f, 0.45f);
         hint.text = skipHint;
-        hint.rectTransform.offsetMin = new Vector2(0f, 8f);
+        // 아래 여백을 넉넉히 둔다. 8px일 때는 글줄이 화면 맨 끝에 붙어 잘린 것처럼 보였다.
+        hint.rectTransform.offsetMin = new Vector2(0f, 22f);
         hint.rectTransform.offsetMax = new Vector2(-16f, 0f);
 
         // 백색 섬광 (맨 위)

@@ -133,6 +133,8 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField, Min(0f)] private float flameRange = 6f;
     [SerializeField, Min(0f)] private float flameWidth = 1.2f;
     [SerializeField] private Color flameColor = new Color(1f, 0.45f, 0.1f, 0.55f);
+    [Tooltip("차지 시간. 옅은 줄기로 조준을 보여 주다가, 끝나야 실제 화염이 나간다.")]
+    [SerializeField, Min(0f)] private float flameWindup = 0.45f;
 
     // ---------------------------------------------------------------- 거북왕 계열
 
@@ -152,6 +154,8 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField, Min(0f)] private float surfDistance = 4.5f;
     [SerializeField, Min(0.05f)] private float surfDuration = 0.65f;
     [SerializeField, Min(0f)] private float surfKnockback = 5f;
+    [Tooltip("돌진 길을 바닥에 까는 물빛. 어디로 쏠려 가는지 몸보다 먼저 보인다.")]
+    [SerializeField] private Color surfColor = new Color(0.3f, 0.6f, 1f, 0.45f);
 
     [Header("로켓박치기 — 짧은 무적 돌진")]
     // 피해량은 진화 단계가 덮어쓴다 (28/40/55).
@@ -200,6 +204,25 @@ public class PlayerCombat : MonoBehaviour
     private SpriteRenderer flashMarker; // 재사용하는 공격 판정 표시
     private SpriteRenderer vineMarker;  // 재사용하는 덩굴채찍 연출
     private SpriteRenderer beamMarker;  // 재사용하는 화염방사·하이드로펌프 줄기 연출
+
+    /// <summary>
+    /// 바닥에 까는 공격 모양(줄기·채찍·춤 파동)의 정렬 순서. 장판(<see cref="MoveZone"/>)과
+    /// 같은 높이다 — 지형(-10·-5)과 예고(0)보다 위, 캐릭터(5·10)보다 아래.
+    ///
+    /// 예전에는 전부 50이라 <b>몸 위에</b> 그려졌다. 공격할 때마다 색 덩어리가 주인공을
+    /// 덮어서, 정작 캐릭터가 무엇을 하는지 보이지 않았다. 넓게 퍼지는 모양은 바닥이 제 자리다.
+    /// </summary>
+    private const int GroundEffectOrder = MoveZone.SortingOrder;
+
+    /// <summary>
+    /// 날아가는 투사체(불꽃세례 탄). 공중에 있는 것들(부메랑·빔 12)과 같은 높이로
+    /// 캐릭터보다 앞이다 — 땅에 깔린 그림이 아니라 날아가는 <b>물체</b>이기 때문이다.
+    ///
+    /// 판정 번쩍임은 여기 두지 않는다. 근접기의 판정 원이 몸에 겹치는 만큼 매 공격마다
+    /// 머리 위로 색이 덮여서, 이것도 바닥(<see cref="GroundEffectOrder"/>)으로 내렸다.
+    /// 맞았다는 것은 적 몸의 피격 점멸이 이미 말해 준다.
+    /// </summary>
+    private const int ImpactEffectOrder = 12;
     private float lastMeleeTime = -999f;
     private float lastVineTime = -999f;
     private float lastPetalTime = -999f;
@@ -770,7 +793,7 @@ public class PlayerCombat : MonoBehaviour
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
         sr.sprite = PrimitiveSprites.Circle;
         sr.color = fireSpitColor;
-        sr.sortingOrder = 50;
+        sr.sortingOrder = ImpactEffectOrder;   // 날아가는 물체는 캐릭터보다 앞
 
         // Dynamic이어야 벽(정지 콜라이더)과의 트리거 접촉이 온다. 빠르니 연속 판정으로 굳힌다.
         Rigidbody2D projectileBody = go.AddComponent<Rigidbody2D>();
@@ -803,7 +826,7 @@ public class PlayerCombat : MonoBehaviour
         GameObject go = new GameObject("DancePulse");
         SpriteRenderer ring = go.AddComponent<SpriteRenderer>();
         ring.sprite = PrimitiveSprites.Ring;
-        ring.sortingOrder = 50;
+        ring.sortingOrder = GroundEffectOrder;   // 몸을 덮지 않게 바닥에 깐다
 
         const float PulseTime = 0.45f;
         float elapsed = 0f;
@@ -829,21 +852,39 @@ public class PlayerCombat : MonoBehaviour
     }
 
     /// <summary>
-    /// 화염방사. 1.5초 동안 마우스를 따라 도는 화염 줄기를 뿜는다. 걸을 수는 있지만
-    /// 공격 감속(50%)이 시전 내내 걸린다 — <see cref="slowUntil"/>을 끝 시각까지 미는 것이 전부다.
+    /// 화염방사. 잠깐 차지한 뒤 마우스를 따라 도는 화염 줄기를 뿜는다. 걸을 수는 있지만
+    /// 공격 감속(50%)이 차지부터 시전 끝까지 걸린다 — <see cref="slowUntil"/>을 미는 것이 전부다.
+    ///
+    /// <b>차지 동안에는 옅은 줄기만 보인다.</b> 진한 줄기와 같은 모양이라 어디를 태울지
+    /// 미리 읽히고, 색이 갑자기 짙어지는 것으로 "지금부터 아프다"가 전해진다. 차지 중에도
+    /// 조준은 따라 돈다 — 모으는 동안 겨냥을 고칠 수 있어야 차지가 벌칙이 아니라 리듬이 된다.
     ///
     /// 틱은 장판(<see cref="MoveZone"/>)과 같은 이유로 <see cref="Health.TakeToll"/>을 쓴다:
     /// 0.25초 간격이 적의 피격 무적(0.3초)에 걸리면 틱이 통째로 사라진다.
     /// </summary>
     private IEnumerator FlameRoutine()
     {
-        float endTime = Time.time + flameDuration;
-        float nextTick = Time.time;
-        slowUntil = endTime;
-        if (playerAnimator != null) playerAnimator.BeginChannel("Charge", flameDuration);
+        slowUntil = Time.time + flameWindup + flameDuration;
+        if (playerAnimator != null)
+            playerAnimator.BeginChannel("Charge", flameWindup + flameDuration);
 
         try
         {
+            // 차지 — 아직 아무도 태우지 않는다.
+            Color preview = flameColor;
+            preview.a *= 0.35f;
+            float chargeEnd = Time.time + flameWindup;
+            while (Time.time < chargeEnd)
+            {
+                if ((health != null && health.IsDead) || !MovesUsable) yield break;
+                Vector2 aim = GetMouseDirection();
+                controller.SetFacing(aim);
+                ShowBeam(aim, EffectiveFlameRange, EffectiveFlameWidth, preview);
+                yield return null;
+            }
+
+            float endTime = Time.time + flameDuration;
+            float nextTick = Time.time;
             while (Time.time < endTime)
             {
                 if ((health != null && health.IsDead) || !MovesUsable) yield break;
@@ -892,9 +933,44 @@ public class PlayerCombat : MonoBehaviour
         controller.Stun(surfDuration);
         if (playerAnimator != null) playerAnimator.PlayAction("Walk", surfDuration);
         float speed = EffectiveSurfDistance / surfDuration;
+        StartCoroutine(SurfWaveFlash(transform.position, direction));
         dash.Begin(direction, speed, surfDuration, EffectiveSurfDamage, surfKnockback,
                    grantInvulnerability: false);
         StartCoroutine(ReleaseStunWhenDashEnds());
+    }
+
+    /// <summary>
+    /// 돌진 길이 지나가는 자리의 물빛 띠. 돌진하는 동안 바닥에 깔렸다 잦아든다 —
+    /// 어느 방향으로 쏠려 가는지가 몸의 움직임보다 먼저 읽힌다.
+    ///
+    /// 폭은 돌진 판정(<see cref="PlayerDash"/>의 hitRadius 0.7)의 지름과 같게 맞춘다.
+    /// 그보다 넓으면 띠에 걸쳤는데 안 맞는 적이 생긴다 — 보이는 것이 곧 판정이어야 한다.
+    /// </summary>
+    private const float SurfWaveWidth = 1.4f;
+
+    private IEnumerator SurfWaveFlash(Vector2 origin, Vector2 direction)
+    {
+        EnsureWhiteSprite();
+        GameObject go = new GameObject("SurfWave");
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = whiteSprite;
+        sr.sortingOrder = GroundEffectOrder;   // 다른 공격 모양과 같은 바닥 층이다
+
+        float length = EffectiveSurfDistance;
+        Transform t = go.transform;
+        t.position = origin + direction * (length * 0.5f);
+        t.rotation = Quaternion.FromToRotation(Vector3.right, direction);
+        t.localScale = new Vector3(length, SurfWaveWidth, 1f);
+
+        float elapsed = 0f;
+        while (elapsed < surfDuration)
+        {
+            elapsed += Time.deltaTime;
+            float fade = 1f - elapsed / surfDuration;
+            sr.color = new Color(surfColor.r, surfColor.g, surfColor.b, surfColor.a * fade);
+            yield return null;
+        }
+        Destroy(go);
     }
 
     /// <summary>
@@ -1033,6 +1109,11 @@ public class PlayerCombat : MonoBehaviour
             if (pushForce > 0f) enemy.ApplyKnockback(direction, pushForce);
             PlayerRelicEffects.ReportDamageDealt(damage);
         }
+
+        // 다른 공격들과 같은 규칙 — 맞았으면 한 번, 허공이면 침묵 (StrikeCircle 참고).
+        // 줄기는 틱마다 여기를 지나므로 태우는 동안 틱 박자대로 타격음이 이어진다.
+        // 예전에는 이 한 줄이 빠져 있어서 화염방사·하이드로펌프만 소리 없이 태웠다.
+        if (struckTargets.Count > 0) GameAudio.PlayPlayerHit();
     }
 
     /// <summary>줄기 연출. 마커 하나를 재사용하며 매 프레임 조준에 맞춰 눕힌다.</summary>
@@ -1044,7 +1125,7 @@ public class PlayerCombat : MonoBehaviour
             GameObject marker = new GameObject("MoveBeam");
             beamMarker = marker.AddComponent<SpriteRenderer>();
             beamMarker.sprite = whiteSprite;
-            beamMarker.sortingOrder = 50;
+            beamMarker.sortingOrder = GroundEffectOrder;
         }
 
         Transform t = beamMarker.transform;
@@ -1095,7 +1176,7 @@ public class PlayerCombat : MonoBehaviour
             GameObject marker = new GameObject("VineWhip");
             vineMarker = marker.AddComponent<SpriteRenderer>();
             vineMarker.sprite = whiteSprite;
-            vineMarker.sortingOrder = 50;
+            vineMarker.sortingOrder = GroundEffectOrder;
         }
 
         // 스프라이트 중심이 아니라 뿌리(플레이어 쪽)를 기준으로 늘어나야 채찍처럼 보인다.
@@ -1145,7 +1226,7 @@ public class PlayerCombat : MonoBehaviour
             GameObject marker = new GameObject("AttackFlash");
             flashMarker = marker.AddComponent<SpriteRenderer>();
             flashMarker.sprite = whiteSprite;
-            flashMarker.sortingOrder = 50;
+            flashMarker.sortingOrder = GroundEffectOrder;   // 근접 판정 원도 몸을 덮지 않게 바닥에
         }
 
         flashMarker.color = color;

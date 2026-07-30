@@ -61,8 +61,26 @@ public class PlayerEvolution : MonoBehaviour
     /// </summary>
     public bool HealedThisFloor { get; private set; }
 
-    /// <summary>층이 바뀌었다. 다음 층에서 다시 한 번 회복할 수 있게 표시를 지운다.</summary>
-    public void NotifyFloorChanged() => HealedThisFloor = false;
+    /// <summary>
+    /// 이 층에 들어온 뒤 실제로 진화한 적이 있는지.
+    ///
+    /// 진화는 <b>층당 한 번</b>이다. 아래 CanEvolve의 "N층에서는 N단계까지" 제한만으로는
+    /// 모자랐다 — 그 제한은 단계가 층을 <b>앞서는</b> 것만 막아서, 단계가 층보다 뒤처진
+    /// 판(진화를 B로 그만두었거나 늦게 시작한 판)에서는 행복의알로 상점에서 한 번,
+    /// 같은 층 보스를 잡고 또 한 번 — 두 번이 통과됐다. 행복의알이 주는 것은 순서이지
+    /// 횟수가 아니다.
+    ///
+    /// 취소한 진화는 세지 않는다 — 이 값은 능력치가 실제로 바뀌는 자리(ApplyStage)에서만
+    /// 선다.
+    /// </summary>
+    public bool EvolvedThisFloor { get; private set; }
+
+    /// <summary>층이 바뀌었다. 다음 층의 회복 한 번과 진화 한 번을 되살린다.</summary>
+    public void NotifyFloorChanged()
+    {
+        HealedThisFloor = false;
+        EvolvedThisFloor = false;
+    }
 
     /// <summary>진화 연출이 진행 중인지. 연출 중 재진입을 막는다.</summary>
     public bool IsEvolving { get; private set; }
@@ -94,8 +112,12 @@ public class PlayerEvolution : MonoBehaviour
 
             if (stages == null || CurrentStageIndex + 1 >= stages.Length) return false;
 
+            // 층당 한 번. 행복의알로 상점에서 미리 진화했다면 같은 층 보스로 또 진화하지
+            // 않는다 — 아래 단계 제한은 뒤처진 판에서 이 경우를 놓친다 (EvolvedThisFloor 참고).
+            if (EvolvedThisFloor) return false;
+
             // 층당 최대 1단계: N층에서는 N단계까지만 진화할 수 있다.
-            // (행복의알로 조기 진화했다면 같은 층 보스 처치로 또 진화하지 않는다.)
+            // 단계가 층을 앞서지 못하게 하는 상한이다.
             if (RoomFlowController.Instance != null &&
                 CurrentStageIndex + 1 > RoomFlowController.Instance.CurrentFloorIndex + 1)
                 return false;
@@ -126,6 +148,7 @@ public class PlayerEvolution : MonoBehaviour
         stages = newStages;
         LastLearnedMove = null;
         HealedThisFloor = false;
+        EvolvedThisFloor = false;
         SetStageImmediate(0);
     }
 
@@ -268,6 +291,9 @@ public class PlayerEvolution : MonoBehaviour
 
         // 진화할 때마다 기술을 하나 더 배운다 (처음 둘 → 셋 → 넷).
         if (!learnMove) return;
+        // 여기서부터가 "진짜 진화"다. 층당 한 번 제한은 이 순간에만 선다 —
+        // B로 그만둔 진화는 여기까지 오지 않으므로 세지 않는다.
+        EvolvedThisFloor = true;
         PlayerMoves moves = GetComponent<PlayerMoves>();
         LastLearnedMove = moves != null ? moves.LearnNext() : null;
     }
