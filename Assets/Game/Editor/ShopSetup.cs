@@ -44,6 +44,16 @@ public static class ShopSetup
     private static readonly Vector3 KeeperPos = new Vector3(TileCenterX(1), RowCenterY, 0f);
 
     /// <summary>
+    /// 그림 크기를 주인공에 맞추는 배율. 주인공은 몸이 약 0.64 × 0.79 월드다.
+    ///
+    /// 캐릭터와 상품의 값이 다른 것은 원본 해상도가 달라서다. 캐릭터 시트는 PPU 32라
+    /// 주인공과 같은 1.2를 쓰면 크기가 그대로 맞고, 유물 아이콘은 PPU 40이라 같은 값으로는
+    /// 더 작게 보인다. <b>맞추는 것은 배율이 아니라 눈에 보이는 크기다.</b>
+    /// </summary>
+    private const float KeeperScale = 1.2f;
+    private const float SlotScale = 1.4f;
+
+    /// <summary>
     /// 상품이 올라가는 칸 번호. 한 칸씩 띄워 3·5·7·9번에 놓는다 — 사이 칸이 비어 있어야
     /// 네 상품의 경계가 눈에 잡히고, 아홉 칸에 딱 맞아떨어진다.
     /// </summary>
@@ -144,6 +154,7 @@ public static class ShopSetup
                 if (slot != null)
                 {
                     slot.localPosition = new Vector3(TileCenterX(SlotTiles[i]), RowCenterY, 0f);
+                    slot.localScale = Vector3.one * SlotScale;
                     moved++;
                 }
                 // 받침대는 걷어낸다. 모래 바닥에 놓을 때는 진열대 노릇을 했지만, 카펫 위에서는
@@ -161,7 +172,7 @@ public static class ShopSetup
                 keeper = go.transform;
             }
             keeper.localPosition = KeeperPos;
-            keeper.localScale = Vector3.one;
+            keeper.localScale = Vector3.one * KeeperScale;
 
             // ⚠ 컨트롤러를 먼저, 스프라이트를 나중에. 순서가 반대면 애니메이터가 다시
             // 바인딩되며 처음 기록해 둔 기본값을 SpriteRenderer에 도로 써 넣는다.
