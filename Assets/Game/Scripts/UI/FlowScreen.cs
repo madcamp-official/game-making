@@ -30,13 +30,24 @@ public abstract class FlowScreen : MonoBehaviour
     protected abstract void Activate(int index);
 
     /// <summary>화면을 세운다. 파생 화면은 <see cref="Build"/>에서 칸을 놓는다.</summary>
-    protected static T Create<T>(GameFlow flow, string name, int sortingOrder) where T : FlowScreen
+    /// <param name="configure">
+    /// <see cref="Build"/>보다 <b>먼저</b> 도는 준비 단계. 화면이 무엇을 그릴지 정하는 값을
+    /// 여기서 받는다.
+    ///
+    /// ⚠️ 돌려받은 뒤에 값을 넣으면 늦는다. <c>Create</c>가 이미 <see cref="Build"/>를
+    /// 끝내고 돌아오기 때문이다. 조작 안내가 그렇게 어긋나 있었다 — 캐릭터를 나중에
+    /// 넣는 바람에 Build가 볼 때는 언제나 비어 있었고, 어느 길로 들어와도 "뒤로가기"
+    /// 하나만 뜨는 화면이 됐다.
+    /// </param>
+    protected static T Create<T>(GameFlow flow, string name, int sortingOrder,
+                                 System.Action<T> configure = null) where T : FlowScreen
     {
         var go = new GameObject(name);
         var screen = go.AddComponent<T>();
         screen.Flow = flow;
         screen.Canvas = PmdUi.MakeCanvas(go.transform, name + "Canvas", sortingOrder);
         screen.Root = PmdUi.MakeFullScreen(screen.Canvas.transform, "Root");
+        configure?.Invoke(screen);
         screen.Build();
         screen.Refresh();
         return screen;

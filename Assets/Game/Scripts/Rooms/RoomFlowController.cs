@@ -65,9 +65,13 @@ public class RoomFlowController : MonoBehaviour
         bool leavingShop = currentRoom != null &&
                            currentRoom.GetComponentInChildren<ShopController>(true) != null;
 
-        AdvanceRoom();
-
+        // 방을 갈아 끼우기 <b>전에</b> 진화한다. 예전에는 뒤에 두었는데, 그러면 진화 연출이
+        // 보스방에 걸어 들어오는 연출과 겹쳤다. 진화 중에는 몸이 Kinematic이라 벽에 막히지
+        // 않고 시간도 멈춰 있어서(timeScale 0), 걸어 들어오는 도중에 그대로 방 밖으로
+        // 흘러 나가 맵 바깥에 서 있는 판이 나왔다.
         if (leavingShop) TryHappyEggEvolve();
+
+        AdvanceRoom();
     }
 
     private void AdvanceRoom()

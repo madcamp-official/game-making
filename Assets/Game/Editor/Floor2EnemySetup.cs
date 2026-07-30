@@ -42,7 +42,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.4f,
-            goldMin = 14, goldMax = 19,
+            goldMin = 3, goldMax = 7,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
             {
@@ -68,7 +68,7 @@ public static class Floor2EnemySetup
         {
             // 이속은 3.0(처음)과 3.6(상향) 사이. 붙는 맛은 살리되 플레이어(5)를 따라붙지는 못한다.
             name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.9f,
-            goldMin = 15, goldMax = 20, knockbackMultiplier = 0.6f,
+            goldMin = 3, goldMax = 7, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyRollSpikeAbility),
             abilityValues = new (string, object)[]
             {
@@ -92,7 +92,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.6f,
-            goldMin = 15, goldMax = 20, keepDistance = 3.2f,
+            goldMin = 3, goldMax = 7, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
             {
@@ -110,7 +110,7 @@ public static class Floor2EnemySetup
             // 넉백 배율 1.6 — 몸통박치기(힘 6)에 맞으면 9.6으로 밀려난다. 파고들 때의 속도(9.5)와
             // 같게 맞춘 값이다. 맞고 땅속으로 밀려나는 것도 이 적에게는 '이동'이라 느리면 답답하다.
             name = "Dugtrio", health = 240, scale = 1.35f, moveSpeed = 2.5f,
-            goldMin = 34, goldMax = 44, knockbackMultiplier = 1.1f, basicAI = false,
+            goldMin = 7, goldMax = 17, knockbackMultiplier = 1.1f, basicAI = false,
             boxSize = new Vector2(0.9f, 0.55f),
             ability = typeof(EnemyBurrowAbility),
             abilityValues = new (string, object)[]
@@ -131,7 +131,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 4f,
-            goldMin = 16, goldMax = 21, keepDistance = 4.2f,
+            goldMin = 4, goldMax = 10, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
             {
@@ -147,7 +147,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Graveler", health = 180, scale = 1.3f, moveSpeed = 3.2f,
-            goldMin = 18, goldMax = 22, knockbackMultiplier = 0.3f,
+            goldMin = 7, goldMax = 17, knockbackMultiplier = 0.3f,
             boxSize = new Vector2(0.75f, 0.7f),
             ability = typeof(EnemyDashAbility),
             abilityValues = new (string, object)[]

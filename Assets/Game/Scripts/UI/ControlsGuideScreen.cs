@@ -29,8 +29,10 @@ public class ControlsGuideScreen : FlowScreen
 
     public static ControlsGuideScreen Open(GameFlow flow, CharacterData character)
     {
-        var screen = Create<ControlsGuideScreen>(flow, "ControlsGuideScreen", SortingOrder);
-        screen.character = character;
+        // ⚠️ 캐릭터는 반드시 Build보다 먼저 넣는다. Build가 이 값으로 버튼을 정하는데,
+        // 돌려받은 뒤에 넣으면 Build는 언제나 빈 값을 본다.
+        var screen = Create<ControlsGuideScreen>(flow, "ControlsGuideScreen", SortingOrder,
+            s => s.character = character);
         screen.FillBody();
         return screen;
     }
@@ -88,16 +90,33 @@ public class ControlsGuideScreen : FlowScreen
 
     private void FillBody()
     {
-        body.text =
-            "이동            WASD / 방향키\n" +
-            "기본 공격      좌클릭\n" +
-            "특수 공격      우클릭 · Shift · Space\n" +
-            "상호작용      E\n" +
-            "일시정지      Esc";
+        // 기술 이름은 적지 않는다. 캐릭터마다 다르고 진화하며 늘어나는데, 여기는 "어느 키가
+        // 몇 번째 기술인가"만 알려 주면 되는 자리다. 이름은 기술 칸 HUD와 습득 화면이 맡는다.
+        var text = new System.Text.StringBuilder();
+        text.Append(Row("이동", "WASD / 방향키"));
+        for (int i = 0; i < MoveInfo.LearnOrder.Length; i++)
+            text.Append(Row("기술 " + (i + 1), MoveInfo.KeyLabelOf(MoveInfo.LearnOrder[i])));
+        text.Append(Row("상호작용", "E"));
+        text.Append(Row("일시정지", "Esc"));
+        body.text = text.ToString().TrimEnd('\n');
 
         characterLine.text = character != null
             ? character.displayName + " — " + character.playStyle
             : "";
+    }
+
+    /// <summary>
+    /// 안내 한 줄. 이름과 키 사이를 공백으로 메워 키 자리를 세로로 맞춘다.
+    ///
+    /// PMD 비트맵 폰트는 <b>한글 한 칸이 공백 셋 폭</b>이다. 글자 수로만 맞추면
+    /// "이동"과 "상호작용"의 키가 어긋난다.
+    /// </summary>
+    private static string Row(string label, string key)
+    {
+        const int column = 18;   // 공백 단위. "이동"(6) + 12칸이 예전 자리였다.
+        int width = 0;
+        foreach (char c in label) width += c >= 0x1100 ? 3 : 1;
+        return label + new string(' ', Mathf.Max(1, column - width)) + key + "\n";
     }
 
     private void UpdateSkipLabel()

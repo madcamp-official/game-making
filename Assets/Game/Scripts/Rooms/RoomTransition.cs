@@ -66,11 +66,21 @@ public class RoomTransition : MonoBehaviour
 
         yield return Fade(0f, 1f, fadeOutDuration);
 
-        // 어둠 아래에서 방을 갈아 끼운다.
+        // 어둠 아래에서 방을 갈아 끼운다. 상점을 나서는 길이면 이 안에서 진화가 시작된다
+        // (행복의알).
         if (RoomFlowController.Instance != null) RoomFlowController.Instance.NextRoom();
         // 방을 올리면서 RoomFlowController가 주인공을 제 자리에 놓는다. 한 프레임 기다려
         // 새 방의 구름(RoomGates)이 생기고 나서 손을 댄다.
         yield return null;
+
+        // 진화 연출이 끝나기를 기다린다. 겹쳐 돌리면 걸어 들어오는 동안 몸이 Kinematic이라
+        // 벽에 막히지 않고, 컷씬이 세워 둔 timeScale 0 때문에 아래 walkTimeout도 흐르지 않는다.
+        // 어둠 아래에서 컷씬을 먼저 보여 주고, 다 끝난 뒤에 밝히며 걸어 들어온다.
+        yield return WaitWhileEvolving(player);
+        // 진화 연출은 끝나면서 조작을 <b>켜 놓고</b> 나간다 (연출이 중간에 끊겨도 몸이 굳지
+        // 않게 하려고 그렇게 되어 있다). 걸어 들어오는 동안에는 다시 꺼야 한다 — 안 그러면
+        // 조종이 되는 채로 끌려 들어오고, 적도 멈춰 있지 않는다(CombatFreeze).
+        if (player != null) player.ControlEnabled = false;
 
         // 게임 클리어처럼 다음 방이 없는 경우엔 걸어 들어올 방이 없다. 밝히고 끝낸다.
         RoomGates gates = RoomGates.Current;
@@ -106,6 +116,20 @@ public class RoomTransition : MonoBehaviour
 
         player.ControlEnabled = true;
         IsPlaying = false;
+    }
+
+    /// <summary>
+    /// 진화 연출이 도는 동안 기다린다. 연출이 없으면 곧바로 지나간다.
+    ///
+    /// <c>yield return null</c>은 timeScale이 0이어도 프레임마다 돌아오므로, 컷씬이 시간을
+    /// 세워 둔 채로도 여기서 멈춰 있지 않는다.
+    /// </summary>
+    private static IEnumerator WaitWhileEvolving(PlayerController player)
+    {
+        if (player == null) yield break;
+        PlayerEvolution evolution = player.GetComponent<PlayerEvolution>();
+        if (evolution == null) yield break;
+        while (evolution.IsEvolving) yield return null;
     }
 
     private IEnumerator Fade(float from, float to, float duration)
