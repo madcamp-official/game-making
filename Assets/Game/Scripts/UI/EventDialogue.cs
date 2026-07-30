@@ -82,7 +82,17 @@ public class EventDialogue : MonoBehaviour
     private bool awaitingDismiss;
     private EventOutcome pendingOutcome;
 
-    private float Width => Mathf.Min(MaxWidth, Screen.width - ScreenPadding * 2f);
+    /// <summary>
+    /// 창 폭·높이를 재는 기준. <b><see cref="Screen"/>이 아니라 이 오브젝트의 rect를 본다.</b>
+    ///
+    /// ⚠️ <c>Screen.width/height</c>는 캔버스 크기와 같지 않다. 에디터에서 게임 뷰가 작으면
+    /// <c>Screen.height</c>가 실제로 그려지는 캔버스 높이보다 작게 나오고, 그 값으로 자리를
+    /// 잡으면 창 묶음이 화면 위쪽에 몰린다 — 이벤트 창이 위로 치우쳐 보인 원인이 이것이었다.
+    /// 이 오브젝트는 캔버스에 꽉 차게 붙어 있으므로 자기 rect가 곧 캔버스 크기다.
+    /// </summary>
+    private Rect Area => ((RectTransform)transform).rect;
+
+    private float Width => Mathf.Min(MaxWidth, Area.width - ScreenPadding * 2f);
 
     private void Awake()
     {
@@ -175,7 +185,7 @@ public class EventDialogue : MonoBehaviour
     /// </summary>
     private Tier PickTier()
     {
-        float available = Screen.height - TopMargin - BottomMargin;
+        float available = Area.height - TopMargin - BottomMargin;
         for (int i = 0; i < Tiers.Length; i++)
         {
             float needed = Tiers[i].minDialogueHeight + PanelGap + MeasureCards(Tiers[i]);
@@ -225,15 +235,24 @@ public class EventDialogue : MonoBehaviour
         // 아래 Clamp가 그것을 "남는 세로 전부"로 잘라 첫 팝업만 화면을 가득 채웠다.
         // 두 번째 호출(결과 화면)부터는 첫 호출이 잡아 둔 폭이 남아 있어 멀쩡했다 —
         // 그래서 "처음엔 꽉 찼다가 고르면 절반으로 줄어드는" 것처럼 보였다.
-        float available = Screen.height - TopMargin - BottomMargin;
+        float available = Area.height - TopMargin - BottomMargin;
         float forChoices = choicePanel.gameObject.activeSelf ? MeasureCards(tier) + PanelGap : 0f;
         float textWidth = Width - left - Padding;
         float wanted = PixelUi.LineBoxHeight(bodyText, textWidth) + Padding * 2f;
         if (hasFace) wanted = Mathf.Max(wanted, tier.portraitSize + Padding);
         float height = Mathf.Clamp(wanted, tier.minDialogueHeight, Mathf.Max(tier.minDialogueHeight, available - forChoices));
 
+        // 대사창과 선택지를 한 묶음으로 보고 <b>화면 세로 가운데</b>에 앉힌다. 예전에는 위쪽
+        // 여백(TopMargin)에 매달아 두어서, 글이 짧은 이벤트에서는 묶음이 화면 위로 몰리고
+        // 아래가 휑하게 비었다. 가운데에 두면 어느 이벤트든 눈이 같은 자리를 본다.
+        //
+        // 위 여백은 그대로 지킨다 — 묶음이 아주 클 때 화면 위 HUD(골드·방 이름)를 덮지 않아야 한다.
+        float group = height + forChoices;
+        float top = Mathf.Max(TopMargin, (Area.height - group) * 0.5f);
+
         dialogue.sizeDelta = new Vector2(Width, height);
-        choicePanel.anchoredPosition = new Vector2(0f, -(TopMargin + height + PanelGap));
+        dialogue.anchoredPosition = new Vector2(0f, -top);
+        choicePanel.anchoredPosition = new Vector2(0f, -(top + height + PanelGap));
     }
 
     private void RebuildCards()

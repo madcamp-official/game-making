@@ -26,6 +26,35 @@ public class TitleScreen : FlowScreen
 
     private Text notice;
 
+    /// <summary>로고가 머무는 높이. 떠다니는 움직임은 이 자리를 기준으로 오간다.</summary>
+    private const float LogoY = 250f;
+
+    /// <summary>
+    /// 로고가 떠다니는 폭과 한 번 오가는 데 걸리는 시간.
+    ///
+    /// 폭을 정수 픽셀로 두는 것이 중요하다. 로고는 픽셀 아트이고 캔버스는 ConstantPixelSize라,
+    /// 소수 자리에 놓이면 획이 두 픽셀에 걸쳐 번진다 — 떠다니는 내내 글자가 지글거린다.
+    /// 그래서 <see cref="Mathf.Round"/>로 끊어 올린다.
+    /// </summary>
+    private const float FloatAmplitude = 8f;
+    private const float FloatPeriod = 3.6f;
+
+    private RectTransform logoRect;
+
+    /// <summary>
+    /// 로고를 위아래로 살짝 띄운다. 사인이라 끝에서 부드럽게 되돌아온다 — 톱니로 오가면
+    /// 방향이 바뀌는 순간이 눈에 걸린다.
+    ///
+    /// 시간은 실제 시간으로 센다. 타이틀은 <see cref="Time.timeScale"/>이 0인 채로 떠 있다.
+    /// </summary>
+    private void LateUpdate()
+    {
+        if (logoRect == null) return;
+        float phase = Time.unscaledTime * (Mathf.PI * 2f / FloatPeriod);
+        float offset = Mathf.Round(Mathf.Sin(phase) * FloatAmplitude);
+        logoRect.anchoredPosition = new Vector2(0f, LogoY + offset);
+    }
+
     public static TitleScreen Open(GameFlow flow) =>
         Create<TitleScreen>(flow, "TitleScreen", SortingOrder);
 
@@ -39,11 +68,11 @@ public class TitleScreen : FlowScreen
         Image logo = PmdUi.MakeLogo(Root, "Logo");
         if (logo != null)
         {
-            RectTransform rt = logo.rectTransform;
-            rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
-            rt.pivot = new Vector2(0.5f, 0.5f);
+            logoRect = logo.rectTransform;
+            logoRect.anchorMin = logoRect.anchorMax = new Vector2(0.5f, 0.5f);
+            logoRect.pivot = new Vector2(0.5f, 0.5f);
             // 크기는 SetNativeSize가 이미 정했다. 자리만 옮긴다.
-            rt.anchoredPosition = new Vector2(0f, 250f);
+            logoRect.anchoredPosition = new Vector2(0f, LogoY);
         }
         else
         {
@@ -77,10 +106,10 @@ public class TitleScreen : FlowScreen
         switch (command)
         {
             case Command.Continue:
-                // 지난 판의 캐릭터를 그대로 데려간다. "빠른"이라는 말은 이 칸이 무엇을
-                // 건너뛰는지 알려 주지 못했다 — 이어서 하는 것이 이 칸이 하는 일이다.
-                CharacterData last = Flow.LastCharacter;
-                return (last != null ? last.displayName : "") + "로 계속하기";
+                // 지난 판의 캐릭터를 그대로 데려간다. 캐릭터 이름을 붙여 두었더니 칸이
+                // 길어지고 조사("로"/"으로")까지 따라붙었다 — 무엇을 이어 하는지는 눌러 보면
+                // 곧 나오므로 짧은 편이 낫다.
+                return "이어하기";
             case Command.Start: return "시작하기";
             case Command.Controls: return "조작 방법";
             case Command.Credits: return "크레딧";

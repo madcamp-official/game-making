@@ -31,7 +31,6 @@ public class RelicChoicePanel : MonoBehaviour
     /// <summary>제목이 차지하는 세로 폭.</summary>
     private const int HeaderBlock = 56;
     /// <summary>아래 조작 안내가 차지하는 세로 폭.</summary>
-    private const int HintBlock = 28;
     /// <summary>카드 안쪽 위아래 여백. 글자가 테두리에 닿지 않게 둔다.</summary>
     private const int CardTextPadding = 12;
 
@@ -145,15 +144,9 @@ public class RelicChoicePanel : MonoBehaviour
             cardTexts[i] = text;
         }
 
-        Text hint = PixelUi.MakeText(panel, "Hint", 12, new Color(0.8f, 0.8f, 0.85f, 0.8f),
-                                     TextAnchor.LowerCenter);
-        hint.text = "클릭 또는 1 · 2 키로 선택";
-        RectTransform hintRt = hint.rectTransform;
-        hintRt.anchorMin = new Vector2(0f, 0f);
-        hintRt.anchorMax = new Vector2(1f, 0f);
-        hintRt.pivot = new Vector2(0.5f, 0f);
-        hintRt.sizeDelta = new Vector2(-Padding * 2, 24f);
-        hintRt.anchoredPosition = new Vector2(0f, 8f);
+        // 조작 안내("클릭 또는 1 · 2 키로 선택")는 두지 않는다. 창이 뜨면 눌러 보는 것이
+        // 사람이 먼저 하는 일이고, 안내 한 줄이 늘 붙어 있으면 정작 읽어야 할 유물 설명의
+        // 무게가 깎인다.
 
         Layout();
     }
@@ -179,7 +172,7 @@ public class RelicChoicePanel : MonoBehaviour
         }
 
         // 마지막 카드 뒤에 붙은 칸 사이 간격은 아래 여백이 아니므로 되돌린다.
-        panel.sizeDelta = new Vector2(PanelWidth, top - CardGap + HintBlock + Padding);
+        panel.sizeDelta = new Vector2(PanelWidth, top - CardGap + Padding);
     }
 
     /// <summary>두 유물을 보여 주고 하나를 고르게 한다. 이미 열려 있거나 값이 비면 false.</summary>

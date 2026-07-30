@@ -13,8 +13,10 @@ using UnityEngine.UI;
 /// </summary>
 public class BarFill : MonoBehaviour
 {
-    /// <summary>틀 스프라이트의 9슬라이스 두께. 채움은 이만큼 물러나 앉는다.</summary>
-    private const float FrameInset = 2f;
+    /// <summary>틀 스프라이트의 9슬라이스 두께. 채움은 이만큼 물러나 앉는다.
+    /// <c>UiSpriteSetup</c>의 <c>PmdBarFrame</c> 테두리와 같은 값이어야 한다 — 작으면 채움이
+    /// 윤곽을 덮고, 크면 트랙 회색이 채움 옆으로 비어져 나온다.</summary>
+    private const float FrameInset = 4f;
 
     /// <summary>짙은 줄이 차지하는 세로 비율. bars.png는 채움 세 줄 중 위 한 줄이 짙다.</summary>
     private const float ShadeFraction = 0.34f;

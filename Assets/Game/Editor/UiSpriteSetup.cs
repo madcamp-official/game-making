@@ -33,8 +33,9 @@ public static class UiSpriteSetup
         // 기술 칸 테두리 — 가운데가 비어 있어 안쪽 띠가 보인다.
         ("PmdMoveFrame", new Vector4(6, 6, 6, 6)),
         ("PmdMoveFrameOff", new Vector4(6, 6, 6, 6)),
-        // 체력바 틀과 작은 꼬리표 — 1px 윤곽(2배라 2px)만 지키면 된다.
-        ("PmdBarFrame", new Vector4(2, 2, 2, 2)),
+        // 체력바 틀 — 2px 윤곽(2배라 4px). 얇게 두면 밝은 지형 위에서 바의 경계가 풀린다.
+        ("PmdBarFrame", new Vector4(4, 4, 4, 4)),
+        // 작은 꼬리표는 1px 윤곽(2배라 2px)이다. 여기까지 두껍게 하면 안쪽에 글자칸이 안 남는다.
         ("PmdChip", new Vector4(2, 2, 2, 2)),
         // 타이틀 로고 — 늘려 쓰지 않으므로 테두리가 없다. logo.png의 흰 배경을 걷어낸 것이다
         // (scratchpad/bake_logo.py). PPU가 100이라 그림 픽셀이 화면 픽셀과 1:1이다.

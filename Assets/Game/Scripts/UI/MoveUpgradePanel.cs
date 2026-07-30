@@ -47,7 +47,6 @@ public class MoveUpgradePanel : MonoBehaviour
     private readonly List<Text> cardTexts = new List<Text>();
     private readonly List<MoveUpgradeOption> shown = new List<MoveUpgradeOption>();
 
-    private Text hintText;
     private PlayerMoves moves;
     private float savedTimeScale = 1f;
     private int openedFrame = -1;
@@ -124,18 +123,15 @@ public class MoveUpgradePanel : MonoBehaviour
             cardTexts.Add(text);
         }
 
-        hintText = PixelUi.MakeText(panel, "Hint", 12, new Color(0.8f, 0.8f, 0.85f, 0.8f),
-                                    TextAnchor.LowerCenter);
-        RectTransform hintRt = hintText.rectTransform;
-        hintRt.anchorMin = new Vector2(0f, 0f);
-        hintRt.anchorMax = new Vector2(1f, 0f);
-        hintRt.pivot = new Vector2(0.5f, 0f);
-        hintRt.sizeDelta = new Vector2(-Padding * 2, 24f);
-        hintRt.anchoredPosition = new Vector2(0f, 8f);
+        // 조작 안내("클릭 또는 1 · 2 키로 선택")는 두지 않는다. 칸에 번호가 이미 적혀 있고
+        // 창이 뜨면 눌러 보는 것이 사람이 먼저 하는 일이다. 안내 한 줄이 늘 붙어 있으면
+        // 정작 읽어야 할 강화 설명의 무게가 깎인다.
     }
 
+    // 예전에는 뒤에 +28이 붙어 있었다. 아래에 두던 조작 안내 한 줄의 자리였고,
+    // 그 줄을 없앤 지금은 창 밑이 그만큼 휑하게 벌어진다.
     private static int PanelHeight(int optionCount) =>
-        Padding * 2 + 56 + optionCount * (CardHeight + CardGap) + 28;
+        Padding * 2 + 56 + optionCount * (CardHeight + CardGap);
 
     /// <summary>선택지를 뽑아 팔레트를 연다. 남은 강화가 하나도 없으면 열지 않고 false.</summary>
     public bool Open(PlayerMoves playerMoves)
@@ -165,13 +161,6 @@ public class MoveUpgradePanel : MonoBehaviour
             if (!used) continue;
             cardTexts[i].text = (i + 1) + ".  " + shown[i].title + " — " + shown[i].detail;
             Highlight(cardImages[i], cardTexts[i], false);
-        }
-
-        if (hintText != null)
-        {
-            string keys = "1";
-            for (int i = 1; i < shown.Count; i++) keys += " · " + (i + 1);
-            hintText.text = "클릭 또는 " + keys + " 키로 선택";
         }
 
         SetVisible(true);

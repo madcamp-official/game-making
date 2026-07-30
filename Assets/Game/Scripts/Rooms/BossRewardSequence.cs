@@ -48,7 +48,6 @@ public class BossRewardSequence : MonoBehaviour
     private Text headerText;
     private Text titleText;
     private Text bodyText;
-    private Text hintText;
 
     private float savedTimeScale = 1f;
 
@@ -265,9 +264,9 @@ public class BossRewardSequence : MonoBehaviour
         titleText = PixelUi.MakeText(fill, "Title", 36, new Color(1f, 0.86f, 0.42f),
                                      TextAnchor.UpperCenter);
         bodyText = PixelUi.MakeText(fill, "Body", 24, Color.white, TextAnchor.UpperCenter);
-        hintText = PixelUi.MakeText(fill, "Hint", 12, new Color(0.8f, 0.8f, 0.85f, 0.8f),
-                                    TextAnchor.UpperCenter);
-        hintText.text = "아무 키나 눌러 계속";
+        // "아무 키나 눌러 계속" 같은 조작 안내는 두지 않는다. 창이 떠 있으면 아무 키나
+        // 눌러 보는 것이 사람이 먼저 하는 일이고, 안내 한 줄이 늘 붙어 있으면 정작 읽어야 할
+        // 보상 내용의 무게가 깎인다.
     }
 
     /// <summary>한 장의 내용을 채우고 패널 높이를 글자에 맞춘다.</summary>
@@ -294,8 +293,7 @@ public class BossRewardSequence : MonoBehaviour
         }
         y = PixelUi.StackFromTop(headerText, y, Padding) - gap * 0.5f;
         y = PixelUi.StackFromTop(titleText, y, Padding) - gap;
-        y = PixelUi.StackFromTop(bodyText, y, Padding) - gap;
-        y = PixelUi.StackFromTop(hintText, y, Padding);
+        y = PixelUi.StackFromTop(bodyText, y, Padding);
 
         panel.sizeDelta = new Vector2(width, -y + Padding);
     }
