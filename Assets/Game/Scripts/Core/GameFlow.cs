@@ -177,7 +177,10 @@ public class GameFlow : MonoBehaviour
     private static void ResetPlayer()
     {
         var death = FindAnyObjectByType<PlayerDeathHandler>();
-        if (death != null) death.ResetForNewRun();
+        // 못 찾으면 조용히 넘어가지 않고 남긴다. 이걸 건너뛴 판은 체력 0에 조작이 꺼진 몸으로
+        // 시작하는데, 그 증상만 보고 여기까지 거슬러 오기는 어렵다.
+        if (death == null) { Debug.LogWarning("PlayerDeathHandler를 찾지 못해 몸을 일으키지 못했다."); return; }
+        death.ResetForNewRun();
     }
 
     /// <summary>죽었거나 클리어했다. 결과 화면을 띄운다.</summary>

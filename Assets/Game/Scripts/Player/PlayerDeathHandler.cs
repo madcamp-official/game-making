@@ -17,10 +17,30 @@ public class PlayerDeathHandler : MonoBehaviour
     private PlayerController controller;
     private bool isGameOver;
 
+    /// <summary>
+    /// 부품을 손에 쥔다. <b>이미 쥐고 있으면 아무 일도 하지 않고, 아직이면 여기서 잡는다.</b>
+    /// 밖에서 들어오는 모든 길의 첫 줄에 둔다 — <see cref="Awake"/>가 이미 돌았다고 믿으면 안 된다.
+    ///
+    /// 판을 새로 깔 때 <see cref="GameFlow"/>가 이 컴포넌트를 찾는 길만 유별나다. 다른 초기화
+    /// 대상(<c>RunManager</c>·<c>PlayerLevel</c>·<c>PlayerMoves</c>·<c>RelicManager</c>)은 모두
+    /// 정적 <c>Instance</c>로 찾는데, 그 값은 <c>Awake</c>에서 채워지므로 <b>Awake 전이면 null이라
+    /// 저절로 걸러진다</b>. 이곳만 <c>FindAnyObjectByType</c>으로 찾아서, 아직 깨어나지 않은
+    /// 오브젝트도 그대로 손에 들어온다. 그때 캐시를 그냥 믿으면 NullReferenceException이 난다.
+    ///
+    /// 재생 중에는 모든 <c>Awake</c>가 첫 <c>Start</c>보다 먼저 끝나므로 실제로 걸릴 일이 드물지만,
+    /// 에디터에서 <see cref="GameFlow.BeginRun"/>을 직접 부르면 (재생 모드가 재컴파일로 풀린 것을
+    /// 눈치채지 못한 채 부르는 것이 흔하다) 곧바로 이 상황이 된다. 공개 함수가 생명주기 순서에
+    /// 기대지 않게 두는 편이 값싸다.
+    /// </summary>
+    private void EnsureParts()
+    {
+        if (health == null) health = GetComponent<Health>();
+        if (controller == null) controller = GetComponent<PlayerController>();
+    }
+
     private void Awake()
     {
-        health = GetComponent<Health>();
-        controller = GetComponent<PlayerController>();
+        EnsureParts();
         health.OnDied += HandleDeath;
     }
 
@@ -56,6 +76,7 @@ public class PlayerDeathHandler : MonoBehaviour
     /// </summary>
     public void ResetForNewRun()
     {
+        EnsureParts();
         isGameOver = false;
         // 진화 단계를 먼저 입힌 뒤에 불러야 그 단계의 최대치로 찬다 (GameFlow가 순서를 지킨다).
         health.Revive(health.MaxHealth);

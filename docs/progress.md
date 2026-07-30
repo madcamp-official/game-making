@@ -666,6 +666,30 @@ uGUI의 `Text`는 비트맵 폰트를 그릴 때 확대율을 `요청 크기(24)
 > 크기 강화를 두 번 걸면 3.6 × 1.69 = 반지름 6.08이 되어 방을 거의 덮는다. 방당 한 번뿐인
 > 기술이라 그대로 두었지만, 이 기술이 너무 세지면 여기부터 볼 것.
 
+## ⚠️ 판을 새로 깔 때 나던 NullReferenceException (2026-07-30)
+
+`GameFlow.BeginRun` → `ResetPlayer` → `PlayerDeathHandler.ResetForNewRun`에서
+`health`가 null이라 터졌다.
+
+**게임이 밟는 길에서는 나지 않았다.** 오류를 낸 것은 브리지로 넣은 에디터 스크립트였고,
+같은 순간 `RoomFlowController.Instance`도 null이라 방이 `-1`에 머물러 있었다
+(`CurrentRoomIndex = -1`은 필드 초기값이라 `Awake` 전에도 -1이다). 즉 **재생 모드가 아닌
+상태에서 들어간 호출**이었다 — 바로 앞에서 스크립트를 고친 뒤 `osascript`로 Unity를 앞으로
+보냈고, 그 순간 재컴파일이 돌면서 재생 모드가 조용히 풀렸다.
+
+**⚠️ 스크립트를 고친 뒤 Unity에 포커스를 주면 재생 모드가 끝난다.** 그 뒤의 브리지 호출은
+전부 에디터 씬을 상대한다. `EditorApplication.isPlaying`을 한 번 더 찍고 나서 판단할 것.
+
+그래도 코드 쪽에 고칠 값이 있었다. **`BeginRun`이 초기화 대상을 찾는 방식이 이곳만
+유별나다** — `RunManager`·`PlayerLevel`·`PlayerMoves`·`RelicManager`는 모두 정적
+`Instance`로 찾으므로 `Awake` 전이면 null이라 저절로 걸러지는데, `PlayerDeathHandler`만
+`FindAnyObjectByType`으로 찾아서 **아직 깨어나지 않은 오브젝트도 그대로 손에 들어온다**.
+`EnsureParts()`를 밖에서 들어오는 길의 첫 줄에 두어, 캐시가 비어 있으면 그 자리에서 잡는다.
+
+`ResetPlayer`가 핸들러를 못 찾는 경우도 경고를 남기게 했다. 이걸 건너뛴 판은 체력 0에
+조작이 꺼진 몸으로 시작하는데(`6b2e5bd`가 고친 그 증상), 조용히 넘어가면 증상만 보고
+여기까지 거슬러 오기 어렵다.
+
 ## 두 적이 같은 순간에 때리지 않는다 (2026-07-30)
 
 1층 첫 방의 모다피 둘이 늘 붙어서 쏜다. 예고가 둘인데 눈에는 하나로 보여, 피하는 것이
