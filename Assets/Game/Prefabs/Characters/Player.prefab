@@ -245,14 +245,14 @@ MonoBehaviour:
   petalCooldown: 12
   petalColor: {r: 1, g: 0.45, b: 0.75, a: 0.38}
   fireSpitDamage: 12
-  fireSpitCooldown: 0.55
-  fireSpitRange: 6.5
+  fireSpitCooldown: 0.65
+  fireSpitRange: 5.5
   fireSpitSpeed: 12
   fireSpitSize: 0.4
   fireSpitColor: {r: 1, g: 0.55, b: 0.15, a: 0.95}
-  danceAttackBonus: 0.3
-  danceSpeedBonus: 0.25
-  danceDuration: 4
+  danceAttackBonus: 0.2
+  danceSpeedBonus: 0.15
+  danceDuration: 3.5
   danceCooldown: 12
   danceColor: {r: 1, g: 0.35, b: 0.3, a: 0.8}
   clawDamage: 26
@@ -276,8 +276,8 @@ MonoBehaviour:
   waterGunColor: {r: 0.35, g: 0.7, b: 1, a: 0.55}
   surfDamage: 12
   surfCooldown: 4.5
-  surfDistance: 4.5
-  surfDuration: 0.65
+  surfDistance: 3
+  surfDuration: 0.3
   surfKnockback: 5
   rocketDamage: 28
   rocketCooldown: 8

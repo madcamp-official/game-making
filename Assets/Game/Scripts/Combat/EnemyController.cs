@@ -53,6 +53,14 @@ public class EnemyController : MonoBehaviour
     /// <summary>지금 향하고 있는 방향. 막혀서 속도가 0이어도 마지막 방향을 유지한다.</summary>
     public Vector2 FacingDirection { get; private set; } = Vector2.down;
 
+    /// <summary>
+    /// 기본 AI가 이번 틱에 <b>내려던</b> 이동 방향 (정규화, 안 움직이려 했으면 0).
+    /// 실제 속도와 다를 수 있다 — 적끼리 몸으로 밀면 물리 엔진이 속도를 옆으로 꺾는데,
+    /// 애니메이션이 그 속도를 따라가면 가려는 곳과 몸이 보는 곳이 어긋난다.
+    /// 넉백 중에는 갱신하지 않으므로 밀려나는 동안에도 가려던 방향을 그대로 본다.
+    /// </summary>
+    public Vector2 DesiredMoveDirection { get; private set; }
+
     /// <summary>아직 넉백으로 밀려나는 중인지. 이 동안에는 능력을 시전하지 않는다.</summary>
     public bool IsKnockedBack => knockbackActive && Time.time < stunnedUntil;
 
@@ -202,6 +210,7 @@ public class EnemyController : MonoBehaviour
         if (CombatFreeze.Active)
         {
             IsEngaged = false;
+            DesiredMoveDirection = Vector2.zero;
             body.linearVelocity = Vector2.zero;
             return;
         }
@@ -209,6 +218,7 @@ public class EnemyController : MonoBehaviour
         if (health.IsDead || player == null)
         {
             IsEngaged = false;
+            DesiredMoveDirection = Vector2.zero;
             body.linearVelocity = Vector2.zero;
             return;
         }
@@ -216,6 +226,7 @@ public class EnemyController : MonoBehaviour
         if (playerHealth != null && playerHealth.IsDead)
         {
             IsEngaged = false;
+            DesiredMoveDirection = Vector2.zero;
             body.linearVelocity = Vector2.zero;
             return;
         }
@@ -229,6 +240,7 @@ public class EnemyController : MonoBehaviour
 
         if (IsInAttackRange(distance))
         {
+            DesiredMoveDirection = Vector2.zero;
             body.linearVelocity = Vector2.zero;
             if (Time.time >= lastAttackTime + attackCooldown)
             {
@@ -238,10 +250,13 @@ public class EnemyController : MonoBehaviour
         }
         else if (IsAggro)
         {
-            body.linearVelocity = DesiredVelocity(distance);
+            Vector2 desired = DesiredVelocity(distance);
+            DesiredMoveDirection = desired.sqrMagnitude > 0.0001f ? desired.normalized : Vector2.zero;
+            body.linearVelocity = desired;
         }
         else
         {
+            DesiredMoveDirection = Vector2.zero;
             body.linearVelocity = Vector2.zero;
         }
     }

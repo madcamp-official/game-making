@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// 적의 이동 속도에 따라 Idle/Walk 8방향 애니메이션을 재생한다.
+/// 적이 가려는 방향에 따라 Idle/Walk 8방향 애니메이션을 재생한다.
 /// 상태 이름 규칙은 PlayerAnimator와 동일 (Idle_행 / Walk_행).
 ///
 /// 특수 공격을 시전하는 동안에는 <see cref="SetActionState"/>로 다른 동작(Charge 등)을
@@ -15,12 +15,21 @@ public class EnemyAnimator : MonoBehaviour
     // PMDCollab 시트 행 순서: 0=남, 1=남동, 2=동, 3=북동, 4=북, 5=북서, 6=서, 7=남서
     private static readonly int[] RowForOctant = { 2, 3, 4, 5, 6, 7, 0, 1 };
 
+    /// <summary>
+    /// 한 번 튼 방향(행)을 최소 이만큼 유지한다. 8분면 경계에 걸친 채 쫓아오면 매 프레임
+    /// 행이 튀어서 몸이 덜덜 떨려 보인다 — 실제 조준·판정과는 무관한 그림 문제라,
+    /// 그림만 잠깐 늦게 따라오게 한다. 시전 동작은 이 제한을 받지 않는다.
+    /// </summary>
+    private const float RowHoldTime = 0.2f;
+
     private Animator animator;
     private Rigidbody2D body;
     private EnemyController controller;
     private Vector2 facing = Vector2.down;
     private string currentState = "";
     private string actionState;
+    private int row;                       // RowFor(Vector2.down) == 0 이라 초기값과 맞다
+    private float rowLockedUntil;
 
     private void Awake()
     {
@@ -53,7 +62,8 @@ public class EnemyAnimator : MonoBehaviour
     {
         SetActionState(stateName, lookDirection);
         if (actionState == null) return;
-        string state = actionState + "_" + RowFor(facing);
+        row = RowFor(facing);
+        string state = actionState + "_" + row;
         currentState = state;
         if (animator.HasState(0, Animator.StringToHash(state))) animator.Play(state, 0, 0f);
     }
@@ -66,8 +76,15 @@ public class EnemyAnimator : MonoBehaviour
 
     private void Update()
     {
-        Vector2 velocity = body.linearVelocity;
-        bool moving = velocity.sqrMagnitude > 0.01f;
+        // 기본 AI가 움직이는 적은 실제 속도가 아니라 AI가 내려던 방향을 본다. 적끼리
+        // 밀리면 속도가 옆으로 꺾이는데, 그걸 따라가면 가려는 곳과 다른 데를 보게 된다.
+        // 보스처럼 전용 컨트롤러가 직접 속도를 넣는 적은 그 속도가 곧 의도라 그대로 쓴다.
+        Vector2 intent;
+        if (controller != null && controller.BasicAIEnabled)
+            intent = controller.DesiredMoveDirection;
+        else
+            intent = body.linearVelocity.sqrMagnitude > 0.01f ? body.linearVelocity : Vector2.zero;
+        bool moving = intent.sqrMagnitude > 0.0001f;
         // 몸이 닿아 있으면 속도가 0이지만 계속 밀고 있는 상태다. 이때 멈춘 그림으로 바뀌면
         // 붙어서 때리는 내내 굳어 보이므로, 추적 중이면 걷기를 유지한다.
         bool engaged = controller != null && controller.IsEngaged;
@@ -76,11 +93,18 @@ public class EnemyAnimator : MonoBehaviour
         // 예고를 보고 잡은 위치가 무의미해진다.
         if (actionState == null)
         {
-            if (moving) facing = velocity.normalized;
+            if (moving) facing = intent.normalized;
             else if (engaged) facing = controller.FacingDirection;
         }
 
-        int row = RowFor(facing);
+        // 걷기·대기의 방향 전환에만 유지 시간을 건다. 시전 동작은 조준한 방향을
+        // 바로 보여야 하므로 즉시 튼다.
+        int desiredRow = RowFor(facing);
+        if (desiredRow != row && (actionState != null || Time.time >= rowLockedUntil))
+        {
+            row = desiredRow;
+            rowLockedUntil = Time.time + RowHoldTime;
+        }
 
         string prefix = actionState ?? (moving || engaged ? "Walk" : "Idle");
         string state = prefix + "_" + row;

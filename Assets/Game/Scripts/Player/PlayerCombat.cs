@@ -99,18 +99,18 @@ public class PlayerCombat : MonoBehaviour
     [Header("불꽃세례 — 원거리 투사체")]
     // 피해량은 진화 단계가 덮어쓴다 (12/18/25). 여기 값은 1단계와 같게 맞춰 둔다.
     [SerializeField, Min(0)] private int fireSpitDamage = 12;
-    [SerializeField, Min(0f)] private float fireSpitCooldown = 0.55f;
-    [SerializeField, Min(0f)] private float fireSpitRange = 6.5f;
+    [SerializeField, Min(0f)] private float fireSpitCooldown = 0.65f;
+    [SerializeField, Min(0f)] private float fireSpitRange = 5.5f;
     [SerializeField, Min(0f)] private float fireSpitSpeed = 12f;
     [Tooltip("투사체의 지름(유닛). 판정과 그림이 같은 원이다.")]
     [SerializeField, Min(0f)] private float fireSpitSize = 0.4f;
     [SerializeField] private Color fireSpitColor = new Color(1f, 0.55f, 0.15f, 0.95f);
 
     [Header("용의춤 — 공격력·이동 속도 버프")]
-    [Tooltip("공격력 증가 비율. 0.3이면 30% 세진다. 불꽃세례·드래곤클로·화염방사에만 적용되고 넉백은 그대로다.")]
-    [SerializeField, Min(0f)] private float danceAttackBonus = 0.3f;
-    [SerializeField, Min(0f)] private float danceSpeedBonus = 0.25f;
-    [SerializeField, Min(0f)] private float danceDuration = 4f;
+    [Tooltip("공격력 증가 비율. 0.2면 20% 세진다. 불꽃세례·드래곤클로·화염방사에만 적용되고 넉백은 그대로다.")]
+    [SerializeField, Min(0f)] private float danceAttackBonus = 0.2f;
+    [SerializeField, Min(0f)] private float danceSpeedBonus = 0.15f;
+    [SerializeField, Min(0f)] private float danceDuration = 3.5f;
     [Tooltip("쿨타임은 기술을 쓴 순간부터 돈다 — 버프가 끝나기를 기다렸다 도는 게 아니다.")]
     [SerializeField, Min(0f)] private float danceCooldown = 12f;
     [SerializeField] private Color danceColor = new Color(1f, 0.35f, 0.3f, 0.8f);
@@ -151,8 +151,10 @@ public class PlayerCombat : MonoBehaviour
     // 피해량은 진화 단계가 덮어쓴다 (12/18/25).
     [SerializeField, Min(0)] private int surfDamage = 12;
     [SerializeField, Min(0f)] private float surfCooldown = 4.5f;
-    [SerializeField, Min(0f)] private float surfDistance = 4.5f;
-    [SerializeField, Min(0.05f)] private float surfDuration = 0.65f;
+    // 거리 3에 0.3초 = 초속 10 — 걷기(5)의 두 배로 확 튀어나가는 짧은 돌진기다.
+    // 예전 값(4.5 / 0.65초 = 초속 6.9)은 길고 미적지근해서 이동기인지 공격기인지 애매했다.
+    [SerializeField, Min(0f)] private float surfDistance = 3f;
+    [SerializeField, Min(0.05f)] private float surfDuration = 0.3f;
     [SerializeField, Min(0f)] private float surfKnockback = 5f;
     [Tooltip("돌진 길을 바닥에 까는 물빛. 어디로 쏠려 가는지 몸보다 먼저 보인다.")]
     [SerializeField] private Color surfColor = new Color(0.3f, 0.6f, 1f, 0.45f);
@@ -241,6 +243,8 @@ public class PlayerCombat : MonoBehaviour
     private float slowUntil = -999f;
     /// <summary>용의춤이 끝나는 시각. 지나면 저절로 풀리므로 "되돌리기"가 없다 — 복구 실수도 없다.</summary>
     private float danceUntil = -999f;
+    /// <summary>버프 동안 떠 있는 붉은 고리. 겹시전 때 두 개가 뜨지 않도록 하나만 관리한다.</summary>
+    private Coroutine danceRingRoutine;
     /// <summary>진행 중인 채널·돌진 루틴 (화염방사·로켓박치기·하이드로펌프). 하나만 돈다.</summary>
     private Coroutine busyRoutine;
 
@@ -817,29 +821,40 @@ public class PlayerCombat : MonoBehaviour
     private void DragonDanceBuff()
     {
         danceUntil = Time.time + EffectiveDanceDuration;
-        StartCoroutine(DancePulse());
+        // 이미 고리가 떠 있으면 새로 띄우지 않는다 — 루프가 danceUntil을 보므로
+        // 연장된 시간만큼 알아서 더 남는다.
+        if (danceRingRoutine == null) danceRingRoutine = StartCoroutine(DanceRing());
     }
 
-    /// <summary>몸에서 붉은 고리가 한 번 퍼진다. 버프가 걸렸다는 유일한 화면 신호다.</summary>
-    private IEnumerator DancePulse()
+    /// <summary>
+    /// 버프가 걸려 있는 동안 발밑에 계속 남는 붉은 고리. 한 번 퍼지고 끝나는 파동은
+    /// 시전 순간을 놓치면 지금 버프 중인지 알 길이 없었다 — 켜져 있는 내내 보여야
+    /// "지금 세다"를 화면이 말해 준다. 숨 쉬듯 천천히 오르내려서 정지 그림처럼 안 보이게 한다.
+    /// </summary>
+    private IEnumerator DanceRing()
     {
-        GameObject go = new GameObject("DancePulse");
+        // 플레이어 밑에 붙인다 — 따로 두면 버프 중에 플레이어가 사라질 때(방 전환·게임 오버)
+        // 코루틴만 죽고 고리가 홀로 남는다. 자식이면 몸을 따라오는 것도 공짜다.
+        GameObject go = new GameObject("DanceRing");
+        go.transform.SetParent(transform, false);
         SpriteRenderer ring = go.AddComponent<SpriteRenderer>();
         ring.sprite = PrimitiveSprites.Ring;
         ring.sortingOrder = GroundEffectOrder;   // 몸을 덮지 않게 바닥에 깐다
 
-        const float PulseTime = 0.45f;
+        const float GrowTime = 0.25f;            // 시전 순간에는 작게 시작해 퍼지며 자리 잡는다
         float elapsed = 0f;
-        while (elapsed < PulseTime)
+        while (Time.time < danceUntil && !(health != null && health.IsDead))
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / PulseTime;
-            go.transform.position = transform.position; // 달리면서 춰도 몸을 따라온다
-            go.transform.localScale = Vector3.one * Mathf.Lerp(0.8f, 2.6f, t);
-            ring.color = new Color(danceColor.r, danceColor.g, danceColor.b, danceColor.a * (1f - t));
+            float grow = Mathf.Clamp01(elapsed / GrowTime);
+            float breath = 0.5f + 0.5f * Mathf.Sin(elapsed * 5f);
+            go.transform.localScale = Vector3.one * (Mathf.Lerp(0.8f, 1.7f, grow) + 0.12f * breath);
+            float alpha = danceColor.a * (0.55f + 0.25f * breath);
+            ring.color = new Color(danceColor.r, danceColor.g, danceColor.b, alpha);
             yield return null;
         }
         Destroy(go);
+        danceRingRoutine = null;
     }
 
     /// <summary>드래곤클로. 몸통박치기와 같은 원형 판정에 수치만 무겁다 — 느리고 넓고 세다.</summary>

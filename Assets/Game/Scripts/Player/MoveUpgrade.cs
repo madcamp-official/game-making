@@ -84,7 +84,7 @@ public static class MoveUpgrades
     // 파이리·꼬부기 계열. 크기·폭·거리의 20%는 RangeStep(1.2)을, 반지름 15%는
     // TackleRadiusStep(1.15)을, 쿨타임 15%는 SpeedStep(0.85)을 그대로 쓴다.
     public const float KnockbackStep = 1.25f;     // 넉백 +25%
-    public const float DancePowerStep = 0.1f;     // 용의춤 공격력 증가량 +10%p (0.3 → 0.4)
+    public const float DancePowerStep = 0.1f;     // 용의춤 공격력 증가량 +10%p (0.2 → 0.3)
     public const float DanceSpeedStep = 0.1f;     // 용의춤 이동 속도 증가량 +10%p
     public const float DanceDurationStep = 1.5f;  // 용의춤 지속시간 +1.5초
     public const float HydroGuardStep = 0.15f;    // 하이드로펌프 피해 감소 +15%p (50% → 65%)
