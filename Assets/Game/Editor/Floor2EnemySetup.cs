@@ -42,7 +42,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.2f,
-            goldMin = 5, goldMax = 9,
+            goldMin = 4, goldMax = 12,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
             {
@@ -69,7 +69,7 @@ public static class Floor2EnemySetup
         {
             // 플레이어(5)보다 확실히 느리게 두어 구르기 사이에 거리를 다시 벌릴 수 있게 한다.
             name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.7f,
-            goldMin = 5, goldMax = 9, knockbackMultiplier = 0.6f,
+            goldMin = 5, goldMax = 13, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyRollSpikeAbility),
             abilityValues = new (string, object)[]
             {
@@ -95,7 +95,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.4f,
-            goldMin = 5, goldMax = 9, keepDistance = 3.2f,
+            goldMin = 4, goldMax = 10, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
             {
@@ -134,7 +134,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 3.8f,
-            goldMin = 5, goldMax = 11, keepDistance = 4.2f,
+            goldMin = 4, goldMax = 10, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
             {

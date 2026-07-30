@@ -68,7 +68,7 @@ public static class Floor3EnemySetup
         new EnemySpec
         {
             name = "Poliwrath", health = 205, scale = 1.25f, moveSpeed = 3.6f,
-            contactDamage = 0, goldMin = 5, goldMax = 15, knockbackMultiplier = 0.7f,
+            contactDamage = 0, goldMin = 6, goldMax = 16, knockbackMultiplier = 0.7f,
             ability = typeof(EnemyVortexAbility),
             abilityValues = new (string, object)[]
             {
@@ -118,7 +118,7 @@ public static class Floor3EnemySetup
         new EnemySpec
         {
             name = "Starmie", health = 130, scale = 1.2f, moveSpeed = 4f,
-            contactDamage = 0, goldMin = 3, goldMax = 11, keepDistance = 3.8f,
+            contactDamage = 0, goldMin = 4, goldMax = 12, keepDistance = 3.8f,
             ability = typeof(EnemyStarLaserAbility),
             abilityValues = new (string, object)[]
             {
