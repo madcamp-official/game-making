@@ -23,6 +23,8 @@ public class RunManager : MonoBehaviour
     public void AddGold(int amount)
     {
         if (amount <= 0) return;
+        // 결과 화면이 "번 골드"를 보여 준다. 쓴 돈은 빼지 않으므로 들어올 때만 센다.
+        RunStats.CountGold(amount);
 
         RelicManager relics = RelicManager.Instance;
         if (relics != null && !Mathf.Approximately(relics.GoldMultiplier, 1f))

@@ -253,6 +253,7 @@ public class EnemyController : MonoBehaviour
         body.linearVelocity = Vector2.zero;
         foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
             col.enabled = false;
+        RunStats.CountKill();
         if (RunManager.Instance != null)
             RunManager.Instance.AddGold(RollGold());
         Destroy(gameObject, 0.4f);

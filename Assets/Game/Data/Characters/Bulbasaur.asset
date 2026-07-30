@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e49634dafd0d847fd8a858edd71ea42e, type: 3}
+  m_Name: Bulbasaur
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  displayName: "\uC774\uC0C1\uD574\uC528"
+  playStyle: "\uC548\uC815\uC801\uC778 \uADFC\uAC70\uB9AC\xB7\uBC94\uC704 \uACF5\uACA9"
+  portrait: {fileID: 368746673022191736, guid: c05d9f7d79efe493c9691638561106f3, type: 3}
+  previewController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
+  previewHoverState: Walk_0
+  previewIdleState: Idle_0
+  stages:
+  - stageName: "\uC774\uC0C1\uD574\uC528"
+    animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
+    portrait: {fileID: 368746673022191736, guid: c05d9f7d79efe493c9691638561106f3, type: 3}
+    maxHealth: 100
+    attackDamage: 11
+    vineDamage: 4
+  - stageName: "\uC774\uC0C1\uD574\uD480"
+    animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
+    portrait: {fileID: 368746673022191736, guid: 18f8c6b6bacc0462a90c6254b2d49dd2, type: 3}
+    maxHealth: 130
+    attackDamage: 16
+    vineDamage: 6
+  - stageName: "\uC774\uC0C1\uD574\uAF43"
+    animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
+    portrait: {fileID: 368746673022191736, guid: 0e8729b0663224c72aa8fd0f99ab8f77, type: 3}
+    maxHealth: 170
+    attackDamage: 22
+    vineDamage: 9

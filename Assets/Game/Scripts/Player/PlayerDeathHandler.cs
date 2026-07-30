@@ -34,6 +34,11 @@ public class PlayerDeathHandler : MonoBehaviour
         }
 
         isGameOver = true;
+
+        // 결과 화면이 있으면 그쪽이 마무리를 맡는다. 옛 안내문(R로 재시작)은 화면이 없을
+        // 때를 위한 대비로 남겨 둔다 — 보상을 잃는 것보다 촌스러운 편이 낫다.
+        if (GameFlow.Instance != null) { GameFlow.Instance.FinishRun(false); return; }
+
         if (UIManager.Instance == null) return;
 
         int floor = RoomFlowController.Instance != null ? RoomFlowController.Instance.CurrentFloorIndex + 1 : 1;

@@ -34,6 +34,15 @@ public class RoomFlowController : MonoBehaviour
 
     private void Start()
     {
+        // GameFlow가 있으면 판이 언제 시작되는지는 그쪽이 정한다. 여기서 미리 방을 올리면
+        // 타이틀 뒤에서 적이 움직이고 시간이 흘러, 판이 언제 시작됐는지가 흐려진다.
+        if (GameFlow.Instance == null) BeginRun();
+    }
+
+    /// <summary>판을 처음부터 시작한다. 첫 층 첫 방을 올린다.</summary>
+    public void BeginRun()
+    {
+        gameCleared = false;
         CurrentFloorIndex = 0;
         LoadRoom(0);
     }
@@ -148,6 +157,8 @@ public class RoomFlowController : MonoBehaviour
         if (corridorCloudFrames != null && corridorCloudFrames.Length > 0)
             RoomGates.Create(currentRoom.transform, corridorCloudFrames);
 
+        RunStats.ReachedRoom(CurrentFloorIndex, index);
+
         string label = floor.roomNames != null && index < floor.roomNames.Length ? floor.roomNames[index] : floor.roomPrefabs[index].name;
         if (UIManager.Instance != null)
             UIManager.Instance.SetRoomName(string.Format("{0}층 {1}  {2}/{3}  {4}",
@@ -157,6 +168,8 @@ public class RoomFlowController : MonoBehaviour
     private void GameClear()
     {
         gameCleared = true;
+        // 결과 화면이 있으면 그쪽이 마무리를 맡는다.
+        if (GameFlow.Instance != null) { GameFlow.Instance.FinishRun(true); return; }
         PlayerController player = FindAnyObjectByType<PlayerController>();
         if (player != null) player.ControlEnabled = false;
         if (UIManager.Instance != null)

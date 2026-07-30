@@ -19,6 +19,10 @@ public class GameStartScreen : MonoBehaviour
 
     private void Start()
     {
+        // TitleScreen이 이 일을 물려받았다. 둘이 같이 뜨면 화면이 겹치고 timeScale을
+        // 서로 뒤집는다. GameFlow가 있으면 조용히 물러난다.
+        if (GameFlow.Instance != null) { enabled = false; return; }
+
         BuildPanel();
         Time.timeScale = 0f;
     }

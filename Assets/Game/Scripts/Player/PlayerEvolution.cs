@@ -80,6 +80,20 @@ public class PlayerEvolution : MonoBehaviour
     /// 개발용: 연출 없이 지정 단계로 바로 바꾼다.
     /// <see cref="DevHackPanel"/>에서만 쓰며, 개발이 끝나면 같이 지운다.
     /// </summary>
+    /// <summary>
+    /// 고른 캐릭터의 진화 단계를 통째로 갈아 끼우고 1단계로 되돌린다.
+    ///
+    /// 캐릭터가 바뀌면 그림·체력·공격력·진화 뒤 모습이 전부 달라진다. 하나씩 옮기는 대신
+    /// 배열째 바꾸면 <see cref="ApplyStage"/>가 나머지를 알아서 맞춘다 — 항목이 늘어나도
+    /// 여기를 고칠 일이 없다. <see cref="GameFlow"/>가 판을 시작할 때 부른다.
+    /// </summary>
+    public void LoadStages(Stage[] newStages)
+    {
+        if (newStages == null || newStages.Length == 0) return;
+        stages = newStages;
+        SetStageImmediate(0);
+    }
+
     public void SetStageImmediate(int index)
     {
         if (stages == null || stages.Length == 0 || IsEvolving) return;

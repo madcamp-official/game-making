@@ -650,6 +650,7 @@ GameObject:
   m_Component:
   - component: {fileID: 826172832}
   - component: {fileID: 826172831}
+  - component: {fileID: 826172833}
   m_Layer: 0
   m_Name: RoomFlowController
   m_TagString: Untagged
@@ -707,6 +708,22 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &826172833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 826172830}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 30963887e74714097a46798751a43b04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameFlow
+  characters:
+  - {fileID: 11400000, guid: 1780554f3c84a40b5b87ef7cd1e1fb85, type: 2}
+  - {fileID: 11400000, guid: f08e73f11e34e44c1b19960120286a52, type: 2}
+  - {fileID: 11400000, guid: 035712502de414a2a97ec271a39a7318, type: 2}
 --- !u!1 &849924748
 GameObject:
   m_ObjectHideFlags: 0
