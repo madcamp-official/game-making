@@ -22,6 +22,13 @@ public class CorridorCloud : MonoBehaviour
 
     [SerializeField, Min(0.05f)] private float fadeDuration = 0.55f;
 
+    [Header("숨쉬기")]
+    [Tooltip("막고 있는 동안 짙기가 오르내리는 폭. 0이면 가만히 서 있는다. " +
+             "크게 잡으면 옅어진 순간에 통로 너머가 비쳐 '막혔다'가 흔들린다.")]
+    [SerializeField, Range(0f, 0.4f)] private float breathDepth = 0.15f;
+    [Tooltip("한 번 오르내리는 데 걸리는 시간의 범위. 구름마다 이 안에서 따로 뽑는다.")]
+    [SerializeField] private Vector2 breathPeriod = new Vector2(2.6f, 4.4f);
+
     /// <summary>지금 지나갈 수 있는지.</summary>
     public bool IsOpen { get; private set; }
 
@@ -29,10 +36,45 @@ public class CorridorCloud : MonoBehaviour
     private BoxCollider2D box;
     private Coroutine fading;
 
+    // 숨쉬기 — 주기와 위상을 개체마다 따로 뽑는다.
+    private float periodA, periodB, phaseA, phaseB;
+
     private void Awake()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
         box = GetComponent<BoxCollider2D>();
+
+        // 파장이 다른 두 물결을 겹친다. 하나만 쓰면 주기가 눈에 잡혀 기계처럼 뛰는데,
+        // 서로 나누어떨어지지 않는 둘을 더하면 합의 주기가 아주 길어져 되풀이가 보이지 않는다.
+        periodA = Random.Range(breathPeriod.x, breathPeriod.y);
+        periodB = periodA * Random.Range(1.43f, 1.79f);
+        phaseA = Random.Range(0f, Mathf.PI * 2f);
+        phaseB = Random.Range(0f, Mathf.PI * 2f);
+    }
+
+    /// <summary>
+    /// 막고 있는 동안 짙기를 천천히 오르내린다. 통로를 꽉 채운 안개가 미동도 없으면
+    /// 그려 붙인 벽처럼 보인다 — 짙기만 살짝 흔들려도 살아 있는 것으로 읽힌다.
+    ///
+    /// <b>자리도 크기도 건드리지 않는다.</b> 옆으로 흐르게 했다가 물살처럼 보여 뺐던 적이
+    /// 있고, 크기를 흔들면 통로 가장자리에 틈이 생겼다 사라졌다 한다. 짙기만 만진다.
+    ///
+    /// 여닫는 중에는 손대지 않는다. 그쪽은 <see cref="Fade"/>가 알파를 쥐고 있고,
+    /// 여기서 같이 쓰면 두 값이 서로를 덮어써 깜빡인다.
+    /// </summary>
+    private void Update()
+    {
+        if (IsOpen || fading != null || breathDepth <= 0f) return;
+
+        float t = Time.time;
+        float wave = Mathf.Sin(t / periodA * Mathf.PI * 2f + phaseA)
+                   + Mathf.Sin(t / periodB * Mathf.PI * 2f + phaseB);
+        // 두 물결의 합은 -2~2다. 0~1로 옮긴 뒤 짙기에서 그만큼 덜어 낸다.
+        float amount = (wave + 2f) * 0.25f;
+
+        Color c = spriteRenderer.color;
+        c.a = 1f - breathDepth * amount;
+        spriteRenderer.color = c;
     }
 
     /// <summary>런타임에 구름을 세운다. 방마다 프리팹을 두지 않고 여기서 만든다.</summary>
