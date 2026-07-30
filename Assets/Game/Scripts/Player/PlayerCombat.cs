@@ -159,9 +159,9 @@ public class PlayerCombat : MonoBehaviour
     private float EffectiveSeedRadius =>
         seedRadius * (moves != null ? moves.SeedRadiusMultiplier : 1f);
     private float EffectiveSeedDuration =>
-        (seedDuration + (moves != null ? moves.SeedDurationBonus : 0f)) * RelicZoneDurationMultiplier;
+        seedDuration * (moves != null ? moves.SeedDurationMultiplier : 1f) * RelicZoneDurationMultiplier;
     private int EffectiveSeedHeal =>
-        seedHealPerTick + (moves != null ? moves.SeedHealBonus : 0);
+        ScaleWholeValue(seedHealPerTick, moves != null ? moves.SeedHealMultiplier : 1f);
 
     private float EffectivePetalCooldown =>
         petalCooldown * (moves != null ? moves.PetalCooldownMultiplier : 1f) * RelicCooldownMultiplier;
@@ -175,7 +175,7 @@ public class PlayerCombat : MonoBehaviour
     /// 배율은 기술에 붙은 속성(근접)을 따른다.
     /// </summary>
     private int EffectivePetalDamage =>
-        ScaleDamage(petalBaseDamage > 0 ? petalBaseDamage : meleeDamage,
+        ScaleWholeValue(petalBaseDamage > 0 ? petalBaseDamage : meleeDamage,
             petalDamageRatio * KindMultiplier(MoveType.PetalDance) *
             (moves != null ? moves.PetalDamageMultiplier : 1f));
 
@@ -235,13 +235,14 @@ public class PlayerCombat : MonoBehaviour
 
     // 속성 배율이 걸린 실제 피해량. 배율이 아무리 낮아도 최소 1은 들어간다.
     private int EffectiveMeleeDamage =>
-        ScaleDamage(meleeDamage, KindMultiplier(MoveType.Tackle) *
+        ScaleWholeValue(meleeDamage, KindMultiplier(MoveType.Tackle) *
             (moves != null ? moves.TackleDamageMultiplier : 1f));
     private int EffectiveVineDamage =>
-        ScaleDamage(vineDamage, KindMultiplier(MoveType.VineWhip));
+        ScaleWholeValue(vineDamage, KindMultiplier(MoveType.VineWhip));
 
-    private static int ScaleDamage(int baseDamage, float multiplier) =>
-        baseDamage <= 0 ? 0 : Mathf.Max(1, GameMath.RoundHalfUp(baseDamage * multiplier));
+    /// <summary>피해·회복처럼 정수로 적용되는 양수 능력치를 같은 반올림 규칙으로 배율 계산한다.</summary>
+    private static int ScaleWholeValue(int baseValue, float multiplier) =>
+        baseValue <= 0 ? 0 : Mathf.Max(1, GameMath.RoundHalfUp(baseValue * multiplier));
 
     /// <summary>기술에 붙은 속성(근접·원거리)에 걸린 유물·이벤트 배율.</summary>
     private static float KindMultiplier(MoveType move) =>

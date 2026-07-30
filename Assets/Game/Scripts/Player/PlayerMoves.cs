@@ -31,9 +31,9 @@ public class PlayerMoves : MonoBehaviour
     public float VineSlowDurationMultiplier { get; private set; } = 1f;
     public float VineCooldownMultiplier { get; private set; } = 1f;
 
-    // 장판 계열. 회복량과 지속시간은 명세가 더할 값을 못박아 두어 배율이 아니라 덧셈으로 쌓인다.
-    public int SeedHealBonus { get; private set; }
-    public float SeedDurationBonus { get; private set; }
+    // 모든 강화 수치는 배율이며 곱셈으로 누적된다.
+    public float SeedHealMultiplier { get; private set; } = 1f;
+    public float SeedDurationMultiplier { get; private set; } = 1f;
     public float SeedRadiusMultiplier { get; private set; } = 1f;
     public float PetalRadiusMultiplier { get; private set; } = 1f;
     public float PetalDamageMultiplier { get; private set; } = 1f;
@@ -99,8 +99,8 @@ public class PlayerMoves : MonoBehaviour
         VineRangeMultiplier = 1f;
         VineSlowDurationMultiplier = 1f;
         VineCooldownMultiplier = 1f;
-        SeedHealBonus = 0;
-        SeedDurationBonus = 0f;
+        SeedHealMultiplier = 1f;
+        SeedDurationMultiplier = 1f;
         SeedRadiusMultiplier = 1f;
         PetalRadiusMultiplier = 1f;
         PetalDamageMultiplier = 1f;
@@ -231,9 +231,9 @@ public class PlayerMoves : MonoBehaviour
             case MoveUpgradeId.VineCooldown:
                 VineCooldownMultiplier *= MoveUpgrades.CooldownStep; break;
             case MoveUpgradeId.SeedHeal:
-                SeedHealBonus += MoveUpgrades.SeedHealStep; break;
+                SeedHealMultiplier *= MoveUpgrades.SeedHealStep; break;
             case MoveUpgradeId.SeedDuration:
-                SeedDurationBonus += MoveUpgrades.SeedDurationStep; break;
+                SeedDurationMultiplier *= MoveUpgrades.SeedDurationStep; break;
             case MoveUpgradeId.SeedRadius:
                 SeedRadiusMultiplier *= MoveUpgrades.SeedRadiusStep; break;
             case MoveUpgradeId.PetalRadius:

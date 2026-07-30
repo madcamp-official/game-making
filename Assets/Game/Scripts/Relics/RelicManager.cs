@@ -13,8 +13,8 @@ using UnityEngine;
 /// 않은 유물로 더미를 새로 만든다. 그래서 얻을 수 있는 유물이 하나라도 남아 있는 한
 /// 상점 자리가 비는 일은 없다.
 ///
-/// 증감은 전부 <b>합연산</b>이다. +30%와 +20%를 함께 지니면 1.3×1.2가 아니라 +50%다.
-/// 예외는 구애 시리즈뿐인데, 그쪽은 다른 증감을 모두 더한 뒤 <b>마지막에 곱해진다</b>.
+/// 능력치 증감은 유물마다 독립된 배율로 적용한다. 30% 증가와 20% 증가를 함께 지니면
+/// 1.3×1.2 = 1.56배가 된다. 유물의 순서와 관계없이 같은 결과가 나온다.
 /// </summary>
 public class RelicManager : MonoBehaviour
 {
@@ -26,7 +26,7 @@ public class RelicManager : MonoBehaviour
     [Tooltip("판마다 등장 순서를 섞는다. 끄면 위 배열 순서가 곧 등장 순서다.")]
     [SerializeField] private bool shuffleOrder = true;
 
-    [Header("효과 수치 — 합연산으로 쌓인다")]
+    [Header("효과 수치 — 유물마다 독립적으로 곱해진다")]
     [SerializeField, Min(0f)] private float amuletCoinGoldBonus = 0.25f;
     [SerializeField, Min(0f)] private float bigRootHealBonus = 0.5f;
     [SerializeField, Min(0f)] private float wideLensSizeBonus = 0.15f;
@@ -39,7 +39,7 @@ public class RelicManager : MonoBehaviour
     [SerializeField, Range(0f, 0.9f)] private float quickClawCooldownReduction = 0.15f;
     [SerializeField, Min(0f)] private float lightClayZoneDurationBonus = 0.3f;
 
-    [Header("효과 수치 — 구애 시리즈 (맨 마지막에 곱해진다)")]
+    [Header("효과 수치 — 구애 시리즈")]
     [SerializeField, Min(0f)] private float choiceBonus = 0.3f;               // 머리띠·안경이 올려 주는 폭
     [SerializeField, Range(0f, 1f)] private float choicePenalty = 0.5f;       // 머리띠·안경이 깎는 쪽에 곱하는 값
     [SerializeField, Min(0f)] private float choiceScarfSpeedBonus = 0.2f;
@@ -132,6 +132,7 @@ public class RelicManager : MonoBehaviour
     public void ResetForNewRun()
     {
         relics.Clear();
+        RecalculateModifiers();
         Refill();
         OnRelicsChanged?.Invoke();
     }
@@ -360,77 +361,78 @@ public class RelicManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 지닌 유물에서 배율을 다시 계산한다.
-    ///
-    /// 증감은 전부 더한다. 곱하면 유물을 모을수록 증가폭이 스스로 부풀어 판이 금세 무너진다.
-    /// 구애 시리즈만 예외로, 더한 결과에 마지막으로 곱해진다 — "다른 모든 것을 계산한 뒤에
-    /// 반이 된다"는 것이 그 유물의 무게이고, 더하기로 섞으면 그 무게가 사라진다.
+    /// 지닌 유물에서 배율을 다시 계산한다. 모든 능력치 효과를 유물별 배율로 곱하므로
+    /// 계산 순서와 관계없이 같은 결과가 나오며, 특정 유물만 예외로 다룰 필요가 없다.
     /// </summary>
     private void RecalculateModifiers()
     {
-        float goldBonus = 0f;
-        float meleeBonus = 0f;
-        float rangedBonus = 0f;
-        float speedBonus = 0f;
-        float healBonus = 0f;
-        float maxHealthBonus = 0f;
-        float attackSizeBonus = 0f;
-        float cooldownReduction = 0f;
-        float zoneDurationBonus = 0f;
-
-        // 구애 시리즈는 하나만 지닐 수 있지만, 계산은 곱으로 두어도 결과가 같다.
-        float choiceMelee = 1f;
-        float choiceRanged = 1f;
-        float choiceSpeed = 1f;
+        GoldMultiplier = 1f;
+        MeleeDamageMultiplier = 1f;
+        RangedDamageMultiplier = 1f;
+        MoveSpeedMultiplier = 1f;
+        HealMultiplier = 1f;
+        MaxHealthMultiplier = 1f;
+        AttackSizeMultiplier = 1f;
+        CooldownMultiplier = 1f;
+        ZoneDurationMultiplier = 1f;
 
         foreach (RelicData relic in relics)
         {
             switch (relic.effect)
             {
-                case RelicEffect.AmuletCoin: goldBonus += amuletCoinGoldBonus; break;
-                case RelicEffect.BigRoot: healBonus += bigRootHealBonus; break;
-                case RelicEffect.WideLens: attackSizeBonus += wideLensSizeBonus; break;
-                case RelicEffect.QuickClaw: cooldownReduction += quickClawCooldownReduction; break;
-                case RelicEffect.LightClay: zoneDurationBonus += lightClayZoneDurationBonus; break;
-                case RelicEffect.HpUp: maxHealthBonus += hpUpMaxHealthBonus; break;
-                case RelicEffect.Protein: meleeBonus += proteinMeleeBonus; break;
-                case RelicEffect.Calcium: rangedBonus += calciumRangedBonus; break;
-                case RelicEffect.Carbos: speedBonus += carbosMoveSpeedBonus; break;
+                case RelicEffect.AmuletCoin:
+                    GoldMultiplier = Increase(GoldMultiplier, amuletCoinGoldBonus); break;
+                case RelicEffect.BigRoot:
+                    HealMultiplier = Increase(HealMultiplier, bigRootHealBonus); break;
+                case RelicEffect.WideLens:
+                    AttackSizeMultiplier = Increase(AttackSizeMultiplier, wideLensSizeBonus); break;
+                case RelicEffect.QuickClaw:
+                    CooldownMultiplier = Decrease(CooldownMultiplier, quickClawCooldownReduction); break;
+                case RelicEffect.LightClay:
+                    ZoneDurationMultiplier = Increase(ZoneDurationMultiplier, lightClayZoneDurationBonus); break;
+                case RelicEffect.HpUp:
+                    MaxHealthMultiplier = Increase(MaxHealthMultiplier, hpUpMaxHealthBonus); break;
+                case RelicEffect.Protein:
+                    MeleeDamageMultiplier = Increase(MeleeDamageMultiplier, proteinMeleeBonus); break;
+                case RelicEffect.Calcium:
+                    RangedDamageMultiplier = Increase(RangedDamageMultiplier, calciumRangedBonus); break;
+                case RelicEffect.Carbos:
+                    MoveSpeedMultiplier = Increase(MoveSpeedMultiplier, carbosMoveSpeedBonus); break;
 
                 case RelicEffect.LifeOrb:
-                    meleeBonus += lifeOrbDamageBonus;
-                    rangedBonus += lifeOrbDamageBonus;
-                    maxHealthBonus -= lifeOrbMaxHealthPenalty;
+                    MeleeDamageMultiplier = Increase(MeleeDamageMultiplier, lifeOrbDamageBonus);
+                    RangedDamageMultiplier = Increase(RangedDamageMultiplier, lifeOrbDamageBonus);
+                    MaxHealthMultiplier = Decrease(MaxHealthMultiplier, lifeOrbMaxHealthPenalty);
                     break;
 
                 case RelicEffect.ChoiceBand:
-                    choiceMelee *= 1f + choiceBonus;
-                    choiceRanged *= choicePenalty;
+                    MeleeDamageMultiplier = Increase(MeleeDamageMultiplier, choiceBonus);
+                    RangedDamageMultiplier *= choicePenalty;
                     break;
                 case RelicEffect.ChoiceSpecs:
-                    choiceRanged *= 1f + choiceBonus;
-                    choiceMelee *= choicePenalty;
+                    RangedDamageMultiplier = Increase(RangedDamageMultiplier, choiceBonus);
+                    MeleeDamageMultiplier *= choicePenalty;
                     break;
                 case RelicEffect.ChoiceScarf:
-                    choiceSpeed *= 1f + choiceScarfSpeedBonus;
-                    choiceMelee *= choiceScarfDamage;
-                    choiceRanged *= choiceScarfDamage;
+                    MoveSpeedMultiplier = Increase(MoveSpeedMultiplier, choiceScarfSpeedBonus);
+                    MeleeDamageMultiplier *= choiceScarfDamage;
+                    RangedDamageMultiplier *= choiceScarfDamage;
                     break;
             }
         }
 
-        GoldMultiplier = 1f + goldBonus;
-        MeleeDamageMultiplier = (1f + meleeBonus) * choiceMelee;
-        RangedDamageMultiplier = (1f + rangedBonus) * choiceRanged;
-        MoveSpeedMultiplier = (1f + speedBonus) * choiceSpeed;
-        HealMultiplier = 1f + healBonus;
-        // 최대 체력이 0 이하가 되면 계산이 무너진다. 생명의구슬을 여러 개 겹칠 수는 없지만
-        // 수치를 만지다 실수하면 바로 터지는 자리라 여기서 바닥을 둔다.
-        MaxHealthMultiplier = Mathf.Max(0.1f, 1f + maxHealthBonus);
-        AttackSizeMultiplier = Mathf.Max(0.1f, 1f + attackSizeBonus);
-        CooldownMultiplier = Mathf.Max(0.05f, 1f - cooldownReduction);
-        ZoneDurationMultiplier = Mathf.Max(0.1f, 1f + zoneDurationBonus);
+        // 능력치가 0이 되어 계산이 무너지지 않도록 최종 안전선만 둔다.
+        MaxHealthMultiplier = Mathf.Max(0.1f, MaxHealthMultiplier);
+        AttackSizeMultiplier = Mathf.Max(0.1f, AttackSizeMultiplier);
+        CooldownMultiplier = Mathf.Max(0.05f, CooldownMultiplier);
+        ZoneDurationMultiplier = Mathf.Max(0.1f, ZoneDurationMultiplier);
     }
+
+    private static float Increase(float current, float fraction) =>
+        current * (1f + Mathf.Max(0f, fraction));
+
+    private static float Decrease(float current, float fraction) =>
+        current * (1f - Mathf.Clamp01(fraction));
 
     private void ApplyOnAcquire(RelicData relic)
     {
