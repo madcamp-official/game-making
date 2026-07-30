@@ -39,6 +39,7 @@ public class UIManager : MonoBehaviour
             SetGold(RunManager.Instance.Gold);
         }
         BuildRelicUi();
+        BuildHintPanel();
         if (RelicManager.Instance != null)
         {
             RelicManager.Instance.OnRelicsChanged += RefreshRelics;
@@ -147,6 +148,12 @@ public class UIManager : MonoBehaviour
 
     private int lastGold = int.MinValue;
     private string lastHint;
+    private RectTransform hintPanel;
+
+    /// <summary>상호작용 안내 창의 자리와 최대 폭. 좌하단 체력바와 우하단 기술 칸을 비켜 앉는다.</summary>
+    private const float HintBottom = 56f;
+    private const float HintMaxWidth = 1080f;
+    private const float HintSideMargin = 420f;
 
     public void SetGold(int gold)
     {
@@ -166,6 +173,57 @@ public class UIManager : MonoBehaviour
         if (hintText == null || hint == lastHint) return;
         lastHint = hint;
         hintText.text = hint;
+        // 상점 상품 설명이 여기로 온다. 맨바닥 글자로 두면 방 바닥 무늬에 묻히므로
+        // 대화창에 담고, 할 말이 없을 때는 창까지 함께 치운다.
+        if (hintPanel == null) return;
+        bool show = !string.IsNullOrEmpty(hint);
+        hintPanel.gameObject.SetActive(show);
+        if (show) LayoutHintPanel();
+    }
+
+    /// <summary>
+    /// 아래쪽 상호작용 안내를 대화창에 담는다.
+    ///
+    /// 씬의 Text를 새로 만들지 않고 <b>창 안으로 옮긴다</b> — 이 Text는 씬에서 물려 준
+    /// 참조라 다시 만들면 연결이 끊긴다. 부모를 바꾸는 것은 참조를 건드리지 않는다.
+    ///
+    /// 옮기면서 줄바꿈을 켜는 것이 핵심이다. 유물 상품 설명은 한 줄로 화면 폭을 넘어가서
+    /// (예: "구매 (400G) — 이동 속도가 +20% 증가하는 대신, 근접·원거리 공격의 피해가...")
+    /// 창만 씌우면 글자가 창을 뚫고 화면 밖으로 흘러나간다.
+    /// </summary>
+    private void BuildHintPanel()
+    {
+        if (hintText == null) return;
+
+        RectTransform textRt = hintText.rectTransform;
+        hintPanel = PmdUi.MakePanel(textRt.parent, "HintPanel").rectTransform;
+        hintPanel.anchorMin = hintPanel.anchorMax = new Vector2(0.5f, 0f);
+        hintPanel.pivot = new Vector2(0.5f, 0f);
+        hintPanel.anchoredPosition = new Vector2(0f, HintBottom);
+        hintPanel.SetSiblingIndex(textRt.GetSiblingIndex());
+
+        textRt.SetParent(hintPanel, false);
+        hintText.alignment = TextAnchor.MiddleCenter;
+        hintText.horizontalOverflow = HorizontalWrapMode.Wrap;
+        hintText.verticalOverflow = VerticalWrapMode.Overflow;
+        PmdUi.Stretch(textRt);
+        textRt.offsetMin = new Vector2(PmdUi.PanelInset.x, PmdUi.PanelInset.y);
+        textRt.offsetMax = new Vector2(-PmdUi.PanelInset.x, -PmdUi.PanelInset.y);
+
+        hintPanel.gameObject.SetActive(false);
+    }
+
+    /// <summary>창을 글자 줄 수에 맞춰 키운다. 폭은 좌우 HUD를 침범하지 않는 선에서 잡는다.</summary>
+    private void LayoutHintPanel()
+    {
+        var canvasRect = hintPanel.parent as RectTransform;
+        float available = canvasRect != null ? canvasRect.rect.width : HintMaxWidth;
+        float width = Mathf.Min(HintMaxWidth, available - HintSideMargin * 2f);
+        // 줄 수는 줄바꿈 폭이 정해진 뒤에야 올바르게 나온다. 배치 전에는 rect가 0이라
+        // 폭을 직접 넘겨야 한 글자에 한 줄씩 세지 않는다.
+        float inner = width - PmdUi.PanelInset.x * 2f;
+        float lines = PixelUi.LineBoxHeight(hintText, inner);
+        hintPanel.sizeDelta = new Vector2(width, lines + PmdUi.PanelInset.y * 2f + 8f);
     }
 
     public void ShowMessage(string message, float duration)

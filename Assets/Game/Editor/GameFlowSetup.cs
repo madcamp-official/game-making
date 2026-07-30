@@ -14,37 +14,17 @@ using UnityEngine;
 /// </summary>
 public static class GameFlowSetup
 {
-    private const string PanelSheet = "Assets/Game/Resources/UI/PmdPanel.png";
     private const string CharacterDir = "Assets/Game/Data/Characters";
-    private const int SliceBorder = 6;
 
     // ---------------------------------------------------------------- 1단계
 
-    /// <summary>대화창 프레임을 9슬라이스로 들인다. 테두리가 늘어나지 않게 border를 박아 둔다.</summary>
-    public static string ImportPanelSprite()
-    {
-        var importer = (TextureImporter)AssetImporter.GetAtPath(PanelSheet);
-        if (importer == null) return "PmdPanel.png가 없다 — bake_pmdui.py를 먼저 돌릴 것";
-
-        importer.textureType = TextureImporterType.Sprite;
-        importer.spriteImportMode = SpriteImportMode.Single;
-        importer.spritePixelsPerUnit = 1;
-        importer.filterMode = FilterMode.Point;
-        importer.textureCompression = TextureImporterCompression.Uncompressed;
-        importer.mipmapEnabled = false;
-        importer.alphaIsTransparency = true;
-
-        var settings = new TextureImporterSettings();
-        importer.ReadTextureSettings(settings);
-        settings.spriteMeshType = SpriteMeshType.FullRect;
-        settings.spriteAlignment = (int)SpriteAlignment.Center;
-        // 9슬라이스 — 사방 6px은 늘리지 않고, 가운데만 늘린다.
-        settings.spriteBorder = new Vector4(SliceBorder, SliceBorder, SliceBorder, SliceBorder);
-        importer.SetTextureSettings(settings);
-        importer.SaveAndReimport();
-
-        return "PmdPanel 9슬라이스 임포트 (테두리 " + SliceBorder + ")";
-    }
+    /// <summary>
+    /// UI 스프라이트를 들인다. 대화창 하나만 쓰던 시절에는 여기서 직접 임포트했는데,
+    /// 버튼·기술칸·체력바까지 늘어나면서 테두리 두께 표를 <see cref="UiSpriteSetup"/>
+    /// 한 군데로 모았다. 두께가 두 곳에 적혀 있으면 한쪽만 고쳐 놓고 창이 늘어지는 것을
+    /// 한참 못 찾는다.
+    /// </summary>
+    public static string ImportPanelSprite() => UiSpriteSetup.ImportAll();
 
     // ---------------------------------------------------------------- 2단계
 

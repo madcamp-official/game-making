@@ -10,41 +10,32 @@ using UnityEngine.UI;
 public class ExpBar : MonoBehaviour
 {
     private const float MarginX = 30f;
-    private const float MarginY = 56f;   // 체력바(72) 바로 아래
+    private const float MarginY = 50f;   // 체력바(72) 바로 아래
     private const float BarWidth = 300f;
-    private const float BarHeight = 12f;
-    private const int Border = 2;
+    private const float BarHeight = 14f;
+    /// <summary>체력바의 "HP" 꼬리표 폭 + 사이 간격. 두 바의 왼쪽 끝을 맞춘다.</summary>
+    private const float ChipOffset = 50f;
 
-    private static readonly Color FillColor = new Color(1f, 0.82f, 0.25f, 0.95f);
+    /// <summary>
+    /// 경험치는 푸른색이다 — <c>bars.png</c>의 "Exp. Point bar colors"에서 그대로 잰 값.
+    /// 체력의 초록과 색으로 갈려서, 두 바가 나란히 있어도 어느 쪽인지 바로 읽힌다.
+    /// </summary>
+    private static readonly Color FillColor = new Color32(73, 146, 251, 255);
 
     private PlayerLevel level;
-    private Image fill;
+    private BarFill bar;
 
     public static ExpBar Create(Transform canvasRoot)
     {
-        RectTransform panel = PixelUi.MakePanel(canvasRoot, "ExpBar", Border);
-        panel.anchorMin = panel.anchorMax = Vector2.zero;
-        panel.pivot = Vector2.zero;
-        panel.anchoredPosition = new Vector2(MarginX, MarginY);
-        panel.sizeDelta = new Vector2(BarWidth, BarHeight);
+        BarFill fill = BarFill.Create(canvasRoot, "ExpBar", FillColor);
+        RectTransform rt = fill.Root;
+        rt.anchorMin = rt.anchorMax = Vector2.zero;
+        rt.pivot = Vector2.zero;
+        rt.anchoredPosition = new Vector2(MarginX + ChipOffset, MarginY);
+        rt.sizeDelta = new Vector2(BarWidth, BarHeight);
 
-        ExpBar bar = panel.gameObject.AddComponent<ExpBar>();
-
-        GameObject fillGo = new GameObject("Fill");
-        fillGo.transform.SetParent(panel, false);
-        bar.fill = fillGo.AddComponent<Image>();
-        bar.fill.sprite = PrimitiveSprites.Square;
-        bar.fill.color = FillColor;
-        bar.fill.raycastTarget = false;
-        bar.fill.type = Image.Type.Filled;
-        bar.fill.fillMethod = Image.FillMethod.Horizontal;
-        bar.fill.fillOrigin = (int)Image.OriginHorizontal.Left;
-        RectTransform fillRt = bar.fill.rectTransform;
-        fillRt.anchorMin = Vector2.zero;
-        fillRt.anchorMax = Vector2.one;
-        fillRt.offsetMin = new Vector2(Border + 1, Border + 1);
-        fillRt.offsetMax = new Vector2(-(Border + 1), -(Border + 1));
-
+        ExpBar bar = fill.gameObject.AddComponent<ExpBar>();
+        bar.bar = fill;
         return bar;
     }
 
@@ -69,7 +60,7 @@ public class ExpBar : MonoBehaviour
 
     private void Refresh()
     {
-        if (fill != null && level != null) fill.fillAmount = Mathf.Clamp01(level.Progress01);
+        if (bar != null && level != null) bar.SetRatio(level.Progress01);
     }
 
     private void OnDestroy()

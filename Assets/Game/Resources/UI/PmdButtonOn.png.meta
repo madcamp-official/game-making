@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 1dd835ecb1d0d4de298e12a7d603ae0b
+guid: a860ba0e308dc4273ac4732b030b149e
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -330454065393159723
-    second: PmdPanel_0
+      213: 2739765856626412269
+    second: PmdButtonOn_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -48,11 +48,11 @@ TextureImporter:
   compressionQuality: 50
   spriteMode: 1
   spriteExtrude: 1
-  spriteMeshType: 0
+  spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
   spritePixelsToUnits: 100
-  spriteBorder: {x: 14, y: 6, z: 14, w: 6}
+  spriteBorder: {x: 10, y: 14, z: 10, w: 14}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
   alphaIsTransparency: 1
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PmdPanel_0
+      name: PmdButtonOn_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 16
-        height: 16
+        width: 22
+        height: 32
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 5d138a147cdf96bf0800000000000000
-      internalID: -330454065393159723
+      spriteID: dea06fbd78a950620800000000000000
+      internalID: 2739765856626412269
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PmdPanel_0: -330454065393159723
+      PmdButtonOn_0: 2739765856626412269
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

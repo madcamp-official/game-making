@@ -2,70 +2,125 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 게임 전체 화면(타이틀·캐릭터 선택·안내·결과)이 함께 쓰는 창 부품.
+/// 게임 UI가 함께 쓰는 부품 — 대화창, 버튼, 기술 칸 테두리, 체력바 틀.
 ///
-/// 생김새는 <c>Assets/Game/Art/UI/dialogue.png</c>의 파란 대화창 — PMD 하늘의 탐험대 —
-/// 을 그대로 따른다. 픽셀을 읽어 뽑은 테두리는 바깥에서 안으로 연청 → 밝은청 → 청색 밴드
-/// → 남색이고 속은 거의 검다. 그 결을 9슬라이스 스프라이트 한 장(<c>Resources/UI/PmdPanel</c>)
-/// 으로 굳혀 두었으므로, 창을 어떤 크기로 늘려도 테두리 두께가 변하지 않는다.
+/// 생김새는 <c>Assets/Game/Art/UI/</c>의 참고 그림을 따른다.
+/// <list type="bullet">
+/// <item><c>textbox.png</c> — 대화창. 깨끗한 픽셀 아트라 색과 두께를 그대로 옮겼다.
+///   바깥에서 안으로 연청 → 밝은청(좌우 5px, 위아래 1px) → 진청, 속은 남색이다.</item>
+/// <item><c>button.png</c> — 붉은 버튼. 보간된 업스케일이고 "FIGHT" 글자까지 박혀 있어
+///   층 구조와 팔레트만 재서 다시 그렸다.</item>
+/// <item><c>moves.png</c> — 기술 칸의 금색 베벨 테두리.</item>
+/// <item><c>bars.png</c> — 체력바 틀(어두운 윤곽 + 흰 트랙)과 "HP" 꼬리표.</item>
+/// </list>
 ///
-/// 9슬라이스로 만든 이유: 화면마다 창 크기가 다른데 테두리를 코드로 그리면 크기가 바뀔 때마다
-/// 두께와 모서리를 다시 맞춰야 한다. 스프라이트 한 장이면 Unity가 알아서 늘려 준다.
+/// 모두 9슬라이스 스프라이트다(<c>scratchpad/bake_ui.py</c>가 굽고 <c>UiSpriteSetup</c>이
+/// 들여온다). 화면마다 창 크기가 다른데 테두리를 코드로 그리면 크기가 바뀔 때마다 두께와
+/// 모서리를 다시 맞춰야 한다. 스프라이트 한 장이면 Unity가 알아서 늘려 준다.
+///
+/// 원본은 본문 폰트(24 = PMD 기본 12의 두 배)에 맞춰 <b>2배</b>로 구워 두었다. 그래서
+/// 스프라이트 픽셀이 UI 단위와 1:1이고, 배율을 따로 맞출 필요가 없다.
 /// </summary>
 public static class PmdUi
 {
     /// <summary>대화창 속 글자색. 흰색보다 살짝 눌러 남색 배경에서 눈이 편하다.</summary>
     public static readonly Color TextColor = new Color(0.97f, 0.97f, 0.94f);
 
-    /// <summary>고른 항목을 가리키는 노란색. 원작의 커서 색이다.</summary>
-    public static readonly Color HighlightColor = new Color(1f, 0.86f, 0.28f);
+    /// <summary>고른 항목의 글자. 붉은 버튼 위에서 흰색과 확실히 갈리는 연한 금색이다.</summary>
+    public static readonly Color HighlightColor = new Color(1f, 0.94f, 0.63f);
 
-    /// <summary>고를 수 없는 항목. 글자만 눌러 두고 창은 그대로 둔다.</summary>
-    public static readonly Color DisabledColor = new Color(0.55f, 0.58f, 0.62f);
+    /// <summary>고를 수 없는 항목의 글자.</summary>
+    public static readonly Color DisabledColor = new Color(0.62f, 0.62f, 0.6f);
 
-    /// <summary>제목처럼 힘을 줄 때 쓰는 하늘색. 테두리와 같은 계열이다.</summary>
+    /// <summary>제목처럼 힘을 줄 때 쓰는 하늘색. 대화창 테두리와 같은 계열이다.</summary>
     public static readonly Color AccentColor = new Color(0.47f, 0.69f, 0.97f);
 
-    private const int SliceBorder = 6;
+    /// <summary>대화창 속 남색. 테두리 스프라이트의 가운데는 비어 있고 이 색이 그 자리를 채운다.</summary>
+    public static readonly Color PanelFill = new Color32(32, 72, 104, 255);
 
-    private static Sprite panelSprite;
+    /// <summary>대화창 테두리 두께 — 스프라이트의 9슬라이스 테두리와 같다 (좌우 14, 위아래 6).</summary>
+    public static readonly Vector2 PanelInset = new Vector2(14f, 6f);
 
-    /// <summary>
-    /// 창 스프라이트. <c>Resources</c>에 두는 이유: 화면을 코드로 짜므로 씬에 물려 둘 자리가
-    /// 없고, 그렇다고 화면마다 인스펙터 참조를 만들면 화면을 하나 추가할 때마다 씬을 건드려야 한다.
-    /// </summary>
-    public static Sprite PanelSprite
+    // ---------------------------------------------------------------- 스프라이트
+
+    private static Sprite panel, button, buttonOn, buttonOff, moveFrame, moveFrameOff, barFrame, chip;
+
+    private static Sprite Load(ref Sprite cache, string name)
     {
-        get
-        {
-            if (panelSprite == null) panelSprite = Resources.Load<Sprite>("UI/PmdPanel");
-            return panelSprite;
-        }
+        if (cache == null) cache = Resources.Load<Sprite>("UI/" + name);
+        return cache;
     }
 
-    /// <summary>화면을 가득 채우는 그릇. 그 아래에 창을 놓는다.</summary>
-    public static RectTransform MakeFullScreen(Transform parent, string name)
-    {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
-        RectTransform rt = (RectTransform)go.transform;
-        Stretch(rt);
-        return rt;
-    }
+    public static Sprite PanelSprite => Load(ref panel, "PmdPanel");
+    public static Sprite ButtonSprite => Load(ref button, "PmdButton");
+    /// <summary>고른 칸 — 링이 금색으로 바뀐다. 붉은색만 밝히면 흘깃 봐서 구분되지 않는다.</summary>
+    public static Sprite ButtonOnSprite => Load(ref buttonOn, "PmdButtonOn");
+    public static Sprite ButtonOffSprite => Load(ref buttonOff, "PmdButtonOff");
+    public static Sprite MoveFrameSprite => Load(ref moveFrame, "PmdMoveFrame");
+    public static Sprite MoveFrameOffSprite => Load(ref moveFrameOff, "PmdMoveFrameOff");
+    public static Sprite BarFrameSprite => Load(ref barFrame, "PmdBarFrame");
+    /// <summary>작은 꼬리표 — 체력바의 "HP" 표와 기술 칸의 속성 표. 흰 속을 물들여 쓴다.</summary>
+    public static Sprite ChipSprite => Load(ref chip, "PmdChip");
 
-    /// <summary>대화창 한 장. <paramref name="opaque"/>가 거짓이면 속을 살짝 비쳐 보이게 한다.</summary>
-    public static Image MakePanel(Transform parent, string name, bool opaque = true)
+    /// <summary>9슬라이스 Image 하나. 스프라이트가 없으면 단색 사각형으로 버틴다.</summary>
+    public static Image MakeSliced(Transform parent, string name, Sprite sprite)
     {
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var image = go.AddComponent<Image>();
-        image.sprite = PanelSprite;
-        image.type = Image.Type.Sliced;
-        // 스프라이트 원본이 16px인데 9슬라이스 테두리가 6px이라, 픽셀 그대로 그리면
-        // 화면이 커질수록 테두리가 실처럼 얇아진다. 화면 배율만큼 곱해 두께를 지킨다.
-        image.pixelsPerUnitMultiplier = 1f / Mathf.Max(1, PixelUi.PixelScale);
-        if (!opaque) image.color = new Color(1f, 1f, 1f, 0.93f);
+        image.raycastTarget = false;
+        if (sprite != null)
+        {
+            image.sprite = sprite;
+            image.type = Image.Type.Sliced;
+        }
+        else
+        {
+            // 스프라이트를 아직 들여오지 않았어도 화면이 사라지지는 않게 한다.
+            image.sprite = PrimitiveSprites.Square;
+        }
         return image;
+    }
+
+    // ---------------------------------------------------------------- 대화창
+
+    /// <summary>
+    /// 대화창 한 장. 테두리와 속을 <b>따로</b> 만든다 — 테두리 스프라이트의 가운데는 비어 있고,
+    /// 자식 <c>Fill</c>이 그 자리를 남색으로 채운다.
+    ///
+    /// 굳이 나눠 둔 이유: 속을 반투명하게 하고 싶은 창이 있다(기술 강화 팔레트는 뒤쪽 전투가
+    /// 비쳐 보여야 한다). 스프라이트에 속색을 박아 두면 그럴 수가 없다.
+    /// </summary>
+    public static Image MakePanel(Transform parent, string name, bool opaque = true)
+    {
+        Image frame = MakeSliced(parent, name, PanelSprite);
+        Image fill = MakeFill(frame.rectTransform);
+        if (!opaque)
+        {
+            Color c = fill.color;
+            c.a = 0.86f;
+            fill.color = c;
+        }
+        return frame;
+    }
+
+    /// <summary>대화창 속을 채우는 남색 판. 테두리 안쪽에 1px 물려 들어가 이음매가 없다.</summary>
+    public static Image MakeFill(RectTransform frame)
+    {
+        var go = new GameObject("Fill", typeof(RectTransform));
+        // 테두리보다 먼저 그려져야 하므로 첫 자식으로 넣는다. 여러 코드가 GetChild(0)으로 찾는다.
+        go.transform.SetParent(frame, false);
+        go.transform.SetAsFirstSibling();
+        var fill = go.AddComponent<Image>();
+        fill.sprite = PrimitiveSprites.Square;
+        fill.color = PanelFill;
+        fill.raycastTarget = false;
+        RectTransform rt = fill.rectTransform;
+        rt.anchorMin = Vector2.zero;
+        rt.anchorMax = Vector2.one;
+        rt.offsetMin = new Vector2(PanelInset.x - 1f, PanelInset.y - 1f);
+        rt.offsetMax = new Vector2(-(PanelInset.x - 1f), -(PanelInset.y - 1f));
+        return fill;
     }
 
     /// <summary>화면 전체를 덮는 어두운 막. 뒤의 게임 화면을 눌러 준다.</summary>
@@ -74,7 +129,9 @@ public static class PmdUi
         var go = new GameObject(name, typeof(RectTransform));
         go.transform.SetParent(parent, false);
         var image = go.AddComponent<Image>();
+        image.sprite = PrimitiveSprites.Square;
         image.color = new Color(0.02f, 0.03f, 0.06f, alpha);
+        image.raycastTarget = false;
         Stretch(image.rectTransform);
         return image;
     }
@@ -89,7 +146,24 @@ public static class PmdUi
     }
 
     /// <summary>
-    /// 메뉴 한 칸. 창 한 장에 글자 한 줄이고, 고른 항목만 테두리를 밝히고 글자를 노랗게 한다.
+    /// 바탕이 고르지 않은 곳(붉은 버튼, 체력바, 게임 화면 위)에 얹는 글자.
+    /// 1px 어두운 윤곽을 둘러 어떤 바탕에서도 획이 끊겨 보이지 않게 한다.
+    /// </summary>
+    public static Text MakeOutlinedText(Transform parent, string name, string body, int size,
+                                        TextAnchor anchor = TextAnchor.MiddleCenter)
+    {
+        Text text = MakeText(parent, name, body, size, anchor);
+        var outline = text.gameObject.AddComponent<Outline>();
+        outline.effectColor = new Color(0f, 0f, 0f, 0.85f);
+        outline.effectDistance = new Vector2(1.5f, 1.5f);
+        return text;
+    }
+
+    // ---------------------------------------------------------------- 버튼
+
+    /// <summary>
+    /// 메뉴 한 칸 — <c>button.png</c>의 붉은 버튼이다. 창 한 장에 글자 한 줄이고,
+    /// 고른 칸은 테두리 링이 금색으로 바뀌며 글자가 연한 금색이 된다.
     ///
     /// uGUI 버튼을 쓰지 않는 이유: 이 씬에는 <c>EventSystem</c>이 없다(좌클릭이 공격이라
     /// 넣으면 게임 입력과 겹친다 — <c>RelicTooltip</c>과 같은 사정이다). 마우스 위치를
@@ -109,34 +183,65 @@ public static class PmdUi
         /// <summary>고른 상태를 겉모습에 반영한다.</summary>
         public void SetSelected(bool selected)
         {
-            if (!enabled)
+            if (panel != null)
             {
-                panel.color = new Color(0.62f, 0.62f, 0.66f, 0.85f);
-                label.color = DisabledColor;
-                return;
+                panel.sprite = !enabled ? ButtonOffSprite
+                                        : (selected ? ButtonOnSprite : ButtonSprite);
+                panel.color = Color.white;
             }
-            panel.color = selected ? new Color(1f, 1f, 1f) : new Color(0.78f, 0.82f, 0.9f);
-            label.color = selected ? HighlightColor : TextColor;
+            if (label != null)
+                label.color = !enabled ? DisabledColor
+                                       : (selected ? HighlightColor : TextColor);
         }
     }
 
-    /// <summary>메뉴 한 칸을 만든다. 자리는 부모 rect 안의 위쪽부터 쌓는 쪽이 다루기 쉽다.</summary>
+    /// <summary>버튼 한 칸을 만든다. 자리는 부모 rect 가운데를 기준으로 잡는다.</summary>
     public static Entry MakeEntry(Transform parent, string name, string body, int size,
-                                  Vector2 anchoredPosition, Vector2 size2)
+                                  Vector2 anchoredPosition, Vector2 boxSize)
     {
-        var entry = new Entry();
-        entry.panel = MakePanel(parent, name);
-        entry.rect = entry.panel.rectTransform;
+        Entry entry = MakeButton(parent, name, body, size);
         entry.rect.anchorMin = entry.rect.anchorMax = new Vector2(0.5f, 0.5f);
         entry.rect.pivot = new Vector2(0.5f, 0.5f);
-        entry.rect.sizeDelta = size2;
+        entry.rect.sizeDelta = boxSize;
         entry.rect.anchoredPosition = anchoredPosition;
+        return entry;
+    }
 
-        entry.label = MakeText(entry.rect, name + "Label", body, size);
+    /// <summary>자리는 부르는 쪽이 정하는 버튼. 목록에 쌓아 놓는 카드들이 이쪽을 쓴다.</summary>
+    public static Entry MakeButton(Transform parent, string name, string body, int size)
+    {
+        var entry = new Entry();
+        entry.panel = MakeSliced(parent, name, ButtonSprite);
+        entry.rect = entry.panel.rectTransform;
+
+        entry.label = MakeOutlinedText(entry.rect, name + "Label", body, size);
         Stretch(entry.label.rectTransform);
+        // 글자가 링에 닿지 않게 좌우로 물러선다.
+        entry.label.rectTransform.offsetMin = new Vector2(12f, 0f);
+        entry.label.rectTransform.offsetMax = new Vector2(-12f, 0f);
         entry.SetSelected(false);
         return entry;
     }
+
+    // ---------------------------------------------------------------- 꼬리표
+
+    /// <summary>
+    /// 작은 색 꼬리표 — 체력바의 "HP" 표, 기술 칸의 속성 표. 흰 속을 가진 스프라이트를
+    /// 물들여 쓰므로 어두운 윤곽도 그 색의 어두운 판이 되어 저절로 어울린다.
+    /// </summary>
+    public static Text MakeChip(Transform parent, string name, string body, int size,
+                                Color color, Color textColor)
+    {
+        Image box = MakeSliced(parent, name, ChipSprite);
+        box.color = color;
+        Text text = MakeText(box.rectTransform, name + "Label", body, size);
+        text.horizontalOverflow = HorizontalWrapMode.Overflow;
+        text.color = textColor;
+        Stretch(text.rectTransform);
+        return text;
+    }
+
+    // ---------------------------------------------------------------- 자리 맞추기
 
     /// <summary>부모를 가득 채우도록 늘린다.</summary>
     public static void Stretch(RectTransform rt)
@@ -145,6 +250,16 @@ public static class PmdUi
         rt.anchorMax = Vector2.one;
         rt.offsetMin = Vector2.zero;
         rt.offsetMax = Vector2.zero;
+    }
+
+    /// <summary>화면을 가득 채우는 그릇. 그 아래에 창을 놓는다.</summary>
+    public static RectTransform MakeFullScreen(Transform parent, string name)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        RectTransform rt = (RectTransform)go.transform;
+        Stretch(rt);
+        return rt;
     }
 
     /// <summary>화면을 코드로 짜는 화면들이 공유하는 캔버스. 항상 게임 화면 위에 덮는다.</summary>

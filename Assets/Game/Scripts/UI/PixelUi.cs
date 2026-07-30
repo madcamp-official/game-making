@@ -70,29 +70,19 @@ public static class PixelUi
     }
 
     /// <summary>
-    /// 테두리가 있는 어두운 패널을 만든다. 반환값은 바깥 테두리의 RectTransform이고,
-    /// 안쪽 채움은 자식으로 붙어 있으므로 내용은 반환값 아래에 그대로 넣으면 된다.
+    /// 대화창 한 장. 반환값은 바깥 테두리의 RectTransform이고, 안쪽 채움은 첫 자식으로
+    /// 붙어 있으므로 내용은 반환값 아래에 그대로 넣으면 된다.
+    ///
+    /// 생김새는 <see cref="PmdUi.MakePanel"/>이 정한다 — <c>textbox.png</c>의 파란 대화창이다.
+    /// 예전에는 여기서 직접 베이지 테두리에 검은 속을 그렸는데, 게임 안의 창이 열세 군데라
+    /// 한 곳만 바꾸면 나머지가 어긋난다. 생김새는 한 군데서만 정하고 여기서는 부른다.
+    ///
+    /// <paramref name="borderWidth"/>는 더 쓰지 않는다. 테두리 두께는 스프라이트가 정하며,
+    /// 부르는 쪽이 그 값을 알 필요가 없다. 인자는 부르는 코드를 건드리지 않으려고 남겨 뒀다.
     /// </summary>
     public static RectTransform MakePanel(Transform parent, string name, int borderWidth = 3)
     {
-        GameObject go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        Image border = go.AddComponent<Image>();
-        border.color = new Color(0.78f, 0.72f, 0.5f, 1f);
-        border.raycastTarget = false;
-
-        GameObject fillGo = new GameObject("Fill");
-        fillGo.transform.SetParent(go.transform, false);
-        Image fill = fillGo.AddComponent<Image>();
-        fill.color = new Color(0.05f, 0.06f, 0.1f, 0.96f);
-        fill.raycastTarget = false;
-        RectTransform fillRt = fill.rectTransform;
-        fillRt.anchorMin = Vector2.zero;
-        fillRt.anchorMax = Vector2.one;
-        fillRt.offsetMin = new Vector2(borderWidth, borderWidth);
-        fillRt.offsetMax = new Vector2(-borderWidth, -borderWidth);
-
-        return border.rectTransform;
+        return PmdUi.MakePanel(parent, name).rectTransform;
     }
 
     /// <summary>부모 폭에 좌우 여백을 두고 붙는, 위에서 아래로 쌓는 배치를 설정한다.</summary>

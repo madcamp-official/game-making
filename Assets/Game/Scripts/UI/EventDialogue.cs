@@ -57,8 +57,11 @@ public class EventDialogue : MonoBehaviour
 
     private static readonly Color GoodColor = new Color(0.4f, 0.92f, 0.45f);
     private static readonly Color BadColor = new Color(1f, 0.38f, 0.36f);
-    private static readonly Color CardColor = new Color(0.16f, 0.2f, 0.3f, 0.78f);
-    private static readonly Color CardHoverColor = new Color(0.28f, 0.42f, 0.62f, 0.9f);
+    /// <summary>고르는 칸은 게임 어디서나 같은 붉은 버튼이고, 가리키면 링이 금색이 된다.</summary>
+    private static void Highlight(Image card, bool hovered)
+    {
+        card.sprite = hovered ? PmdUi.ButtonOnSprite : PmdUi.ButtonSprite;
+    }
 
     private Image dim;
     private RectTransform dialogue;
@@ -238,12 +241,8 @@ public class EventDialogue : MonoBehaviour
             EventChoice choice = shown[i];
             float height = CardPadding * 2f + tier.lineHeight * (1 + choice.lines.Length);
 
-            GameObject cardGo = new GameObject("Card" + i);
-            cardGo.transform.SetParent(choicePanel, false);
-            Image image = cardGo.AddComponent<Image>();
-            image.sprite = PrimitiveSprites.Square;
-            image.color = CardColor;
-            image.raycastTarget = false;
+            // 고르는 칸은 게임 어디서나 같은 붉은 버튼이다.
+            Image image = PmdUi.MakeSliced(choicePanel, "Card" + i, PmdUi.ButtonSprite);
 
             RectTransform rt = image.rectTransform;
             rt.anchorMin = new Vector2(0f, 1f);
@@ -314,7 +313,7 @@ public class EventDialogue : MonoBehaviour
         }
 
         for (int i = 0; i < shown.Count; i++)
-            cardImages[i].color = i == hovered ? CardHoverColor : CardColor;
+            Highlight(cardImages[i], i == hovered);
 
         if (hovered >= 0 && mouse != null && mouse.leftButton.wasPressedThisFrame)
         {

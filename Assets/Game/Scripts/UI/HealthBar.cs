@@ -2,7 +2,10 @@ using UnityEngine;
 
 /// <summary>
 /// Health 컴포넌트가 있는 오브젝트 머리 위에 표시되는 월드 스페이스 체력바.
-/// 배경(검정)과 채움 스프라이트를 런타임에 생성한다.
+///
+/// 생김새는 좌하단 바(<see cref="BarFill"/>, <c>bars.png</c>에서 옮겼다)와 맞춘다 —
+/// 어두운 윤곽, 흰 트랙, 그리고 위 한 줄이 짙은 두 톤 채움이다. 머리 위 바만 민무늬로
+/// 두면 같은 게임 안에서 체력을 두 가지 문법으로 그리는 셈이 된다.
 ///
 /// <b>색은 누구 것인지만 말한다 — 적은 빨강, 나는 초록.</b> 예전에는 남은 비율로
 /// 초록에서 빨강으로 물들였는데, 그러면 위급할 때 내 바와 적 바가 같은 색이 되어
@@ -24,6 +27,17 @@ public class HealthBar : MonoBehaviour
     private static readonly Color PlayerFill = new Color(0.3f, 0.85f, 0.3f, 1f);
     /// <summary>적 바.</summary>
     private static readonly Color EnemyFill = new Color(0.85f, 0.15f, 0.15f, 1f);
+
+    /// <summary>bars.png의 바 윤곽·트랙 색. 좌하단 바와 같은 값이다.</summary>
+    private static readonly Color OutlineColor = new Color32(73, 73, 73, 255);
+    private static readonly Color TrackColor = new Color32(251, 251, 251, 255);
+
+    /// <summary>윤곽 두께(월드 단위). 바가 작아 한 픽셀 남짓이면 충분하다.</summary>
+    private const float Outline = 0.035f;
+
+    /// <summary>채움 위쪽 짙은 줄의 비율과 어두운 정도. <see cref="BarFill"/>과 같은 값이다.</summary>
+    private const float ShadeFraction = 0.34f;
+    private const float ShadeMultiplier = 0.62f;
 
     private static Sprite whiteSprite;
 
@@ -49,8 +63,13 @@ public class HealthBar : MonoBehaviour
         barRoot.SetParent(transform);
         barRoot.localPosition = new Vector3(0f, offsetY, 0f);
 
-        SpriteRenderer bg = CreatePart("BG", barRoot, new Color(0.1f, 0.1f, 0.1f, 0.9f), 40);
-        bg.transform.localScale = new Vector3(width, height, 1f);
+        // 어두운 윤곽 — 트랙보다 사방으로 조금 크게 깔아 테두리처럼 보이게 한다.
+        SpriteRenderer outline = CreatePart("Outline", barRoot, OutlineColor, 39);
+        outline.transform.localScale = new Vector3(width + Outline * 2f, height + Outline * 2f, 1f);
+
+        // 흰 트랙 — 아직 차지 않은 자리다. 검정으로 두면 남은 양이 얼마인지 눈에 덜 띈다.
+        SpriteRenderer track = CreatePart("Track", barRoot, TrackColor, 40);
+        track.transform.localScale = new Vector3(width, height, 1f);
 
         // 채움은 왼쪽 기준으로 줄어들도록 부모를 왼쪽 끝에 둔다.
         Transform fillPivot = new GameObject("FillPivot").transform;
@@ -63,7 +82,15 @@ public class HealthBar : MonoBehaviour
         Color fillColor = GetComponent<PlayerController>() != null ? PlayerFill : EnemyFill;
         fillRenderer = CreatePart("Fill", fillPivot, fillColor, 41);
         fillRenderer.transform.localPosition = new Vector3(width * 0.5f, 0f, 0f);
-        fillRenderer.transform.localScale = new Vector3(width, height * 0.7f, 1f);
+        fillRenderer.transform.localScale = new Vector3(width, height, 1f);
+
+        // 위쪽 짙은 줄 — 좌하단 바와 같은 두 톤이다. 이게 없으면 바가 납작해 보인다.
+        SpriteRenderer shade = CreatePart("Shade", fillPivot,
+            new Color(fillColor.r * ShadeMultiplier, fillColor.g * ShadeMultiplier,
+                      fillColor.b * ShadeMultiplier, fillColor.a), 42);
+        shade.transform.localPosition =
+            new Vector3(width * 0.5f, height * 0.5f * (1f - ShadeFraction), 0f);
+        shade.transform.localScale = new Vector3(width, height * ShadeFraction, 1f);
 
         // 바 오른쪽에 "현재/최대" 수치 표시 (기본은 그리지 않는다)
         if (showValue)

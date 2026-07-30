@@ -2,8 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 화면 오른쪽 아래 기술 칸 네 개. 포켓몬 DS 게임의 기술 선택 버튼처럼 2×2로 놓고,
-/// 칸 하나는 가로가 세로보다 길다.
+/// 화면 오른쪽 아래 기술 칸 네 개. 생김새는 <c>Assets/Game/Art/UI/moves.png</c>의 기술 목록을
+/// 따른다 — 금색 베벨 테두리 안에 <b>위는 밝은 띠에 기술 이름</b>, <b>아래는 어두운 띠에
+/// 속성 꼬리표와 조작키</b>가 놓인다 (원작은 그 자리에 속성 배지와 PP가 있다).
+///
+/// 예전에는 남색 판에 흰 글자였는데, 판이 반투명이라 뒤쪽 지형에 따라 글자가 묻혔다.
+/// 지금은 밝은 띠에 어두운 글자라 무엇이 뒤에 있든 대비가 변하지 않는다.
 ///
 /// 쿨타임이 도는 동안에는 칸이 어두워졌다가 왼쪽에서부터 밝아진다.
 /// 어두운 덮개를 오른쪽 기준으로 채워 두고 그 양을 줄이면, 밝은 부분이 왼쪽부터 자라난다.
@@ -12,27 +16,38 @@ public class MoveSlotsHud : MonoBehaviour
 {
     private const float MarginX = 24f;
     private const float MarginY = 24f;
-    private const float SlotWidth = 156f;
-    private const float SlotHeight = 52f;
-    private const float Gap = 6f;
-    private const int Border = 2;
+    private const float SlotWidth = 176f;
+    private const float SlotHeight = 64f;
+    private const float Gap = 8f;
+    /// <summary>테두리 스프라이트의 9슬라이스 두께. 안쪽 띠는 이만큼 물러나 앉는다.</summary>
+    private const float FrameInset = 6f;
+    /// <summary>위쪽(이름) 띠의 높이. 아래 띠는 남는 만큼 가져간다.</summary>
+    private const float NameBandHeight = 32f;
 
-    private static readonly Color ReadyColor = new Color(0.20f, 0.34f, 0.52f, 0.95f);
-    private static readonly Color LockedColor = new Color(0.16f, 0.16f, 0.18f, 0.7f);
-    /// <summary>배웠지만 지금은 쓸 수 없을 때 (전투방 밖).</summary>
-    private static readonly Color RestingColor = new Color(0.18f, 0.22f, 0.3f, 0.8f);
-    private static readonly Color CooldownVeil = new Color(0f, 0f, 0f, 0.62f);
-    /// <summary>속성 꼬리표. 기술 이름보다 한 단계 물러나 보여야 한다.</summary>
-    private static readonly Color TagColor = new Color(0.72f, 0.78f, 0.88f, 0.85f);
+    private static readonly Color NameBand = new Color32(240, 238, 226, 255);
+    private static readonly Color InfoBand = new Color32(192, 176, 150, 255);
+    private static readonly Color NameText = new Color32(56, 52, 44, 255);
+    private static readonly Color InfoText = new Color32(74, 66, 56, 255);
+
+    private static readonly Color LockedBand = new Color32(126, 126, 130, 255);
+    private static readonly Color LockedInfoBand = new Color32(104, 104, 108, 255);
+    private static readonly Color LockedText = new Color32(58, 58, 62, 255);
+
+    /// <summary>배웠지만 지금은 쓸 수 없을 때(전투방 밖) 띠를 눌러 두는 정도.</summary>
+    private static readonly Color RestingTint = new Color(0.72f, 0.72f, 0.74f, 1f);
+    private static readonly Color CooldownVeil = new Color(0.05f, 0.05f, 0.08f, 0.66f);
 
     private class Slot
     {
         public RectTransform root;
-        public Image background;
+        public Image frame;
+        public Image nameBand;
+        public Image infoBand;
         public Image veil;
         public Text nameText;
         public Text keyText;
-        /// <summary>왼쪽 아래 꼬리표 — 근접·원거리 같은 공격 속성.</summary>
+        /// <summary>왼쪽 아래 속성 꼬리표 — 근접·원거리 같은 공격 속성.</summary>
+        public Image tagChip;
         public Text tagText;
     }
 
@@ -55,6 +70,29 @@ public class MoveSlotsHud : MonoBehaviour
         return hud;
     }
 
+    /// <summary>
+    /// 속성 꼬리표의 색. 원작의 타입 배지처럼 <b>밝은 바탕에 어두운 글자</b>로 둔다 —
+    /// 12px 글자는 획이 얇아서, 어두운 바탕에 밝은 글자로 두면 뭉개진다.
+    /// </summary>
+    private static void TagPalette(string tag, out Color box, out Color ink)
+    {
+        switch (tag)
+        {
+            case "근접":
+                box = new Color32(240, 160, 84, 255);
+                ink = new Color32(58, 42, 24, 255);
+                return;
+            case "원거리":
+                box = new Color32(156, 192, 240, 255);
+                ink = new Color32(30, 46, 74, 255);
+                return;
+            default:                                  // "방당 1회" 같은 제약 표시
+                box = new Color32(168, 220, 160, 255);
+                ink = new Color32(30, 58, 32, 255);
+                return;
+        }
+    }
+
     private void Build(RectTransform root)
     {
         for (int i = 0; i < slots.Length; i++)
@@ -64,51 +102,74 @@ public class MoveSlotsHud : MonoBehaviour
             int column = i % 2;
             int row = i / 2;
 
-            RectTransform panel = PixelUi.MakePanel(root, "Slot" + i, Border);
-            panel.anchorMin = panel.anchorMax = new Vector2(0f, 1f);
-            panel.pivot = new Vector2(0f, 1f);
-            panel.anchoredPosition = new Vector2(column * (SlotWidth + Gap),
-                                                 -row * (SlotHeight + Gap));
-            panel.sizeDelta = new Vector2(SlotWidth, SlotHeight);
+            var slot = new Slot();
 
-            Slot slot = new Slot();
-            slot.root = panel;
-            // PixelUi.MakePanel의 첫 자식이 안쪽 채움이다. 그걸 칸 색으로 쓴다.
-            slot.background = panel.GetChild(0).GetComponent<Image>();
+            slot.frame = PmdUi.MakeSliced(root, "Slot" + i, PmdUi.MoveFrameSprite);
+            slot.root = slot.frame.rectTransform;
+            slot.root.anchorMin = slot.root.anchorMax = new Vector2(0f, 1f);
+            slot.root.pivot = new Vector2(0f, 1f);
+            slot.root.anchoredPosition = new Vector2(column * (SlotWidth + Gap),
+                                                     -row * (SlotHeight + Gap));
+            slot.root.sizeDelta = new Vector2(SlotWidth, SlotHeight);
 
-            slot.nameText = PixelUi.MakeText(panel, "Name", 24, Color.white, TextAnchor.MiddleCenter);
+            // 위쪽 밝은 띠 — 기술 이름이 앉는다. 위 모서리에 걸어 두고 아래로 자란다.
+            slot.nameBand = MakeBand(slot.root, "NameBand", NameBand);
+            RectTransform nameRt = slot.nameBand.rectTransform;
+            nameRt.anchorMin = new Vector2(0f, 1f);
+            nameRt.anchorMax = new Vector2(1f, 1f);
+            nameRt.pivot = new Vector2(0.5f, 1f);
+            nameRt.sizeDelta = new Vector2(-FrameInset * 2f, NameBandHeight - FrameInset);
+            nameRt.anchoredPosition = new Vector2(0f, -FrameInset);
+
+            // 아래쪽 어두운 띠 — 속성과 조작키.
+            slot.infoBand = MakeBand(slot.root, "InfoBand", InfoBand);
+            slot.infoBand.rectTransform.anchorMin = new Vector2(0f, 0f);
+            slot.infoBand.rectTransform.anchorMax = new Vector2(1f, 1f);
+            slot.infoBand.rectTransform.offsetMin = new Vector2(FrameInset, FrameInset);
+            slot.infoBand.rectTransform.offsetMax = new Vector2(-FrameInset, -NameBandHeight);
+
+            slot.nameText = PixelUi.MakeText(slot.nameBand.rectTransform, "Name", 24,
+                                             NameText, TextAnchor.MiddleCenter);
             slot.nameText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            Stretch(slot.nameText.rectTransform, 0f, 8f);
+            Stretch(slot.nameText.rectTransform, 4f, 0f);
 
-            slot.keyText = PixelUi.MakeText(panel, "Key", 12,
-                new Color(0.75f, 0.8f, 0.9f, 0.9f), TextAnchor.LowerRight);
+            // 속성 꼬리표는 아래 띠의 왼쪽에 붙는다.
+            slot.tagText = PmdUi.MakeChip(slot.infoBand.rectTransform, "Tag", "", 12,
+                                          Color.white, Color.black);
+            slot.tagChip = slot.tagText.transform.parent.GetComponent<Image>();
+            RectTransform chipRt = slot.tagChip.rectTransform;
+            chipRt.anchorMin = chipRt.anchorMax = new Vector2(0f, 0.5f);
+            chipRt.pivot = new Vector2(0f, 0.5f);
+            chipRt.sizeDelta = new Vector2(66f, 18f);
+            chipRt.anchoredPosition = new Vector2(5f, 0f);
+
+            // 조작키는 반대쪽(오른쪽)에 적는다. 원작의 PP가 있던 자리다.
+            slot.keyText = PixelUi.MakeText(slot.infoBand.rectTransform, "Key", 12,
+                                            InfoText, TextAnchor.MiddleRight);
             slot.keyText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            Stretch(slot.keyText.rectTransform, 0f, 0f);
-            slot.keyText.rectTransform.offsetMin = new Vector2(4f, 3f);
-            slot.keyText.rectTransform.offsetMax = new Vector2(-6f, 0f);
-
-            // 조작키 반대편(왼쪽 아래)에 속성을 적는다. 유물과 이벤트가 "근접 +20%"처럼
-            // 속성 단위로 걸리는데, 어느 기술이 무슨 속성인지 알 길이 없으면 고를 수가 없다.
-            slot.tagText = PixelUi.MakeText(panel, "Tag", 12, TagColor, TextAnchor.LowerLeft);
-            slot.tagText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            Stretch(slot.tagText.rectTransform, 0f, 0f);
-            slot.tagText.rectTransform.offsetMin = new Vector2(6f, 3f);
-            slot.tagText.rectTransform.offsetMax = new Vector2(-4f, 0f);
+            Stretch(slot.keyText.rectTransform, 6f, 0f);
 
             // 덮개는 글자 위에 와야 쿨타임 중이라는 게 확실히 보인다.
-            GameObject veilGo = new GameObject("Veil");
-            veilGo.transform.SetParent(panel, false);
-            slot.veil = veilGo.AddComponent<Image>();
-            slot.veil.sprite = PrimitiveSprites.Square;
+            slot.veil = PmdUi.MakeSliced(slot.root, "Veil", null);
             slot.veil.color = CooldownVeil;
-            slot.veil.raycastTarget = false;
             slot.veil.type = Image.Type.Filled;
             slot.veil.fillMethod = Image.FillMethod.Horizontal;
             slot.veil.fillOrigin = (int)Image.OriginHorizontal.Right;
-            Stretch(slot.veil.rectTransform, Border, Border);
+            Stretch(slot.veil.rectTransform, FrameInset, FrameInset);
 
             slots[i] = slot;
         }
+    }
+
+    private static Image MakeBand(Transform parent, string name, Color color)
+    {
+        var go = new GameObject(name, typeof(RectTransform));
+        go.transform.SetParent(parent, false);
+        var image = go.AddComponent<Image>();
+        image.sprite = PrimitiveSprites.Square;
+        image.color = color;
+        image.raycastTarget = false;
+        return image;
     }
 
     private static void Stretch(RectTransform rt, float insetX, float insetY)
@@ -130,26 +191,42 @@ public class MoveSlotsHud : MonoBehaviour
         for (int i = 0; i < slots.Length; i++)
         {
             Slot slot = slots[i];
+            if (slot == null) continue;
+
             MoveType move = MoveInfo.LearnOrder[i];
             bool learned = moves != null && moves.Has(move);
 
             if (!learned)
             {
-                slot.background.color = LockedColor;
+                slot.frame.sprite = PmdUi.MoveFrameOffSprite;
+                slot.nameBand.color = LockedBand;
+                slot.infoBand.color = LockedInfoBand;
                 slot.nameText.text = "—";
-                slot.nameText.color = new Color(1f, 1f, 1f, 0.35f);
+                slot.nameText.color = LockedText;
                 slot.keyText.text = "";
-                slot.tagText.text = "";
+                slot.tagChip.gameObject.SetActive(false);
                 slot.veil.fillAmount = 0f;
                 continue;
             }
 
-            slot.background.color = usable ? ReadyColor : RestingColor;
+            slot.frame.sprite = PmdUi.MoveFrameSprite;
+            // 색은 그대로 두고 밝기만 낮춘다 — 쓸 수 없다는 것과 못 배웠다는 것이 달라 보여야 한다.
+            Color tint = usable ? Color.white : RestingTint;
+            slot.frame.color = tint;
+            slot.nameBand.color = NameBand * tint;
+            slot.infoBand.color = InfoBand * tint;
+
             slot.nameText.text = MoveInfo.NameOf(move);
-            slot.nameText.color = usable ? Color.white : new Color(1f, 1f, 1f, 0.45f);
+            slot.nameText.color = NameText;
             slot.keyText.text = MoveInfo.KeyLabelOf(move);
-            slot.tagText.text = MoveInfo.TagOf(move);
-            slot.tagText.color = usable ? TagColor : new Color(TagColor.r, TagColor.g, TagColor.b, 0.4f);
+            slot.keyText.color = InfoText;
+
+            string tag = MoveInfo.TagOf(move);
+            slot.tagChip.gameObject.SetActive(!string.IsNullOrEmpty(tag));
+            TagPalette(tag, out Color box, out Color ink);
+            slot.tagChip.color = box * tint;
+            slot.tagText.text = tag;
+            slot.tagText.color = ink;
 
             float progress = combat != null ? combat.CooldownProgress01(move) : 1f;
             slot.veil.fillAmount = 1f - progress;

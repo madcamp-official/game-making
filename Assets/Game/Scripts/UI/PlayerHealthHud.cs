@@ -8,6 +8,10 @@ using UnityEngine.UI;
 /// 자기 체력은 캐릭터를 보는 중에도 곁눈으로 읽어야 하는 정보라, 캐릭터에 붙어 다니면
 /// 시선이 전투 상황과 겹쳐 오히려 안 보인다.
 ///
+/// 생김새는 <c>Assets/Game/Art/UI/bars.png</c>(하트골드/소울실버 체력바)를 따른다 —
+/// 왼쪽에 <b>"HP" 꼬리표</b>, 그 옆에 <b>어두운 윤곽을 두른 바</b>, 속은 흰 트랙이고
+/// 남은 만큼만 색이 찬다. 채움은 위 한 줄이 짙어 띠가 납작해 보이지 않는다.
+///
 /// UI는 <see cref="UIManager"/>가 런타임에 만든다. 별도 프리팹이 필요 없다.
 /// </summary>
 public class PlayerHealthHud : MonoBehaviour
@@ -16,58 +20,58 @@ public class PlayerHealthHud : MonoBehaviour
     private const float MarginX = 30f;
     private const float MarginY = 72f;
     private const float BarWidth = 300f;
-    private const float BarHeight = 36f;
-    private const int Border = 2;
-    private const int FontSize = 24;   // PMD 폰트라 12의 배수여야 한다
+    private const float BarHeight = 26f;
+    private const float ChipWidth = 46f;
+    private const float ChipGap = 4f;
+    private const int FontSize = 12;   // PMD 폰트라 12의 배수여야 한다
 
     /// <summary>
     /// 내 체력은 남은 양과 상관없이 늘 초록이다. 예전에는 줄어들수록 빨강으로 물들었는데,
     /// 적 체력바도 같은 그라데이션이라 위급할 때 화면의 빨간 바가 내 것인지 적 것인지
     /// 구분이 되지 않았다. 색은 <b>누구 것인지</b>만 말하고, 남은 양은 길이가 말한다.
     /// </summary>
-    private static readonly Color FillColor = new Color(0.3f, 0.85f, 0.3f, 1f);
+    private static readonly Color FillColor = new Color32(24, 195, 32, 255);
+
+    /// <summary>"HP" 꼬리표의 호박색. bars.png에서 그대로 잰 값이다.</summary>
+    private static readonly Color ChipColor = new Color32(251, 178, 0, 255);
+    private static readonly Color ChipInk = new Color32(58, 42, 0, 255);
 
     private Health health;
-    private Image fill;
+    private BarFill bar;
     private Text valueText;
 
     /// <summary>캔버스 아래에 체력바를 만들어 붙인다.</summary>
     public static PlayerHealthHud Create(Transform canvasRoot)
     {
-        RectTransform panel = PixelUi.MakePanel(canvasRoot, "PlayerHealthHud", Border);
-        panel.anchorMin = Vector2.zero;
-        panel.anchorMax = Vector2.zero;
-        panel.pivot = Vector2.zero;
-        panel.anchoredPosition = new Vector2(MarginX, MarginY);
-        panel.sizeDelta = new Vector2(BarWidth, BarHeight);
+        var go = new GameObject("PlayerHealthHud", typeof(RectTransform));
+        RectTransform root = (RectTransform)go.transform;
+        root.SetParent(canvasRoot, false);
+        root.anchorMin = root.anchorMax = Vector2.zero;
+        root.pivot = Vector2.zero;
+        root.anchoredPosition = new Vector2(MarginX, MarginY);
+        root.sizeDelta = new Vector2(ChipWidth + ChipGap + BarWidth, BarHeight);
 
-        PlayerHealthHud hud = panel.gameObject.AddComponent<PlayerHealthHud>();
+        PlayerHealthHud hud = go.AddComponent<PlayerHealthHud>();
 
-        // 채움은 Filled 이미지로 왼쪽부터 줄어들게 한다. 크기를 직접 건드리는 것보다
-        // 레이아웃이 단순하고, 테두리 안쪽에 정확히 맞춰 둘 수 있다.
-        GameObject fillGo = new GameObject("Bar");
-        fillGo.transform.SetParent(panel, false);
-        hud.fill = fillGo.AddComponent<Image>();
-        hud.fill.sprite = PrimitiveSprites.Square;
-        hud.fill.type = Image.Type.Filled;
-        hud.fill.fillMethod = Image.FillMethod.Horizontal;
-        hud.fill.fillOrigin = (int)Image.OriginHorizontal.Left;
-        hud.fill.raycastTarget = false;
-        RectTransform fillRt = hud.fill.rectTransform;
-        fillRt.anchorMin = Vector2.zero;
-        fillRt.anchorMax = Vector2.one;
-        fillRt.offsetMin = new Vector2(Border + 2, Border + 2);
-        fillRt.offsetMax = new Vector2(-(Border + 2), -(Border + 2));
+        // "HP" 꼬리표 — 바 왼쪽에 붙는다.
+        Text chip = PmdUi.MakeChip(root, "Chip", "HP", FontSize, ChipColor, ChipInk);
+        RectTransform chipRt = ((RectTransform)chip.transform.parent);
+        chipRt.anchorMin = chipRt.anchorMax = new Vector2(0f, 0.5f);
+        chipRt.pivot = new Vector2(0f, 0.5f);
+        chipRt.sizeDelta = new Vector2(ChipWidth, BarHeight);
+        chipRt.anchoredPosition = Vector2.zero;
 
-        hud.valueText = PixelUi.MakeText(panel, "Value", FontSize, Color.white, TextAnchor.MiddleCenter);
+        hud.bar = BarFill.Create(root, "Bar", FillColor);
+        RectTransform barRt = hud.bar.Root;
+        barRt.anchorMin = barRt.anchorMax = new Vector2(0f, 0.5f);
+        barRt.pivot = new Vector2(0f, 0.5f);
+        barRt.sizeDelta = new Vector2(BarWidth, BarHeight);
+        barRt.anchoredPosition = new Vector2(ChipWidth + ChipGap, 0f);
+
+        // 수치는 바 위에 겹쳐 얹는다. 흰 트랙과 초록 채움을 오가므로 윤곽을 둘러 둔다.
+        hud.valueText = PmdUi.MakeOutlinedText(barRt, "Value", "", 24);
         hud.valueText.horizontalOverflow = HorizontalWrapMode.Overflow;
-        RectTransform textRt = hud.valueText.rectTransform;
-        textRt.anchorMin = Vector2.zero;
-        textRt.anchorMax = Vector2.one;
-        textRt.offsetMin = Vector2.zero;
-        textRt.offsetMax = Vector2.zero;
-        // 숫자는 항상 채움 위에 그린다.
-        textRt.SetAsLastSibling();
+        PmdUi.Stretch(hud.valueText.rectTransform);
 
         return hud;
     }
@@ -101,11 +105,7 @@ public class PlayerHealthHud : MonoBehaviour
     private void Refresh(int current, int max)
     {
         float ratio = max > 0 ? Mathf.Clamp01(current / (float)max) : 0f;
-        if (fill != null)
-        {
-            fill.fillAmount = ratio;
-            fill.color = FillColor;
-        }
+        if (bar != null) bar.SetRatio(ratio);
         if (valueText != null) valueText.text = current + " / " + max;
     }
 

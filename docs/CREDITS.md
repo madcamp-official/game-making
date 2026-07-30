@@ -70,6 +70,23 @@
 `ForestPath.png`도 파생물이다. 숲 타일셋에 길이 없어서, 풀 타일(F_13_1)의 잔디 결은
 그대로 두고 색만 흙빛으로 낮춰 여섯 장을 구웠다 (`ForestPathSetup` 참고).
 
+## UI
+
+`Assets/Game/Art/UI/`의 `textbox.png`, `button.png`, `moves.png`, `bars.png`, `dialogue.png`는
+참고용으로 들여온 립 그림이다. `bars.png`는 시트에 적힌 대로 포켓몬 하트골드/소울실버의
+체력바이며 "Ripped by GameMaster12 & StayPuft" 표기가 붙어 있다. 원저작은 게임프리크/닌텐도,
+PMD 쪽은 스파이크 춘소프트다.
+
+게임에 실제로 쓰는 `Resources/UI/Pmd*.png`는 이 그림들에서 **구조와 색만 가져와 새로 구운
+파생물**이다 (`scratchpad/bake_ui.py`).
+
+- `textbox.png`는 깨끗한 픽셀 아트라 테두리 색과 두께를 그대로 옮겼다 (연청 → 밝은청 →
+  진청, 속은 남색). 원본에서 깎인 모서리를 메우던 검정은 투명으로 바꿨다
+- `button.png`·`moves.png`는 보간된 업스케일이고 "FIGHT" 글자와 아이콘·기술 이름까지 박혀
+  있어 그대로 쓸 수 없다. 층 구조와 팔레트만 재서 픽셀로 다시 그렸다
+- `bars.png`에서는 팔레트만 가져왔다 — 바 윤곽 `#494949`, 흰 트랙, 체력 초록 두 톤,
+  경험치 푸른색 두 톤, HP 꼬리표 호박색
+
 ## 아이템 아이콘
 
 - `item.png` — "Ripped by redblueyellow. No credit needed." 표기. 원저작: 게임프리크/닌텐도.

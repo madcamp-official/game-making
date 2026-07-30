@@ -41,8 +41,12 @@ public class RelicChoicePanel : MonoBehaviour
     private const float CardWidth = PanelWidth - Padding * 2;
     private const float CardTextWidth = CardWidth - (Padding * 2 + IconSize) - Padding;
 
-    private static readonly Color CardColor = new Color(0.16f, 0.2f, 0.3f, 0.72f);
-    private static readonly Color CardHoverColor = new Color(0.28f, 0.42f, 0.62f, 0.85f);
+    /// <summary>고를 수 있는 칸은 전부 같은 붉은 버튼이다 (<see cref="PmdUi.MakeButton"/>).</summary>
+    private static void Highlight(Image card, Text label, bool hovered)
+    {
+        card.sprite = hovered ? PmdUi.ButtonOnSprite : PmdUi.ButtonSprite;
+        label.color = hovered ? PmdUi.HighlightColor : PmdUi.TextColor;
+    }
 
     private RectTransform panel;
     private Image dim;
@@ -90,7 +94,8 @@ public class RelicChoicePanel : MonoBehaviour
         panel.sizeDelta = new Vector2(PanelWidth, MinCardHeight);   // 실제 높이는 Layout이 정한다
 
         Image panelFill = panel.GetChild(0).GetComponent<Image>();
-        panelFill.color = new Color(0.05f, 0.06f, 0.1f, 0.78f);
+        // 대화창과 같은 남색을 쓰되 뒤가 살짝 비치게 둔다.
+        panelFill.color = new Color(PmdUi.PanelFill.r, PmdUi.PanelFill.g, PmdUi.PanelFill.b, 0.86f);
 
         Text header = PixelUi.MakeText(panel, "Header", 36, new Color(1f, 0.86f, 0.42f),
                                        TextAnchor.UpperCenter);
@@ -104,14 +109,10 @@ public class RelicChoicePanel : MonoBehaviour
 
         for (int i = 0; i < OptionCount; i++)
         {
-            GameObject cardGo = new GameObject("Card" + i);
-            cardGo.transform.SetParent(panel, false);
-            Image image = cardGo.AddComponent<Image>();
-            image.sprite = PrimitiveSprites.Square;
-            image.color = CardColor;
-            image.raycastTarget = false;
+            PmdUi.Entry entry = PmdUi.MakeButton(panel, "Card" + i, "", 24);
+            Image image = entry.panel;
 
-            RectTransform rt = image.rectTransform;
+            RectTransform rt = entry.rect;
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
@@ -128,11 +129,11 @@ public class RelicChoicePanel : MonoBehaviour
             iconRt.sizeDelta = new Vector2(IconSize, IconSize);
             iconRt.anchoredPosition = new Vector2(Padding, 0f);
 
-            Text text = PixelUi.MakeText(rt, "Text", 24, Color.white, TextAnchor.MiddleLeft);
+            // 버튼이 만들어 준 글자를 아이콘 오른쪽으로 밀고 왼쪽 정렬로 바꾼다.
+            Text text = entry.label;
+            text.alignment = TextAnchor.MiddleLeft;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             RectTransform textRt = text.rectTransform;
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
             textRt.offsetMin = new Vector2(Padding * 2 + IconSize, CardTextPadding);
             textRt.offsetMax = new Vector2(-Padding, -CardTextPadding);
 
@@ -193,7 +194,7 @@ public class RelicChoicePanel : MonoBehaviour
             cardIcons[i].sprite = shown[i].icon;
             cardIcons[i].enabled = shown[i].icon != null;
             cardTexts[i].text = (i + 1) + ".  " + shown[i].relicName + "\n" + shown[i].description;
-            cardImages[i].color = CardColor;
+            Highlight(cardImages[i], cardTexts[i], false);
         }
 
         // 글자를 넣은 뒤에 다시 잰다. 유물마다 설명 길이가 달라 카드 높이도 매번 달라진다.
@@ -226,7 +227,7 @@ public class RelicChoicePanel : MonoBehaviour
         }
 
         for (int i = 0; i < OptionCount; i++)
-            cardImages[i].color = i == hovered ? CardHoverColor : CardColor;
+            Highlight(cardImages[i], cardTexts[i], i == hovered);
 
         if (hovered >= 0 && mouse != null && mouse.leftButton.wasPressedThisFrame)
         {

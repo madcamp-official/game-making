@@ -33,8 +33,12 @@ public class MoveUpgradePanel : MonoBehaviour
     /// <summary>기술머신까지 감안한 최대 칸 수. 카드는 이 수만큼 미리 만들어 두고 필요한 만큼만 켠다.</summary>
     private const int MaxOptionCount = 4;
 
-    private static readonly Color CardColor = new Color(0.16f, 0.2f, 0.3f, 0.72f);
-    private static readonly Color CardHoverColor = new Color(0.28f, 0.42f, 0.62f, 0.85f);
+    /// <summary>고를 수 있는 칸은 전부 같은 붉은 버튼이다 (<see cref="PmdUi.MakeButton"/>).</summary>
+    private static void Highlight(Image card, Text label, bool hovered)
+    {
+        card.sprite = hovered ? PmdUi.ButtonOnSprite : PmdUi.ButtonSprite;
+        label.color = hovered ? PmdUi.HighlightColor : PmdUi.TextColor;
+    }
 
     private RectTransform panel;
     private Image dim;
@@ -84,8 +88,9 @@ public class MoveUpgradePanel : MonoBehaviour
         panel.sizeDelta = new Vector2(PanelWidth, height);
 
         Image panelFill = panel.GetChild(0).GetComponent<Image>();
-        // "반투명 팔레트" — 뒤쪽 전투 상황이 비쳐 보여야 한다.
-        panelFill.color = new Color(0.05f, 0.06f, 0.1f, 0.72f);
+        // "반투명 팔레트" — 뒤쪽 전투 상황이 비쳐 보여야 한다. 색은 대화창의 남색 그대로 두고
+        // 투명도만 낮춘다. 다른 색을 쓰면 창 하나만 다른 게임에서 온 것처럼 보인다.
+        panelFill.color = new Color(PmdUi.PanelFill.r, PmdUi.PanelFill.g, PmdUi.PanelFill.b, 0.82f);
 
         Text header = PixelUi.MakeText(panel, "Header", 36, new Color(1f, 0.9f, 0.4f),
                                        TextAnchor.UpperCenter);
@@ -99,27 +104,18 @@ public class MoveUpgradePanel : MonoBehaviour
 
         for (int i = 0; i < MaxOptionCount; i++)
         {
-            GameObject cardGo = new GameObject("Card" + i);
-            cardGo.transform.SetParent(panel, false);
-            Image image = cardGo.AddComponent<Image>();
-            image.sprite = PrimitiveSprites.Square;
-            image.color = CardColor;
-            image.raycastTarget = false;
+            PmdUi.Entry entry = PmdUi.MakeButton(panel, "Card" + i, "", 24);
+            Image image = entry.panel;
 
-            RectTransform rt = image.rectTransform;
+            RectTransform rt = entry.rect;
             rt.anchorMin = new Vector2(0f, 1f);
             rt.anchorMax = new Vector2(1f, 1f);
             rt.pivot = new Vector2(0.5f, 1f);
             rt.sizeDelta = new Vector2(-Padding * 2, CardHeight);
             rt.anchoredPosition = new Vector2(0f, -(Padding + 56 + i * (CardHeight + CardGap)));
 
-            Text text = PixelUi.MakeText(rt, "Text", 24, Color.white, TextAnchor.MiddleCenter);
+            Text text = entry.label;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
-            RectTransform textRt = text.rectTransform;
-            textRt.anchorMin = Vector2.zero;
-            textRt.anchorMax = Vector2.one;
-            textRt.offsetMin = new Vector2(10f, 0f);
-            textRt.offsetMax = new Vector2(-10f, 0f);
 
             cards.Add(rt);
             cardImages.Add(image);
@@ -166,7 +162,7 @@ public class MoveUpgradePanel : MonoBehaviour
             cards[i].gameObject.SetActive(used);
             if (!used) continue;
             cardTexts[i].text = (i + 1) + ".  " + shown[i].title + " — " + shown[i].detail;
-            cardImages[i].color = CardColor;
+            Highlight(cardImages[i], cardTexts[i], false);
         }
 
         if (hintText != null)
@@ -205,7 +201,7 @@ public class MoveUpgradePanel : MonoBehaviour
         }
 
         for (int i = 0; i < shown.Count; i++)
-            cardImages[i].color = i == hovered ? CardHoverColor : CardColor;
+            Highlight(cardImages[i], cardTexts[i], i == hovered);
 
         if (hovered >= 0 && mouse != null && mouse.leftButton.wasPressedThisFrame)
         {
@@ -227,6 +223,7 @@ public class MoveUpgradePanel : MonoBehaviour
         MoveUpgradeOption option = shown[index];
         if (moves != null) moves.ApplyUpgrade(option.id);
         Close(true);
+        GameAudio.PlayMoveLearned();
 
         if (UIManager.Instance != null)
             UIManager.Instance.ShowMessage(option.title + " 강화! " + option.detail, 2.5f);
