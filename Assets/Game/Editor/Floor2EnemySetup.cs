@@ -41,7 +41,7 @@ public static class Floor2EnemySetup
         // 맞히면 거기서 끝(0.7초), 세 번 다 빗나가면 지쳐서 길게 멈춘다(1.6초).
         new EnemySpec
         {
-            name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.4f,
+            name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.2f,
             goldMin = 5, goldMax = 9,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
@@ -66,8 +66,8 @@ public static class Floor2EnemySetup
         // 굴러온 자리가 곧 가시의 중심이라 첫 회피가 두 번째 회피를 정한다.
         new EnemySpec
         {
-            // 이속은 3.0(처음)과 3.6(상향) 사이. 붙는 맛은 살리되 플레이어(5)를 따라붙지는 못한다.
-            name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.9f,
+            // 플레이어(5)보다 확실히 느리게 두어 구르기 사이에 거리를 다시 벌릴 수 있게 한다.
+            name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.7f,
             goldMin = 5, goldMax = 9, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyRollSpikeAbility),
             abilityValues = new (string, object)[]
@@ -91,7 +91,7 @@ public static class Floor2EnemySetup
         // 투척 자세로 무방비다. 맞혔으면 0.7초, 왕복이 다 빗나가면 1.3초 정지.
         new EnemySpec
         {
-            name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.6f,
+            name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.4f,
             goldMin = 5, goldMax = 9, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
@@ -109,7 +109,7 @@ public static class Floor2EnemySetup
         {
             // 넉백 배율 1.6 — 몸통박치기(힘 6)에 맞으면 9.6으로 밀려난다. 파고들 때의 속도(9.5)와
             // 같게 맞춘 값이다. 맞고 땅속으로 밀려나는 것도 이 적에게는 '이동'이라 느리면 답답하다.
-            name = "Dugtrio", health = 240, scale = 1.35f, moveSpeed = 2.5f,
+            name = "Dugtrio", health = 240, scale = 1.35f, moveSpeed = 2.4f,
             goldMin = 7, goldMax = 17, knockbackMultiplier = 1.1f, basicAI = false,
             boxSize = new Vector2(0.9f, 0.55f),
             ability = typeof(EnemyBurrowAbility),
@@ -123,14 +123,14 @@ public static class Floor2EnemySetup
                 ("recovery", 1.15f),
                 // 맞고 나서 땅속으로 사라지는 것이 유일한 도피다. 플레이어(5)보다 확실히 빨라야
                 // 쫓아가 잡는 게 아니라 놓치는 느낌이 된다.
-                ("diveSpeed", 10.5f),
+                ("diveSpeed", 10f),
             },
         },
         // 나인테일 — 후열. 중거리를 지키다 부채꼴 예고와 함께 넓게 화염을 뿜는다.
         // 잔류 장판 없음, 직접 피해만. 분사가 끝나면 과열로 2초 정지.
         new EnemySpec
         {
-            name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 4f,
+            name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 3.8f,
             goldMin = 5, goldMax = 11, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
