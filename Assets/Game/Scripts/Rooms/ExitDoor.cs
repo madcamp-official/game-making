@@ -2,39 +2,51 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 /// <summary>
-/// 방 출구. 벽의 빈 구간을 메우는 단단한 충돌체이며, 열린 상태에서 플레이어가
-/// 닿으면 다음 방으로 넘어간다.
+/// 방 출구. 벽의 빈 구간을 메우는 단단한 충돌체이며, 열린 뒤 플레이어가 <b>몸을 대고 밀면</b>
+/// 다음 방으로 넘어간다.
 ///
-/// 예전에는 열릴 때 충돌체를 트리거로 바꿨는데, 그러면 벽에 실제로 구멍이 뚫린다.
-/// 트리거 진입 이벤트를 한 번이라도 놓치면(열리는 순간 이미 겹쳐 있었거나,
-/// 다음 방으로 넘어가지 않는 게임 클리어 시점 등) 플레이어가 그대로 방 밖으로
-/// 걸어 나갈 수 있었다. 지금은 항상 단단하게 두고 충돌로 판정한다.
+/// 열릴 때 충돌체를 트리거로 바꾸지 않는다. 그러면 벽에 실제로 구멍이 뚫리고, 트리거 진입
+/// 이벤트를 한 번이라도 놓치면(열리는 순간 이미 겹쳐 있었거나, 다음 방으로 넘어가지 않는
+/// 게임 클리어 시점 등) 플레이어가 그대로 방 밖으로 걸어 나갈 수 있었다. <b>문은 늘 단단하다.</b>
+/// 덕분에 돌아다닐 수 있는 범위가 정확히 방 네모(±7 × ±5)로 유지된다 — 통로는 그림이고,
+/// 발을 들이는 곳이 아니다.
 ///
-/// 열리면 판정이 통로 <b>안쪽으로 물러난다</b>(<see cref="openDepth"/>). 문은 벽 구멍
-/// 자리(x ±7.25)에 박혀 있어서, 그대로 두면 방 안에서 통로 입구를 스치기만 해도 다음 방으로
-/// 넘어갔다 — 벽을 따라 오르내리다 발이 닿는 것만으로도 넘어간다. 물러나 있으면 통로에
-/// 실제로 걸어 들어가야 넘어가므로 "나간다"가 스스로 고른 행동이 된다.
+/// 그래서 "넘어간다"는 물리 충돌이 아니라 아래 두 조건으로 따로 판정한다.
+///
+/// <list type="number">
+/// <item>문을 <b>마주 보고</b> 서 있을 것 (<see cref="passHalfHeight"/>)</item>
+/// <item>그 자세로 <b>잠깐 버틸</b> 것 (<see cref="passDuration"/>)</item>
+/// </list>
+///
+/// 닿기만 하면 넘어가던 시절에는 통로 입구를 스치는 것만으로 방이 넘어갔다. 통로 구멍이
+/// 두 칸(y ±1)이라, 오른쪽 벽에 붙어 오르내리다 y 1.3쯤에서도 몸통 아래쪽이 문의 위 모서리에
+/// 걸린다 — 나갈 생각이 없었는데 끌려 나갔다. 가운데 판정과 버티는 시간이 그 둘을 가른다.
 /// </summary>
 [RequireComponent(typeof(Collider2D))]
 public class ExitDoor : MonoBehaviour
 {
     [SerializeField] private bool startOpen;
 
-    [Tooltip("열렸을 때 판정이 통로 안쪽으로 물러나는 거리(칸). 0이면 벽 구멍 자리에 그대로 " +
-             "있어 입구를 스치는 것만으로 넘어간다. 구름(RoomGates)이 통로를 12칸 덮으므로 " +
-             "이 값이 그 안이면 물러난 문이 화면 밖으로 나가지 않는다.")]
-    [SerializeField, Min(0f)] private float openDepth = 3f;
+    [Tooltip("문 한가운데에서 세로로 이 안에 들어와야 넘어간다. 통로 구멍이 두 칸(±1)이라 " +
+             "1로 두면 벽을 타고 내려오다 모서리에 몸끝만 스쳐도 넘어간다.")]
+    [SerializeField, Min(0f)] private float passHalfHeight = 0.5f;
+
+    [Tooltip("문에 몸을 댄 채 이만큼 버텨야 넘어간다. 0이면 닿는 순간이다. " +
+             "걸어 나갈 때는 계속 닿아 있으므로 멈칫하는 느낌이 나지 않는다.")]
+    [SerializeField, Min(0f)] private float passDuration = 0.25f;
 
     public bool IsOpen { get; private set; }
 
+    /// <summary>몸이 닿았다고 볼 틈. 물리 엔진이 두 몸을 아주 살짝 띄워 두므로 0으로 잴 수 없다.</summary>
+    private const float ContactSlack = 0.06f;
+
     private Collider2D doorCollider;
+    private PlayerController player;
+    private Collider2D playerCollider;
     private bool used;
 
-    /// <summary>닫혔을 때 제자리. 열고 닫을 때마다 여기를 기준으로 밀고 되돌린다.</summary>
-    private Vector2 closedOffset;
-
-    /// <summary>통로가 뻗어 나가는 쪽(+1 오른쪽 / −1 왼쪽). 문의 자리로 판별한다.</summary>
-    private float outward;
+    /// <summary>문을 밀기 시작한 때. 떨어지면 −1로 되돌아가 처음부터 다시 센다.</summary>
+    private float pressingSince = -1f;
 
     private void Awake()
     {
@@ -45,8 +57,6 @@ public class ExitDoor : MonoBehaviour
             sr.enabled = false;
 
         doorCollider = GetComponent<Collider2D>();
-        closedOffset = doorCollider.offset;
-        outward = transform.localPosition.x >= 0f ? 1f : -1f;
         SetOpen(startOpen);
     }
 
@@ -55,24 +65,51 @@ public class ExitDoor : MonoBehaviour
         IsOpen = open;
         // 열려도 트리거로 바꾸지 않는다. 벽에 구멍이 생기면 안 된다.
         doorCollider.isTrigger = false;
-
-        // 판정만 통로 안쪽으로 물린다. 오브젝트를 옮기지 않고 콜라이더 오프셋을 쓰는 이유는
-        // 스물한 방의 프리팹이 이 자리를 벽 구멍에 맞춰 두고 있어서다 — 자리는 그대로 두고
-        // 몸만 움직인다. 오프셋은 로컬 단위라 스케일(0.5)로 나눠 준다.
-        float scale = Mathf.Abs(transform.lossyScale.x);
-        float local = open && scale > 0.0001f ? openDepth / scale : 0f;
-        doorCollider.offset = closedOffset + new Vector2(outward * local, 0f);
+        pressingSince = -1f;
     }
 
-    // 열린 뒤에 닿아도(Enter), 열리는 순간 이미 닿아 있었어도(Stay) 모두 처리한다.
-    private void OnCollisionEnter2D(Collision2D collision) => TryPass(collision.collider);
-    private void OnCollisionStay2D(Collision2D collision) => TryPass(collision.collider);
-
-    private void TryPass(Collider2D other)
+    /// <summary>
+    /// 충돌 이벤트가 아니라 매 프레임 거리로 잰다. 이벤트는 "닿았다/떨어졌다"만 알려 주는데,
+    /// 여기서 알아야 하는 것은 <b>얼마나 오래 대고 있었나</b>라 상태를 직접 보는 편이 맞다.
+    /// 열리는 순간 이미 겹쳐 있는 경우도 저절로 처리된다.
+    /// </summary>
+    private void Update()
     {
         if (used || !IsOpen) return;
-        if (other.GetComponentInParent<PlayerController>() == null) return;
 
+        if (!PlayerPressing())
+        {
+            pressingSince = -1f;
+            return;
+        }
+
+        if (pressingSince < 0f) pressingSince = Time.time;
+        if (Time.time - pressingSince < passDuration) return;
+        Pass();
+    }
+
+    private bool PlayerPressing()
+    {
+        if (player == null)
+        {
+            player = FindAnyObjectByType<PlayerController>();
+            if (player == null) return false;
+            playerCollider = player.GetComponent<Collider2D>();
+        }
+
+        // 걸어 들어오는 연출처럼 조작이 꺼져 있는 동안은 세지 않는다. 스스로 민 것이 아니다.
+        if (!player.ControlEnabled) return false;
+        if (playerCollider == null || !playerCollider.enabled) return false;
+
+        // 문을 마주 보고 서 있는가. 모서리를 스치는 것과 여기서 갈린다.
+        if (Mathf.Abs(player.transform.position.y - transform.position.y) > passHalfHeight) return false;
+
+        ColliderDistance2D gap = doorCollider.Distance(playerCollider);
+        return gap.isValid && gap.distance <= ContactSlack;
+    }
+
+    private void Pass()
+    {
         used = true;
         if (RoomFlowController.Instance != null)
         {

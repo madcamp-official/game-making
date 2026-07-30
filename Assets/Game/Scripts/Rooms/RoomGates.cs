@@ -33,11 +33,8 @@ public class RoomGates : MonoBehaviour
     /// </summary>
     private const float CorridorHeight = 2f;
 
-    /// <summary>방 벽의 바깥 면. 통로는 여기서부터 시작한다.</summary>
-    private const float MouthX = 7.5f;
-
-    /// <summary>통로 난간의 두께. 벽 그림 안쪽에 묻히기만 하면 되므로 한 칸이면 넉넉하다.</summary>
-    private const float RailThickness = 1f;
+    /// <summary>안개 둑의 바깥 끝. 여기까지 막는다.</summary>
+    private static float BankFarX => BankX + BankSize.x * 0.5f;
 
     public CorridorCloud Left { get; private set; }
     public CorridorCloud Right { get; private set; }
@@ -51,12 +48,9 @@ public class RoomGates : MonoBehaviour
 
         // 그림의 둥근 얼굴이 방을 향한다 — 왼쪽 구름은 뒤집는다(faceRight).
         gates.Left = CorridorCloud.Create(go.transform, "Cloud_Left",
-            new Vector2(-BankX, 0f), BankSize, CorridorHeight, sprite, true);
+            new Vector2(-BankX, 0f), BankSize, BlockRect(-1f), sprite, true);
         gates.Right = CorridorCloud.Create(go.transform, "Cloud_Right",
-            new Vector2(BankX, 0f), BankSize, CorridorHeight, sprite, false);
-
-        CreateRails(go.transform, +1f);
-        CreateRails(go.transform, -1f);
+            new Vector2(BankX, 0f), BankSize, BlockRect(+1f), sprite, false);
 
         // 둘 다 막힌 채로 시작한다. 들어오는 연출이 왼쪽을 잠시 열어 준다.
         gates.Left.SetOpenImmediate(false);
@@ -67,32 +61,23 @@ public class RoomGates : MonoBehaviour
     }
 
     /// <summary>
-    /// 통로 위아래를 막는 난간. 방 벽은 x ±7.25에서 끝나고 그 너머 통로에는 콜라이더가 없어서
-    /// (WallMap은 타일만 있고 TilemapCollider가 없다), 통로에 들어선 순간 위아래로 벽 그림
-    /// 속을 걸어 나갈 수 있었다.
+    /// 구름이 막을 자리(방 기준). 통로 구멍 <b>바로 앞</b>에서 시작해 안개 끝까지다.
     ///
-    /// 예전에는 이것이 드러나지 않았다. 출구 판정이 벽 구멍 자리에 박혀 있어 통로에 발을
-    /// 들이는 순간 다음 방으로 넘어갔기 때문이다. 판정을 통로 안쪽으로 물리면
-    /// (<see cref="ExitDoor"/>) 통로를 실제로 걷게 되므로 벽이 필요해진다.
+    /// 안쪽 끝을 벽 안쪽 면(<see cref="RoomArena.HalfSize"/>.x = 7)에 정확히 맞추는 것이 핵심이다.
+    /// 그래야 <b>돌아다닐 수 있는 범위가 정확히 네모</b>가 된다 — 위아래 벽도 오른쪽 벽도
+    /// 여기서 끝나므로, 통로 앞이라고 조금 더 나가지지도, 조금 덜 나가지지도 않는다.
+    ///
+    /// 예전에는 이 값이 두 번 어긋났다. 그림 크기에 방 쪽으로 반 칸을 더 내밀었을 때는
+    /// 6.7까지 들어와 방 안에 보이지 않는 턱이 생겼고, 그림 폭 그대로 두었을 때는 7.3에서
+    /// 시작해 문턱 안쪽에 0.3칸짜리 홈이 남았다.
     /// </summary>
-    private static void CreateRails(Transform parent, float side)
+    private static Rect BlockRect(float side)
     {
-        float length = (BankX + BankSize.x * 0.5f) - MouthX;
-        float centerX = side * (MouthX + length * 0.5f);
-        float centerY = (CorridorHeight + RailThickness) * 0.5f;
-
-        Rail(parent, side > 0f ? "Rail_Right_Top" : "Rail_Left_Top",
-             new Vector2(centerX, centerY), new Vector2(length, RailThickness));
-        Rail(parent, side > 0f ? "Rail_Right_Bottom" : "Rail_Left_Bottom",
-             new Vector2(centerX, -centerY), new Vector2(length, RailThickness));
-    }
-
-    private static void Rail(Transform parent, string name, Vector2 localPosition, Vector2 size)
-    {
-        var go = new GameObject(name);
-        go.transform.SetParent(parent, false);
-        go.transform.localPosition = localPosition;
-        go.AddComponent<BoxCollider2D>().size = size;
+        float near = RoomArena.HalfSize.x;
+        float half = CorridorHeight * 0.5f;
+        return side > 0f
+            ? Rect.MinMaxRect(near, -half, BankFarX, half)
+            : Rect.MinMaxRect(-BankFarX, -half, -near, half);
     }
 
     private void OnDestroy()
