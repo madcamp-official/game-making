@@ -16,8 +16,8 @@
 | 이상해풀 | 0002 | CHUNSOFT (공식 PMD 유래) |
 | 이상해꽃 | 0003 | CHUNSOFT (공식 PMD 유래) |
 | 파이리 | 0004 | CHUNSOFT (공식 PMD 유래) |
-| 리자드 | 0005 | CHUNSOFT (공식 PMD 유래) |
-| 리자몽 | 0006 | CHUNSOFT + 리워크 (Shoot·Strike·Charge, PMDCollab 라이선스) |
+| 리자드 | 0005 | CHUNSOFT + bwappi·Grimlin·이름 미등록 1명 리워크 (CC BY-NC 4.0 / PMDCollab 라이선스) |
+| 리자몽 | 0006 | CHUNSOFT + Emboarger 리워크 (Shoot·Strike·Charge 등, PMDCollab 라이선스) |
 | 꼬부기 | 0007 | CHUNSOFT (공식 PMD 유래) |
 | 어니부기 | 0008 | CHUNSOFT (공식 PMD 유래) |
 | 거북왕 | 0009 | CHUNSOFT (공식 PMD 유래) |
@@ -26,10 +26,10 @@
 | 나인테일 | 0038 | CHUNSOFT + baronessfaron 리워크 (Walk, PMDCollab 라이선스) |
 | 단데기 | 0011 | CHUNSOFT (공식 PMD 유래) |
 | 버터플 | 0012 | CHUNSOFT (공식 PMD 유래) |
-| 콘팡 | 0048 | CHUNSOFT (공식 PMD 유래) |
-| 닥트리오 | 0051 | CHUNSOFT (공식 PMD 유래) |
+| 콘팡 | 0048 | CHUNSOFT + anomalocaris 리워크 (PMDCollab 라이선스) |
+| 닥트리오 | 0051 | CHUNSOFT (공식 PMD 유래. Audino의 리워크가 있으나 OLD 판이라 쓰지 않는다) |
 | 성원숭 | 0057 | CHUNSOFT (공식 PMD 유래) |
-| 켈리몬 | 0352 | CHUNSOFT (공식 PMD 유래) |
+| 켈리몬 | 0352 | CHUNSOFT + Top_Kec 리워크 (CC BY-NC 4.0) |
 | 강챙이 | 0062 | CHUNSOFT (공식 PMD 유래) |
 | 모다피 | 0069 | CHUNSOFT (공식 PMD 유래) |
 | 쥬래곤 | 0087 | CHUNSOFT (공식 PMD 유래) |
@@ -48,6 +48,12 @@
 | 잠만보 | 0143 | CHUNSOFT (공식 PMD 유래) |
 
 각 포켓몬의 원본 `credits.txt`는 `Assets/ThirdParty/PMDCollab/<도감번호_이름>/`에 보관되어 있다.
+
+제작자 칸은 각 `credits.txt`에서 **`CUR`(현재 판)** 줄만 추린 것이다. `OLD` 줄은 나중 판으로
+대체된 기여라 게임에 실제로 들어간 그림이 아니다 — 닥트리오가 그런 경우다. 파일에는 이름 대신
+디스코드 ID만 적혀 있어서, 이름은 SpriteCollab 저장소의
+[`credit_names.txt`](https://github.com/PMDCollab/SpriteCollab/blob/master/credit_names.txt)로
+옮긴다. 그 표에도 이름이 비어 있는 기여자가 있다 (리자드의 `199989579682414592`).
 
 발밑 그림자도 같은 저장소의 애니메이션별 `*-Shadow.png` 시트에서 가져왔다. 시트는
 동심원 구조로, 안쪽부터 초록(소형)·빨강(중형까지)·파랑(대형까지) 순이다. 게임에서는

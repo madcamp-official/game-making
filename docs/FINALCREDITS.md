@@ -26,7 +26,6 @@ rth934
 - 캐터피 (0010)
 - 단데기 (0011)
 - 버터플 (0012)
-- 콘팡 (0048)
 - 닥트리오 (0051)
 - 성원숭 (0057)
 - 강챙이 (0062)
@@ -44,7 +43,14 @@ rth934
 - 라프라스 (0131)
 - 잠만보 (0143)
 - 신뇽 (0148)
-- 켈리몬 (0352)
+
+**CHUNSOFT + bwappi, Grimlin 외 1명**
+
+- 리자드 (0005)
+
+**CHUNSOFT + Emboarger**
+
+- 리자몽 (0006)
 
 **CHUNSOFT + Emmuffin**
 
@@ -55,10 +61,13 @@ rth934
 
 - 나인테일 (0038)
 
-**CHUNSOFT + PMDCollab 기여자**
+**CHUNSOFT + anomalocaris**
 
-- 리자드 (0005)
-- 리자몽 (0006)
+- 콘팡 (0048)
+
+**CHUNSOFT + Top_Kec**
+
+- 켈리몬 (0352)
 
 ### [ EVOLUTION ARTWORK ]
 
