@@ -197,12 +197,76 @@ public class RoomFlowController : MonoBehaviour
                              "Gameplay 씬의 RoomFlowController에 CorridorCloud.png를 연결할 것.", this);
         }
 
+        // 지난 방에서 싸움이 끝나 낮춰 둔 음악을 제 크기로 되돌린다. 곡이 같은 층 안에서는
+        // 이어지므로(전투방 → 전투방) 여기서 크기를 그 자리에서 올리면 문턱을 넘는 순간
+        // 소리가 툭 튄다. 잦아들 때와 같은 속도로 도로 차오르게 둔다.
+        GameAudio.SetBgmDuck(1f);
+        GameAudio.PlayBgm(BgmFor(floor, index));
+
         RunStats.ReachedRoom(CurrentFloorIndex, index);
 
         string label = floor.roomNames != null && index < floor.roomNames.Length ? floor.roomNames[index] : floor.roomPrefabs[index].name;
         if (UIManager.Instance != null)
             UIManager.Instance.SetRoomName(string.Format("{0}층 {1}  {2}/{3}  {4}",
                 CurrentFloorIndex + 1, floor.floorName, index + 1, floor.roomPrefabs.Length, label));
+    }
+
+    /// <summary>
+    /// 이 방에 흐를 곡. 방 종류는 프리팹 이름 뒤에 붙은 꼬리("F2Room3_Event" → Event)로 읽는다.
+    ///
+    /// 방 종류를 담은 데이터가 따로 없어서 다른 곳에서는 컴포넌트 유무로 종류를 알아냈지만
+    /// (<see cref="NextRoom"/>의 상점 판별), 보스방에는 그렇게 잡아낼 공통 조각이 없다 —
+    /// 보스마다 컨트롤러가 다르다. 스물한 방이 모두 같은 규칙으로 이름 붙어 있으므로 이름을 믿는다.
+    /// 꼬리를 알아볼 수 없으면 전투곡으로 떨어진다 (전투방이 층의 절반을 넘는다).
+    /// </summary>
+    private static AudioClip BgmFor(FloorData floor, int index)
+    {
+        if (floor == null || floor.roomPrefabs == null || index < 0 || index >= floor.roomPrefabs.Length) return null;
+        GameObject prefab = floor.roomPrefabs[index];
+        string name = prefab != null ? prefab.name : "";
+
+        if (name.EndsWith("_Boss")) return floor.bossBgm;
+        if (name.EndsWith("_Shop")) return floor.shopBgm;
+        if (name.EndsWith("_Event")) return floor.eventBgm;
+        return floor.battleBgm;
+    }
+
+    /// <summary>
+    /// 주인공이 방 안까지 걸어 들어와 멈췄다 (<see cref="RoomTransition"/>이 알려 준다).
+    ///
+    /// 방을 <b>올리는</b> 것과 방에 <b>들어서는</b> 것은 다른 순간이다. 방은 화면이 검게 덮인
+    /// 아래에서 갈아 끼우고, 주인공은 그 뒤에 밝아진 화면에서 통로를 걸어 들어온다. 보스
+    /// 울음소리를 방 올리는 자리(<see cref="LoadRoom"/>)에 두었더니 아직 통로에 서 있는데
+    /// — 심지어 화면이 검을 때 — 울어서, 누가 우는지 보이지 않았다.
+    /// </summary>
+    public void OnPlayerEnteredRoom()
+    {
+        if (floors == null || CurrentFloorIndex < 0 || CurrentFloorIndex >= floors.Length) return;
+        if (IsBossRoom(floors[CurrentFloorIndex], CurrentRoomIndex)) PlayBossCry();
+    }
+
+    private static bool IsBossRoom(FloorData floor, int index)
+    {
+        if (floor == null || floor.roomPrefabs == null || index < 0 || index >= floor.roomPrefabs.Length) return false;
+        GameObject prefab = floor.roomPrefabs[index];
+        return prefab != null && prefab.name.EndsWith("_Boss");
+    }
+
+    /// <summary>
+    /// 지금 층 보스의 울음소리를 낸다. 방에 들어설 때는 여기서, 2막으로 넘어갈 때는 보스
+    /// 컨트롤러가 부른다.
+    ///
+    /// 세 보스가 각자 자기 소리를 들고 있게 하지 않은 이유는 <see cref="FloorData.bossCry"/>에
+    /// 적어 두었다. 보스 쪽에서는 어느 층인지 따질 필요 없이 이 문만 두드리면 된다.
+    /// </summary>
+    public static void PlayBossCry()
+    {
+        RoomFlowController flow = Instance;
+        if (flow == null || flow.floors == null) return;
+        if (flow.CurrentFloorIndex < 0 || flow.CurrentFloorIndex >= flow.floors.Length) return;
+
+        FloorData floor = flow.floors[flow.CurrentFloorIndex];
+        if (floor != null) GameAudio.PlaySfx(floor.bossCry);
     }
 
     private void GameClear()

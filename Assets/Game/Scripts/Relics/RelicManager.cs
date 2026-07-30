@@ -334,6 +334,10 @@ public class RelicManager : MonoBehaviour
         RecalculateModifiers();
         OnRelicsChanged?.Invoke();
 
+        // 소리는 announce와 상관없이 낸다. announce가 끄는 것은 겹쳐 뜨는 팝업이지 획득 자체가
+        // 아니다 — 보스 보상으로 받아도 손에 넣은 것은 마찬가지다.
+        GameAudio.PlayItemAcquired();
+
         if (announce && UIManager.Instance != null)
             UIManager.Instance.ShowRelicAcquired(relic, 3f);
 

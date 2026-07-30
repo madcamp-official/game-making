@@ -930,6 +930,7 @@ public class RhydonBossController : MonoBehaviour
 
     private IEnumerator PhaseTransitionRoutine()
     {
+        RoomFlowController.PlayBossCry();
         holdPosition = true;
         dashing = false;
         SetPassThroughPlayer(false);

@@ -87,6 +87,38 @@ PMD 쪽은 스파이크 춘소프트다.
 - `bars.png`에서는 팔레트만 가져왔다 — 바 윤곽 `#494949`, 흰 트랙, 체력 초록 두 톤,
   경험치 푸른색 두 톤, HP 꼬리표 호박색
 
+## 음악과 소리
+
+`Assets/Game/Audio/BGM/`의 파일은 모두 **원작에서 그대로 가져온 립**이다. 새로 만든 소리는
+하나도 없다. 원저작은 포켓몬 불가사의 던전 시리즈(스파이크 춘소프트)와 포켓몬 본가
+(게임프리크/닌텐도)다.
+
+포켓몬 불가사의 던전 하늘의 탐험대 사운드트랙 — 파일 이름 앞의 번호는 원작 트랙 번호다.
+
+| 곡 | 쓰이는 곳 |
+|---|---|
+| 03. Top Menu | 타이틀·캐릭터 선택·조작 안내, 클리어 결과 |
+| 61. Game Over | 쓰러진 결과 화면 |
+| 25. Kecleon's Shop | 세 층의 상점 (켈리몬 상점) |
+| 36. Amp Plains | 1층 전투 |
+| 08. Wigglytuff's Guild | 1층 이벤트 |
+| 48. Chasm Cave | 1층 보스 |
+| 41. Quicksand Cave | 2층 전투 |
+| 40. Northern Desert | 2층 이벤트 |
+| 51. Sealed Ruin Pit | 2층 보스 |
+| 116. Spring Cave | 3층 전투 |
+| 04. On the Beach at Dusk | 3층 이벤트 |
+| 129. Spacial Cliffs | 3층 보스 |
+
+그 밖의 소리.
+
+- `boss1.wav`·`boss2.wav`·`boss3.wav` — 층별 보스의 울음소리. 포켓몬 본가의 울음소리 립이다
+- `getitem.mp3`·`getskill.mp3` — 유물 획득, 기술 강화 효과음
+- `song409.mp3`·`song410.mp3` — 플레이어 피격음. 파일 이름이 번호뿐이라 원작 트랙을
+  특정하지 못했다. 출처를 확인하면 이 표를 고칠 것
+- `click.mp3`·`hover.mp3`·`start1~3.wav` — 아직 어디에도 물려 있지 않다. 쓰기 전에
+  출처를 확인해 위에 옮겨 적을 것
+
 ## 아이템 아이콘
 
 - `item.png` — "Ripped by redblueyellow. No credit needed." 표기. 원저작: 게임프리크/닌텐도.

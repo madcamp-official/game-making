@@ -99,6 +99,11 @@ public class RoomTransition : MonoBehaviour
 
         // 등 뒤에서 길이 막힌다.
         gates.Left.Close();
+
+        // 다 들어와 멈춘 지금이 "방에 들어섰다"이다. 보스방이라면 여기서 울음소리가 난다 —
+        // 방을 올리는 순간에 울리면 아직 화면이 검고 주인공은 통로 밖에 있다.
+        if (RoomFlowController.Instance != null) RoomFlowController.Instance.OnPlayerEnteredRoom();
+
         player.ControlEnabled = true;
         IsPlaying = false;
     }

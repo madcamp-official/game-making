@@ -79,11 +79,17 @@ public class GameFlow : MonoBehaviour
 
     // ---------------------------------------------------------------- 화면 전환
 
+    /// <summary>
+    /// 메뉴 음악을 건다. 타이틀 → 캐릭터 선택 → 조작 안내는 한 흐름이라 곡이 이어져야 하는데,
+    /// <see cref="GameAudio.PlayMenuBgm"/>이 같은 곡 요청을 걸러 주므로 화면마다 불러도 끊기지 않는다.
+    /// 결과 화면은 <see cref="FinishRun"/>에서 갈린다 — 깼으면 메뉴 곡, 쓰러졌으면 게임 오버 곡.
+    /// </summary>
     public void GoTitle()
     {
         CloseAll();
         Current = State.Title;
         Time.timeScale = 0f;
+        GameAudio.PlayMenuBgm();
         title = TitleScreen.Open(this);
     }
 
@@ -92,6 +98,7 @@ public class GameFlow : MonoBehaviour
         CloseAll();
         Current = State.CharacterSelect;
         Time.timeScale = 0f;
+        GameAudio.PlayMenuBgm();
         select = CharacterSelectScreen.Open(this);
     }
 
@@ -112,6 +119,7 @@ public class GameFlow : MonoBehaviour
         CloseAll();
         Current = State.Guide;
         Time.timeScale = 0f;
+        GameAudio.PlayMenuBgm();
         guide = ControlsGuideScreen.Open(this, Selected);
     }
 
@@ -169,6 +177,10 @@ public class GameFlow : MonoBehaviour
         RunStats.Finish();
         CloseAll();
         Time.timeScale = 0f;
+        // 쓰러진 것과 깬 것은 같은 화면이지만 같은 소리일 수 없다. 게임 오버 곡은 한 번만
+        // 흐르고 조용해지므로, 다음 화면으로 넘어갈 때까지 결과 화면은 침묵 속에 남는다.
+        if (cleared) GameAudio.PlayMenuBgm();
+        else GameAudio.PlayGameOverBgm();
         result = ResultScreen.Open(this, cleared);
     }
 

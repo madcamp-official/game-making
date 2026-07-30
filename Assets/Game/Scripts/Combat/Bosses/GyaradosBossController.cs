@@ -760,6 +760,7 @@ public class GyaradosBossController : MonoBehaviour
     private IEnumerator PhaseTransitionRoutine()
     {
         state = State.Exit;
+        RoomFlowController.PlayBossCry();
         BeginStateInvulnerability();
         // 똬리치기 판정과 예고, 남은 잉어킹을 모두 지운다.
         ClearAttackObjects();

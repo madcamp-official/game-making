@@ -29,3 +29,8 @@ MonoBehaviour:
   - "\uC804\uD22C"
   - "\uC0C1\uC810"
   - "\uBCF4\uC2A4"
+  battleBgm: {fileID: 8300000, guid: abb2d4198b5ec4f288b4afd95b420283, type: 3}
+  eventBgm: {fileID: 8300000, guid: 25c466c0eeea84d6b9c7e2c1ed8396bb, type: 3}
+  shopBgm: {fileID: 8300000, guid: fc4e3f6d220244d36be5c693bfa58a14, type: 3}
+  bossBgm: {fileID: 8300000, guid: bd633f141749740e0a8faad1f5314f51, type: 3}
+  bossCry: {fileID: 8300000, guid: 36728ef0a37974342a1920daa07448f8, type: 3}

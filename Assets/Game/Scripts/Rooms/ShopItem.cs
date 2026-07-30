@@ -91,6 +91,10 @@ public class ShopItem : MonoBehaviour, IInteractable
             // 지금 몸 기준으로 채워야 표시한 비율과 어긋나지 않는다.
             int heal = health != null ? GameMath.RoundHalfUp(health.MaxHealth * healFraction) : 0;
             if (health != null) health.Heal(heal);
+
+            // 회복약도 돈 주고 산 물건이다. 유물 쪽은 AddRelic이 알아서 울리므로 여기서만 낸다 —
+            // 양쪽에 다 넣으면 유물을 살 때 소리가 두 번 겹친다.
+            GameAudio.PlayItemAcquired();
             if (UIManager.Instance != null)
                 UIManager.Instance.ShowMessage(itemName + "을(를) 먹고 체력을 " + heal + " 회복했다!", 2f);
         }

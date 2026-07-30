@@ -92,6 +92,12 @@ public class CombatRoomController : MonoBehaviour
         MarkCleared();
         GiveLeftoversHeal();
 
+        // 방이 조용해졌다. 곡은 그대로 두고 크기만 낮춘다 — 남은 것을 줍고 나가는 동안
+        // 싸울 때와 같은 크기로 계속 울리면 방이 끝났다는 것이 소리로 전해지지 않는다.
+        // 적을 배치하지 않은 방(Start에서 곧장 MarkCleared)은 여기를 지나지 않는다.
+        // 싸움이 없었으니 잦아들 것도 없다.
+        GameAudio.DuckForClearedRoom();
+
         if (isBossRoom)
         {
             // 진화·기술 습득·유물을 한꺼번에 터뜨리지 않고 한 장씩 보여 준다.

@@ -103,6 +103,16 @@ public class PlayerCombat : MonoBehaviour
         playerAnimator = GetComponent<PlayerAnimator>();
         moves = GetComponent<PlayerMoves>();
         health = GetComponent<Health>();
+
+        // 맞는 소리. OnDamaged가 아니라 OnCombatDamaged를 듣는 이유는, 잠만보를 흔들다 치르는
+        // 대가처럼 "맞은 것이 아닌 감소"까지 타격음이 나면 안 되기 때문이다.
+        // 맞아서 쓰러지는 순간에는 울리지 않는다 — 그 자리는 게임 오버 곡이 맡는다.
+        if (health != null) health.OnCombatDamaged += GameAudio.PlayPlayerHurt;
+    }
+
+    private void OnDestroy()
+    {
+        if (health != null) health.OnCombatDamaged -= GameAudio.PlayPlayerHurt;
     }
 
     // ---------------------------------------------------------------- 강화가 반영된 수치
@@ -320,6 +330,10 @@ public class PlayerCombat : MonoBehaviour
             enemy.ApplyKnockback(direction, meleeKnockbackForce);
             PlayerRelicEffects.ReportDamageDealt(damage);
         }
+
+        // 한 번 휘둘러 여럿을 때려도 소리는 한 번이다. 맞은 수만큼 겹쳐 울리면 무리 한가운데서
+        // 휘두를 때마다 소리가 뭉개진다. 허공을 갈랐으면 아무 소리도 나지 않는다.
+        if (struckTargets.Count > 0) GameAudio.PlayPlayerHit();
     }
 
     /// <summary>
@@ -360,6 +374,8 @@ public class PlayerCombat : MonoBehaviour
             enemy.ApplyKnockback(direction, vineKnockbackForce);
             PlayerRelicEffects.ReportDamageDealt(damage);
         }
+
+        if (struckTargets.Count > 0) GameAudio.PlayPlayerHit();
     }
 
     // ---------------------------------------------------------------- 기술 3·4 · 장판

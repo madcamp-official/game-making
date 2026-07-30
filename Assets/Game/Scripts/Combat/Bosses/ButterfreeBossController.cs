@@ -933,6 +933,7 @@ public class ButterfreeBossController : MonoBehaviour
     private IEnumerator PhaseTransitionRoutine()
     {
         state = BossState.PhaseTransition;
+        RoomFlowController.PlayBossCry();
         BeginPhaseInvulnerability();
         // 전환 연출 중에는 새 공격 판정이 남아 있으면 안 된다.
         ClearAttackObjects();
