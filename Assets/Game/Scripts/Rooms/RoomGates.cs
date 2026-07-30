@@ -15,14 +15,15 @@ public class RoomGates : MonoBehaviour
     /// <summary>지금 방의 구름. 방이 바뀌면 새 것으로 갈린다.</summary>
     public static RoomGates Current { get; private set; }
 
-    /// <summary>구름 둑의 중심 x. 벽 안쪽 면(±7)부터 화면 밖까지 통로 전체를 덮는다 —
-    /// 문 앞에 서서 통로를 들여다봐도 구름 너머가 보이지 않아야 한다.</summary>
-    private const float BankX = 13.2f;
+    /// <summary>안개 둑의 중심 x. 방 벽(±7.5)에서 살짝 떨어뜨려 두는 이유: 벽에 붙이면
+    /// 둥근 얼굴이 벽 모서리에 걸려 잘린 것처럼 보인다. 통로 안쪽에서 온전한 윤곽으로
+    /// 끝나야 "안개가 길을 메웠다"로 읽힌다.</summary>
+    private const float BankX = 13.7f;
 
-    /// <summary>구름 둑 크기. 폭 12칸은 카메라 반폭(10칸)보다 길어 문 앞에 바짝 서도
-    /// 구름 끝이 보이지 않고, 높이 3칸은 통로 두 줄에 위아래로 반 칸씩 부풀어
-    /// 벽에 걸쳐 보인다.</summary>
-    private static readonly Vector2 BankSize = new Vector2(12f, 3f);
+    /// <summary>안개 둑 크기 — 그림(288×56px, PPU 24) 원본 그대로. 폭 12칸은 카메라
+    /// 반폭(10칸)보다 길어 문 앞에 바짝 서도 끝이 보이지 않고, 높이 2.33칸은 통로
+    /// 두 줄에 딱 맞아 위아래 나무 타일을 넘보지 않는다.</summary>
+    private static readonly Vector2 BankSize = new Vector2(12f, 56f / 24f);
 
     public CorridorCloud Left { get; private set; }
     public CorridorCloud Right { get; private set; }

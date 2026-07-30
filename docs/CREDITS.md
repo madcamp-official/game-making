@@ -60,11 +60,12 @@
 갸라도스 방의 흐르는 바닥은 새로 그린 그림이 아니다. 방에 깔린 바닥 타일을 그대로 빌려
 수로마다 통째로 밀어 흐르게 한 것이다 (`WaterCurrentField` 참고).
 
-`carpet.png`, `cloud.png`, `cloud-move.png`는 프로젝트에 들여온 그림이다 (상점 깔개와
-구름 참고용). 원본 그대로 쓰는 것은 `carpet.png`뿐이고, 통로를 막는
-`CorridorCloud.png`는 <b>참고 그림의 여섯 색 팔레트만</b> 가져와 새로 구운 것이다 —
-둥근 덩이들의 합집합 실루엣으로 통로를 끝까지 메우는 정적인 뭉게구름 한 장이다
-(`scratchpad/bake_cloudbank.py`, `CorridorCloudSetup`).
+`carpet.png`, `cloud.png`, `cloud-move.png`, `fog.png`는 프로젝트에 들여온 그림이다
+(상점 깔개, 구름·안개 참고용). `fog.png`는 시트에 표기된 대로 포켓몬 불가사의 던전
+붉은 구조대(GBA, Chunsoft/Nintendo)의 엔딩 안개 립이다. 원본 그대로 쓰는 것은
+`carpet.png`뿐이고, 통로를 막는 `CorridorCloud.png`는 `fog.png`의 안개 덩이들을
+잘라 알파를 복원하고 이어 붙여 만든 파생물이다 — 통로를 끝까지 메우는 정적인 안개
+한 장이다 (`scratchpad/bake_fogbank.py`, `CorridorCloudSetup`).
 
 `ForestPath.png`도 파생물이다. 숲 타일셋에 길이 없어서, 풀 타일(F_13_1)의 잔디 결은
 그대로 두고 색만 흙빛으로 낮춰 여섯 장을 구웠다 (`ForestPathSetup` 참고).
