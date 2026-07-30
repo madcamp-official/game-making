@@ -109,6 +109,8 @@ public class ButterfreeBossController : MonoBehaviour
     private const float MinSilverFirstWindup = 0.55f;
     private const float MinSilverLaterWindup = 0.40f;
     private const float MinPhase2Recovery = 0.55f;
+    /// <summary>앞을 노린 장판을 그대로 달려 빠져나갈 때 남겨 두는 여유 거리. 딱 맞으면 운이 된다.</summary>
+    private const float PredictClearance = 0.4f;
 
     // 최대 체력은 Health 컴포넌트의 값을 그대로 쓴다 (프리팹에서 240).
     [Header("기본")]
@@ -174,9 +176,12 @@ public class ButterfreeBossController : MonoBehaviour
     };
 
     [Header("독가루 — 2페이즈")]
+    // activationDelay는 앞을 노린 장판(predictIndex)이 성립하는 하한이기도 하다. 예고가 끝나기
+    // 전에 그 장판을 달려서 통과할 수 있어야 하므로 predictLead + radius + 여유(0.4)를
+    // 달리기 속도(5)로 나눈 값, 곧 0.586초보다 길어야 한다. 0.5로는 모자랐다.
     [SerializeField] private PoisonSettings poisonPhase2 = new PoisonSettings
     {
-        count = 6, recordInterval = 0.2f, activationDelay = 0.5f,
+        count = 6, recordInterval = 0.2f, activationDelay = 0.62f,
         radius = 1.33f, duration = 7.5f, recovery = 0.6f, predictIndex = 3, predictLead = 1.2f,
     };
 
@@ -184,8 +189,11 @@ public class ButterfreeBossController : MonoBehaviour
     [SerializeField, Min(0)] private int poisonDamage = 8;
     [SerializeField, Min(0f)] private float poisonTickInterval = 1f;
     [Tooltip("직전 장판 중심과 최소한 이만큼 떨어뜨린다. 더 가까우면 이동 방향으로 밀거나 생략한다. " +
-             "장판 크기와 함께 움직여야 한다 — 반지름만 키우면 장판들이 한 덩어리로 뭉친다.")]
-    [SerializeField, Min(0f)] private float poisonMinSeparation = 1.19f;
+             "장판 크기와 함께 움직여야 한다 — 반지름만 키우면 장판들이 한 덩어리로 뭉친다.\n\n" +
+             "달리는 플레이어가 한 기록 간격 동안 나아가는 거리(2페이즈는 5 x 0.2 = 1.0)보다 " +
+             "작게 잡는다. 크면 밀어낸 장판이 플레이어보다 앞서게 되어 줄줄이 생략되고, " +
+             "장판이 거의 깔리지 않는다.")]
+    [SerializeField, Min(0f)] private float poisonMinSeparation = 0.95f;
     [Tooltip("장판 '중심'을 방 경계에서 이만큼 안쪽으로 유지한다 (명세 7.3). " +
              "여기에 반지름을 더하면 안 된다 — 장판이 벽에 조금 걸치더라도 벽에 붙은 자리를 덮어야 한다.")]
     [SerializeField, Min(0f)] private float poisonArenaMargin = 0.55f;
@@ -264,6 +272,8 @@ public class ButterfreeBossController : MonoBehaviour
     private Transform player;
     private Health playerHealth;
     private Rigidbody2D playerBody;
+    /// <summary>독가루가 "달리면 빠져나갈 수 있는가"를 재려고 달리기 속도를 읽는다.</summary>
+    private PlayerController playerController;
     private Vector2 fallbackArenaCenter;
     private float nextContactDamageTime;
 
@@ -324,6 +334,7 @@ public class ButterfreeBossController : MonoBehaviour
         if (pc != null)
         {
             player = pc.transform;
+            playerController = pc;
             playerHealth = pc.GetComponent<Health>();
             playerBody = pc.GetComponent<Rigidbody2D>();
         }
@@ -697,16 +708,20 @@ public class ButterfreeBossController : MonoBehaviour
 
             // 4번째만 이동 방향 앞을 노려 진행 방향을 한 번 끊는다.
             Vector2 raw = PlayerPosition;
-            if (i == settings.predictIndex)
-            {
-                Vector2 moveDir = PlayerMoveDirection;
-                if (moveDir != Vector2.zero) raw += moveDir * settings.predictLead;
-            }
+            Vector2 moveDir = PlayerMoveDirection;
+            bool predicting = i == settings.predictIndex && moveDir != Vector2.zero;
+            if (predicting) raw += moveDir * PredictLead(settings, windup);
 
-            if (TryPlaceZone(raw, hasPrevious, previous, settings, out Vector2 placed))
+            if (TryPlaceZone(raw, moveDir, predicting, hasPrevious, previous,
+                             settings, out Vector2 placed))
             {
-                previous = placed;
-                hasPrevious = true;
+                // 앞을 노린 장판은 줄에서 벗어난 한 수라 줄의 기준점으로 삼지 않는다.
+                // 삼으면 뒤따르는 장판들이 "직전 것과 너무 가깝다"로 줄줄이 생략된다.
+                if (!predicting)
+                {
+                    previous = placed;
+                    hasPrevious = true;
+                }
 
                 AttackTelegraph warning = AttackTelegraph.CreateCircle(
                     attackRoot, placed, settings.radius, poisonWarningColor);
@@ -743,10 +758,37 @@ public class ButterfreeBossController : MonoBehaviour
     }
 
     /// <summary>
+    /// 앞을 노리는 장판이 실제로 앞설 거리. <b>그대로 달리면 활성화 전에 빠져나갈 수 있는</b>
+    /// 만큼으로 제한한다.
+    ///
+    /// 조건은 간단하다 — 예고가 끝날 때까지 플레이어가 나아가는 거리가 장판의 <b>먼 쪽 끝</b>을
+    /// 넘어야 한다. 즉 <c>앞선 거리 + 반지름 + 여유 ≤ 달리는 속도 × 예고 시간</c>.
+    /// 이걸 넘기면 앞을 노린 장판이 "지금 서 있는 자리"까지 덮은 채 활성화되어, 옆으로 꺾지
+    /// 않는 한 맞을 수밖에 없다.
+    ///
+    /// 속도를 5로 못박지 않고 <see cref="PlayerController.RunSpeed"/>를 읽는 이유는
+    /// 구애스카프 때문이다. 유물 하나에 회피 가능 여부가 뒤집히면 안 된다.
+    /// </summary>
+    private float PredictLead(PoisonSettings settings, float windup)
+    {
+        float speed = playerController != null ? playerController.RunSpeed : 0f;
+        if (speed <= 0f) return settings.predictLead;
+
+        float reachable = speed * windup - settings.radius - PredictClearance;
+        return Mathf.Clamp(settings.predictLead, 0f, Mathf.Max(0f, reachable));
+    }
+
+    /// <summary>
     /// 명세 7.3의 배치 규칙을 적용한다. 둘 수 없으면 그 장판을 생략한다.
     /// 장판은 기본적으로 플레이어가 이미 지나온 자리라서, 규칙만 지키면 가둘 일이 없다.
     /// </summary>
-    private bool TryPlaceZone(Vector2 raw, bool hasPrevious, Vector2 previous,
+    /// <param name="predicting">
+    /// 앞을 노리는 장판(<see cref="PoisonSettings.predictIndex"/>)인지. 이 하나는 간격 규칙에서
+    /// 빠진다 — 밀어내면 <see cref="PredictLead"/>가 맞춰 둔 "달려서 빠져나갈 수 있는 거리"가
+    /// 깨진다. 자리 수·면적 상한은 그대로 지킨다.
+    /// </param>
+    private bool TryPlaceZone(Vector2 raw, Vector2 moveDirection, bool predicting,
+                              bool hasPrevious, Vector2 previous,
                               PoisonSettings settings, out Vector2 placed)
     {
         placed = ClampToArena(raw, poisonArenaMargin);
@@ -761,7 +803,7 @@ public class ButterfreeBossController : MonoBehaviour
         float zoneArea = Mathf.PI * settings.radius * settings.radius * (occupied + 1);
         if (arenaArea > 0f && zoneArea / arenaArea > poisonMaxAreaRatio) return false;
 
-        if (!hasPrevious) return true;
+        if (predicting || !hasPrevious) return true;
 
         Vector2 delta = placed - previous;
         if (delta.magnitude >= poisonMinSeparation) return true;
@@ -774,11 +816,34 @@ public class ButterfreeBossController : MonoBehaviour
 
         Vector2 pushed = ClampToArena(previous + pushDirection * poisonMinSeparation,
                                       poisonArenaMargin);
-        // 벽에 막혀 밀어도 여전히 겹치면 그냥 생략한다.
+        // 플레이어보다 앞으로 밀려났으면 지금 서 있는 자리까지만 당긴다. 이 밀어내기는 장판이
+        // 한 덩어리로 뭉치는 것을 막으려고 있는 것이지 앞길을 막으라고 있는 것이 아니다.
+        pushed = PullBackBehindPlayer(pushed, raw, moveDirection);
+        // 벽에 막혔거나 당겨진 탓에 여전히 겹치면 그냥 생략한다.
         if ((pushed - previous).magnitude < poisonMinSeparation * 0.9f) return false;
 
         placed = pushed;
         return true;
+    }
+
+    /// <summary>
+    /// <paramref name="forward"/> 방향으로 플레이어(<paramref name="playerAt"/>)보다 앞서 있으면
+    /// 그만큼 뒤로 당긴다. 옆으로 벌어진 만큼은 그대로 둔다.
+    ///
+    /// <b>이것이 없으면 장판 줄이 플레이어를 앞지른다.</b> 밀어내기는 직전 장판에서 늘 정확히
+    /// <c>poisonMinSeparation</c>만큼 나아가는데, 그 값을 기록 간격으로 나눈 속도가 플레이어보다
+    /// 빠르면 (2페이즈는 1.19 ÷ 0.2 = 초속 5.95 &gt; 5) 줄이 앞질러 나가 진행 방향에 벽을 세운다.
+    /// 뒤로는 이미 지나온 장판이 깔려 있으니 어느 쪽으로도 빠져나갈 수 없다.
+    /// 1페이즈는 1.19 ÷ 0.28 = 4.25로 플레이어보다 느려서 이 문제가 드러나지 않았다.
+    ///
+    /// 수치를 맞추는 대신 방향으로 막는 이유는 구애스카프·기록 간격 조정처럼 나중에 속도 관계가
+    /// 바뀌어도 "지나온 자리를 막는다"는 규칙이 그대로 지켜지기 때문이다.
+    /// </summary>
+    private static Vector2 PullBackBehindPlayer(Vector2 zone, Vector2 playerAt, Vector2 forward)
+    {
+        if (forward == Vector2.zero) return zone;
+        float ahead = Vector2.Dot(zone - playerAt, forward);
+        return ahead > 0f ? zone - forward * ahead : zone;
     }
 
     private void PruneZones()

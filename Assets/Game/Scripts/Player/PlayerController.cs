@@ -18,6 +18,16 @@ public class PlayerController : MonoBehaviour
     /// <summary>유물로 인한 이동 속도 배율 (구애스카프). 공격 감속과 따로 곱해진다.</summary>
     public float RelicSpeedMultiplier { get; set; } = 1f;
 
+    /// <summary>
+    /// 손을 떼고 달리기만 할 때 낼 수 있는 속도. 유물 배율은 포함하고 <b>공격 감속은 뺀다</b> —
+    /// 공격을 멈추는 것은 플레이어가 고를 수 있는 일이라, "달리면 피할 수 있는가"를 재는 기준은
+    /// 감속되지 않은 속도여야 한다.
+    ///
+    /// 회피 가능한 공격을 만들 때 쓴다 (버터플 독가루). 속도를 5로 못박아 두면 구애스카프를
+    /// 먹은 순간 계산이 어긋난다.
+    /// </summary>
+    public float RunSpeed => moveSpeed * RelicSpeedMultiplier;
+
     /// <summary>공격 등 외부 요인으로 바라보는 방향을 바꾼다.</summary>
     public void SetFacing(Vector2 direction)
     {
