@@ -91,7 +91,7 @@ public class TitleScreen : FlowScreen
                 break;
             case Command.Controls:
                 // 캐릭터를 고르기 전에도 조작은 볼 수 있어야 한다. 보고 나면 타이틀로 돌아온다.
-                Flow.GoGuide();
+                Flow.GoGuide(fromTitle: true);
                 break;
             case Command.Settings:
                 Tell("설정은 아직 준비 중이다.");

@@ -216,9 +216,17 @@ public class EventDialogue : MonoBehaviour
         bodyText.text = text;
 
         // 글이 길면 창을 늘리되, 선택지를 밀어내지 않을 만큼만 늘린다.
+        //
+        // ⚠️ 글자 높이를 잴 때 <b>줄바꿈 폭을 직접 넘겨야 한다.</b> preferredHeight는 지금
+        // 붙어 있는 rect의 폭으로 재는데, 이벤트를 처음 열 때는 창 크기를 아직 정하지 않아
+        // 그 폭이 0이다. 그러면 글자 하나가 한 줄로 세어져 높이가 터무니없이 커지고,
+        // 아래 Clamp가 그것을 "남는 세로 전부"로 잘라 첫 팝업만 화면을 가득 채웠다.
+        // 두 번째 호출(결과 화면)부터는 첫 호출이 잡아 둔 폭이 남아 있어 멀쩡했다 —
+        // 그래서 "처음엔 꽉 찼다가 고르면 절반으로 줄어드는" 것처럼 보였다.
         float available = Screen.height - TopMargin - BottomMargin;
         float forChoices = choicePanel.gameObject.activeSelf ? MeasureCards(tier) + PanelGap : 0f;
-        float wanted = bodyText.preferredHeight + Padding * 2f;
+        float textWidth = Width - left - Padding;
+        float wanted = PixelUi.LineBoxHeight(bodyText, textWidth) + Padding * 2f;
         if (hasFace) wanted = Mathf.Max(wanted, tier.portraitSize + Padding);
         float height = Mathf.Clamp(wanted, tier.minDialogueHeight, Mathf.Max(tier.minDialogueHeight, available - forChoices));
 

@@ -279,7 +279,7 @@ MonoBehaviour:
   minRange: 0
   cooldown: 2.6
   initialDelay: 1
-  initialDelayJitter: 0.6
+  initialDelayJitter: 1
   readyState: StrikeReady
   rollState: Attack
   curlState: Guard

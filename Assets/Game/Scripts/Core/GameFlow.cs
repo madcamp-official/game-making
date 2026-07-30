@@ -114,13 +114,24 @@ public class GameFlow : MonoBehaviour
         else GoGuide();
     }
 
-    public void GoGuide()
+    /// <summary>
+    /// 조작 안내를 연다.
+    /// </summary>
+    /// <param name="fromTitle">
+    /// 타이틀에서 구경하러 들어온 길인지. 그 길에는 시작할 캐릭터를 넘기지 않는다 —
+    /// 안내 화면이 "다음에 무엇이 오는가"를 캐릭터의 유무로 판단하기 때문이다.
+    ///
+    /// <b>고른 캐릭터가 있느냐로 판단할 수는 없다.</b> 한 판 하고 타이틀로 돌아오면
+    /// <see cref="Selected"/>가 지난 판의 것으로 남아 있어서, 구경하러 들어온 것인데도
+    /// "시작"이 떠 버린다.
+    /// </param>
+    public void GoGuide(bool fromTitle = false)
     {
         CloseAll();
         Current = State.Guide;
         Time.timeScale = 0f;
         GameAudio.PlayMenuBgm();
-        guide = ControlsGuideScreen.Open(this, Selected);
+        guide = ControlsGuideScreen.Open(this, fromTitle ? null : Selected);
     }
 
     /// <summary>고른 캐릭터로 판을 시작한다.</summary>

@@ -26,8 +26,9 @@ public abstract class EnemyAbility : MonoBehaviour
     [Tooltip("방에 들어오자마자 터지지 않도록 첫 시전만 늦춘다.")]
     [SerializeField, Min(0f)] private float initialDelay = 1.2f;
     [Tooltip("첫 시전을 이 시간 안에서 무작위로 더 늦춘다. 같은 종이 여럿 있을 때 " +
-             "박자를 흩어 놓는 값이다 — 0이면 전부 같은 순간에 시작한다.")]
-    [SerializeField, Min(0f)] private float initialDelayJitter = 0.6f;
+             "박자를 흩어 놓는 값이다 — 0이면 전부 같은 순간에 시작한다. " +
+             "그 뒤의 박자는 CastTurns가 지킨다.")]
+    [SerializeField, Min(0f)] private float initialDelayJitter = 1f;
 
     protected EnemyController Controller { get; private set; }
     protected Health Health { get; private set; }
@@ -217,6 +218,14 @@ public abstract class EnemyAbility : MonoBehaviour
         float distance = Vector2.Distance(transform.position, Player.position);
         if (distance > range || distance < minRange) return;
         if (!ReadyToCast()) return;
+
+        // 방 안의 다른 적과 같은 순간에 터지지 않게 순번을 받는다. 못 받으면 취소가 아니라
+        // 연기다 — 조정기가 알려 준 시각까지 기다렸다가 다시 묻는다.
+        if (!CastTurns.TryClaim(GetType(), cooldown, out float retryAt))
+        {
+            nextReadyTime = retryAt;
+            return;
+        }
 
         StartCoroutine(Cast());
     }

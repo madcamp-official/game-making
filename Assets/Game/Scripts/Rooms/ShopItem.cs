@@ -48,16 +48,46 @@ public class ShopItem : MonoBehaviour, IInteractable
         {
             if (cachedPrompt == null)
             {
-                // 설명이 여러 줄인 유물(구애 시리즈)이 있다. 상호작용 안내는 한 줄짜리라
-                // 줄바꿈을 그대로 넣으면 화면 아래가 두 줄로 벌어진다.
+                // 값과 설명을 <b>줄로 나눈다.</b> 예전에는 " — "로 이어 한 줄로 만들었는데,
+                // 구애 시리즈처럼 설명이 긴 유물은 그 한 줄이 화면 폭을 넘어가 양끝이
+                // 잘리고 좌우 HUD(체력바·기술 칸) 뒤로 숨었다. 안내창은 줄바꿈을 하지만
+                // 두 토막이 한 줄에 붙어 있으면 어디서 끊길지가 글자 수에 좌우된다 —
+                // "무엇을 얼마에 사는가"와 "그게 무슨 효과인가"는 처음부터 다른 줄이어야 한다.
                 cachedPrompt = relicData != null
-                    ? "E : " + relicData.relicName + " 구매 (" + price + "G) — "
-                      + relicData.description.Replace("\n", " · ")
+                    ? "E : " + relicData.relicName + " 구매 (" + price + "G)\n"
+                      + Flatten(relicData.description)
                     : "E : " + itemName + " 구매 (" + price + "G, 최대 체력의 +"
                       + Mathf.RoundToInt(healFraction * 100f) + "% 회복)";
             }
             return cachedPrompt;
         }
+    }
+
+    /// <summary>
+    /// 유물 설명을 한 문단으로 편다. 줄바꿈과 그 뒤의 들여쓰기를 공백 하나로 바꾼다.
+    ///
+    /// 설명은 에셋(YAML)에 여러 줄로 적혀 있고, 이어지는 줄마다 들여쓰기가 딸려 온다.
+    /// 그대로 두면 "…피해가 80%가\n    된다"처럼 문장 한가운데에 빈칸이 뭉텅이로 생긴다.
+    /// 어디서 줄을 바꿀지는 <b>안내창의 폭</b>이 정해야지 에셋의 줄 모양이 정할 일이 아니다.
+    /// </summary>
+    private static string Flatten(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+
+        var flat = new System.Text.StringBuilder(text.Length);
+        bool blank = false;
+        foreach (char c in text)
+        {
+            if (c == '\n' || c == '\r' || c == ' ' || c == '\t')
+            {
+                blank = true;
+                continue;
+            }
+            if (blank && flat.Length > 0) flat.Append(' ');
+            blank = false;
+            flat.Append(c);
+        }
+        return flat.ToString();
     }
 
     public void Interact(GameObject interactor)
