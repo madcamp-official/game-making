@@ -30,8 +30,15 @@ public class EnemyStarLaserAbility : EnemyAbility
     [SerializeField, Min(0.05f)] private float laserWidth = 0.55f;
     [Tooltip("순간이동 후 레이저를 예고하는 시간. 어떤 경우에도 줄지 않는다.")]
     [SerializeField, Min(0.05f)] private float laserTelegraph = 0.55f;
-    [Tooltip("레이저가 켜져 피해 판정을 유지하는 시간.")]
-    [SerializeField, Min(0.05f)] private float laserDuration = 0.4f;
+    // 0.4 → 0.9초. 이 층의 CC(킹크랩의 밀치기, 강챙이의 흡인, 신뇽의 해류)는 <b>플레이어를
+    // 옮기기만 하고</b> 옮겨진 자리가 위험해야 뜻이 생기는데, 빔이 0.4초만 켜져 있으면
+    // 밀려나는 동안 이미 꺼져 있었다. 밀린 것 자체는 아프지 않으니 결국 아무 일도 아니었다.
+    //
+    // 0.9초면 피격 무적(0.5초)이 한 번 돌아, 빔 위에 계속 서 있으면 <b>두 번까지</b> 맞는다.
+    // 걸어 나갈 시간은 넉넉하다 — 벌은 밀려난 것이 아니라 밀려난 자리에 머문 것에 붙는다.
+    [Tooltip("레이저가 켜져 피해 판정을 유지하는 시간. 이 층 CC의 '옮겨진 자리'가 " +
+             "위험하려면 옮겨지는 동안 꺼지지 않아야 한다.")]
+    [SerializeField, Min(0.05f)] private float laserDuration = 0.9f;
     [SerializeField, Min(0)] private int laserDamage = 18;
     [Tooltip("발사 중 Idle 동작을 이만큼 배속해 회전을 빠르게 보여 준다.")]
     [SerializeField, Min(1f)] private float spinSpeedMultiplier = 2.6f;

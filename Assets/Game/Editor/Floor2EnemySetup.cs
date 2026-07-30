@@ -42,7 +42,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Primeape", health = 150, scale = 1.2f, moveSpeed = 4.2f,
-            goldMin = 5, goldMax = 9,
+            goldMin = 4, goldMax = 12,
             ability = typeof(EnemyComboMeleeAbility),
             abilityValues = new (string, object)[]
             {
@@ -54,11 +54,11 @@ public static class Floor2EnemySetup
                 ("dashDistance", 2.2f), ("dashSpeed", 9f), ("hitDelay", 0.18f),
                 // 피격 무적(0.5초)보다 짧다 — 연타가 다 들어가지는 않지만 쉴 틈도 주지 않는다.
                 ("betweenDashes", 0.38f),
-                // 부채꼴을 걷어내고 직사각형으로. 앞이면 맞고 옆이면 안 맞는다.
-                ("hitLength", 1.5f), ("hitWidth", 1.6f), ("damage", 15),
+                // 몸 앞에서 시작하는 직사각형 하나. 앞이면 맞고 옆이면 안 맞는다.
+                // 그리는 크기는 2.8 × 1.8칸(여기 값 + 플레이어 반지름)이고, 그것이 곧 판정이다.
+                ("hitLength", 2.5f), ("hitWidth", 1.2f), ("damage", 15),
                 ("hitPause", 0.5f), ("missPause", 1f),
-                // 예고 색을 붉은색으로 통일했다 — 회색 경로와 붉은 피해 범위가 섞여 읽히지 않았다.
-                ("pathColor", new Color(0.88f, 0.12f, 0.2f, 0.24f)),
+                // 도형이 하나라 색도 하나다. "여기 서 있으면 맞는다" 말고 뜻할 것이 없다.
                 ("hitColor", new Color(0.88f, 0.12f, 0.2f, 0.52f)),
             },
         },
@@ -69,7 +69,7 @@ public static class Floor2EnemySetup
         {
             // 플레이어(5)보다 확실히 느리게 두어 구르기 사이에 거리를 다시 벌릴 수 있게 한다.
             name = "Sandslash", health = 190, scale = 1.25f, moveSpeed = 3.7f,
-            goldMin = 5, goldMax = 9, knockbackMultiplier = 0.6f,
+            goldMin = 5, goldMax = 13, knockbackMultiplier = 0.6f,
             ability = typeof(EnemyRollSpikeAbility),
             abilityValues = new (string, object)[]
             {
@@ -95,7 +95,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Marowak", health = 135, scale = 1.2f, moveSpeed = 3.4f,
-            goldMin = 5, goldMax = 9, keepDistance = 3.2f,
+            goldMin = 4, goldMax = 10, keepDistance = 3.2f,
             ability = typeof(EnemyBoomerangAbility),
             abilityValues = new (string, object)[]
             {
@@ -134,7 +134,7 @@ public static class Floor2EnemySetup
         new EnemySpec
         {
             name = "Ninetales", health = 125, scale = 1.25f, moveSpeed = 3.8f,
-            goldMin = 5, goldMax = 11, keepDistance = 4.2f,
+            goldMin = 4, goldMax = 10, keepDistance = 4.2f,
             ability = typeof(EnemyFlameConeAbility),
             abilityValues = new (string, object)[]
             {

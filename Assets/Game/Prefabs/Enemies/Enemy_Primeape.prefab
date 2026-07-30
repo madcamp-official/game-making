@@ -228,8 +228,8 @@ MonoBehaviour:
   attackContactReach: 0.25
   attackDamage: 0
   attackCooldown: 1
-  goldRewardMin: 5
-  goldRewardMax: 9
+  goldRewardMin: 4
+  goldRewardMax: 12
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
@@ -593,10 +593,9 @@ MonoBehaviour:
   dashSpeed: 9
   hitDelay: 0.18
   betweenDashes: 0.38
-  hitLength: 1.5
-  hitWidth: 1.6
+  hitLength: 2.5
+  hitWidth: 1.2
   damage: 15
   hitPause: 0.5
   missPause: 1
-  pathColor: {r: 0.88, g: 0.12, b: 0.2, a: 0.24}
   hitColor: {r: 0.88, g: 0.12, b: 0.2, a: 0.52}
