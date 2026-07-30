@@ -126,6 +126,17 @@ public class RelicManager : MonoBehaviour
     }
 
     /// <summary>
+    /// 새 판을 시작한다. 지닌 유물을 전부 버리고 더미를 처음부터 다시 만든다.
+    /// 씬을 다시 올리지 않고 이어서 도는 구조라 여기서 직접 비워야 한다.
+    /// </summary>
+    public void ResetForNewRun()
+    {
+        relics.Clear();
+        Refill();
+        OnRelicsChanged?.Invoke();
+    }
+
+    /// <summary>
     /// 더미를 아직 손에 넣지 않은 유물로 새로 만든다. 판이 시작될 때 한 번,
     /// 그리고 더미를 끝까지 다 본 뒤에 다시 불린다.
     ///

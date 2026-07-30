@@ -34,6 +34,14 @@ public class PlayerLevel : MonoBehaviour
         if (Instance == this) Instance = null;
     }
 
+    /// <summary>새 판을 시작한다. 씬을 다시 올리지 않으므로 여기서 직접 되돌린다.</summary>
+    public void ResetForNewRun()
+    {
+        Level = 1;
+        Progress01 = 0f;
+        OnProgressChanged?.Invoke();
+    }
+
     /// <summary>전투방 하나를 치웠다. 보스방은 진화로 기술을 주므로 여기서 세지 않는다.</summary>
     public void AddRoomClear()
     {

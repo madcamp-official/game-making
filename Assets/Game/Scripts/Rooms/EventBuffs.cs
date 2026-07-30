@@ -38,6 +38,21 @@ public class EventBuffs : MonoBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void Reset() => instance = null;
 
+    /// <summary>
+    /// 새 판을 시작한다. 위의 <see cref="Reset"/>은 <b>씬을 다시 올릴 때만</b> 돈다 —
+    /// 결과 화면에서 이어서 시작하면 씬이 그대로라 이벤트 강화가 다음 판까지 따라간다.
+    ///
+    /// 오브젝트를 지우지 않고 값만 되돌린다. <c>DontDestroyOnLoad</c>로 붙여 둔 것이라
+    /// 지우면 다음에 이벤트가 강화를 줄 때 새로 만드는 수고만 늘어난다.
+    /// </summary>
+    public static void ResetForNewRun()
+    {
+        if (instance == null) return;
+        instance.MeleeDamageMultiplier = 1f;
+        instance.RangedDamageMultiplier = 1f;
+        instance.MoveSpeedMultiplier = 1f;
+    }
+
     private void Awake()
     {
         if (instance != null && instance != this) { Destroy(gameObject); return; }

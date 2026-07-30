@@ -47,6 +47,22 @@ public class PlayerDeathHandler : MonoBehaviour
             "쓰러졌다...  " + floor + "층에서 여정 종료  ·  획득 골드 " + gold + "G\nR : 다시 시작", 9999f);
     }
 
+    /// <summary>
+    /// 새 판을 시작한다. 쓰러진 상태를 통째로 걷어낸다 — 체력을 가득 채우고, 사망으로 꺼 둔
+    /// 조작을 되살리고, 게임 오버 표시를 내린다.
+    ///
+    /// 결과 화면에서 다시 시작하면 <b>씬을 다시 올리지 않는다.</b> 그래서 죽은 몸이 그대로
+    /// 다음 판으로 넘어간다 — 체력 0에 조작도 꺼진 채로 시작하던 것이 이 때문이다.
+    /// </summary>
+    public void ResetForNewRun()
+    {
+        isGameOver = false;
+        // 진화 단계를 먼저 입힌 뒤에 불러야 그 단계의 최대치로 찬다 (GameFlow가 순서를 지킨다).
+        health.Revive(health.MaxHealth);
+        controller.ControlEnabled = true;
+        transform.position = roomEntrance;
+    }
+
     private IEnumerator ReviveRoutine()
     {
         // 실제 시간으로 센다. 보스의 마지막 공격과 함께 쓰러지면 곧바로 보스 보상 흐름이

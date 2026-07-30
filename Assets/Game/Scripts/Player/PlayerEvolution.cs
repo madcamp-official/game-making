@@ -77,10 +77,6 @@ public class PlayerEvolution : MonoBehaviour
     }
 
     /// <summary>
-    /// 개발용: 연출 없이 지정 단계로 바로 바꾼다.
-    /// <see cref="DevHackPanel"/>에서만 쓰며, 개발이 끝나면 같이 지운다.
-    /// </summary>
-    /// <summary>
     /// 고른 캐릭터의 진화 단계를 통째로 갈아 끼우고 1단계로 되돌린다.
     ///
     /// 캐릭터가 바뀌면 그림·체력·공격력·진화 뒤 모습이 전부 달라진다. 하나씩 옮기는 대신
@@ -91,14 +87,21 @@ public class PlayerEvolution : MonoBehaviour
     {
         if (newStages == null || newStages.Length == 0) return;
         stages = newStages;
+        LastLearnedMove = null;
         SetStageImmediate(0);
     }
 
+    /// <summary>
+    /// 개발용: 연출 없이 지정 단계로 바로 바꾼다.
+    /// <see cref="DevHackPanel"/>에서만 쓰며, 개발이 끝나면 같이 지운다.
+    /// 판을 시작할 때 1단계를 입히는 데에도 쓴다 (<see cref="LoadStages"/>).
+    /// </summary>
     public void SetStageImmediate(int index)
     {
         if (stages == null || stages.Length == 0 || IsEvolving) return;
         CurrentStageIndex = Mathf.Clamp(index, 0, stages.Length - 1);
-        ApplyStage(stages[CurrentStageIndex]);
+        // 기술은 배우지 않는다. 이건 "단계를 입힌다"이지 "진화한다"가 아니다.
+        ApplyStage(stages[CurrentStageIndex], learnMove: false);
     }
 
     private IEnumerator EvolveRoutine()
@@ -129,7 +132,7 @@ public class PlayerEvolution : MonoBehaviour
                 yield return EvolutionCutscene.Instance.Play(
                     previous.portrait, next.portrait,
                     previous.stageName, next.stageName,
-                    () => ApplyStage(next));
+                    () => ApplyStage(next, learnMove: true));
             }
             else
             {
@@ -147,7 +150,7 @@ public class PlayerEvolution : MonoBehaviour
                 }
                 if (sr != null) sr.color = Color.white;
 
-                ApplyStage(next);
+                ApplyStage(next, learnMove: true);
 
                 if (UIManager.Instance != null)
                     UIManager.Instance.ShowMessage(next.stageName + "(으)로 진화했다!", 2.5f);
@@ -168,10 +171,20 @@ public class PlayerEvolution : MonoBehaviour
         }
     }
 
-    // 진화 확정: 애니메이터·능력치 교체.
-    // 명세(gameplay-spec 6절)는 완전 회복이었으나, 보스 클리어가 너무 후해져서
-    // 비어 있는 체력의 일부만 채우도록 바꿨다 (healMissingFraction).
-    private void ApplyStage(Stage next)
+    /// <summary>
+    /// 단계를 실제로 입힌다: 애니메이터·능력치 교체.
+    /// 명세(gameplay-spec 6절)는 완전 회복이었으나, 보스 클리어가 너무 후해져서
+    /// 비어 있는 체력의 일부만 채우도록 바꿨다 (<see cref="healMissingFraction"/>).
+    /// </summary>
+    /// <param name="learnMove">
+    /// 기술을 하나 더 배울지. <b>진화할 때만 참이다.</b>
+    ///
+    /// 예전에는 이 안에서 무조건 <c>LearnNext()</c>를 불렀다. 진화가 이 함수를 부르는
+    /// 유일한 길이던 시절에는 맞는 자리였지만, 판을 시작할 때 캐릭터의 1단계를 입히는
+    /// 길(<see cref="LoadStages"/>)이 생기면서 <b>시작하자마자 기술을 하나 더 배우는</b>
+    /// 문제가 됐다. 단계를 입히는 것과 진화하는 것은 다른 일이다.
+    /// </param>
+    private void ApplyStage(Stage next, bool learnMove)
     {
         Animator animator = GetComponent<Animator>();
         if (animator != null && next.animatorController != null)
@@ -190,6 +203,7 @@ public class PlayerEvolution : MonoBehaviour
         if (combat != null) combat.SetDamages(next.attackDamage, next.vineDamage);
 
         // 진화할 때마다 기술을 하나 더 배운다 (처음 둘 → 셋 → 넷).
+        if (!learnMove) return;
         PlayerMoves moves = GetComponent<PlayerMoves>();
         LastLearnedMove = moves != null ? moves.LearnNext() : null;
     }

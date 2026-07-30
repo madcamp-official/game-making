@@ -621,6 +621,68 @@ uGUI의 `Text`는 비트맵 폰트를 그릴 때 확대율을 `요청 크기(24)
 `CanvasGroup.alpha = 0`으로 숨기도록 바꿨다. 캔버스는 계속 켜져 있으므로 확대율이 흔들리지 않는다.
 **HUD를 감추려고 `Canvas.enabled`를 끄지 말 것** — 같은 함정이 그대로 다시 열린다.
 
+## 판을 다시 시작해도 지난 판이 남던 문제 (2026-07-30)
+
+게임 흐름이 들어오면서 두 가지가 드러났다. 뿌리는 하나다 — **판을 다시 시작하는 길이
+"씬을 통째로 다시 올리는 것"에서 "결과 화면에서 이어서 시작하는 것"으로 바뀌었는데,
+씬 재로드가 공짜로 해 주던 초기화가 아무도 하지 않는 일이 됐다.**
+
+### 시작하자마자 기술을 하나 더 배웠다
+
+`GameFlow`가 판을 시작하며 캐릭터의 1단계를 입히는데, 그 길이
+`LoadStages` → `SetStageImmediate(0)` → `ApplyStage`였다. 그런데 `ApplyStage`의 마지막 줄이
+
+```csharp
+LastLearnedMove = moves != null ? moves.LearnNext() : null;
+```
+
+이다. **진화가 이 함수를 부르는 유일한 길이던 시절에는 맞는 자리였다.** 판을 시작할 때도
+지나가게 되면서, 시작 기술 둘에 하나가 더 얹히고 "새로운 기술을 배웠다!" 알림까지 떴다.
+
+`ApplyStage(next, learnMove)`로 갈랐다. 진화만 참을 넘긴다 — **단계를 입히는 것과
+진화하는 것은 다른 일이다.**
+
+### 체력 0으로 시작했다
+
+죽고 나서 다시 시작하면 체력이 0이었다. `ApplyStage`가 최대 체력을 올릴 때
+
+```csharp
+health.SetMaxHealth(next.maxHealth, refill: false);
+if (!health.IsDead) health.HealMissingFraction(healMissingFraction);
+```
+
+인데, 죽은 상태에서는 `IsDead`가 참이라 **회복을 건너뛴다.** 최대치만 새로 잡히고 현재
+체력은 0인 채로 판이 시작됐다. 저 `IsDead` 검사 자체는 옳다 — 보스와 동시에 죽었을 때
+진화의 회복이 부활시키던 버그를 막는 장치다. 문제는 죽은 몸을 일으키는 사람이 없다는 것이었다.
+
+조작도 마찬가지였다. `PlayerController.HandleDeath`가 `ControlEnabled = false`로 두는데
+되돌리는 곳이 없어, 체력을 고쳐도 움직일 수 없었다.
+
+### 씬 재로드가 해 주던 나머지
+
+같은 이유로 **골드·유물·레벨·배운 기술·이벤트 강화가 전부 다음 판까지 따라갔다.**
+판이 시작된다는 것을 아는 곳이 `GameFlow.BeginRun` 하나뿐이라 거기에 모았다.
+
+| 비우는 것 | 방법 |
+|---|---|
+| 골드 | `RunManager.ResetForNewRun` |
+| 레벨·경험치 | `PlayerLevel.ResetForNewRun` |
+| 배운 기술·강화 배율 | `PlayerMoves.ResetForNewRun` |
+| 이벤트 강화 | `EventBuffs.ResetForNewRun` |
+| 유물과 더미 | `RelicManager.ResetForNewRun` |
+| 체력·조작·게임 오버 표시 | `PlayerDeathHandler.ResetForNewRun` |
+
+**순서가 있다.** 유물을 마지막에 비우는 것은 그때 도는 `OnRelicsChanged`가 최대 체력·이동
+속도 배율을 다시 계산해 플레이어에게 밀어 넣기 때문이고, 캐릭터를 입힌 <b>뒤에</b> 되살리는
+것은 그래야 그 단계의 최대 체력으로 차기 때문이다.
+
+`CombatRoomController`의 정적 값은 **일부러 건드리지 않았다.** `VisitId`는 방이 켜질 때마다
+단조 증가하므로 새 방이 올라오면 `clearedVisitId`와 저절로 달라진다. 오히려 판 도중에
+`activeRooms`를 0으로 밀면 아직 켜져 있는 방이 나가면서 계수가 어긋난다.
+
+> ⚠️ 플레이로는 확인하지 않았다. `[RuntimeInitializeOnLoadMethod]`로 초기화하는 정적 값이
+> 더 있다면 같은 함정이 남아 있다 — 그 특성은 **씬을 다시 올릴 때만** 돈다.
+
 ## 독가루는 넓이로 압박한다 — 문을 걷어내다 (2026-07-30)
 
 아래에서 세운 문을 다시 걷어냈다. **지나갈 수 있음은 보장됐지만 어색했다** — 독가루는

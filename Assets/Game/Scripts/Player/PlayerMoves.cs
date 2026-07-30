@@ -62,6 +62,37 @@ public class PlayerMoves : MonoBehaviour
         if (PlayerLevel.Instance != null) PlayerLevel.Instance.OnLevelUp += HandleLevelUp;
     }
 
+    /// <summary>
+    /// 새 판을 시작한다. 배운 기술과 강화를 전부 버리고 시작 기술만 남긴다.
+    /// 씬을 다시 올리지 않고 이어서 도는 구조라 여기서 직접 비워야 한다.
+    ///
+    /// 배율은 하나씩 되돌리지 않고 <b>전부 기본값으로 다시 적는다</b> — 강화가 늘어날 때
+    /// 여기를 같이 고치는 것을 잊으면 지난 판의 배율이 남는다.
+    /// </summary>
+    public void ResetForNewRun()
+    {
+        learned.Clear();
+        upgradeCounts.Clear();
+        taken.Clear();
+        for (int i = 0; i < MoveInfo.StartingMoveCount && i < MoveInfo.LearnOrder.Length; i++)
+            learned.Add(MoveInfo.LearnOrder[i]);
+
+        TackleDamageMultiplier = 1f;
+        TackleCooldownMultiplier = 1f;
+        TackleSlowReductionMultiplier = 1f;
+        VineRangeMultiplier = 1f;
+        VineStunMultiplier = 1f;
+        VineCooldownMultiplier = 1f;
+        SeedHealBonus = 0;
+        SeedDurationBonus = 0f;
+        SeedRadiusMultiplier = 1f;
+        PetalRadiusMultiplier = 1f;
+        PetalDamageMultiplier = 1f;
+        PetalDurationBonus = 0f;
+
+        OnMovesChanged?.Invoke();
+    }
+
     private void OnDestroy()
     {
         if (PlayerLevel.Instance != null) PlayerLevel.Instance.OnLevelUp -= HandleLevelUp;

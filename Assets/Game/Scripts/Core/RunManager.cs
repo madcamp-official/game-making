@@ -19,6 +19,15 @@ public class RunManager : MonoBehaviour
         Instance = this;
     }
 
+    /// <summary>
+    /// 새 판을 시작한다. 씬을 다시 올리지 않고 이어서 도는 구조라 여기서 직접 비워야 한다.
+    /// </summary>
+    public void ResetForNewRun()
+    {
+        Gold = 0;
+        OnGoldChanged?.Invoke(Gold);
+    }
+
     /// <summary>골드를 준다. 부적금화 같은 획득량 배율은 여기서 한 번에 적용된다.</summary>
     public void AddGold(int amount)
     {

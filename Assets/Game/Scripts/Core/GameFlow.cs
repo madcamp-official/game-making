@@ -123,10 +123,42 @@ public class GameFlow : MonoBehaviour
         Current = State.Playing;
 
         RunStats.Begin(Selected);
+        ResetRunState();
         ApplyCharacter(Selected);
+        // 캐릭터의 1단계를 입힌 뒤에 되살려야 그 단계의 최대 체력으로 찬다.
+        ResetPlayer();
 
         Time.timeScale = 1f;
         if (RoomFlowController.Instance != null) RoomFlowController.Instance.BeginRun();
+    }
+
+    /// <summary>
+    /// 지난 판에서 쌓인 것을 전부 비운다.
+    ///
+    /// 예전에는 판을 다시 시작하는 길이 <b>씬을 통째로 다시 올리는 것</b>뿐이라 (게임 오버 뒤 R키)
+    /// 아무것도 비울 필요가 없었다. 결과 화면에서 이어서 시작하게 되면서 씬이 그대로 남고,
+    /// 골드·유물·레벨·배운 기술이 전부 다음 판으로 넘어간다. 판에 걸쳐 남아야 하는 것은
+    /// 마지막으로 고른 캐릭터(PlayerPrefs)뿐이다.
+    ///
+    /// 여기에 모아 두는 이유는 "판이 시작된다"를 아는 곳이 여기 하나이기 때문이다. 각자
+    /// 알아서 비우게 하면 무엇이 언제 비워지는지가 흩어진다.
+    /// </summary>
+    private void ResetRunState()
+    {
+        if (RunManager.Instance != null) RunManager.Instance.ResetForNewRun();
+        if (PlayerLevel.Instance != null) PlayerLevel.Instance.ResetForNewRun();
+        if (PlayerMoves.Instance != null) PlayerMoves.Instance.ResetForNewRun();
+        EventBuffs.ResetForNewRun();
+        // 유물을 마지막에 비운다. 이때 도는 OnRelicsChanged가 최대 체력·이동 속도 배율을
+        // 다시 계산해 플레이어에게 밀어 넣는다 — 그 뒤에 캐릭터를 입히고 되살려야 한다.
+        if (RelicManager.Instance != null) RelicManager.Instance.ResetForNewRun();
+    }
+
+    /// <summary>쓰러진 몸을 일으킨다. 캐릭터를 입힌 뒤에 불러야 한다.</summary>
+    private static void ResetPlayer()
+    {
+        var death = FindAnyObjectByType<PlayerDeathHandler>();
+        if (death != null) death.ResetForNewRun();
     }
 
     /// <summary>죽었거나 클리어했다. 결과 화면을 띄운다.</summary>

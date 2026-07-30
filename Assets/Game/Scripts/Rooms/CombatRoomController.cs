@@ -54,6 +54,10 @@ public class CombatRoomController : MonoBehaviour
         clearedVisitId = -1;
     }
 
+    // 새 판을 시작할 때 이 값들을 손으로 되돌릴 필요는 없다. VisitId는 방이 켜질 때마다
+    // 단조 증가하므로 새 방이 올라오면 clearedVisitId와 저절로 달라진다. 오히려 판 도중에
+    // activeRooms를 0으로 밀면 아직 켜져 있는 방이 나가면서 계수가 어긋난다.
+
     // 방을 옮길 때 옛 방은 프레임 끝에 지워지고 새 방은 곧바로 생긴다. 그래서 잠깐 둘이 겹치는데,
     // 세어 두면 그 사이에도 0으로 떨어지지 않는다.
     private void OnEnable()
