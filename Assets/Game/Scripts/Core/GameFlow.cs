@@ -181,6 +181,10 @@ public class GameFlow : MonoBehaviour
         if (RunManager.Instance != null) RunManager.Instance.ResetForNewRun();
         if (PlayerLevel.Instance != null) PlayerLevel.Instance.ResetForNewRun();
         if (PlayerMoves.Instance != null) PlayerMoves.Instance.ResetForNewRun();
+        // 쿨타임·용의춤·채널(위치 고정, 피해 감소)·돌진 무적을 걷는다. 지난 판이 하이드로펌프
+        // 도중에 끝났어도 여기서 원상 복구된다.
+        var combat = FindAnyObjectByType<PlayerCombat>();
+        if (combat != null) combat.ResetForNewRun();
         EventBuffs.ResetForNewRun();
         // 유물을 마지막에 비운다. 이때 도는 OnRelicsChanged가 최대 체력·이동 속도 배율을
         // 다시 계산해 플레이어에게 밀어 넣는다 — 그 뒤에 캐릭터를 입히고 되살려야 한다.

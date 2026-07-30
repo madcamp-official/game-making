@@ -18,7 +18,12 @@ public static class ShadowSetup
 {
     /// <summary>대상 시트 이름이 저장소의 다른 동작에서 온 경우.</summary>
     private static readonly Dictionary<(string, string), string> SourceOverrides =
-        new Dictionary<(string, string), string> { [("Graveler", "Roll")] = "Special0" };
+        new Dictionary<(string, string), string>
+        {
+            [("Graveler", "Roll")] = "Special0",
+            // 파이리는 Shoot이 Charge의 CopyOf라 시트도 격자도 Charge의 것이다.
+            [("Charmander", "Shoot")] = "Charge",
+        };
 
     // ---------------------------------------------------------------- 1단계 · 슬라이스
 
@@ -144,6 +149,20 @@ public static class ShadowSetup
     {
         return AttachToPrefab("Assets/Game/Prefabs/Rooms/" + roomName + ".prefab",
                               childName, new[] { species });
+    }
+
+    /// <summary>
+    /// 플레이어 프리팹의 본체·그림자 짝을 다시 채운다. 진화와 캐릭터 선택으로 종이 바뀌므로
+    /// <b>고를 수 있는 모든 계열의 모든 단계</b>를 한 번에 싣는다. 파이리·꼬부기 계열을 들일 때
+    /// 아홉 종으로 늘리며 만들었다 — <see cref="AttachAll"/>을 다시 돌리면 적·NPC의 이미 맺어 둔
+    /// 짝까지 전부 다시 만드는데, 그건 필요 없는 일이다.
+    /// </summary>
+    public static string AttachToPlayer(string[] speciesList)
+    {
+        string result = AttachToPrefab(
+            "Assets/Game/Prefabs/Characters/Player.prefab", null, speciesList);
+        AssetDatabase.SaveAssets();
+        return result;
     }
 
     /// <summary>적 프리팹 하나에만 그림자를 단다. 나중에 추가된 종(성원숭)에 쓴다.</summary>

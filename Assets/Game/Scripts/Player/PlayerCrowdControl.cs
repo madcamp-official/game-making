@@ -73,6 +73,9 @@ public class PlayerCrowdControl : MonoBehaviour
     public bool CanFreeze => Time.time >= refreezeReadyTime &&
                              (health == null || !health.IsDead);
 
+    /// <summary>지금 얼어 있는지. 채널 기술이 끝나며 경직을 지울 때 빙결 경직까지 지우지 않기 위해 본다.</summary>
+    public bool IsFrozen => Time.time < frozenUntil;
+
     /// <summary>
     /// 짧게 얼린다. 유일한 하드 CC라 <paramref name="immunity"/> 동안 재빙결을 막는다.
     /// </summary>

@@ -13,13 +13,66 @@ MonoBehaviour:
   m_Name: Squirtle
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   displayName: "\uAF2C\uBD80\uAE30"
-  playStyle: "\uB192\uC740 \uC0DD\uC874\uB825\xB7\uBC00\uCE58\uAE30\uC640 \uBC29\uC5B4"
-  portrait: {fileID: 0}
-  previewController: {fileID: 0}
+  playStyle: "\uB3CC\uC9C4\uACFC \uBC29\uC5B4\uB85C \uADFC\uAC70\uB9AC\xB7\uC6D0\uAC70\uB9AC\uB97C
+    \uC624\uAC00\uBA70 \uC2F8\uC6B4\uB2E4"
+  portrait: {fileID: 680926374, guid: 67214e85dde3a49e18ee4c43bf0ff2ca, type: 3}
+  previewController: {fileID: 9100000, guid: 1be132d59233d4a7aa6788a498462d2c, type: 2}
   previewHoverState: Walk_0
   previewIdleState: Idle_0
-  fallbackCharacter: {fileID: 11400000, guid: 1780554f3c84a40b5b87ef7cd1e1fb85, type: 2}
+  fallbackCharacter: {fileID: 0}
   moveSet:
     startingMoveCount: 2
-    moves: []
-  stages: []
+    moves:
+    - type: 8
+      displayName: "\uBB3C\uB300\uD3EC"
+      summary: "\uACA8\uB208 \uBC29\uD5A5\uC5D0 \uBB3C\uC904\uAE30\uB97C \uD130\uB728\uB9AC\uB294
+        \uADFC\uC811 \uACF5\uACA9."
+      attackKind: 1
+      tagOverride: 
+      upgrades: 18000000190000001a000000
+    - type: 9
+      displayName: "\uD30C\uB3C4\uD0C0\uAE30"
+      summary: "\uACA8\uB208 \uBC29\uD5A5\uC73C\uB85C \uD30C\uB3C4\uB97C \uD0C0\uACE0
+        \uB3CC\uC9C4\uD558\uBA70 \uAE38\uC5D0 \uB2FF\uC740 \uC801\uC744 \uB54C\uB9B0\uB2E4.
+        \uBCBD\uC5D0 \uB2FF\uC73C\uBA74 \uBA48\uCD98\uB2E4."
+      attackKind: 1
+      tagOverride: 
+      upgrades: 1b0000001c0000001d000000
+    - type: 10
+      displayName: "\uB85C\uCF13\uBC15\uCE58\uAE30"
+      summary: "\uC7A0\uAE50 \uC6C5\uD06C\uB838\uB2E4\uAC00 \uB85C\uCF13\uCC98\uB7FC
+        \uB3CC\uC9C4\uD55C\uB2E4. \uB3CC\uC9C4\uD558\uB294 \uB3D9\uC548\uC5D0\uB294
+        \uBB34\uC801\uC774\uB2E4."
+      attackKind: 1
+      tagOverride: 
+      upgrades: 1e0000001f00000020000000
+    - type: 11
+      displayName: "\uD558\uC774\uB4DC\uB85C\uD38C\uD504"
+      summary: "\uC790\uB9AC\uC5D0 \uBC84\uD2F0\uACE0 \uC11C\uC11C \uAD75\uC740 \uBB3C\uC904\uAE30\uB97C
+        \uBFDC\uB294\uB2E4. \uBFDC\uB294 \uB3D9\uC548 \uBC1B\uB294 \uD53C\uD574\uAC00
+        \uC904\uC5B4\uB4E0\uB2E4."
+      attackKind: 2
+      tagOverride: 
+      upgrades: 210000002200000023000000
+  stages:
+  - stageName: "\uAF2C\uBD80\uAE30"
+    animatorController: {fileID: 9100000, guid: 1be132d59233d4a7aa6788a498462d2c, type: 2}
+    portrait: {fileID: 680926374, guid: 67214e85dde3a49e18ee4c43bf0ff2ca, type: 3}
+    maxHealth: 95
+    movePowers: 0a0000000c0000001c00000008000000
+    attackDamage: 11
+    vineDamage: 4
+  - stageName: "\uC5B4\uB2C8\uBD80\uAE30"
+    animatorController: {fileID: 9100000, guid: f8093cb9d9a0f4fbbb8111e8e17d5a80, type: 2}
+    portrait: {fileID: -1090406695, guid: fb6d1de90cb0345978332e0266ad923d, type: 3}
+    maxHealth: 120
+    movePowers: 0f000000120000002800000008000000
+    attackDamage: 11
+    vineDamage: 4
+  - stageName: "\uAC70\uBD81\uC655"
+    animatorController: {fileID: 9100000, guid: b92e3c2ad414c42d7991f6efa79e1100, type: 2}
+    portrait: {fileID: 1611680246, guid: 4cb1983010b554f2f9975cda08f3993c, type: 3}
+    maxHealth: 150
+    movePowers: 15000000190000003700000008000000
+    attackDamage: 11
+    vineDamage: 4

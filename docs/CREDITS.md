@@ -11,6 +11,12 @@
 | 이상해씨 | 0001 | CHUNSOFT (공식 PMD 유래) |
 | 이상해풀 | 0002 | CHUNSOFT (공식 PMD 유래) |
 | 이상해꽃 | 0003 | CHUNSOFT (공식 PMD 유래) |
+| 파이리 | 0004 | CHUNSOFT (공식 PMD 유래) |
+| 리자드 | 0005 | CHUNSOFT (공식 PMD 유래) |
+| 리자몽 | 0006 | CHUNSOFT + 리워크 (Shoot·Strike·Charge, PMDCollab 라이선스) |
+| 꼬부기 | 0007 | CHUNSOFT (공식 PMD 유래) |
+| 어니부기 | 0008 | CHUNSOFT (공식 PMD 유래) |
+| 거북왕 | 0009 | CHUNSOFT (공식 PMD 유래) |
 | 캐터피 | 0010 | CHUNSOFT (공식 PMD 유래) |
 | 고지 | 0028 | CHUNSOFT + Emmuffin 리워크 (PMDCollab 라이선스) |
 | 나인테일 | 0038 | CHUNSOFT + baronessfaron 리워크 (Walk, PMDCollab 라이선스) |

@@ -1,0 +1,2821 @@
+fileFormatVersion: 2
+guid: d82e8dcb06ebe4d1ebf168261f4fcebf
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -5639230596034153049
+    second: StrikeShadow_0
+  - first:
+      213: 7997450372491539873
+    second: StrikeShadow_1
+  - first:
+      213: -3196156891792674184
+    second: StrikeShadow_2
+  - first:
+      213: -3883599078740826596
+    second: StrikeShadow_3
+  - first:
+      213: 8475116778988378800
+    second: StrikeShadow_4
+  - first:
+      213: 2794180082398504851
+    second: StrikeShadow_5
+  - first:
+      213: -1253121354399883151
+    second: StrikeShadow_6
+  - first:
+      213: 6196359172572140831
+    second: StrikeShadow_7
+  - first:
+      213: 5802504450542823476
+    second: StrikeShadow_8
+  - first:
+      213: -4664584044430302730
+    second: StrikeShadow_9
+  - first:
+      213: -8165241374760151886
+    second: StrikeShadow_10
+  - first:
+      213: 8302008367800508208
+    second: StrikeShadow_11
+  - first:
+      213: 2913084553567611896
+    second: StrikeShadow_12
+  - first:
+      213: 2173430098934802898
+    second: StrikeShadow_13
+  - first:
+      213: -7544294095400070573
+    second: StrikeShadow_14
+  - first:
+      213: 2024410506347024439
+    second: StrikeShadow_15
+  - first:
+      213: 6753067977376035413
+    second: StrikeShadow_16
+  - first:
+      213: 1520234083809095506
+    second: StrikeShadow_17
+  - first:
+      213: 6026402185421343406
+    second: StrikeShadow_18
+  - first:
+      213: 6646919629067317043
+    second: StrikeShadow_19
+  - first:
+      213: -9180869318039434117
+    second: StrikeShadow_20
+  - first:
+      213: -8962180016442391833
+    second: StrikeShadow_21
+  - first:
+      213: -8402809736273813488
+    second: StrikeShadow_22
+  - first:
+      213: 2052127046796014886
+    second: StrikeShadow_23
+  - first:
+      213: 4366440951831367168
+    second: StrikeShadow_24
+  - first:
+      213: 812549075254051642
+    second: StrikeShadow_25
+  - first:
+      213: -3743695009029299679
+    second: StrikeShadow_26
+  - first:
+      213: -5630316702043880621
+    second: StrikeShadow_27
+  - first:
+      213: -6122183947310978309
+    second: StrikeShadow_28
+  - first:
+      213: -3287163523227553355
+    second: StrikeShadow_29
+  - first:
+      213: -1511260922708801351
+    second: StrikeShadow_30
+  - first:
+      213: -3825963246247658469
+    second: StrikeShadow_31
+  - first:
+      213: -8193077125895807155
+    second: StrikeShadow_32
+  - first:
+      213: -6855731839836633381
+    second: StrikeShadow_33
+  - first:
+      213: 4347292177010331523
+    second: StrikeShadow_34
+  - first:
+      213: 4323958044802874443
+    second: StrikeShadow_35
+  - first:
+      213: 4984051141800434479
+    second: StrikeShadow_36
+  - first:
+      213: 5214740531564625712
+    second: StrikeShadow_37
+  - first:
+      213: 9125406092333820818
+    second: StrikeShadow_38
+  - first:
+      213: -5706131550126107783
+    second: StrikeShadow_39
+  - first:
+      213: 2773453482993944102
+    second: StrikeShadow_40
+  - first:
+      213: -2929788782734417596
+    second: StrikeShadow_41
+  - first:
+      213: 4149396608947355549
+    second: StrikeShadow_42
+  - first:
+      213: 7311653627280833860
+    second: StrikeShadow_43
+  - first:
+      213: -1842900243112240555
+    second: StrikeShadow_44
+  - first:
+      213: 4444506711445675657
+    second: StrikeShadow_45
+  - first:
+      213: -1855251245389079763
+    second: StrikeShadow_46
+  - first:
+      213: -5894206403339368831
+    second: StrikeShadow_47
+  - first:
+      213: 5216942753433092832
+    second: StrikeShadow_48
+  - first:
+      213: 1112021807074731280
+    second: StrikeShadow_49
+  - first:
+      213: -2562953899104683225
+    second: StrikeShadow_50
+  - first:
+      213: -8244641475938416078
+    second: StrikeShadow_51
+  - first:
+      213: 3663495395899973621
+    second: StrikeShadow_52
+  - first:
+      213: -5719114687424819406
+    second: StrikeShadow_53
+  - first:
+      213: -6976398598017292232
+    second: StrikeShadow_54
+  - first:
+      213: -1889080155836673055
+    second: StrikeShadow_55
+  - first:
+      213: 3057582316300399343
+    second: StrikeShadow_56
+  - first:
+      213: -7017134351128421241
+    second: StrikeShadow_57
+  - first:
+      213: 8956601667024074044
+    second: StrikeShadow_58
+  - first:
+      213: -3805705660699423928
+    second: StrikeShadow_59
+  - first:
+      213: 5555872996219815173
+    second: StrikeShadow_60
+  - first:
+      213: -7236327216435202600
+    second: StrikeShadow_61
+  - first:
+      213: 1271111630885982541
+    second: StrikeShadow_62
+  - first:
+      213: -6526448813736374593
+    second: StrikeShadow_63
+  - first:
+      213: -1511650711058613283
+    second: StrikeShadow_64
+  - first:
+      213: 1794591069052582534
+    second: StrikeShadow_65
+  - first:
+      213: 856658352832869289
+    second: StrikeShadow_66
+  - first:
+      213: 6502077162523372356
+    second: StrikeShadow_67
+  - first:
+      213: -185159474609212413
+    second: StrikeShadow_68
+  - first:
+      213: -2004818332526724034
+    second: StrikeShadow_69
+  - first:
+      213: 6400844884420214506
+    second: StrikeShadow_70
+  - first:
+      213: 1095568219610234436
+    second: StrikeShadow_71
+  - first:
+      213: -8754105106888859027
+    second: StrikeShadow_72
+  - first:
+      213: -38707922764526614
+    second: StrikeShadow_73
+  - first:
+      213: 432976261281115973
+    second: StrikeShadow_74
+  - first:
+      213: 6646983343918394422
+    second: StrikeShadow_75
+  - first:
+      213: -6015457778150408627
+    second: StrikeShadow_76
+  - first:
+      213: 8061044185614488104
+    second: StrikeShadow_77
+  - first:
+      213: 3529338756448513620
+    second: StrikeShadow_78
+  - first:
+      213: 1149187373245169274
+    second: StrikeShadow_79
+  - first:
+      213: 7518954861751365659
+    second: StrikeShadow_80
+  - first:
+      213: -3121948379188432001
+    second: StrikeShadow_81
+  - first:
+      213: -5782336874821326600
+    second: StrikeShadow_82
+  - first:
+      213: -6405750133395946994
+    second: StrikeShadow_83
+  - first:
+      213: -1456449077109171952
+    second: StrikeShadow_84
+  - first:
+      213: -7636852619212131357
+    second: StrikeShadow_85
+  - first:
+      213: 8909589516386607465
+    second: StrikeShadow_86
+  - first:
+      213: -2782537805658750910
+    second: StrikeShadow_87
+  - first:
+      213: -3537505297758698779
+    second: StrikeShadow_88
+  - first:
+      213: -5281392409291061470
+    second: StrikeShadow_89
+  - first:
+      213: -9208381568350932407
+    second: StrikeShadow_90
+  - first:
+      213: -7505576745373570565
+    second: StrikeShadow_91
+  - first:
+      213: -3027571937305126490
+    second: StrikeShadow_92
+  - first:
+      213: 3184786870372883257
+    second: StrikeShadow_93
+  - first:
+      213: -4898122240792752482
+    second: StrikeShadow_94
+  - first:
+      213: -5993831733533303829
+    second: StrikeShadow_95
+  - first:
+      213: -801415286182286323
+    second: StrikeShadow_96
+  - first:
+      213: -8939214258661932663
+    second: StrikeShadow_97
+  - first:
+      213: 3797922957972026888
+    second: StrikeShadow_98
+  - first:
+      213: 3590685859283389632
+    second: StrikeShadow_99
+  - first:
+      213: 2638169761925308517
+    second: StrikeShadow_100
+  - first:
+      213: 5202051619495826061
+    second: StrikeShadow_101
+  - first:
+      213: 1572154955688815486
+    second: StrikeShadow_102
+  - first:
+      213: 6395406197261459734
+    second: StrikeShadow_103
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: StrikeShadow_0_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b14beb3aa3b9b4813a9305748f17a6b7
+      internalID: -1955360670
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4b51991d72a3746189c9f35e1b0f5113
+      internalID: 2113035010
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 2e97a913136184c31887495e4a62464d
+      internalID: -1079034158
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 496dca21a9c56459c96eb1a5a798efc9
+      internalID: -1917244888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 714fe151a0cd8483a88d7f4718abec1a
+      internalID: -1195882758
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3986c0f5c20ba4cffba00ec45578d1d4
+      internalID: -665645323
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6500748d9804a4851a7dc52e2c31fee2
+      internalID: 1559358848
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4917a907bef7e430ba31b70db9391a48
+      internalID: 118014835
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4f59f51d26abb4e46a60a68cc1a01db2
+      internalID: -1689358892
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 80940d30a2ebd426dacf1bef077bfa3d
+      internalID: 716658555
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 770724d3c4aaa4255be4f3ad391d1e2d
+      internalID: -1177594171
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fb420839567d54982aa22fb90d9e572c
+      internalID: -1212947172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_0_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 560
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 223234f47a1574be2b315e485c1f1894
+      internalID: -556835702
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c7022a0f6dd4a4c0a899ade2d6e5cdcc
+      internalID: -444497899
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d0bc35298f35a4902b4559390f266f1a
+      internalID: 582978963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9a6c5f357df284a60892ea2dfb837f41
+      internalID: 1080958253
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d880694d7e077430d8202b5d3e535569
+      internalID: 583895900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b13e78babbdd04f998ac3b8c59b110fe
+      internalID: 1340019436
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d6d2f12a680dd4913b075a308c11ab4d
+      internalID: 809204088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 574b0bf60cce94e999e4e6bbdf2be1be
+      internalID: 1485715561
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 98c92f70e22b346c2b2fa97c93f6df05
+      internalID: -287604112
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d2c02c2da89514b7a8e8a9d76f237d6d
+      internalID: -523266817
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6097e91b5024e4c4f8c1b741c9504d8a
+      internalID: 2025758812
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ad83f7afe7ecf4e6e99865299d4afe00
+      internalID: -264581981
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3bc4a38c1f17449e189068a7952f5b94
+      internalID: -1915729862
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_1_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 480
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ac8227fd3556b4d7eb20141a8e408026
+      internalID: 133650671
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e58c4585d49e9459f8bfd086c9560b2f
+      internalID: 1820395932
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e098129af643f4a1e8b9a2a5781d2102
+      internalID: 1692846984
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d4668603ef524ddbbff07043dac285b
+      internalID: 171257647
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 037b60f054bce474689d808c6dc674a4
+      internalID: -981564387
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3758f23ff0bcb4f63b06f5e73a232050
+      internalID: 794626156
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4d631901ae9c945ae87cbaab73bc2fe4
+      internalID: 1056455887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e68811e1ce81b41c9a17032925b9dee3
+      internalID: 348978445
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d278f6b896c4847ec90037994ae5c745
+      internalID: -561194712
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 57af03f44be5f47b685bd37cd7fc82c0
+      internalID: -1862295898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 89c27b8b1854549ad87cde39250b2fd0
+      internalID: -1368471398
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a80409b8399a44d2db3016d6fb6f76cb
+      internalID: -275344801
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ef3fead2575014583bb224c1e509a0fc
+      internalID: 1852660778
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_2_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 400
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c2395c3250a2847a78205a7dee84d26b
+      internalID: -1350147692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c79cdd901c8c4a71b6925f5415160c7
+      internalID: 1788765180
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f6f1490e3c634f46b4a72630d71e61d
+      internalID: -399235888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 86dcd189f41514bad9d2d9d2e71993ec
+      internalID: 386970096
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bff18c4f1600d46f8951f51a76b4cfca
+      internalID: -1391561055
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 32fb0e34e384244d3864e6b4d1313f5a
+      internalID: -1474427917
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 00960ace47442496d92e2c57f1732a49
+      internalID: -1160072518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 49ec926f9ba544a86b37e34d3c724a1c
+      internalID: -1377294560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c3976580160548a29483aef94db0b25
+      internalID: -507587482
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3edfe3f416d2b4a8a95593268375c183
+      internalID: 45937948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f1d6eb491428c47869de98765540cfdd
+      internalID: -1881596199
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 03ef95d587ef8451eb7f993d50b38fa6
+      internalID: 526747611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 22eaa5924477f4f8d9ab74df6f90e4f2
+      internalID: 1999814473
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_3_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 320
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87c46633703b34ac0866ffdeeb20cea4
+      internalID: -1209865143
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0f972830c2f4146128392fa6f77446af
+      internalID: -1297972119
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: a5f0365a99c004b539ad71c98b5623ea
+      internalID: 1088392020
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 22c251476481c4d35acd35bf72416292
+      internalID: 90609906
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 17372a3ae9a2c4c13995d6a28ac2f549
+      internalID: 477545452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1ef3a8410cb48479aafc77be7d3e0970
+      internalID: -668437424
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd600e049241047f8beab5b99b205837
+      internalID: -1986776773
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 54845b6c370d04389b4ad3472b6b0fd1
+      internalID: -1875640347
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f8e8f6c07e37f4d9eaf191e1609a876e
+      internalID: -924677068
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7a01a49698997470a95b07f3ec05cd70
+      internalID: 1168076510
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f4e46b87ec42342008cd97fda38d5329
+      internalID: -1174274961
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52127a84a1c8c4da5931ae9b5ca26ac7
+      internalID: -662768921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 87f34f8dfd75b486891d974b64cbc80a
+      internalID: -1462455327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_4_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 240
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1b34b4f84326b4dec9ac6a82dc02f154
+      internalID: -530286376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b74e09214003d4333a6beec314b3f6e2
+      internalID: 652864749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: cc5afd5f1123c4156beacc13c1da7138
+      internalID: 24318159
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 10fecdfa0b20b4f99b211a68cadac9ef
+      internalID: 1404295692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7f738647e57464fe0bbc68fb5fb9e42e
+      internalID: -646362472
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: ab8822bbbe4f44c7f9edf5c23cc22b73
+      internalID: 1754079697
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: bc5e254c3bd20415b8619ea904a9bfe5
+      internalID: -251517221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 629ecbbdc8ef94122a1703667d17ea1d
+      internalID: 2074155183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 23e1fbedc244f4421958ce4c6c142da5
+      internalID: -645733963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3c9538c0721934b85bf1ce6fe7557751
+      internalID: 578306191
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c49936a06b26c43ec8661b2260173a3b
+      internalID: -1937747440
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4fc1e65c9f2fa4293a22b67e038bd0b2
+      internalID: -792061150
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 14a9a61c8b5224a809dd61cb22d52ee9
+      internalID: -545504049
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_5_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 160
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: d0a4fa1786dab42b6aeedb883172468b
+      internalID: -902649348
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 7d03acf9499c149a1b5c8cf9d850d363
+      internalID: 682675031
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: b8c04262fdd5a4c86b3c89e08e4f7898
+      internalID: 1711581830
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 3e2bf93f644134a9789677c1b4584a15
+      internalID: -447038327
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 6544531a70f2a44d4a26c54441a2005f
+      internalID: -242200135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 52478d9ca65de459abef2a74426a0496
+      internalID: -1252059755
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: af7d6ba676e2e4cc3a25a925665afd71
+      internalID: 197347884
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 67cd28bc6bf8e4d4d9a87e4146faf5fc
+      internalID: 2058040149
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1a8d165a3c45b4aa7b33ad440afaaade
+      internalID: 915416205
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78a9c628d811a4d05b4570b1ff9b084b
+      internalID: -1820095728
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 78b0ff48a3dcf4827a45e9e54ad09d1d
+      internalID: -25672218
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 1c0a552105cad43b4a506074fe8e9c3c
+      internalID: 1392141014
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 0d7de5f943689454dae945639178ef14
+      internalID: 715529788
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_6_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 80
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8bcf2d4215b1d49088dbf79f3653e23e
+      internalID: -1378249030
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9dd96102d4b1e4468ba74faf06b2f204
+      internalID: -99444176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_1
+      rect:
+        serializedVersion: 2
+        x: 72
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c19ad19f42c8e45558d27219c769e5cb
+      internalID: 1429497269
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_2
+      rect:
+        serializedVersion: 2
+        x: 144
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 400c2c3c37b0d4d679e7af36c8735f95
+      internalID: 625170832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_3
+      rect:
+        serializedVersion: 2
+        x: 216
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: e2de4d8c44aab4e39bcb14cf6a7bc1bb
+      internalID: -202995183
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_4
+      rect:
+        serializedVersion: 2
+        x: 288
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: eec1d5f8fb064408caed76e1e071fc31
+      internalID: -786465557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_5
+      rect:
+        serializedVersion: 2
+        x: 360
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 50b70381d536f4f7a82754ef25b0759c
+      internalID: 1901573500
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_6
+      rect:
+        serializedVersion: 2
+        x: 432
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 84e262e0405f446048d83db3c563250b
+      internalID: 734812036
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_7
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 31c9d64905a094489a8414339945081b
+      internalID: 2081234995
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_8
+      rect:
+        serializedVersion: 2
+        x: 576
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: fd05bd4e1b3ec4165b725a0014b91ad7
+      internalID: 1538243522
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_9
+      rect:
+        serializedVersion: 2
+        x: 648
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4cb9fd8dd37e74fa4b3565d74b22c4bd
+      internalID: 574649913
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_10
+      rect:
+        serializedVersion: 2
+        x: 720
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: f191104fec3854c26ba9f868b991e3de
+      internalID: -1139108648
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_11
+      rect:
+        serializedVersion: 2
+        x: 792
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4889b6d49abfa453ab58359b1c3171ac
+      internalID: 314255910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: StrikeShadow_7_12
+      rect:
+        serializedVersion: 2
+        x: 864
+        y: 0
+        width: 72
+        height: 80
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 069aa797ed5384f0987935c537034c6a
+      internalID: -740975088
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 976161dfa73ae41a8b5648abf76e0c88
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      StrikeShadow_0_0: -1955360670
+      StrikeShadow_0_1: 2113035010
+      StrikeShadow_0_10: -1177594171
+      StrikeShadow_0_11: -1212947172
+      StrikeShadow_0_12: -556835702
+      StrikeShadow_0_2: -1079034158
+      StrikeShadow_0_3: -1917244888
+      StrikeShadow_0_4: -1195882758
+      StrikeShadow_0_5: -665645323
+      StrikeShadow_0_6: 1559358848
+      StrikeShadow_0_7: 118014835
+      StrikeShadow_0_8: -1689358892
+      StrikeShadow_0_9: 716658555
+      StrikeShadow_1_0: -444497899
+      StrikeShadow_1_1: 582978963
+      StrikeShadow_1_10: -264581981
+      StrikeShadow_1_11: -1915729862
+      StrikeShadow_1_12: 133650671
+      StrikeShadow_1_2: 1080958253
+      StrikeShadow_1_3: 583895900
+      StrikeShadow_1_4: 1340019436
+      StrikeShadow_1_5: 809204088
+      StrikeShadow_1_6: 1485715561
+      StrikeShadow_1_7: -287604112
+      StrikeShadow_1_8: -523266817
+      StrikeShadow_1_9: 2025758812
+      StrikeShadow_2_0: 1820395932
+      StrikeShadow_2_1: 1692846984
+      StrikeShadow_2_10: -275344801
+      StrikeShadow_2_11: 1852660778
+      StrikeShadow_2_12: -1350147692
+      StrikeShadow_2_2: 171257647
+      StrikeShadow_2_3: -981564387
+      StrikeShadow_2_4: 794626156
+      StrikeShadow_2_5: 1056455887
+      StrikeShadow_2_6: 348978445
+      StrikeShadow_2_7: -561194712
+      StrikeShadow_2_8: -1862295898
+      StrikeShadow_2_9: -1368471398
+      StrikeShadow_3_0: 1788765180
+      StrikeShadow_3_1: -399235888
+      StrikeShadow_3_10: 526747611
+      StrikeShadow_3_11: 1999814473
+      StrikeShadow_3_12: -1209865143
+      StrikeShadow_3_2: 386970096
+      StrikeShadow_3_3: -1391561055
+      StrikeShadow_3_4: -1474427917
+      StrikeShadow_3_5: -1160072518
+      StrikeShadow_3_6: -1377294560
+      StrikeShadow_3_7: -507587482
+      StrikeShadow_3_8: 45937948
+      StrikeShadow_3_9: -1881596199
+      StrikeShadow_4_0: -1297972119
+      StrikeShadow_4_1: 1088392020
+      StrikeShadow_4_10: -662768921
+      StrikeShadow_4_11: -1462455327
+      StrikeShadow_4_12: -530286376
+      StrikeShadow_4_2: 90609906
+      StrikeShadow_4_3: 477545452
+      StrikeShadow_4_4: -668437424
+      StrikeShadow_4_5: -1986776773
+      StrikeShadow_4_6: -1875640347
+      StrikeShadow_4_7: -924677068
+      StrikeShadow_4_8: 1168076510
+      StrikeShadow_4_9: -1174274961
+      StrikeShadow_5_0: 652864749
+      StrikeShadow_5_1: 24318159
+      StrikeShadow_5_10: -792061150
+      StrikeShadow_5_11: -545504049
+      StrikeShadow_5_12: -902649348
+      StrikeShadow_5_2: 1404295692
+      StrikeShadow_5_3: -646362472
+      StrikeShadow_5_4: 1754079697
+      StrikeShadow_5_5: -251517221
+      StrikeShadow_5_6: 2074155183
+      StrikeShadow_5_7: -645733963
+      StrikeShadow_5_8: 578306191
+      StrikeShadow_5_9: -1937747440
+      StrikeShadow_6_0: 682675031
+      StrikeShadow_6_1: 1711581830
+      StrikeShadow_6_10: 1392141014
+      StrikeShadow_6_11: 715529788
+      StrikeShadow_6_12: -1378249030
+      StrikeShadow_6_2: -447038327
+      StrikeShadow_6_3: -242200135
+      StrikeShadow_6_4: -1252059755
+      StrikeShadow_6_5: 197347884
+      StrikeShadow_6_6: 2058040149
+      StrikeShadow_6_7: 915416205
+      StrikeShadow_6_8: -1820095728
+      StrikeShadow_6_9: -25672218
+      StrikeShadow_7_0: -99444176
+      StrikeShadow_7_1: 1429497269
+      StrikeShadow_7_10: -1139108648
+      StrikeShadow_7_11: 314255910
+      StrikeShadow_7_12: -740975088
+      StrikeShadow_7_2: 625170832
+      StrikeShadow_7_3: -202995183
+      StrikeShadow_7_4: -786465557
+      StrikeShadow_7_5: 1901573500
+      StrikeShadow_7_6: 734812036
+      StrikeShadow_7_7: 2081234995
+      StrikeShadow_7_8: 1538243522
+      StrikeShadow_7_9: 574649913
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

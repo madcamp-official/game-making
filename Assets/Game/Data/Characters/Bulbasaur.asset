@@ -23,48 +23,56 @@ MonoBehaviour:
     startingMoveCount: 2
     moves:
     - type: 0
-      displayName: "몸통박치기"
-      summary: "겨눈 방향을 후려치는 근접 공격."
+      displayName: "\uBAB8\uD1B5\uBC15\uCE58\uAE30"
+      summary: "\uACA8\uB208 \uBC29\uD5A5\uC744 \uD6C4\uB824\uCE58\uB294 \uADFC\uC811
+        \uACF5\uACA9."
       attackKind: 1
-      tagOverride: ""
-      upgrades: [0, 1, 2]
+      tagOverride: 
+      upgrades: 000000000100000002000000
     - type: 1
-      displayName: "덩굴채찍"
-      summary: "두어 칸 밖까지 채찍을 뻗어 그 선 위의 적을 때리고 밀쳐 낸다. 맞은 적은 한동안 느려진다. 휘두른 뒤에는 잠깐 움직일 수 없다."
+      displayName: "\uB369\uAD74\uCC44\uCC0D"
+      summary: "\uB450\uC5B4 \uCE78 \uBC16\uAE4C\uC9C0 \uCC44\uCC0D\uC744 \uBED7\uC5B4
+        \uADF8 \uC120 \uC704\uC758 \uC801\uC744 \uB54C\uB9AC\uACE0 \uBC00\uCCD0 \uB0B8\uB2E4.
+        \uB9DE\uC740 \uC801\uC740 \uD55C\uB3D9\uC548 \uB290\uB824\uC9C4\uB2E4. \uD718\uB450\uB978
+        \uB4A4\uC5D0\uB294 \uC7A0\uAE50 \uC6C0\uC9C1\uC77C \uC218 \uC5C6\uB2E4."
       attackKind: 2
-      tagOverride: ""
-      upgrades: [3, 4, 5]
+      tagOverride: 
+      upgrades: 030000000400000005000000
     - type: 2
-      displayName: "씨뿌리기"
-      summary: "발밑에 회복 장판을 깐다. 그 위에 서 있는 동안 체력이 차오른다. 전투방마다 한 번 쓸 수 있다."
+      displayName: "\uC528\uBFCC\uB9AC\uAE30"
+      summary: "\uBC1C\uBC11\uC5D0 \uD68C\uBCF5 \uC7A5\uD310\uC744 \uAE50\uB2E4.
+        \uADF8 \uC704\uC5D0 \uC11C \uC788\uB294 \uB3D9\uC548 \uCCB4\uB825\uC774 \uCC28\uC624\uB978\uB2E4.
+        \uC804\uD22C\uBC29\uB9C8\uB2E4 \uD55C \uBC88 \uC4F8 \uC218 \uC788\uB2E4."
       attackKind: 0
-      tagOverride: "방당 1회"
-      upgrades: [6, 7, 8]
+      tagOverride: "\uBC29\uB2F9 1\uD68C"
+      upgrades: 060000000700000008000000
     - type: 3
-      displayName: "꽃잎댄스"
-      summary: "몸을 따라다니는 피해 장판을 만든다. 장판 안의 적이 주기적으로 피해를 입는다."
-      attackKind: 2
-      tagOverride: ""
-      upgrades: [9, 10, 11]
+      displayName: "\uAF43\uC78E\uB304\uC2A4"
+      summary: "\uBAB8\uC744 \uB530\uB77C\uB2E4\uB2C8\uB294 \uD53C\uD574 \uC7A5\uD310\uC744
+        \uB9CC\uB4E0\uB2E4. \uC7A5\uD310 \uC548\uC758 \uC801\uC774 \uC8FC\uAE30\uC801\uC73C\uB85C
+        \uD53C\uD574\uB97C \uC785\uB294\uB2E4."
+      attackKind: 1
+      tagOverride: 
+      upgrades: 090000000a0000000b000000
   stages:
   - stageName: "\uC774\uC0C1\uD574\uC528"
     animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
     portrait: {fileID: 368746673022191736, guid: c05d9f7d79efe493c9691638561106f3, type: 3}
     maxHealth: 100
-    movePowers: [11, 4, 0, 11]
+    movePowers: 0b00000004000000000000000b000000
     attackDamage: 11
     vineDamage: 4
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
     portrait: {fileID: 368746673022191736, guid: 18f8c6b6bacc0462a90c6254b2d49dd2, type: 3}
     maxHealth: 130
-    movePowers: [16, 6, 0, 16]
+    movePowers: 10000000060000000000000010000000
     attackDamage: 16
     vineDamage: 6
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
     portrait: {fileID: 368746673022191736, guid: 0e8729b0663224c72aa8fd0f99ab8f77, type: 3}
     maxHealth: 170
-    movePowers: [22, 9, 0, 22]
+    movePowers: 16000000090000000000000016000000
     attackDamage: 22
     vineDamage: 9

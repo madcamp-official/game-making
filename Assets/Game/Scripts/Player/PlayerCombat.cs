@@ -5,18 +5,21 @@ using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 /// <summary>
-/// 플레이어의 네 기술. 마우스 조준(360도 자유각) 기준이다.
+/// 플레이어 기술의 실행부. 마우스 조준(360도 자유각) 기준이다.
 ///
-/// * 좌클릭 — 몸통박치기 (근접)
-/// * 우클릭 — 덩굴채찍 (원거리, 2칸 사거리, 휘두른 뒤 짧은 경직)
-/// * 좌측 Shift — 씨뿌리기 (발밑에 회복 장판, 전투방마다 한 번)
-/// * Space — 꽃잎댄스 (몸을 따라다니는 피해 장판, 근접)
+/// 어느 캐릭터가 어느 기술을 어느 슬롯에 두는지는 <see cref="PlayerMoves"/>(캐릭터 데이터)가
+/// 정하고, 여기는 <b>모든 캐릭터의 기술 구현</b>을 들고 있다가 슬롯이 가리키는 것을 실행한다.
+///
+/// * 이상해씨 계열 — 몸통박치기 / 덩굴채찍 / 씨뿌리기(회복 장판) / 꽃잎댄스(따라다니는 장판, 근접)
+/// * 리자몽 계열 — 불꽃세례(투사체) / 용의춤(버프) / 드래곤클로(근접) / 화염방사(이어지는 줄기)
+/// * 거북왕 계열 — 물대포(판정은 몸통박치기) / 파도타기(돌진) / 로켓박치기(무적 돌진) / 하이드로펌프(자리 고정 줄기)
 ///
 /// 피해를 주는 기술에는 사거리 속성이 붙어 있다 (<see cref="MoveInfo.KindOf"/>).
 /// 유물과 이벤트 강화는 그 속성만 보고 배율을 매긴다.
 ///
 /// 기술은 전투방과 보스방에서, 적이 남아 있는 동안에만 쓸 수 있다 (<see cref="MovesUsable"/>).
-/// 수치는 모두 Inspector에서 조정한다.
+/// 수치는 모두 Inspector에서 조정하고, 단계별 기준 위력은 캐릭터 데이터가 덮어쓴다
+/// (<see cref="SetMovePowers"/>).
 /// </summary>
 [RequireComponent(typeof(PlayerController))]
 public class PlayerCombat : MonoBehaviour
@@ -82,6 +85,91 @@ public class PlayerCombat : MonoBehaviour
     [SerializeField, Min(0f)] private float petalCooldown = 12f;
     [SerializeField] private Color petalColor = new Color(1f, 0.45f, 0.75f, 0.38f);
 
+    // ---------------------------------------------------------------- 리자몽 계열
+
+    [Header("불꽃세례 — 원거리 투사체")]
+    // 피해량은 진화 단계가 덮어쓴다 (12/18/25). 여기 값은 1단계와 같게 맞춰 둔다.
+    [SerializeField, Min(0)] private int fireSpitDamage = 12;
+    [SerializeField, Min(0f)] private float fireSpitCooldown = 0.55f;
+    [SerializeField, Min(0f)] private float fireSpitRange = 6.5f;
+    [SerializeField, Min(0f)] private float fireSpitSpeed = 12f;
+    [Tooltip("투사체의 지름(유닛). 판정과 그림이 같은 원이다.")]
+    [SerializeField, Min(0f)] private float fireSpitSize = 0.4f;
+    [SerializeField] private Color fireSpitColor = new Color(1f, 0.55f, 0.15f, 0.95f);
+
+    [Header("용의춤 — 공격력·이동 속도 버프")]
+    [Tooltip("공격력 증가 비율. 0.3이면 30% 세진다. 불꽃세례·드래곤클로·화염방사에만 적용되고 넉백은 그대로다.")]
+    [SerializeField, Min(0f)] private float danceAttackBonus = 0.3f;
+    [SerializeField, Min(0f)] private float danceSpeedBonus = 0.25f;
+    [SerializeField, Min(0f)] private float danceDuration = 4f;
+    [Tooltip("쿨타임은 기술을 쓴 순간부터 돈다 — 버프가 끝나기를 기다렸다 도는 게 아니다.")]
+    [SerializeField, Min(0f)] private float danceCooldown = 12f;
+    [SerializeField] private Color danceColor = new Color(1f, 0.35f, 0.3f, 0.8f);
+
+    [Header("드래곤클로 — 근접 강타")]
+    // 피해량은 진화 단계가 덮어쓴다 (26/38/52).
+    [SerializeField, Min(0)] private int clawDamage = 26;
+    [SerializeField, Min(0f)] private float clawCooldown = 4f;
+    [SerializeField, Min(0f)] private float clawRange = 0.95f;
+    [SerializeField, Min(0f)] private float clawRadius = 1.05f;
+    [SerializeField, Min(0f)] private float clawKnockback = 9f;
+    [SerializeField] private Color clawColor = new Color(1f, 0.5f, 0.2f, 0.55f);
+
+    [Header("화염방사 — 이어지는 화염 줄기")]
+    // 틱당 피해는 진화 단계가 덮어쓴다 (전 단계 14 — 총 6틱 84).
+    [SerializeField, Min(0)] private int flameTickDamage = 14;
+    [SerializeField, Min(0f)] private float flameDuration = 1.5f;
+    [SerializeField, Min(0.05f)] private float flameTickInterval = 0.25f;
+    [SerializeField, Min(0f)] private float flameCooldown = 9f;
+    [SerializeField, Min(0f)] private float flameRange = 6f;
+    [SerializeField, Min(0f)] private float flameWidth = 1.2f;
+    [SerializeField] private Color flameColor = new Color(1f, 0.45f, 0.1f, 0.55f);
+
+    // ---------------------------------------------------------------- 거북왕 계열
+
+    [Header("물대포 — 근접 (판정은 몸통박치기와 동일)")]
+    // 피해량은 진화 단계가 덮어쓴다 (10/15/21).
+    [SerializeField, Min(0)] private int waterGunDamage = 10;
+    [SerializeField, Min(0f)] private float waterGunCooldown = 0.5f;
+    [SerializeField, Min(0f)] private float waterGunRange = 0.9f;
+    [SerializeField, Min(0f)] private float waterGunRadius = 0.78f;
+    [SerializeField, Min(0f)] private float waterGunKnockback = 6f;
+    [SerializeField] private Color waterGunColor = new Color(0.35f, 0.7f, 1f, 0.55f);
+
+    [Header("파도타기 — 이동 겸 공격 돌진")]
+    // 피해량은 진화 단계가 덮어쓴다 (12/18/25).
+    [SerializeField, Min(0)] private int surfDamage = 12;
+    [SerializeField, Min(0f)] private float surfCooldown = 4.5f;
+    [SerializeField, Min(0f)] private float surfDistance = 4.5f;
+    [SerializeField, Min(0.05f)] private float surfDuration = 0.65f;
+    [SerializeField, Min(0f)] private float surfKnockback = 5f;
+
+    [Header("로켓박치기 — 짧은 무적 돌진")]
+    // 피해량은 진화 단계가 덮어쓴다 (28/40/55).
+    [SerializeField, Min(0)] private int rocketDamage = 28;
+    [SerializeField, Min(0f)] private float rocketCooldown = 8f;
+    [Tooltip("준비 동작. 이 동안에는 무적이 아니다 — 무적은 실제로 몸이 나가는 동안만이다.")]
+    [SerializeField, Min(0f)] private float rocketWindup = 0.3f;
+    [SerializeField, Min(0.05f)] private float rocketDuration = 0.6f;
+    [SerializeField, Min(0f)] private float rocketDistance = 3.2f;
+    [SerializeField, Min(0f)] private float rocketKnockback = 10f;
+
+    [Header("하이드로펌프 — 자리를 고정하고 쏘는 물줄기")]
+    // 틱당 피해는 진화 단계가 덮어쓴다 (전 단계 8 — 총 12틱 96).
+    [SerializeField, Min(0)] private int hydroTickDamage = 8;
+    [SerializeField, Min(0f)] private float hydroDuration = 2.4f;
+    [SerializeField, Min(0.05f)] private float hydroTickInterval = 0.2f;
+    [SerializeField, Min(0f)] private float hydroCooldown = 14f;
+    [SerializeField, Min(0f)] private float hydroRange = 7f;
+    [SerializeField, Min(0f)] private float hydroWidth = 1.1f;
+    [Tooltip("조준이 마우스를 따라 도는 최대 각속도 (도/초).")]
+    [SerializeField, Min(0f)] private float hydroTurnSpeed = 240f;
+    [Tooltip("시전 중 받는 피해가 줄어드는 비율. 0.5면 절반만 맞는다. 완전 무적과는 다르다.")]
+    [SerializeField, Range(0f, 0.9f)] private float hydroDamageReduction = 0.5f;
+    [Tooltip("틱마다 맞은 적을 물줄기 방향으로 미는 힘.")]
+    [SerializeField, Min(0f)] private float hydroPushForce = 3.5f;
+    [SerializeField] private Color hydroColor = new Color(0.3f, 0.65f, 1f, 0.55f);
+
     [Header("공통")]
     [SerializeField, Range(0f, 1f)] private float attackMoveSpeedMultiplier = 0.5f;
     [SerializeField, Min(0f)] private float attackAnimDuration = 0.467f;
@@ -96,17 +184,33 @@ public class PlayerCombat : MonoBehaviour
     private PlayerAnimator playerAnimator;
     private PlayerMoves moves;
     private Health health;
+    private Rigidbody2D body;
+    private PlayerDash dash;
+    private PlayerCrowdControl crowdControl;
     private Camera mainCamera;
     private SpriteRenderer flashMarker; // 재사용하는 공격 판정 표시
     private SpriteRenderer vineMarker;  // 재사용하는 덩굴채찍 연출
+    private SpriteRenderer beamMarker;  // 재사용하는 화염방사·하이드로펌프 줄기 연출
     private float lastMeleeTime = -999f;
     private float lastVineTime = -999f;
     private float lastPetalTime = -999f;
+    private float lastFireSpitTime = -999f;
+    private float lastDanceTime = -999f;
+    private float lastClawTime = -999f;
+    private float lastFlameTime = -999f;
+    private float lastWaterGunTime = -999f;
+    private float lastSurfTime = -999f;
+    private float lastRocketTime = -999f;
+    private float lastHydroTime = -999f;
     /// <summary>단계 데이터가 꽃잎댄스 위력을 따로 주지 않았을 때는 몸통박치기 위력을 쓴다.</summary>
     private int petalBaseDamage;
     /// <summary>씨뿌리기를 쓴 전투방의 번호. 방이 바뀌면 다시 쓸 수 있다.</summary>
     private int seedUsedInRoom = -1;
     private float slowUntil = -999f;
+    /// <summary>용의춤이 끝나는 시각. 지나면 저절로 풀리므로 "되돌리기"가 없다 — 복구 실수도 없다.</summary>
+    private float danceUntil = -999f;
+    /// <summary>진행 중인 채널·돌진 루틴 (화염방사·로켓박치기·하이드로펌프). 하나만 돈다.</summary>
+    private Coroutine busyRoutine;
 
     private void Awake()
     {
@@ -114,6 +218,11 @@ public class PlayerCombat : MonoBehaviour
         playerAnimator = GetComponent<PlayerAnimator>();
         moves = GetComponent<PlayerMoves>();
         health = GetComponent<Health>();
+        body = GetComponent<Rigidbody2D>();
+        crowdControl = GetComponent<PlayerCrowdControl>();
+        // 돌진 부품은 캐릭터가 바뀌어도 같은 것을 쓰므로 없으면 여기서 붙인다.
+        dash = GetComponent<PlayerDash>();
+        if (dash == null) dash = gameObject.AddComponent<PlayerDash>();
 
         // 맞는 소리. OnDamaged가 아니라 OnCombatDamaged를 듣는 이유는, 잠만보를 흔들다 치르는
         // 대가처럼 "맞은 것이 아닌 감소"까지 타격음이 나면 안 되기 때문이다.
@@ -179,6 +288,86 @@ public class PlayerCombat : MonoBehaviour
             petalDamageRatio * KindMultiplier(MoveType.PetalDance) *
             (moves != null ? moves.PetalDamageMultiplier : 1f));
 
+    // ---------------------------------------------------------------- 리자몽 계열 유효 수치
+
+    /// <summary>
+    /// 용의춤이 켜져 있는 동안의 공격력 배율. 불꽃세례·드래곤클로·화염방사에만 곱한다.
+    /// 넉백에는 곱하지 않는다 — 명세가 못박은 규칙이다.
+    /// 시각이 지나면 배율이 저절로 1로 돌아오므로 종료 처리에서 복구를 빠뜨릴 수가 없다.
+    /// </summary>
+    private float DanceAttackMultiplier =>
+        Time.time < danceUntil ? 1f + danceAttackBonus + (moves != null ? moves.DancePowerBonus : 0f) : 1f;
+
+    private float DanceSpeedMultiplier =>
+        Time.time < danceUntil ? 1f + danceSpeedBonus + (moves != null ? moves.DanceSpeedBonus : 0f) : 1f;
+
+    private float EffectiveDanceDuration =>
+        danceDuration + (moves != null ? moves.DanceDurationBonus : 0f);
+    private float EffectiveDanceCooldown => danceCooldown * RelicCooldownMultiplier;
+
+    private int EffectiveFireSpitDamage =>
+        ScaleWholeValue(fireSpitDamage, KindMultiplier(MoveType.FireSpit) * DanceAttackMultiplier *
+            (moves != null ? moves.FireSpitDamageMultiplier : 1f));
+    private float EffectiveFireSpitCooldown =>
+        fireSpitCooldown * (moves != null ? moves.FireSpitCooldownMultiplier : 1f) * RelicCooldownMultiplier;
+    private float EffectiveFireSpitSize =>
+        fireSpitSize * (moves != null ? moves.FireSpitSizeMultiplier : 1f) * RelicAttackSizeMultiplier;
+
+    private int EffectiveClawDamage =>
+        ScaleWholeValue(clawDamage, KindMultiplier(MoveType.DragonClaw) * DanceAttackMultiplier *
+            (moves != null ? moves.ClawDamageMultiplier : 1f));
+    private float EffectiveClawCooldown => clawCooldown * RelicCooldownMultiplier;
+    private float EffectiveClawRadius =>
+        clawRadius * (moves != null ? moves.ClawRadiusMultiplier : 1f) * RelicAttackSizeMultiplier;
+    private float EffectiveClawKnockback =>
+        clawKnockback * (moves != null ? moves.ClawKnockbackMultiplier : 1f);
+
+    private int EffectiveFlameTickDamage =>
+        ScaleWholeValue(flameTickDamage, KindMultiplier(MoveType.Flamethrower) * DanceAttackMultiplier *
+            (moves != null ? moves.FlameDamageMultiplier : 1f));
+    private float EffectiveFlameCooldown =>
+        flameCooldown * (moves != null ? moves.FlameCooldownMultiplier : 1f) * RelicCooldownMultiplier;
+    private float EffectiveFlameWidth =>
+        flameWidth * (moves != null ? moves.FlameWidthMultiplier : 1f) * RelicAttackSizeMultiplier;
+    private float EffectiveFlameRange => flameRange * RelicAttackSizeMultiplier;
+
+    // ---------------------------------------------------------------- 거북왕 계열 유효 수치
+
+    private int EffectiveWaterGunDamage =>
+        ScaleWholeValue(waterGunDamage, KindMultiplier(MoveType.WaterGun) *
+            (moves != null ? moves.WaterGunDamageMultiplier : 1f));
+    private float EffectiveWaterGunCooldown =>
+        waterGunCooldown * (moves != null ? moves.WaterGunCooldownMultiplier : 1f) * RelicCooldownMultiplier;
+    private float EffectiveWaterGunRadius =>
+        waterGunRadius * (moves != null ? moves.WaterGunRadiusMultiplier : 1f) * RelicAttackSizeMultiplier;
+
+    private int EffectiveSurfDamage =>
+        ScaleWholeValue(surfDamage, KindMultiplier(MoveType.Surf) *
+            (moves != null ? moves.SurfDamageMultiplier : 1f));
+    private float EffectiveSurfCooldown =>
+        surfCooldown * (moves != null ? moves.SurfCooldownMultiplier : 1f) * RelicCooldownMultiplier;
+    private float EffectiveSurfDistance =>
+        surfDistance * (moves != null ? moves.SurfDistanceMultiplier : 1f);
+
+    private int EffectiveRocketDamage =>
+        ScaleWholeValue(rocketDamage, KindMultiplier(MoveType.RocketHeadbutt) *
+            (moves != null ? moves.RocketDamageMultiplier : 1f));
+    private float EffectiveRocketCooldown =>
+        rocketCooldown * (moves != null ? moves.RocketCooldownMultiplier : 1f) * RelicCooldownMultiplier;
+    private float EffectiveRocketKnockback =>
+        rocketKnockback * (moves != null ? moves.RocketKnockbackMultiplier : 1f);
+
+    private int EffectiveHydroTickDamage =>
+        ScaleWholeValue(hydroTickDamage, KindMultiplier(MoveType.HydroPump) *
+            (moves != null ? moves.HydroDamageMultiplier : 1f));
+    private float EffectiveHydroCooldown => hydroCooldown * RelicCooldownMultiplier;
+    private float EffectiveHydroWidth =>
+        hydroWidth * (moves != null ? moves.HydroWidthMultiplier : 1f) * RelicAttackSizeMultiplier;
+    private float EffectiveHydroRange => hydroRange * RelicAttackSizeMultiplier;
+    /// <summary>시전 중 받는 피해 배율. 감소 50%면 0.5, 강화하면 0.35까지 내려간다.</summary>
+    private float EffectiveHydroDamageTaken =>
+        Mathf.Clamp(1f - hydroDamageReduction - (moves != null ? moves.HydroGuardBonus : 0f), 0.05f, 1f);
+
     /// <summary>
     /// 씨뿌리기는 전투방마다 한 번만 쓸 수 있다. 시간이 지나 돌아오는 게 아니라
     /// 방을 넘어가야 돌아오므로, "이 방에서 언제 쓸 것인가"가 곧 선택이 된다.
@@ -201,6 +390,14 @@ public class PlayerCombat : MonoBehaviour
             case MoveType.Tackle: last = lastMeleeTime; cooldown = EffectiveMeleeCooldown; break;
             case MoveType.VineWhip: last = lastVineTime; cooldown = EffectiveVineCooldown; break;
             case MoveType.PetalDance: last = lastPetalTime; cooldown = EffectivePetalCooldown; break;
+            case MoveType.FireSpit: last = lastFireSpitTime; cooldown = EffectiveFireSpitCooldown; break;
+            case MoveType.DragonDance: last = lastDanceTime; cooldown = EffectiveDanceCooldown; break;
+            case MoveType.DragonClaw: last = lastClawTime; cooldown = EffectiveClawCooldown; break;
+            case MoveType.Flamethrower: last = lastFlameTime; cooldown = EffectiveFlameCooldown; break;
+            case MoveType.WaterGun: last = lastWaterGunTime; cooldown = EffectiveWaterGunCooldown; break;
+            case MoveType.Surf: last = lastSurfTime; cooldown = EffectiveSurfCooldown; break;
+            case MoveType.RocketHeadbutt: last = lastRocketTime; cooldown = EffectiveRocketCooldown; break;
+            case MoveType.HydroPump: last = lastHydroTime; cooldown = EffectiveHydroCooldown; break;
             default: return 1f;
         }
         if (cooldown <= 0f) return 1f;
@@ -229,6 +426,13 @@ public class PlayerCombat : MonoBehaviour
                 case MoveType.Tackle: meleeDamage = power; break;
                 case MoveType.VineWhip: vineDamage = power; break;
                 case MoveType.PetalDance: petalBaseDamage = power; break;
+                case MoveType.FireSpit: fireSpitDamage = power; break;
+                case MoveType.DragonClaw: clawDamage = power; break;
+                case MoveType.Flamethrower: flameTickDamage = power; break;
+                case MoveType.WaterGun: waterGunDamage = power; break;
+                case MoveType.Surf: surfDamage = power; break;
+                case MoveType.RocketHeadbutt: rocketDamage = power; break;
+                case MoveType.HydroPump: hydroTickDamage = power; break;
             }
         }
     }
@@ -250,12 +454,15 @@ public class PlayerCombat : MonoBehaviour
 
     private void Update()
     {
-        // 공격 중 이동 감속 적용/해제
-        controller.SpeedMultiplier = Time.time < slowUntil ? EffectiveAttackMoveSpeedMultiplier : 1f;
+        // 공격 중 감속과 용의춤 가속. 겹치면 곱한다 — 춤을 춘 채 공격해도 가속의 몫은 남는다.
+        float slow = Time.time < slowUntil ? EffectiveAttackMoveSpeedMultiplier : 1f;
+        controller.SpeedMultiplier = slow * DanceSpeedMultiplier;
 
         if (!controller.ControlEnabled || (health != null && health.IsDead)) return;
         // 경직 중에는 공격도 못 한다. 후딜이 없는 것과 같아지면 경직을 넣은 의미가 없다.
         if (controller.IsStunned) return;
+        // 채널(화염방사)·돌진이 도는 동안에는 다른 기술을 겹쳐 쓸 수 없다.
+        if (busyRoutine != null || (dash != null && dash.IsDashing)) return;
         // 강화 팔레트·이벤트 대사창·보스 보상 화면이 떠 있는 동안에는 클릭이 공격으로 새면 안 된다.
         // 특히 보상 화면은 "아무 키나 눌러 계속"이라 넘기는 입력이 그대로 공격이 될 수 있다.
         if (MoveUpgradePanel.IsOpen || RelicChoicePanel.IsOpen || EventDialogue.IsOpen ||
@@ -299,6 +506,43 @@ public class PlayerCombat : MonoBehaviour
                 lastPetalTime = Time.time;
                 PetalDance();
                 break;
+
+            // 리자몽 계열
+            case MoveType.FireSpit:
+                lastFireSpitTime = Time.time;
+                FireSpitAttack(GetMouseDirection());
+                break;
+            case MoveType.DragonDance:
+                lastDanceTime = Time.time;
+                DragonDanceBuff();
+                break;
+            case MoveType.DragonClaw:
+                lastClawTime = Time.time;
+                ClawAttack(GetMouseDirection());
+                break;
+            case MoveType.Flamethrower:
+                lastFlameTime = Time.time;
+                busyRoutine = StartCoroutine(FlameRoutine());
+                break;
+
+            // 거북왕 계열
+            case MoveType.WaterGun:
+                lastWaterGunTime = Time.time;
+                WaterGunAttack(GetMouseDirection());
+                break;
+            case MoveType.Surf:
+                lastSurfTime = Time.time;
+                SurfDash(GetMouseDirection());
+                break;
+            case MoveType.RocketHeadbutt:
+                lastRocketTime = Time.time;
+                busyRoutine = StartCoroutine(RocketRoutine());
+                break;
+            case MoveType.HydroPump:
+                lastHydroTime = Time.time;
+                busyRoutine = StartCoroutine(HydroRoutine());
+                break;
+
             default:
                 Debug.LogWarning("기술 실행부가 연결되지 않았다: " + move);
                 break;
@@ -332,13 +576,17 @@ public class PlayerCombat : MonoBehaviour
         return direction.sqrMagnitude > 0.001f ? direction.normalized : controller.FacingDirection;
     }
 
-    /// <summary>근접 공격용. 조준 방향을 보고, 공격 모션을 재생하며 그동안 감속한다.</summary>
-    private void BeginAttack(Vector2 direction)
+    /// <summary>
+    /// 근접 공격용. 조준 방향을 보고, 공격 모션을 재생하며 그동안 감속한다.
+    /// 동작 이름을 받는 이유: 캐릭터마다 공격 시트가 다르다 — 이상해씨는 Attack 하나로
+    /// 다 쓰지만, 리자몽 계열은 기술마다 Shoot·Strike·Charge로 갈린다.
+    /// </summary>
+    private void BeginAttack(Vector2 direction, string animAction = "Attack")
     {
         controller.SetFacing(direction);
         slowUntil = Time.time + attackAnimDuration;
         if (playerAnimator != null)
-            playerAnimator.PlayAttack(attackAnimDuration);
+            playerAnimator.PlayAction(animAction, attackAnimDuration);
     }
 
     private void MeleeAttack(Vector2 direction)
@@ -353,12 +601,21 @@ public class PlayerCombat : MonoBehaviour
         }
         else
         {
-            StartCoroutine(DebugAttackFlash(origin));
+            StartCoroutine(DebugAttackFlash(origin, EffectiveMeleeRadius,
+                new Color(1f, 0.9f, 0.2f, 0.6f)));
         }
 
-        int damage = EffectiveMeleeDamage;
+        StrikeCircle(direction, origin, EffectiveMeleeRadius, EffectiveMeleeDamage, meleeKnockbackForce);
+    }
+
+    /// <summary>
+    /// 원형 근접 판정의 공용 실행부. 몸통박치기·물대포·드래곤클로가 수치만 달리해 함께 쓴다.
+    /// 범위 안의 적을 전부 때리되, 콜라이더를 여럿 가진 적도 한 번만 맞는다.
+    /// </summary>
+    private void StrikeCircle(Vector2 direction, Vector2 origin, float radius, int damage, float knockback)
+    {
         struckTargets.Clear();
-        int count = Physics2D.OverlapCircle(origin, EffectiveMeleeRadius, noFilter, hitBuffer);
+        int count = Physics2D.OverlapCircle(origin, radius, noFilter, hitBuffer);
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
@@ -370,7 +627,7 @@ public class PlayerCombat : MonoBehaviour
             struckTargets.Add(enemyHealth);
 
             enemyHealth.TakeDamage(damage);
-            enemy.ApplyKnockback(direction, meleeKnockbackForce);
+            enemy.ApplyKnockback(direction, knockback);
             PlayerRelicEffects.ReportDamageDealt(damage);
         }
 
@@ -454,6 +711,340 @@ public class PlayerCombat : MonoBehaviour
                              EffectivePetalDamage, petalTickInterval, petalColor, transform);
     }
 
+    // ---------------------------------------------------------------- 리자몽 계열
+
+    /// <summary>
+    /// 불꽃세례. 조준 방향으로 불덩이를 쏜다. 관통하지 않고, 적이나 벽에 닿으면 사라진다.
+    /// 투사체는 프리팹 없이 코드로 세운다 — 원 하나짜리 그림이라 프리팹으로 만들 몫이 없다.
+    /// </summary>
+    private void FireSpitAttack(Vector2 direction)
+    {
+        BeginAttack(direction, "Shoot");
+
+        float size = EffectiveFireSpitSize;
+        GameObject go = new GameObject("FireSpit");
+        go.transform.position = (Vector2)transform.position + direction * 0.4f;
+        go.transform.localScale = Vector3.one * size;
+
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = PrimitiveSprites.Circle;
+        sr.color = fireSpitColor;
+        sr.sortingOrder = 50;
+
+        // Dynamic이어야 벽(정지 콜라이더)과의 트리거 접촉이 온다. 빠르니 연속 판정으로 굳힌다.
+        Rigidbody2D projectileBody = go.AddComponent<Rigidbody2D>();
+        projectileBody.gravityScale = 0f;
+        projectileBody.freezeRotation = true;
+        projectileBody.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+
+        CircleCollider2D circle = go.AddComponent<CircleCollider2D>();
+        circle.isTrigger = true;
+        circle.radius = 0.5f; // 원 스프라이트가 1유닛이라, 스케일이 곧 지름이 된다
+
+        go.AddComponent<Projectile>().Launch(direction, EffectiveFireSpitDamage,
+                                             fireSpitSpeed, fireSpitRange);
+    }
+
+    /// <summary>
+    /// 용의춤. 잠깐 춤을 추고 공격력·이동 속도가 오른다. "되돌리기"가 없는 구조다 —
+    /// 만료 시각만 적어 두고 배율 프로퍼티가 매번 시각을 보므로, 끝나는 순간 저절로 1로
+    /// 돌아온다. 중복 시전도 시각을 늘릴 뿐이라 겹침 복구 문제가 없다.
+    /// </summary>
+    private void DragonDanceBuff()
+    {
+        danceUntil = Time.time + EffectiveDanceDuration;
+        StartCoroutine(DancePulse());
+    }
+
+    /// <summary>몸에서 붉은 고리가 한 번 퍼진다. 버프가 걸렸다는 유일한 화면 신호다.</summary>
+    private IEnumerator DancePulse()
+    {
+        GameObject go = new GameObject("DancePulse");
+        SpriteRenderer ring = go.AddComponent<SpriteRenderer>();
+        ring.sprite = PrimitiveSprites.Ring;
+        ring.sortingOrder = 50;
+
+        const float PulseTime = 0.45f;
+        float elapsed = 0f;
+        while (elapsed < PulseTime)
+        {
+            elapsed += Time.deltaTime;
+            float t = elapsed / PulseTime;
+            go.transform.position = transform.position; // 달리면서 춰도 몸을 따라온다
+            go.transform.localScale = Vector3.one * Mathf.Lerp(0.8f, 2.6f, t);
+            ring.color = new Color(danceColor.r, danceColor.g, danceColor.b, danceColor.a * (1f - t));
+            yield return null;
+        }
+        Destroy(go);
+    }
+
+    /// <summary>드래곤클로. 몸통박치기와 같은 원형 판정에 수치만 무겁다 — 느리고 넓고 세다.</summary>
+    private void ClawAttack(Vector2 direction)
+    {
+        BeginAttack(direction, "Strike");
+        Vector2 origin = (Vector2)transform.position + direction * clawRange;
+        StartCoroutine(DebugAttackFlash(origin, EffectiveClawRadius, clawColor));
+        StrikeCircle(direction, origin, EffectiveClawRadius, EffectiveClawDamage, EffectiveClawKnockback);
+    }
+
+    /// <summary>
+    /// 화염방사. 1.5초 동안 마우스를 따라 도는 화염 줄기를 뿜는다. 걸을 수는 있지만
+    /// 공격 감속(50%)이 시전 내내 걸린다 — <see cref="slowUntil"/>을 끝 시각까지 미는 것이 전부다.
+    ///
+    /// 틱은 장판(<see cref="MoveZone"/>)과 같은 이유로 <see cref="Health.TakeToll"/>을 쓴다:
+    /// 0.25초 간격이 적의 피격 무적(0.3초)에 걸리면 틱이 통째로 사라진다.
+    /// </summary>
+    private IEnumerator FlameRoutine()
+    {
+        float endTime = Time.time + flameDuration;
+        float nextTick = Time.time;
+        slowUntil = endTime;
+        if (playerAnimator != null) playerAnimator.BeginChannel("Charge", flameDuration);
+
+        try
+        {
+            while (Time.time < endTime)
+            {
+                if ((health != null && health.IsDead) || !MovesUsable) yield break;
+
+                Vector2 direction = GetMouseDirection();
+                controller.SetFacing(direction);
+                ShowBeam(direction, EffectiveFlameRange, EffectiveFlameWidth, flameColor);
+
+                if (Time.time >= nextTick)
+                {
+                    nextTick += flameTickInterval;
+                    BeamTick(direction, EffectiveFlameRange, EffectiveFlameWidth,
+                             EffectiveFlameTickDamage, pushForce: 0f);
+                }
+                yield return null;
+            }
+        }
+        finally
+        {
+            // 어느 길로 끝나든 줄기·모션·감속을 걷는다. 중단이 남긴 상태가 없어야 한다.
+            HideBeam();
+            if (playerAnimator != null) playerAnimator.EndChannel();
+            slowUntil = Mathf.Min(slowUntil, Time.time);
+            busyRoutine = null;
+        }
+    }
+
+    // ---------------------------------------------------------------- 거북왕 계열
+
+    /// <summary>물대포. 이름만 원거리 같을 뿐, 판정은 몸통박치기와 같은 근접 원이다.</summary>
+    private void WaterGunAttack(Vector2 direction)
+    {
+        BeginAttack(direction, "Shoot");
+        Vector2 origin = (Vector2)transform.position + direction * waterGunRange;
+        StartCoroutine(DebugAttackFlash(origin, EffectiveWaterGunRadius, waterGunColor));
+        StrikeCircle(direction, origin, EffectiveWaterGunRadius, EffectiveWaterGunDamage, waterGunKnockback);
+    }
+
+    /// <summary>
+    /// 파도타기. 시전 순간의 마우스 방향으로 고정된 돌진. 실제 이동·타격·벽 판정은
+    /// <see cref="PlayerDash"/>가 맡고, 여기서는 경직(돌진 중 입력 차단)과 모션만 건다.
+    /// </summary>
+    private void SurfDash(Vector2 direction)
+    {
+        controller.SetFacing(direction);
+        controller.Stun(surfDuration);
+        if (playerAnimator != null) playerAnimator.PlayAction("Walk", surfDuration);
+        float speed = EffectiveSurfDistance / surfDuration;
+        dash.Begin(direction, speed, surfDuration, EffectiveSurfDamage, surfKnockback,
+                   grantInvulnerability: false);
+        StartCoroutine(ReleaseStunWhenDashEnds());
+    }
+
+    /// <summary>
+    /// 로켓박치기. 준비 동작(무적 아님) 뒤 짧고 굵게 무적 돌진한다.
+    /// 방향은 시전 순간에 고정된다 — 준비 동작은 조준 시간이 아니라 예고 시간이다.
+    /// 무적의 시작·해제는 전부 <see cref="PlayerDash"/> 안에 있다.
+    /// </summary>
+    private IEnumerator RocketRoutine()
+    {
+        Vector2 direction = GetMouseDirection();
+        controller.SetFacing(direction);
+        controller.Stun(rocketWindup + rocketDuration);
+        if (playerAnimator != null)
+            playerAnimator.PlayAction("Ricochet", rocketWindup + rocketDuration);
+
+        try
+        {
+            yield return new WaitForSeconds(rocketWindup);
+            if ((health != null && health.IsDead) || !MovesUsable) yield break;
+
+            float speed = rocketDistance / rocketDuration;
+            dash.Begin(direction, speed, rocketDuration, EffectiveRocketDamage,
+                       EffectiveRocketKnockback, grantInvulnerability: true);
+            while (dash.IsDashing) yield return null;
+            ReleaseOwnStun();
+        }
+        finally
+        {
+            busyRoutine = null;
+        }
+    }
+
+    /// <summary>돌진이 벽에서 일찍 끝나면 남겨 둔 경직도 함께 푼다.</summary>
+    private IEnumerator ReleaseStunWhenDashEnds()
+    {
+        while (dash != null && dash.IsDashing) yield return null;
+        ReleaseOwnStun();
+    }
+
+    /// <summary>
+    /// 기술이 미리 걸어 둔 경직을 지운다. 빙결(적 CC)이 건 경직까지 지우면 안 되므로
+    /// 얼어 있는 동안에는 그대로 둔다.
+    /// </summary>
+    private void ReleaseOwnStun()
+    {
+        if (crowdControl == null) crowdControl = GetComponent<PlayerCrowdControl>();
+        if (crowdControl != null && crowdControl.IsFrozen) return;
+        controller.CancelStun();
+    }
+
+    /// <summary>
+    /// 하이드로펌프. 2.4초 동안 자리를 고정하고 마우스를 따라 도는 물줄기를 쏜다.
+    ///
+    /// * 자리 고정 — Rigidbody 위치를 통째로 얼린다. 속도로 밀어내는 CC(해류·흡인)까지
+    ///   물리 단계에서 막힌다. 경직도 함께 걸어 입력과 다른 기술을 잠근다.
+    /// * 받는 피해 50% 감소 — <see cref="Health.DamageTakenMultiplier"/>. 완전 무적
+    ///   (<see cref="Health.BeginInvulnerability"/>)과는 다른 층이다.
+    /// * 조준 — 목표각으로 초당 240도까지만 돈다. 마우스를 홱 돌려도 줄기는 따라 도는
+    ///   중간 각도를 전부 지난다.
+    ///
+    /// 고정·감속·경직은 전부 finally에서 되돌린다 — 사망·방 종료로 끊겨도 남지 않는다.
+    /// </summary>
+    private IEnumerator HydroRoutine()
+    {
+        Vector2 aim = GetMouseDirection();
+        float aimAngle = Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg;
+        float endTime = Time.time + hydroDuration;
+        float nextTick = Time.time;
+
+        controller.SetFacing(aim);
+        controller.Stun(hydroDuration);
+        if (playerAnimator != null) playerAnimator.BeginChannel("Charge", hydroDuration);
+
+        RigidbodyConstraints2D previousConstraints = body.constraints;
+        body.constraints = RigidbodyConstraints2D.FreezeAll;
+        float previousDamageTaken = health != null ? health.DamageTakenMultiplier : 1f;
+        if (health != null) health.DamageTakenMultiplier = EffectiveHydroDamageTaken;
+
+        try
+        {
+            while (Time.time < endTime)
+            {
+                if ((health != null && health.IsDead) || !MovesUsable) yield break;
+
+                // 목표각을 향해 제한 속도로 돈다.
+                Vector2 mouseDir = GetMouseDirection();
+                float target = Mathf.Atan2(mouseDir.y, mouseDir.x) * Mathf.Rad2Deg;
+                aimAngle = Mathf.MoveTowardsAngle(aimAngle, target, hydroTurnSpeed * Time.deltaTime);
+                Vector2 direction = new Vector2(Mathf.Cos(aimAngle * Mathf.Deg2Rad),
+                                                Mathf.Sin(aimAngle * Mathf.Deg2Rad));
+                controller.SetFacing(direction);
+                ShowBeam(direction, EffectiveHydroRange, EffectiveHydroWidth, hydroColor);
+
+                if (Time.time >= nextTick)
+                {
+                    nextTick += hydroTickInterval;
+                    BeamTick(direction, EffectiveHydroRange, EffectiveHydroWidth,
+                             EffectiveHydroTickDamage, hydroPushForce);
+                }
+                yield return null;
+            }
+        }
+        finally
+        {
+            body.constraints = previousConstraints;
+            if (health != null) health.DamageTakenMultiplier = previousDamageTaken;
+            HideBeam();
+            if (playerAnimator != null) playerAnimator.EndChannel();
+            ReleaseOwnStun();
+            busyRoutine = null;
+        }
+    }
+
+    // ---------------------------------------------------------------- 줄기(빔) 공용부
+
+    /// <summary>줄기 한 틱. 플레이어 앞으로 뻗은 직사각형 안의 적을 전부 때린다.</summary>
+    private void BeamTick(Vector2 direction, float range, float width, int damage, float pushForce)
+    {
+        Vector2 origin = transform.position;
+        Vector2 center = origin + direction * (range * 0.5f);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+
+        struckTargets.Clear();
+        int count = Physics2D.OverlapBox(center, new Vector2(range, width), angle, noFilter, hitBuffer);
+        for (int i = 0; i < count; i++)
+        {
+            EnemyController enemy = hitBuffer[i].GetComponentInParent<EnemyController>();
+            if (enemy == null) continue;
+            Health enemyHealth = enemy.GetComponent<Health>();
+            if (enemyHealth == null || enemyHealth.IsDead) continue;
+            if (struckTargets.Contains(enemyHealth)) continue;
+            struckTargets.Add(enemyHealth);
+
+            // 장판과 같은 이유로 무적 시간을 쓰지 않는다 — 틱 간격이 피격 무적보다 짧다.
+            enemyHealth.TakeToll(damage);
+            if (pushForce > 0f) enemy.ApplyKnockback(direction, pushForce);
+            PlayerRelicEffects.ReportDamageDealt(damage);
+        }
+    }
+
+    /// <summary>줄기 연출. 마커 하나를 재사용하며 매 프레임 조준에 맞춰 눕힌다.</summary>
+    private void ShowBeam(Vector2 direction, float range, float width, Color color)
+    {
+        if (beamMarker == null)
+        {
+            EnsureWhiteSprite();
+            GameObject marker = new GameObject("MoveBeam");
+            beamMarker = marker.AddComponent<SpriteRenderer>();
+            beamMarker.sprite = whiteSprite;
+            beamMarker.sortingOrder = 50;
+        }
+
+        Transform t = beamMarker.transform;
+        t.position = (Vector2)transform.position + direction * (range * 0.5f);
+        t.rotation = Quaternion.FromToRotation(Vector3.right, direction);
+        t.localScale = new Vector3(range, width, 1f);
+        beamMarker.color = color;
+        beamMarker.enabled = true;
+    }
+
+    private void HideBeam()
+    {
+        if (beamMarker != null) beamMarker.enabled = false;
+    }
+
+    // ---------------------------------------------------------------- 새 판 초기화
+
+    /// <summary>
+    /// 새 판(재도전 포함)을 시작한다. 쿨타임·버프·채널·돌진을 전부 걷는다.
+    /// 씬을 다시 올리지 않고 이어서 도는 구조라, 지난 판의 쿨타임과 용의춤이 그대로
+    /// 넘어오면 판의 시작이 캐릭터마다 달라진다. <see cref="GameFlow"/>가 부른다.
+    ///
+    /// 채널을 멈추면(StopCoroutine) 이터레이터가 정리되며 finally가 돌아, 위치 고정과
+    /// 피해 감소도 이 한 줄로 원상 복구된다.
+    /// </summary>
+    public void ResetForNewRun()
+    {
+        if (busyRoutine != null) { StopCoroutine(busyRoutine); busyRoutine = null; }
+        if (dash != null) dash.End();
+        HideBeam();
+        if (playerAnimator != null) playerAnimator.EndChannel();
+
+        lastMeleeTime = lastVineTime = lastPetalTime = -999f;
+        lastFireSpitTime = lastDanceTime = lastClawTime = lastFlameTime = -999f;
+        lastWaterGunTime = lastSurfTime = lastRocketTime = lastHydroTime = -999f;
+        danceUntil = -999f;
+        slowUntil = -999f;
+        seedUsedInRoom = -1;
+        if (controller != null) controller.CancelStun();
+    }
+
     /// <summary>채찍이 뻗었다가 사라지는 연출. 마커 하나를 계속 재사용한다.</summary>
     private IEnumerator VineWhipFlash(Vector2 origin, Vector2 direction, float range, float width)
     {
@@ -503,8 +1094,9 @@ public class PlayerCombat : MonoBehaviour
     }
 
     // 이펙트 프리팹이 없을 때 공격 판정 위치를 잠깐 표시하는 임시 연출.
-    // 마커 오브젝트는 한 번만 만들어 재사용한다.
-    private IEnumerator DebugAttackFlash(Vector2 origin)
+    // 마커 오브젝트는 한 번만 만들어 재사용한다. 색은 기술마다 다르다 —
+    // 몸통박치기는 노랑, 드래곤클로는 주황, 물대포는 물빛.
+    private IEnumerator DebugAttackFlash(Vector2 origin, float radius, Color color)
     {
         if (flashMarker == null)
         {
@@ -512,12 +1104,12 @@ public class PlayerCombat : MonoBehaviour
             GameObject marker = new GameObject("AttackFlash");
             flashMarker = marker.AddComponent<SpriteRenderer>();
             flashMarker.sprite = whiteSprite;
-            flashMarker.color = new Color(1f, 0.9f, 0.2f, 0.6f);
             flashMarker.sortingOrder = 50;
         }
 
+        flashMarker.color = color;
         flashMarker.transform.position = origin;
-        flashMarker.transform.localScale = Vector3.one * EffectiveMeleeRadius * 2f;
+        flashMarker.transform.localScale = Vector3.one * radius * 2f;
         flashMarker.enabled = true;
         yield return flashDuration;
         if (flashMarker != null) flashMarker.enabled = false;

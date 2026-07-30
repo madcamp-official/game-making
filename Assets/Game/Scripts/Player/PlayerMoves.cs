@@ -39,6 +39,34 @@ public class PlayerMoves : MonoBehaviour
     public float PetalDamageMultiplier { get; private set; } = 1f;
     public float PetalCooldownMultiplier { get; private set; } = 1f;
 
+    // 파이리(리자몽) 계열. 용의춤은 "증가량이 10%p 는다"라 배율이 아니라 덧셈이다.
+    public float FireSpitDamageMultiplier { get; private set; } = 1f;
+    public float FireSpitSizeMultiplier { get; private set; } = 1f;
+    public float FireSpitCooldownMultiplier { get; private set; } = 1f;
+    public float DancePowerBonus { get; private set; }
+    public float DanceSpeedBonus { get; private set; }
+    public float DanceDurationBonus { get; private set; }
+    public float ClawDamageMultiplier { get; private set; } = 1f;
+    public float ClawRadiusMultiplier { get; private set; } = 1f;
+    public float ClawKnockbackMultiplier { get; private set; } = 1f;
+    public float FlameDamageMultiplier { get; private set; } = 1f;
+    public float FlameWidthMultiplier { get; private set; } = 1f;
+    public float FlameCooldownMultiplier { get; private set; } = 1f;
+
+    // 꼬부기(거북왕) 계열. 하이드로펌프의 피해 감소도 %p라 덧셈이다.
+    public float WaterGunDamageMultiplier { get; private set; } = 1f;
+    public float WaterGunRadiusMultiplier { get; private set; } = 1f;
+    public float WaterGunCooldownMultiplier { get; private set; } = 1f;
+    public float SurfDamageMultiplier { get; private set; } = 1f;
+    public float SurfDistanceMultiplier { get; private set; } = 1f;
+    public float SurfCooldownMultiplier { get; private set; } = 1f;
+    public float RocketDamageMultiplier { get; private set; } = 1f;
+    public float RocketKnockbackMultiplier { get; private set; } = 1f;
+    public float RocketCooldownMultiplier { get; private set; } = 1f;
+    public float HydroDamageMultiplier { get; private set; } = 1f;
+    public float HydroWidthMultiplier { get; private set; } = 1f;
+    public float HydroGuardBonus { get; private set; }
+
     public IReadOnlyList<MoveType> Learned => learned;
 
     public int MoveCount => MoveSet != null ? MoveSet.Count : 0;
@@ -105,6 +133,30 @@ public class PlayerMoves : MonoBehaviour
         PetalRadiusMultiplier = 1f;
         PetalDamageMultiplier = 1f;
         PetalCooldownMultiplier = 1f;
+        FireSpitDamageMultiplier = 1f;
+        FireSpitSizeMultiplier = 1f;
+        FireSpitCooldownMultiplier = 1f;
+        DancePowerBonus = 0f;
+        DanceSpeedBonus = 0f;
+        DanceDurationBonus = 0f;
+        ClawDamageMultiplier = 1f;
+        ClawRadiusMultiplier = 1f;
+        ClawKnockbackMultiplier = 1f;
+        FlameDamageMultiplier = 1f;
+        FlameWidthMultiplier = 1f;
+        FlameCooldownMultiplier = 1f;
+        WaterGunDamageMultiplier = 1f;
+        WaterGunRadiusMultiplier = 1f;
+        WaterGunCooldownMultiplier = 1f;
+        SurfDamageMultiplier = 1f;
+        SurfDistanceMultiplier = 1f;
+        SurfCooldownMultiplier = 1f;
+        RocketDamageMultiplier = 1f;
+        RocketKnockbackMultiplier = 1f;
+        RocketCooldownMultiplier = 1f;
+        HydroDamageMultiplier = 1f;
+        HydroWidthMultiplier = 1f;
+        HydroGuardBonus = 0f;
 
         OnMovesChanged?.Invoke();
     }
@@ -242,6 +294,58 @@ public class PlayerMoves : MonoBehaviour
                 PetalDamageMultiplier *= MoveUpgrades.PetalDamageStep; break;
             case MoveUpgradeId.PetalCooldown:
                 PetalCooldownMultiplier *= MoveUpgrades.PetalCooldownStep; break;
+
+            // 파이리(리자몽) 계열
+            case MoveUpgradeId.FireSpitDamage:
+                FireSpitDamageMultiplier *= MoveUpgrades.DamageStep; break;
+            case MoveUpgradeId.FireSpitSize:
+                FireSpitSizeMultiplier *= MoveUpgrades.RangeStep; break;
+            case MoveUpgradeId.FireSpitCooldown:
+                FireSpitCooldownMultiplier *= MoveUpgrades.SpeedStep; break;
+            case MoveUpgradeId.DancePower:
+                DancePowerBonus += MoveUpgrades.DancePowerStep; break;
+            case MoveUpgradeId.DanceSpeed:
+                DanceSpeedBonus += MoveUpgrades.DanceSpeedStep; break;
+            case MoveUpgradeId.DanceDuration:
+                DanceDurationBonus += MoveUpgrades.DanceDurationStep; break;
+            case MoveUpgradeId.ClawDamage:
+                ClawDamageMultiplier *= MoveUpgrades.DamageStep; break;
+            case MoveUpgradeId.ClawRadius:
+                ClawRadiusMultiplier *= MoveUpgrades.TackleRadiusStep; break;
+            case MoveUpgradeId.ClawKnockback:
+                ClawKnockbackMultiplier *= MoveUpgrades.KnockbackStep; break;
+            case MoveUpgradeId.FlameDamage:
+                FlameDamageMultiplier *= MoveUpgrades.DamageStep; break;
+            case MoveUpgradeId.FlameWidth:
+                FlameWidthMultiplier *= MoveUpgrades.RangeStep; break;
+            case MoveUpgradeId.FlameCooldown:
+                FlameCooldownMultiplier *= MoveUpgrades.SpeedStep; break;
+
+            // 꼬부기(거북왕) 계열
+            case MoveUpgradeId.WaterGunDamage:
+                WaterGunDamageMultiplier *= MoveUpgrades.DamageStep; break;
+            case MoveUpgradeId.WaterGunRadius:
+                WaterGunRadiusMultiplier *= MoveUpgrades.TackleRadiusStep; break;
+            case MoveUpgradeId.WaterGunCooldown:
+                WaterGunCooldownMultiplier *= MoveUpgrades.SpeedStep; break;
+            case MoveUpgradeId.SurfDamage:
+                SurfDamageMultiplier *= MoveUpgrades.DamageStep; break;
+            case MoveUpgradeId.SurfDistance:
+                SurfDistanceMultiplier *= MoveUpgrades.RangeStep; break;
+            case MoveUpgradeId.SurfCooldown:
+                SurfCooldownMultiplier *= MoveUpgrades.SpeedStep; break;
+            case MoveUpgradeId.RocketDamage:
+                RocketDamageMultiplier *= MoveUpgrades.DamageStep; break;
+            case MoveUpgradeId.RocketKnockback:
+                RocketKnockbackMultiplier *= MoveUpgrades.KnockbackStep; break;
+            case MoveUpgradeId.RocketCooldown:
+                RocketCooldownMultiplier *= MoveUpgrades.SpeedStep; break;
+            case MoveUpgradeId.HydroDamage:
+                HydroDamageMultiplier *= MoveUpgrades.DamageStep; break;
+            case MoveUpgradeId.HydroWidth:
+                HydroWidthMultiplier *= MoveUpgrades.RangeStep; break;
+            case MoveUpgradeId.HydroGuard:
+                HydroGuardBonus += MoveUpgrades.HydroGuardStep; break;
         }
 
         OnMovesChanged?.Invoke();

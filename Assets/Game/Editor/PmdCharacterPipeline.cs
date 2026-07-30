@@ -192,6 +192,64 @@ public static class PmdCharacterPipeline
             new AnimSpec("Hop", "Hop", true)),
     };
 
+    /// <summary>
+    /// 플레이어 캐릭터 두 계열 (파이리·꼬부기 진화 계열). 동작 이름은 기술과 이렇게 맺는다:
+    /// Shoot=불꽃세례·물대포, Strike=드래곤클로, Charge=화염방사·하이드로펌프, Ricochet=로켓박치기,
+    /// Walk=파도타기 돌진. 용의춤은 전용 동작이 없다 (상태 변화 기술).
+    ///
+    /// * 파이리는 저장소에 Shoot이 Charge의 CopyOf로만 있어 <b>Charge 시트를 Shoot으로</b> 들인다.
+    /// * 꼬부기는 Ricochet이 없지만 로켓박치기는 어니부기부터 배우므로 필요하지 않다.
+    /// * Charge·Ricochet은 이어지는 기술 동안 돌아야 해서 반복이고, Shoot·Strike는 한 번이다.
+    /// </summary>
+    public static readonly CharacterSpec[] PlayerLines =
+    {
+        new CharacterSpec("Charmander", "0004_Charmander",
+            new AnimSpec("Idle", "Idle", true),
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Shoot", "Charge", false),
+            new AnimSpec("Strike", "Strike", false),
+            new AnimSpec("Charge", "Charge", true)),
+        new CharacterSpec("Charmeleon", "0005_Charmeleon",
+            new AnimSpec("Idle", "Idle", true),
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Shoot", "Shoot", false),
+            new AnimSpec("Strike", "Strike", false),
+            new AnimSpec("Charge", "Charge", true)),
+        new CharacterSpec("Charizard", "0006_Charizard",
+            new AnimSpec("Idle", "Idle", true),
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Shoot", "Shoot", false),
+            new AnimSpec("Strike", "Strike", false),
+            new AnimSpec("Charge", "Charge", true)),
+        new CharacterSpec("Squirtle", "0007_Squirtle",
+            new AnimSpec("Idle", "Idle", true),
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Shoot", "Shoot", false),
+            new AnimSpec("Charge", "Charge", true)),
+        new CharacterSpec("Wartortle", "0008_Wartortle",
+            new AnimSpec("Idle", "Idle", true),
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Shoot", "Shoot", false),
+            new AnimSpec("Ricochet", "Ricochet", true),
+            new AnimSpec("Charge", "Charge", true)),
+        new CharacterSpec("Blastoise", "0009_Blastoise",
+            new AnimSpec("Idle", "Idle", true),
+            new AnimSpec("Walk", "Walk", true),
+            new AnimSpec("Shoot", "Shoot", false),
+            new AnimSpec("Ricochet", "Ricochet", true),
+            new AnimSpec("Charge", "Charge", true)),
+    };
+
+    /// <summary>플레이어 두 계열만 굽는다. 나누는 이유는 <see cref="ImportFloor3Summons"/>와 같다.</summary>
+    public static string ImportPlayerLines()
+    {
+        var log = new System.Text.StringBuilder();
+        foreach (CharacterSpec spec in PlayerLines)
+            log.AppendLine(Import(spec));
+        AssetDatabase.SaveAssets();
+        return log.ToString();
+    }
+
     private const int PixelsPerUnit = 32;
 
     public static string ImportAll()

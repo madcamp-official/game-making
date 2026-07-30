@@ -43,6 +43,13 @@ public class PlayerController : MonoBehaviour
     }
 
     /// <summary>
+    /// 남은 경직을 지운다. 시전 시간만큼 미리 경직을 걸어 두는 기술(하이드로펌프)이
+    /// 도중에 끊겼을 때 쓴다 — 마지막 적이 죽어 시전이 끝났는데 몸만 계속 굳어 있으면,
+    /// 승리한 방에서 움직이지 못하는 이상한 순간이 남는다.
+    /// </summary>
+    public void CancelStun() => stunnedUntil = -999f;
+
+    /// <summary>
     /// 연출이 대신 걸리게 하는 방향. 조작이 꺼진 동안에만 쓴다.
     ///
     /// 방을 옮길 때 주인공이 왼쪽 통로에서 걸어 들어오는 장면에 쓴다. 조작을 끄면
