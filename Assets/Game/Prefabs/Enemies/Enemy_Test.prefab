@@ -199,11 +199,17 @@ MonoBehaviour:
   moveSpeed: 2.5
   detectRange: 6
   attackRange: 1
+  attackContactReach: 0.25
   attackDamage: 10
   attackCooldown: 1
   goldRewardMin: 2
   goldRewardMax: 4
+  keepDistance: 0
   knockbackStunDuration: 0.15
+  knockbackMultiplier: 1
+  immovable: 0
+  basicAIEnabled: 1
+  aggroOnSpawn: 1
 --- !u!114 &1456054312652267571
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,3 +225,4 @@ MonoBehaviour:
   offsetY: 0.85
   width: 0.9
   height: 0.12
+  showValue: 0

@@ -233,6 +233,7 @@ MonoBehaviour:
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
+  immovable: 0
   basicAIEnabled: 1
   aggroOnSpawn: 1
 --- !u!114 &8430554365491630093
@@ -584,6 +585,7 @@ MonoBehaviour:
   minRange: 0
   cooldown: 0.85
   initialDelay: 1
+  initialDelayJitter: 1
   actionState: MultiStrike
   readyState: Ready
   maxDashes: 3

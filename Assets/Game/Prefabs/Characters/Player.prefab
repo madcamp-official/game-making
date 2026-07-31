@@ -268,6 +268,7 @@ MonoBehaviour:
   flameRange: 6
   flameWidth: 1.2
   flameColor: {r: 1, g: 0.45, b: 0.1, a: 0.55}
+  flameWindup: 0.45
   waterGunDamage: 10
   waterGunCooldown: 0.5
   waterGunRange: 0.9
@@ -279,6 +280,7 @@ MonoBehaviour:
   surfDistance: 3
   surfDuration: 0.3
   surfKnockback: 5
+  surfColor: {r: 0.3, g: 0.6, b: 1, a: 0.45}
   rocketDamage: 28
   rocketCooldown: 8
   rocketWindup: 0.3
@@ -360,6 +362,9 @@ MonoBehaviour:
   - stageName: "\uC774\uC0C1\uD574\uC528"
     animatorController: {fileID: 9100000, guid: 8e5890a6d6a5241e2983d044f61797ce, type: 2}
     portrait: {fileID: 0}
+    evolutionArt: {fileID: 0}
+    dizzyPortrait: {fileID: 0}
+    happyPortrait: {fileID: 0}
     maxHealth: 100
     movePowers: 0b00000004000000000000000b000000
     attackDamage: 11
@@ -367,6 +372,9 @@ MonoBehaviour:
   - stageName: "\uC774\uC0C1\uD574\uD480"
     animatorController: {fileID: 9100000, guid: e64c7d9c0cee4408185c2b47bd460963, type: 2}
     portrait: {fileID: 0}
+    evolutionArt: {fileID: 0}
+    dizzyPortrait: {fileID: 0}
+    happyPortrait: {fileID: 0}
     maxHealth: 130
     movePowers: 10000000060000000000000010000000
     attackDamage: 16
@@ -374,6 +382,9 @@ MonoBehaviour:
   - stageName: "\uC774\uC0C1\uD574\uAF43"
     animatorController: {fileID: 9100000, guid: ef95f2ce1859c4ea1b16543dc16364d0, type: 2}
     portrait: {fileID: 0}
+    evolutionArt: {fileID: 0}
+    dizzyPortrait: {fileID: 0}
+    happyPortrait: {fileID: 0}
     maxHealth: 170
     movePowers: 16000000090000000000000016000000
     attackDamage: 22
