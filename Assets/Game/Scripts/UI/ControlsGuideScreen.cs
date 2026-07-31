@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// 게임에 들어가기 전 조작 안내. 한 화면에 짧게 보여 주고 바로 들어간다.
+/// 게임에 들어가기 전 조작·기본 기술 안내.
 ///
 /// 첫 플레이에는 저절로 뜨고, <b>다시 보지 않기</b>를 고르면 그 뒤로는 캐릭터를 고르는 즉시
 /// 게임이 시작된다(<see cref="GameFlow.SkipGuide"/>).
@@ -10,7 +10,7 @@ using UnityEngine.UI;
 /// <b>들어온 길에 따라 다른 화면이 된다.</b>
 ///
 /// <list type="bullet">
-/// <item>캐릭터를 고르고 온 길 — 다음은 게임이다. "다시 보지 않기"와 "시작"이 붙는다</item>
+/// <item>캐릭터를 고르고 온 길 — 조작 방법 다음에 시작 기술 둘을 보여 주고 게임으로 들어간다</item>
 /// <item>타이틀의 '조작 방법'으로 온 길 — 시작할 캐릭터가 없다. "뒤로가기" 하나뿐이다</item>
 /// </list>
 ///
@@ -42,7 +42,24 @@ public class ControlsGuideScreen : FlowScreen
 
     private Text actionColumn;
     private Text keyColumn;
+    private Image controlsPanel;
+    private RectTransform movesRoot;
+    private PmdUi.Entry nextButton;
     private PmdUi.Entry skipToggle;
+    private PmdUi.Entry startButton;
+
+    /// <summary>진화 뒤 새 기술 안내와 같은 정보 계층을 가진 기술 카드 한 장.</summary>
+    private class MoveCard
+    {
+        public RectTransform panel;
+        public Text header;
+        public Text title;
+        public Text body;
+    }
+
+    private const int MovePanelWidth = 660;
+    private const int MovePanelPadding = 20;
+    private const float MovePanelGap = 16f;
 
     /// <summary>
     /// 안내 줄의 자리. 동작 이름과 키를 <b>서로 다른 글자 상자</b>에 나눠 담아 키가 언제나
@@ -71,18 +88,18 @@ public class ControlsGuideScreen : FlowScreen
         bg.color = new Color(0.05f, 0.07f, 0.14f);
         PmdUi.Stretch(bg.rectTransform);
 
-        Image panel = PmdUi.MakePanel(Root, "Panel");
-        Place(panel.rectTransform, new Vector2(0f, 40f), new Vector2(760f, 420f));
+        controlsPanel = PmdUi.MakePanel(Root, "Panel");
+        Place(controlsPanel.rectTransform, new Vector2(0f, 40f), new Vector2(760f, 420f));
 
-        Text heading = PmdUi.MakeText(panel.rectTransform, "Heading", "조작 방법", 34);
+        Text heading = PmdUi.MakeText(controlsPanel.rectTransform, "Heading", "조작 방법", 34);
         heading.color = PmdUi.AccentColor;
         Place(heading.rectTransform, new Vector2(0f, 160f), new Vector2(700f, 50f));
 
-        actionColumn = PmdUi.MakeText(panel.rectTransform, "Actions", "", BodyFontSize,
+        actionColumn = PmdUi.MakeText(controlsPanel.rectTransform, "Actions", "", BodyFontSize,
                                       TextAnchor.UpperLeft);
         PlaceLeft(actionColumn.rectTransform, ActionLeft, 110f, ActionWidth, 260f);
 
-        keyColumn = PmdUi.MakeText(panel.rectTransform, "Keys", "", BodyFontSize,
+        keyColumn = PmdUi.MakeText(controlsPanel.rectTransform, "Keys", "", BodyFontSize,
                                    TextAnchor.UpperLeft);
         PlaceLeft(keyColumn.rectTransform, KeyLeft, 110f, KeyWidth, 260f);
 
@@ -96,15 +113,108 @@ public class ControlsGuideScreen : FlowScreen
             return;
         }
 
-        // 다시 보지 않기 — 지금 상태를 글자로 보여 주고, 누르면 뒤집는다.
-        skipToggle = PmdUi.MakeEntry(Root, "SkipToggle", "", 22,
-            new Vector2(-190f, -230f), new Vector2(340f, 52f));
+        nextButton = PmdUi.MakeEntry(Root, "Next", "다음", 28,
+            new Vector2(0f, -230f), new Vector2(240f, 52f));
+        entries.Add(nextButton);
+
+        // 두 번째 장. 진화 뒤 새 기술을 배울 때의 카드 두 장을 세로로 잇는다.
+        movesRoot = PmdUi.MakeFullScreen(Root, "StartingMoves");
+        float moveButtonsY = BuildMoveGuide();
+
+        // 다시 보지 않기 — 두 기술을 모두 본 뒤에만 고를 수 있다.
+        skipToggle = PmdUi.MakeEntry(movesRoot, "SkipToggle", "", 22,
+            new Vector2(-190f, moveButtonsY), new Vector2(340f, 52f));
         entries.Add(skipToggle);
 
-        entries.Add(PmdUi.MakeEntry(Root, "Continue", "시작", 28,
-            new Vector2(190f, -230f), new Vector2(240f, 52f)));
-        cursor = 1;
+        startButton = PmdUi.MakeEntry(movesRoot, "Continue", "시작", 28,
+            new Vector2(190f, moveButtonsY), new Vector2(240f, 52f));
+        entries.Add(startButton);
+
+        movesRoot.gameObject.SetActive(false);
+        skipToggle.enabled = false;
+        startButton.enabled = false;
+        cursor = 0;
         UpdateSkipLabel();
+    }
+
+    /// <summary>
+    /// 선택한 캐릭터의 시작 기술 둘을 보상 화면의 기술 안내와 같은 형식으로 쌓는다.
+    /// 캐릭터 선택 카드가 준비 중인 폴백을 가리키는 경우에는 실제 플레이할 캐릭터의 기술을 쓴다.
+    /// </summary>
+    private float BuildMoveGuide()
+    {
+        CharacterData playable = character != null ? character.ResolvePlayable() : null;
+        PlayerMoveSet moveSet = playable != null ? playable.moveSet : null;
+        if (moveSet == null) return -230f;
+
+        int count = Mathf.Min(2, moveSet.StartingCount);
+        if (count <= 0) return -230f;
+
+        var cards = new MoveCard[count];
+        float width = Mathf.Min(MovePanelWidth, Mathf.Max(280f, Screen.width - MovePanelPadding * 2f));
+        float totalHeight = 0f;
+
+        for (int i = 0; i < count; i++)
+        {
+            PlayerMoveDefinition definition = moveSet.DefinitionAt(i);
+            if (definition == null) continue;
+
+            cards[i] = MakeMoveCard(i);
+            string tag = MoveInfo.TagOf(definition.type, moveSet);
+            string details = "조작 : " + MoveInfo.KeyLabelOf(definition.type, moveSet);
+            if (!string.IsNullOrEmpty(tag)) details += "    속성 : " + tag;
+
+            cards[i].header.text = "기본 기술 " + (i + 1);
+            cards[i].title.text = MoveInfo.NameOf(definition.type, moveSet);
+            cards[i].body.text = details + "\n" + MoveInfo.SummaryOf(definition.type, moveSet);
+
+            float height = LayoutMoveCard(cards[i], width);
+            totalHeight += height;
+            if (i + 1 < count) totalHeight += MovePanelGap;
+        }
+
+        float top = Mathf.Min(300f, totalHeight * 0.5f + 82f);
+        float y = top;
+        for (int i = 0; i < cards.Length; i++)
+        {
+            if (cards[i] == null) continue;
+            cards[i].panel.anchoredPosition = new Vector2(0f, y);
+            y -= cards[i].panel.sizeDelta.y + MovePanelGap;
+        }
+
+        // 마지막 카드 바로 아래에 두 버튼을 둔다. 설명 길이가 달라도 간격이 유지된다.
+        return y - 30f;
+    }
+
+    private MoveCard MakeMoveCard(int index)
+    {
+        var card = new MoveCard();
+        card.panel = PixelUi.MakePanel(movesRoot, "Move" + (index + 1));
+        card.panel.anchorMin = card.panel.anchorMax = new Vector2(0.5f, 0.5f);
+        card.panel.pivot = new Vector2(0.5f, 1f);
+
+        Transform fill = card.panel.GetChild(0);
+        card.header = PixelUi.MakeText(fill, "Header", 24, new Color(0.72f, 0.78f, 0.88f),
+                                       TextAnchor.UpperCenter);
+        card.title = PixelUi.MakeText(fill, "Title", 36, new Color(1f, 0.86f, 0.42f),
+                                      TextAnchor.UpperCenter);
+        card.body = PixelUi.MakeText(fill, "Body", 24, Color.white, TextAnchor.UpperCenter);
+        return card;
+    }
+
+    private static float LayoutMoveCard(MoveCard card, float width)
+    {
+        card.panel.sizeDelta = new Vector2(width, card.panel.sizeDelta.y);
+
+        float gap = MovePanelPadding * 0.5f;
+        float y = -MovePanelPadding;
+        y = PixelUi.StackFromTop(card.header, y, MovePanelPadding) - gap * 0.5f;
+        y = PixelUi.StackFromTop(card.title, y, MovePanelPadding) - gap;
+        y = PixelUi.StackFromTop(card.body, y, MovePanelPadding);
+
+        float height = -y + MovePanelPadding;
+        card.panel.sizeDelta = new Vector2(width, height);
+        return height;
     }
 
     private void FillBody()
@@ -139,6 +249,12 @@ public class ControlsGuideScreen : FlowScreen
 
     protected override void Activate(int index)
     {
+        if (nextButton != null && entries[index] == nextButton)
+        {
+            ShowMoveGuide();
+            return;
+        }
+
         if (skipToggle != null && entries[index] == skipToggle)
         {
             Flow.SkipGuide = !Flow.SkipGuide;
@@ -151,6 +267,20 @@ public class ControlsGuideScreen : FlowScreen
         if (fromPause) Flow.OpenPauseMenu();
         else if (FromTitle) Flow.GoTitle();
         else Flow.BeginRun();
+    }
+
+    private void ShowMoveGuide()
+    {
+        controlsPanel.gameObject.SetActive(false);
+        nextButton.panel.gameObject.SetActive(false);
+        nextButton.enabled = false;
+
+        movesRoot.gameObject.SetActive(true);
+        skipToggle.enabled = true;
+        startButton.enabled = true;
+        cursor = entries.IndexOf(startButton);
+        UpdateSkipLabel();
+        Refresh();
     }
 
     private static void Place(RectTransform rt, Vector2 position, Vector2 size)
