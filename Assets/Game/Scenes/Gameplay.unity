@@ -1038,7 +1038,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8a925e626eb807a4b8a4fa7d38bdf4f3, type: 2}
   shuffleOrder: 1
   amuletCoinGoldBonus: 0.25
-  bigRootHealBonus: 0.5
+  bigRootHealBonus: 0.4
   wideLensSizeBonus: 0.15
   lifeOrbDamageBonus: 0.3
   lifeOrbMaxHealthPenalty: 0.3
@@ -1053,8 +1053,7 @@ MonoBehaviour:
   choiceScarfSpeedBonus: 0.2
   choiceScarfDamage: 0.8
   leftoversHealPerRoom: 12
-  shellBellDamagePerHeal: 40
-  shellBellHealAmount: 6
+  shellBellHealPerKill: 3
   nuggetGold: 100
   rockyHelmetDamage: 10
   rockyHelmetRadius: 2.2

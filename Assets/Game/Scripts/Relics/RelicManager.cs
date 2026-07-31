@@ -28,7 +28,7 @@ public class RelicManager : MonoBehaviour
 
     [Header("효과 수치 — 유물마다 독립적으로 곱해진다")]
     [SerializeField, Min(0f)] private float amuletCoinGoldBonus = 0.25f;
-    [SerializeField, Min(0f)] private float bigRootHealBonus = 0.5f;
+    [SerializeField, Min(0f)] private float bigRootHealBonus = 0.4f;
     [SerializeField, Min(0f)] private float wideLensSizeBonus = 0.15f;
     [SerializeField, Min(0f)] private float lifeOrbDamageBonus = 0.3f;
     [SerializeField, Range(0f, 0.9f)] private float lifeOrbMaxHealthPenalty = 0.3f;
@@ -48,8 +48,10 @@ public class RelicManager : MonoBehaviour
     [Header("효과 수치 — 그 밖")]
     // 자뭉열매의 회복 비율은 여기 없다. 유물에서 빠지고 상점 포션이 됐다 (ShopController).
     [SerializeField, Min(0)] private int leftoversHealPerRoom = 12;
-    [SerializeField, Min(1)] private int shellBellDamagePerHeal = 40;
-    [SerializeField, Min(0)] private int shellBellHealAmount = 6;
+    // 예전에는 "누적 40 피해마다 6 회복"이었다. 피해량은 눈에 안 보이는 값이라 언제
+    // 회복되는지 읽을 수 없었고, 화력이 셀수록 이득이라 잘 큰 판을 더 키워 줬다.
+    // "처치마다"는 눈에 보이는 사건이라 리듬이 읽히고, 마릿수는 판마다 비슷해 총량도 고르다.
+    [SerializeField, Min(0)] private int shellBellHealPerKill = 3;
     [SerializeField, Min(0)] private int nuggetGold = 100;
     [SerializeField, Min(0)] private int rockyHelmetDamage = 10;
     [Tooltip("울퉁불퉁멧이 반사 피해를 주는 범위. 타일 한 칸이 1이다.")]
@@ -95,8 +97,7 @@ public class RelicManager : MonoBehaviour
     public float ZoneDurationMultiplier { get; private set; } = 1f;
 
     public int LeftoversHealPerRoom => leftoversHealPerRoom;
-    public int ShellBellDamagePerHeal => shellBellDamagePerHeal;
-    public int ShellBellHealAmount => shellBellHealAmount;
+    public int ShellBellHealPerKill => shellBellHealPerKill;
     public int RockyHelmetDamage => rockyHelmetDamage;
     public float RockyHelmetRadius => rockyHelmetRadius;
 

@@ -171,7 +171,6 @@ public class MoveZone : MonoBehaviour
             // 무적 시간을 쓰지 않는다. 0.5초마다 도는 장판이 적의 피격 무적에 걸리면
             // 틱이 통째로 사라져, 서 있는 시간만큼 아프다는 규칙이 무너진다.
             enemyHealth.TakeToll(amount);
-            PlayerRelicEffects.ReportDamageDealt(amount);
         }
     }
 }

@@ -18,9 +18,6 @@ public class PlayerRelicEffects : MonoBehaviour
     private Health health;
     private PlayerController controller;
 
-    /// <summary>조개껍질방울용 누적 피해량. 기준치를 넘을 때마다 회복하고 그만큼 뺀다.</summary>
-    private int damageAccumulated;
-
     private void Awake()
     {
         health = GetComponent<Health>();
@@ -63,17 +60,20 @@ public class PlayerRelicEffects : MonoBehaviour
     public void RefreshSpeed() => Apply();
 
     /// <summary>
-    /// 플레이어가 적에게 준 피해를 알린다 (조개껍질방울). 근접 공격과 투사체 양쪽에서 호출한다.
+    /// 적을 쓰러뜨렸다고 알린다 (조개껍질방울). <see cref="EnemyController"/>가 죽는 순간 부른다.
+    ///
+    /// 예전에는 준 피해를 쌓아 기준치마다 회복했지만, 피해량은 화면에 없는 값이라 언제
+    /// 회복될지 읽을 수 없었다. "처치마다"는 눈에 보이는 사건이라 유물이 일하는 순간이 보인다.
     /// </summary>
-    public static void ReportDamageDealt(int amount)
+    public static void ReportEnemyKilled()
     {
-        if (amount <= 0) return;
-
         RelicManager relics = RelicManager.Instance;
         if (relics == null || !relics.Has(RelicEffect.ShellBell)) return;
+        if (relics.ShellBellHealPerKill <= 0) return;
 
         PlayerRelicEffects effects = FindAnyObjectByType<PlayerRelicEffects>();
-        if (effects != null) effects.AccumulateDamage(amount, relics);
+        if (effects != null && !effects.health.IsDead)
+            effects.health.Heal(relics.ShellBellHealPerKill);
     }
 
     /// <summary>
@@ -108,21 +108,6 @@ public class PlayerRelicEffects : MonoBehaviour
             struck.Add(enemyHealth);
 
             enemyHealth.TakeToll(damage);
-            // 조개껍질방울도 반사 피해를 센다. 여기서는 자기 자신이므로 정적 진입점을 거치지 않는다.
-            if (relics.Has(RelicEffect.ShellBell)) AccumulateDamage(damage, relics);
-        }
-    }
-
-    private void AccumulateDamage(int amount, RelicManager relics)
-    {
-        damageAccumulated += amount;
-
-        int threshold = relics.ShellBellDamagePerHeal;
-        // 한 번에 기준치를 여러 번 넘길 수 있다 (강한 공격 한 방).
-        while (damageAccumulated >= threshold)
-        {
-            damageAccumulated -= threshold;
-            health.Heal(relics.ShellBellHealAmount);
         }
     }
 }

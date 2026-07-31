@@ -333,6 +333,7 @@ public class EnemyController : MonoBehaviour
         foreach (Collider2D col in GetComponentsInChildren<Collider2D>())
             col.enabled = false;
         RunStats.CountKill();
+        PlayerRelicEffects.ReportEnemyKilled();
         if (RunManager.Instance != null)
             RunManager.Instance.AddGold(RollGold());
         Destroy(gameObject, 0.4f);

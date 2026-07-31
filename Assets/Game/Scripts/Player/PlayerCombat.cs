@@ -696,7 +696,6 @@ public class PlayerCombat : MonoBehaviour
 
             enemyHealth.TakeDamage(damage);
             enemy.ApplyKnockback(direction, knockback);
-            PlayerRelicEffects.ReportDamageDealt(damage);
         }
 
         // 한 번 휘둘러 여럿을 때려도 소리는 한 번이다. 맞은 수만큼 겹쳐 울리면 무리 한가운데서
@@ -750,7 +749,6 @@ public class PlayerCombat : MonoBehaviour
             enemyHealth.TakeDamage(damage);
             enemy.ApplyKnockback(direction, vineKnockbackForce);
             if (vineSlowMultiplier < 1f) enemy.ApplySlow(vineSlowMultiplier, EffectiveVineSlowDuration);
-            PlayerRelicEffects.ReportDamageDealt(damage);
         }
 
         if (struckTargets.Count > 0) GameAudio.PlayPlayerHit();
@@ -1122,7 +1120,6 @@ public class PlayerCombat : MonoBehaviour
             // 장판과 같은 이유로 무적 시간을 쓰지 않는다 — 틱 간격이 피격 무적보다 짧다.
             enemyHealth.TakeToll(damage);
             if (pushForce > 0f) enemy.ApplyKnockback(direction, pushForce);
-            PlayerRelicEffects.ReportDamageDealt(damage);
         }
 
         // 다른 공격들과 같은 규칙 — 맞았으면 한 번, 허공이면 침묵 (StrikeCircle 참고).

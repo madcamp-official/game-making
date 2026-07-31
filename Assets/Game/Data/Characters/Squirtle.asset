@@ -13,8 +13,7 @@ MonoBehaviour:
   m_Name: Squirtle
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   displayName: "\uAF2C\uBD80\uAE30"
-  playStyle: "\uB3CC\uC9C4\uACFC \uBC29\uC5B4\uB85C \uADFC\uAC70\uB9AC\xB7\uC6D0\uAC70\uB9AC\uB97C
-    \uC624\uAC00\uBA70 \uC2F8\uC6B4\uB2E4"
+  playStyle: "\uB3CC\uC9C4\uACFC \uBC29\uC5B4\uB85C \uADFC\uAC70\uB9AC\u00B7\uC6D0\uAC70\uB9AC\uB97C \uC624\uAC00\uBA70 \uC2F8\uC6B4\uB2E4 (\uBE44\uAD8C\uC7A5)"
   portrait: {fileID: 680926374, guid: 67214e85dde3a49e18ee4c43bf0ff2ca, type: 3}
   previewController: {fileID: 9100000, guid: 1be132d59233d4a7aa6788a498462d2c, type: 2}
   previewHoverState: Walk_0

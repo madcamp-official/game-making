@@ -130,7 +130,6 @@ public class PlayerDash : MonoBehaviour
 
             enemyHealth.TakeDamage(damage);
             enemy.ApplyKnockback(direction, knockback);
-            PlayerRelicEffects.ReportDamageDealt(damage);
             hitAny = true;
         }
         if (hitAny) GameAudio.PlayPlayerHit();

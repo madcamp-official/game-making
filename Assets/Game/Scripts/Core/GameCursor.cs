@@ -1,7 +1,7 @@
 using UnityEngine;
 
 /// <summary>
-/// OS 마우스 커서를 빨간 픽셀 십자 에임으로 바꾼다.
+/// OS 마우스 커서를 하얀 픽셀 십자 에임으로 바꾼다.
 ///
 /// 기본 화살표는 바닥 타일 위에서 눈에 잘 띄지 않는데, 이 게임은 네 기술이 전부
 /// 마우스 방향 조준이라 커서를 놓치는 순간 조준을 놓친다. 에임 십자는 "지금 여기를
@@ -19,9 +19,9 @@ public static class GameCursor
     /// <summary>십자 중심의 논리 좌표.</summary>
     private const int Center = 7;
 
-    private static readonly Color32 Red = new Color32(235, 38, 38, 255);
-    /// <summary>빨강 둘레의 어두운 테두리. 밝은 바닥에서도, 붉은 예고 위에서도 형태가 남는다.</summary>
-    private static readonly Color32 Outline = new Color32(40, 0, 0, 255);
+    private static readonly Color32 Body = new Color32(245, 245, 245, 255);
+    /// <summary>하양 둘레의 어두운 테두리. 밝은 바닥에서도, 붉은 예고 위에서도 형태가 남는다.</summary>
+    private static readonly Color32 Outline = new Color32(25, 25, 25, 255);
 
     private static Texture2D texture;
 
@@ -38,27 +38,27 @@ public static class GameCursor
     {
         // 십자 모양: 중심 점 하나 + 상하좌우 팔. 팔은 중심에서 2~5칸 — 중심 바로 옆
         // 1칸을 비워 두어, 겨누는 지점 자체는 십자에 가리지 않고 보인다.
-        bool[,] red = new bool[Grid, Grid];
-        red[Center, Center] = true;
+        bool[,] body = new bool[Grid, Grid];
+        body[Center, Center] = true;
         for (int offset = 2; offset <= 5; offset++)
         {
-            red[Center + offset, Center] = true;
-            red[Center - offset, Center] = true;
-            red[Center, Center + offset] = true;
-            red[Center, Center - offset] = true;
+            body[Center + offset, Center] = true;
+            body[Center - offset, Center] = true;
+            body[Center, Center + offset] = true;
+            body[Center, Center - offset] = true;
         }
 
-        // 빨간 픽셀의 8방향 이웃을 테두리색으로 두른다.
+        // 십자 픽셀의 8방향 이웃을 테두리색으로 두른다.
         bool[,] outline = new bool[Grid, Grid];
         for (int y = 0; y < Grid; y++)
             for (int x = 0; x < Grid; x++)
             {
-                if (red[x, y]) continue;
+                if (body[x, y]) continue;
                 for (int dy = -1; dy <= 1 && !outline[x, y]; dy++)
                     for (int dx = -1; dx <= 1; dx++)
                     {
                         int nx = x + dx, ny = y + dy;
-                        if (nx < 0 || ny < 0 || nx >= Grid || ny >= Grid || !red[nx, ny]) continue;
+                        if (nx < 0 || ny < 0 || nx >= Grid || ny >= Grid || !body[nx, ny]) continue;
                         outline[x, y] = true;
                         break;
                     }
@@ -80,7 +80,7 @@ public static class GameCursor
                 // 텍스처는 아래가 y=0이지만 핫스팟·격자는 위가 원점이라 뒤집어 읽는다.
                 int gy = Grid - 1 - y / Cell;
                 pixels[y * Grid * Cell + x] =
-                    red[gx, gy] ? Red : outline[gx, gy] ? Outline : clear;
+                    body[gx, gy] ? Body : outline[gx, gy] ? Outline : clear;
             }
         tex.SetPixels32(pixels);
         tex.Apply();
