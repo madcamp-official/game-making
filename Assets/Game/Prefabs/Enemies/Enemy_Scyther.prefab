@@ -234,6 +234,7 @@ MonoBehaviour:
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
+  immovable: 0
   basicAIEnabled: 1
   aggroOnSpawn: 1
 --- !u!114 &9152377573221937291
@@ -280,6 +281,7 @@ MonoBehaviour:
   minRange: 1.8
   cooldown: 2
   initialDelay: 1
+  initialDelayJitter: 1
   windupState: Charge
   dashState: Walk
   windup: 0.5
@@ -547,9 +549,11 @@ MonoBehaviour:
   minRange: 0
   cooldown: 1.1
   initialDelay: 1.2
+  initialDelayJitter: 1
   actionState: Slice
   reach: 1.1
   sweepAngle: 200
   hitDelay: 0.15
   recovery: 0.3
   damage: 11
+  onlyWhenLastEnemy: 0

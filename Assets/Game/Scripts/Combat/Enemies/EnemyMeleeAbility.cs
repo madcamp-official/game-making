@@ -37,6 +37,19 @@ public class EnemyMeleeAbility : EnemyAbility
     [Tooltip("동작을 끝까지 보여 주고 다음 행동으로 넘어가기까지의 시간.")]
     [SerializeField, Min(0f)] private float recovery = 0.35f;
     [SerializeField, Min(0)] private int damage = 8;
+    [Tooltip("켜면 방에 적이 저 하나 남았을 때만 휘두른다. 원거리가 주무기인 적(쥬레곤)이 " +
+             "무리 속에서까지 근접기를 섞으면 붙는 것 자체가 벌칙이 되어서, 마지막 한 마리의 " +
+             "발악으로만 남긴다.")]
+    [SerializeField] private bool onlyWhenLastEnemy;
+
+    /// <summary>내가 속한 전투방. 혼자 남았는지는 방의 생존 수로 판단한다.</summary>
+    private CombatRoomController room;
+
+    protected override void Awake()
+    {
+        base.Awake();
+        room = GetComponentInParent<CombatRoomController>();
+    }
 
     protected override IEnumerator Perform()
     {
@@ -71,5 +84,10 @@ public class EnemyMeleeAbility : EnemyAbility
     /// 시작할 때 닿는 거리였어도 타격 순간에 벗어나 있으면 빗나가는 것은 그대로다.
     /// 물러나서 피하는 손맛은 남기고, 애초에 닿을 리 없는 헛손질만 없앤다.
     /// </summary>
-    protected override bool ReadyToCast() => SurfaceDistanceToPlayer() <= reach;
+    protected override bool ReadyToCast()
+    {
+        // 방에 다른 적이 남아 있으면 휘두르지 않는다. 방 밖(개발용 배치)이면 조건이 없다.
+        if (onlyWhenLastEnemy && room != null && room.AliveEnemyCount > 1) return false;
+        return SurfaceDistanceToPlayer() <= reach;
+    }
 }

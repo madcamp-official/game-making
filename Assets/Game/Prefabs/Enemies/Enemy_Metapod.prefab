@@ -233,6 +233,7 @@ MonoBehaviour:
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
+  immovable: 0
   basicAIEnabled: 1
   aggroOnSpawn: 1
 --- !u!114 &1678400488436181084
@@ -456,9 +457,11 @@ MonoBehaviour:
   minRange: 0
   cooldown: 1.2
   initialDelay: 1.4
+  initialDelayJitter: 1
   actionState: Attack
   reach: 0.8
   sweepAngle: 220
   hitDelay: 0.13
   recovery: 0.25
   damage: 6
+  onlyWhenLastEnemy: 0

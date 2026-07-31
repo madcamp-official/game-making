@@ -17,6 +17,12 @@ public class CombatRoomController : MonoBehaviour
     private readonly List<Health> aliveEnemies = new List<Health>();
 
     /// <summary>
+    /// 이 방에 아직 살아 있는 적의 수. "혼자 남았을 때만" 발동하는 기술
+    /// (쥬레곤의 근접기)이 자기가 마지막인지 여기로 확인한다.
+    /// </summary>
+    public int AliveEnemyCount => aliveEnemies.Count;
+
+    /// <summary>
     /// 지금 있는 방이 전투방(보스방 포함)인지. 기술은 여기서만 쓸 수 있다.
     ///
     /// 방 종류를 따로 들고 있는 데이터가 없어서, 이 컴포넌트가 붙어 있느냐로 판별한다 —
