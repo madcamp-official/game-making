@@ -1293,6 +1293,33 @@ corridorCloudSprite = CorridorCloud, guid f48054…   ← 디스크의 Gameplay.
 `Assets/Game/Editor/ShopSetup.cs`에도 같은 값을 넣었다 — 수치의 원본이 그쪽이라,
 재실행하면 배율이 1로 돌아갔다 (`MeleeAttackSetup`에서 겪은 것과 같은 함정이다).
 
+## 이름을 PokeBrawl로 (2026-07-31)
+
+제목을 **이상해씨의 던전 탐험 → PokeBrawl**로 바꿨다. 파이리·꼬부기 계열이 플레이어블이 된
+뒤로 예전 이름은 세 캐릭터 중 하나만 가리키고 있었다.
+
+사실 **화면에 뜨는 이름은 이미 PokeBrawl에 가까웠다.** 타이틀은 로고 그림
+(`Resources/UI/PmdLogo.png`, "Pokémon BRAWL")을 띄우고, 옛 글자 제목은 그림을 아직 들여오지
+않은 사람에게만 보이는 예비 자리였기 때문이다. 이번 변경은 그 예비 자리와 문서·설정을
+로고에 맞춘 것에 가깝다.
+
+| 자리 | 무엇 |
+|---|---|
+| `TitleScreen.cs` | 로고가 없을 때 뜨는 글자 제목 |
+| `GameStartScreen.cs` | `gameTitle` 기본값 |
+| `Gameplay.unity` | 씬에 저장된 `gameTitle` — **기본값을 덮으므로 여기까지 고쳐야 한다** |
+| `ProjectSettings.asset` | `productName` (`My project` → `PokeBrawl`) |
+| `README.md` · `docs/CREDITS.md` | 문서 제목 |
+
+크레딧 두루마리(`FINALCREDITS.md` → `Resources/Text/Credits.txt`)에는 게임 이름이 들어 있지
+않아 손댈 것이 없었다.
+
+⚠️ **`productName`을 바꾸면 PlayerPrefs 저장 위치가 달라진다.** 회사명/제품명이 키의 일부라
+이전에 저장된 값이 새 이름에서는 보이지 않는다 — "다시 보지 않기" 설정과 마지막으로 고른
+캐릭터(`GameFlow`)가 각자 기기에서 한 번씩 초기화된다. 새 판에 영향은 없다.
+
+이 문서의 옛 기록(로고를 들여오던 대목)에 남은 이름은 그대로 뒀다. 그때 그 이름이었던 것이 사실이다.
+
 ## 성원숭의 예고를 직사각형 하나로 (2026-07-31)
 
 부채꼴 → 직사각형 둘 → **직사각형 하나**. 세 번째 손질이다.
