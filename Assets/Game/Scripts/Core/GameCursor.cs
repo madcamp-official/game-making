@@ -13,8 +13,9 @@ using UnityEngine;
 public static class GameCursor
 {
     /// <summary>논리 픽셀 하나를 화면에서 이만큼 키운다. 이 확대가 곧 픽셀화된 느낌이다.</summary>
-    private const int Cell = 2;
-    /// <summary>논리 격자 크기. ×Cell = 32픽셀로, 하드웨어 커서가 지원하는 안전한 상한이다.</summary>
+    private const int Cell = 4;
+    /// <summary>논리 격자 크기. ×Cell = 64픽셀. 32가 안전 상한이던 옛 플랫폼도 있지만
+    /// 지금 배포 대상(macOS·WebGL 브라우저)은 64를 그대로 그린다.</summary>
     private const int Grid = 16;
     /// <summary>십자 중심의 논리 좌표.</summary>
     private const int Center = 7;
@@ -29,8 +30,9 @@ public static class GameCursor
     private static void Apply()
     {
         if (texture == null) texture = Build();
-        // 십자 중심 = 논리 (7,7)이 차지하는 2×2 블록의 한가운데. 핫스팟은 왼쪽 위 원점이다.
-        Cursor.SetCursor(texture, new Vector2(Center * Cell + 1, Center * Cell + 1), CursorMode.Auto);
+        // 십자 중심 = 논리 (7,7)이 차지하는 Cell×Cell 블록의 한가운데. 핫스팟은 왼쪽 위 원점이다.
+        Cursor.SetCursor(texture, new Vector2(Center * Cell + Cell / 2, Center * Cell + Cell / 2),
+                         CursorMode.Auto);
         Cursor.visible = true;
     }
 
