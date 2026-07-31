@@ -105,7 +105,8 @@ public class TitleScreen : FlowScreen
         }
         else
         {
-            Text title = PmdUi.MakeText(Root, "Title", "이상해씨의 던전 탐험", 84);
+            // 로고 그림(Pokémon BRAWL)이 없을 때만 오는 자리다. 글자도 같은 이름을 쓴다.
+            Text title = PmdUi.MakeText(Root, "Title", "PokeBrawl", 84);
             title.color = PmdUi.AccentColor;
             Place(title.rectTransform, new Vector2(0f, 250f), new Vector2(900f, 110f));
         }

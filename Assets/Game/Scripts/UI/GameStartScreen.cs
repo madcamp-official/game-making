@@ -8,7 +8,7 @@ using UnityEngine.UI;
 /// </summary>
 public class GameStartScreen : MonoBehaviour
 {
-    [SerializeField] private string gameTitle = "이상해씨의 던전 탐험";
+    [SerializeField] private string gameTitle = "PokeBrawl";
     [SerializeField] private string subtitle = "포켓몬 로그라이트 프로토타입";
     [SerializeField, TextArea] private string controlsText =
         "이동 WASD   ·   조준 마우스\n기본 공격 좌클릭   ·   덩굴채찍 우클릭\n상호작용 E   ·   재시작 R";
