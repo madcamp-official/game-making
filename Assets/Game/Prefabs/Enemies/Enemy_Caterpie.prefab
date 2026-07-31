@@ -229,7 +229,7 @@ MonoBehaviour:
   attackDamage: 0
   attackCooldown: 1
   goldRewardMin: 2
-  goldRewardMax: 6
+  goldRewardMax: 8
   keepDistance: 0
   knockbackStunDuration: 0.15
   knockbackMultiplier: 1
@@ -353,3 +353,4 @@ MonoBehaviour:
   recovery: 0.25
   damage: 5
   onlyWhenLastEnemy: 0
+  telegraphColor: {r: 0.88, g: 0.12, b: 0.2, a: 0.45}

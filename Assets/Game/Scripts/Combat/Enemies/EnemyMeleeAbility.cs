@@ -41,14 +41,35 @@ public class EnemyMeleeAbility : EnemyAbility
              "무리 속에서까지 근접기를 섞으면 붙는 것 자체가 벌칙이 되어서, 마지막 한 마리의 " +
              "발악으로만 남긴다.")]
     [SerializeField] private bool onlyWhenLastEnemy;
+    // 성원숭 2연타의 예고와 같은 위험색. "여기 서 있으면 맞는다" 하나만 뜻한다.
+    [Tooltip("피해 부채꼴. 그린 그대로가 맞는 자리다.")]
+    [SerializeField] private Color telegraphColor = new Color(0.88f, 0.12f, 0.2f, 0.45f);
 
     /// <summary>내가 속한 전투방. 혼자 남았는지는 방의 생존 수로 판단한다.</summary>
     private CombatRoomController room;
+    /// <summary>예고 부채꼴의 반지름 계산에 쓰는 내 콜라이더.</summary>
+    private Collider2D bodyCollider;
 
     protected override void Awake()
     {
         base.Awake();
         room = GetComponentInParent<CombatRoomController>();
+        bodyCollider = GetComponent<Collider2D>();
+    }
+
+    /// <summary>
+    /// 예고 부채꼴의 반지름. 판정(<see cref="EnemyAbility.PlayerWithinSector"/>)은 몸 표면
+    /// 사이 거리 ≤ reach인데 그림은 몸 중심에서 그리므로, 내 몸 반지름과 플레이어 반지름을
+    /// 더해 <b>넘칠지언정 모자라지 않게</b> 부풀린다 — 예고 밖에 서 있다가 맞으면 안 된다.
+    /// </summary>
+    private float TelegraphRadius()
+    {
+        float own = bodyCollider != null
+            ? Mathf.Max(bodyCollider.bounds.extents.x, bodyCollider.bounds.extents.y) : 0.4f;
+        Collider2D playerCol = PlayerHealth != null ? PlayerHealth.GetComponent<Collider2D>() : null;
+        float player = playerCol != null
+            ? Mathf.Max(playerCol.bounds.extents.x, playerCol.bounds.extents.y) : 0.3f;
+        return own + reach + player;
     }
 
     protected override IEnumerator Perform()
@@ -56,7 +77,21 @@ public class EnemyMeleeAbility : EnemyAbility
         Vector2 aim = DirectionToPlayer;
         PlayAction(actionState, aim);
 
-        yield return new WaitForSeconds(hitDelay);
+        // 예고 — 재는 것과 같은 부채꼴을 타격 순간까지 그려 둔다. 예고 시간이 곧 hitDelay라
+        // 따로 시간을 벌지 않고, 공격 박자도 그대로다.
+        AttackTelegraph zone = AttackTelegraph.CreateSector(
+            EffectRoot, transform.position, TelegraphRadius(),
+            Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg, sweepAngle, telegraphColor);
+        zone.Hold(hitDelay);
+
+        float hitAt = Time.time + hitDelay;
+        while (Time.time < hitAt && !Health.IsDead)
+        {
+            // 예고 중 넉백으로 밀리면 판정 기준(내 몸)도 함께 움직인다. 그림만 처음
+            // 자리에 남으면 예고가 거짓말이 되므로 몸에 붙여 둔다.
+            if (zone != null) zone.transform.position = transform.position;
+            yield return null;
+        }
         if (Health.IsDead) yield break;
 
         if (PlayerWithinSector(aim, reach, sweepAngle) && PlayerHealth != null && !PlayerHealth.IsDead)
